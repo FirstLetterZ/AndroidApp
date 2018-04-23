@@ -1,0 +1,21 @@
+apply plugin: 'java'
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.squareup:javapoet:1.10.0'
+    compile 'com.google.auto.service:auto-service:1.0-rc4'
+}
+
+static def getRuntimeJar() {
+    try {
+        final File javaBase = new File(System.getProperty("java.home")).getCanonicalFile();
+        File runtimeJar = new File(javaBase, "lib/rt.jar")
+        if (runtimeJar.exists()) {
+            return runtimeJar
+        }
+        runtimeJar = new File(javaBase, "jre/lib/rt.jar")
+        return runtimeJar.exists() ? runtimeJar : null
+    } catch (IOException e) {
+        throw new RuntimeException(e)
+    }
+}
