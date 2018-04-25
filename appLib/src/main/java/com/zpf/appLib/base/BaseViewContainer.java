@@ -8,6 +8,8 @@ import android.view.Window;
 
 import java.util.List;
 
+import io.reactivex.Observer;
+
 /**
  * 替代activity与fragment
  * Created by ZPF on 2018/3/22.
@@ -49,8 +51,8 @@ public interface BaseViewContainer {
     //绑定生命周期的弹窗
     void showDialog(BaseDialog dialog);
 
-//    //绑定生命周期的网络请求
-//    void request(Subscription subscription);
+    //绑定生命周期的网络请求
+    void addRequest(Observer observer);
 
     //activity与fragment预留交互通道
     void sendMessage(String name, Object value);

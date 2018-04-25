@@ -1,4 +1,4 @@
-package com.zpf.appLib.network.helper;
+package com.zpf.middleware.network.helper;
 
 public class HttpResult<T> {
     private int code;

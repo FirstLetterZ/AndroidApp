@@ -4,10 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
-import com.zpf.app.config.RouteRuleList;
 import com.zpf.app.layout.WelcomeView;
 import com.zpf.appLib.base.BaseActivity;
-import com.zpf.appLib.util.RouteUtil;
 
 public class StartActivity extends BaseActivity {
 
@@ -17,7 +15,6 @@ public class StartActivity extends BaseActivity {
         if (savedInstanceState == null) {
             pushActivity(WelcomeView.class);
         }
-        RouteUtil.instance().init(new RouteRuleList());
     }
 
     @Override

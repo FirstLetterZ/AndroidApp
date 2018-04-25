@@ -1,6 +1,5 @@
 package com.zpf.appLib.util;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
@@ -15,26 +14,20 @@ public class SpUtil {
     private static volatile SpUtil mySpUtil;
     private SharedPreferences sp;
 
-    /**
-     * 使用前需要初始化
-     */
-    public static void init(@NonNull Application application) {
-        if (mySpUtil == null) {
-            synchronized (SpUtil.class) {
-                if (mySpUtil == null) {
-                    mySpUtil = new SpUtil(application);
-                }
-            }
-        }
+    private SpUtil() {
+        sp = AppConst.instance().getApplication()
+                .getSharedPreferences(AppConst.CACHE_SP_FILE_NAME, Context.MODE_PRIVATE);
     }
 
     private static SpUtil get() {
+        if (mySpUtil == null) {
+            synchronized (SpUtil.class) {
+                if (mySpUtil == null) {
+                    mySpUtil = new SpUtil();
+                }
+            }
+        }
         return mySpUtil;
-    }
-
-    private SpUtil(Application application) {
-        sp = application.getApplicationContext().getSharedPreferences(AppConst.CACHE_SP_FILE_NAME,
-                Context.MODE_PRIVATE);
     }
 
     public static void putValue(String key, Object value) {

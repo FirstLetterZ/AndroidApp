@@ -1,17 +1,19 @@
-package com.zpf.appLib.network.callback;
+package com.zpf.middleware.network.callback;
 
-import com.zpf.appLib.network.helper.HttpResult;
+import com.zpf.appLib.base.BaseViewContainer;
+import com.zpf.middleware.network.helper.HttpResult;
 
 /**
  * Created by ZPF on 2018/4/23.
  */
 public abstract class ResultCallBack<T> extends NetCallBack<HttpResult<T>> {
-    public ResultCallBack() {
-        super();
+
+    public ResultCallBack(BaseViewContainer container) {
+        super(container);
     }
 
-    public ResultCallBack(int type) {
-        super(type);
+    public ResultCallBack(BaseViewContainer container, int type) {
+        super(container, type);
     }
 
     @Override
@@ -30,17 +32,7 @@ public abstract class ResultCallBack<T> extends NetCallBack<HttpResult<T>> {
                 complete(true);
             }
         } else {
-            String description = httpResult.getMessage();
-            switch (httpResult.getCode()) {
-                case 100:
-                    description = "该用户不存在";
-                    break;
-                case 101:
-                    description = "密码错误";
-                    break;
-                default:
-            }
-            fail(httpResult.getCode(), description);
+            fail(httpResult.getCode(), httpResult.getMessage());
         }
     }
 

@@ -24,7 +24,6 @@ public class CacheMapUtil {
         return appCacheUtil;
     }
 
-
     public static void clearCache() {
         get().cacheValue.clear();
     }
