@@ -48,9 +48,8 @@ public class RouteUtil implements RouteRule {
 
     private boolean checkState(String name, BaseViewContainer container) {
         if (routeUtil.routeRule == null) {
-            routeUtil.routeRule = AppConst.instance().getRouteRule();
+            init(AppConst.instance().getRouteRule());
         }
-
         return routeRule != null && container != null && name != null;
     }
 }

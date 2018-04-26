@@ -1,5 +1,6 @@
 package com.zpf.appLib.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Rect;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,6 +9,7 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.AbsListView;
 
@@ -140,5 +142,33 @@ public class ViewUtil {
                     context.getResources().getDisplayMetrics());
         }
         return height;
+    }
+
+    //收起软键盘
+    public static void packUpKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null && imm.isActive()) {
+            if (activity.getCurrentFocus() != null) {
+                try {
+                    imm.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(),
+                            InputMethodManager.HIDE_NOT_ALWAYS);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    //弹出软键盘
+    public static void showKeyboard(Activity activity) {
+        /*如果顶部视图可见高度大于2/3屏幕高度，则认定软键盘未弹出（大约计算）*/
+        Rect rect = new Rect();
+        activity.getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
+        if ((rect.bottom - rect.top) > (0.667 * activity.getResources().getDisplayMetrics().heightPixels)) {
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.toggleSoftInput(0, InputMethodManager.SHOW_FORCED);
+            }
+        }
     }
 }

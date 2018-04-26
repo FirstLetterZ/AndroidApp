@@ -92,7 +92,7 @@ public class FileUtil {
 
 
     //下载文件
-    public static boolean downloadFile(InputStream inputStream, File file) {
+    public static boolean downloadFile(File file, InputStream inputStream) {
         boolean b = false;
         FileOutputStream fos = null;
         BufferedInputStream bis = null;
@@ -230,11 +230,11 @@ public class FileUtil {
 
     /*获取相册内的图片路径*/
     @SuppressLint("NewApi")
-    public static String getPath(final Context context, final Uri uri) {
-
-        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-
-        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+    public static String fromPhotoAlbum(Context context, final Uri uri) {
+        if (context == null || uri == null) {
+            return null;
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(context, uri)) {
             /*API19及以上*/
             if (isExternalStorageDocument(uri)) {
                 final String docId = DocumentsContract.getDocumentId(uri);

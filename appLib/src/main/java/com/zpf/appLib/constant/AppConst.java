@@ -9,7 +9,8 @@ import com.zpf.appLib.util.FileUtil;
 import com.zpf.appLib.util.JsonUtil;
 import com.zpf.appLib.util.PathInfo;
 import com.zpf.appLib.util.RouteRule;
-import com.zpf.modelsqlite.CacheDao;
+import com.zpf.modelsqlite.CacheInitInterface;
+import com.zpf.modelsqlite.CacheUtil;
 
 /**
  * 全局常量（定义后不再修改）
@@ -38,7 +39,7 @@ public class AppConst implements AppInitInterface {
 
     public static void init(@NonNull AppInitInterface initInterface) {
         instance().appInitInterface = initInterface;
-        CacheDao.init(new CacheDao.CacheInfo() {
+        CacheUtil.init(new CacheInitInterface() {
             @Override
             public Context getContext() {
                 return instance().appInitInterface.getApplication();

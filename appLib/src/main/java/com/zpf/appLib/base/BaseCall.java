@@ -1,6 +1,5 @@
 package com.zpf.appLib.base;
 
-import com.zpf.middleware.network.callback.NetCallBack;
 
 import org.json.JSONObject;
 
@@ -34,7 +33,7 @@ public class BaseCall {
         return RequestBody.create(MediaType.parse("application/json;charset=utf-8"), jsonObject.toString());
     }
 
-    protected <T> void toSubscribe(final Observable<T> o, NetCallBack<T> callBack) {
+    protected <T> void toSubscribe(final Observable<T> o, BaseCallBack<T> callBack) {
         callBack.bindObservable(o);
         o.subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())
