@@ -13,7 +13,7 @@ import com.zpf.appLib.view.interfaces.ViewStateCheckListener;
 /**
  * Created by ZPF on 2017/11/15.
  */
-public class ViewStateCheckImpl implements ViewStateCheckListener {
+public class DefaultCheckImpl implements ViewStateCheckListener {
 
     @Override
     public boolean checkPullUp(View view) {

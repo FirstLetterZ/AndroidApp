@@ -7,6 +7,12 @@ import com.zpf.middleware.network.helper.HttpResult;
  * Created by ZPF on 2018/4/23.
  */
 public abstract class ResultCallBack<T> extends NetCallBack<HttpResult<T>> {
+    public ResultCallBack() {
+    }
+
+    public ResultCallBack(int type) {
+        super(type);
+    }
 
     public ResultCallBack(BaseViewContainer container) {
         super(container);
@@ -18,6 +24,7 @@ public abstract class ResultCallBack<T> extends NetCallBack<HttpResult<T>> {
 
     @Override
     public void onNext(HttpResult<T> httpResult) {
+        removeObservable();
         if (ignore()) {
             return;
         }

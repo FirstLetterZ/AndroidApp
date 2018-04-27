@@ -22,6 +22,7 @@ public class AppConst implements AppInitInterface {
     public static final int REQUEST_CODE_DEFAULT = 65535;
     public static final int REQUEST_CODE_EXIT_APP = 65534;
     public static final int REQUEST_CODE_CHECK_TARGET = 65533;
+    public static final int REQUEST_CODE_CHECK_PERMISSION = 65532;
 
     public static final String CACHE_SP_KEY = "cache_map_";
     public static final String CACHE_SP_FILE_NAME = "cache_sp_data";

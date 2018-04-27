@@ -10,14 +10,15 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
-
 import com.zpf.appLib.activity.PageActivity;
 import com.zpf.appLib.util.DialogControlUtil;
+import com.zpf.appLib.util.PermissionHelper;
 import com.zpf.appLib.util.RouteUtil;
 import com.zpf.appLib.constant.AppConst;
 
@@ -26,6 +27,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by ZPF on 2018/4/13.
@@ -38,8 +40,9 @@ public class BaseActivity extends FragmentActivity implements BaseViewContainer 
     private BaseViewLayout mView;
     protected final String INTENT_TARGET_CLASS = "viewClass";
     private List<Runnable> mWaitingList;
-    private volatile Class<? extends BaseViewLayout> mViewClass;
-    private LinkedList<Class<? extends BaseViewLayout>> mTargetViewList = new LinkedList<>();
+    private volatile Class<? extends BaseViewLayout> mViewClass;//当前页面
+    private LinkedList<Class<? extends BaseViewLayout>> mTargetViewList = new LinkedList<>();//启动列表
+    private SparseArray<BaseCallBack> mObserverArray = new SparseArray<>();//绑定生命周期的网络请求
     private DialogControlUtil dialogControlUtil = new DialogControlUtil(new DialogControlUtil.LifeControl() {
         @Override
         public boolean isDestroy() {
@@ -205,6 +208,19 @@ public class BaseActivity extends FragmentActivity implements BaseViewContainer 
     }
 
     @Override
+    public boolean shouldShowRequestPermissionRationale(@NonNull String permission) {
+        return super.shouldShowRequestPermissionRationale(permission);
+    }
+
+    @Override
+    public void requestPermission(@NonNull String[] permissions, int requestCode, PermissionHelper helper) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mView.setPermissionHelper(helper);
+            super.requestPermissions(permissions, requestCode);
+        }
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         if (mView != null) {
@@ -323,6 +339,22 @@ public class BaseActivity extends FragmentActivity implements BaseViewContainer 
     @Override
     public void showDialog(BaseDialog dialog) {
         dialogControlUtil.showDialog(dialog);
+    }
+
+    @Override
+    public int addRequest(BaseCallBack callBack) {
+        int id = UUID.randomUUID().hashCode();
+        if (callBack != null) {
+            mObserverArray.put(id, callBack);
+        }
+        return id;
+    }
+
+    @Override
+    public void removeRequest(int id) {
+        if (!isDestroy) {
+            mObserverArray.remove(id);
+        }
     }
 
     @Override

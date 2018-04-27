@@ -11,6 +11,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.zpf.appLib.activity.PageActivity;
+import com.zpf.appLib.util.PermissionHelper;
 import com.zpf.appLib.util.SafeClickListener;
 import com.zpf.appLib.view.RootLayout;
 import com.zpf.appLib.view.TitleBarLayout;
@@ -30,6 +31,7 @@ public abstract class BaseViewLayout implements LifecycleView {
             OnClick(v);
         }
     };
+    private PermissionHelper mPermissionHelper;
 
     public BaseViewLayout(BaseViewContainer container) {
         this.mContainer = container;
@@ -98,7 +100,9 @@ public abstract class BaseViewLayout implements LifecycleView {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-
+        if (mPermissionHelper != null) {
+            mPermissionHelper. onRequestPermissionsResult(requestCode,permissions,grantResults)      ;
+        }
     }
 
     @Override
@@ -159,6 +163,10 @@ public abstract class BaseViewLayout implements LifecycleView {
      */
     public void OnClick(View view) {
 
+    }
+
+    public void setPermissionHelper(PermissionHelper mPermissionHelper) {
+        this.mPermissionHelper = mPermissionHelper;
     }
 
     public <T extends View> T $(int viewId) {

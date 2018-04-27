@@ -1,6 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="transparent">#00ffffff</color>
+    <color name="half_transparent">#80ffffff</color>
+    <color name="txt1">#333333</color>
+    <color name="txt2">#666666</color>
+    <color name="txt3">#999999</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="gray">#bfbfbf</color>
+    <color name="light_gray">#f1f1f1</color>
+    <color name="blue">#24a1fd</color>
+    <color name="dark_blue">#26578a</color>
+    <color name="red">#ff2929</color>
+    <color name="little_red">#ff2c2c</color>
+    <color name="orange">#ff8400</color>
+    <color name="green">#43bb41</color>
+    <color name="dark_green">#239211</color>
+    <color name="yellow">#fbff00</color>
+    <color name="purple">#ff33fc</color>
+    <color name="mask">#80000000</color>
+
+    <color name="line_split">#e2e2e2</color>
+
+    <color name="global_bg">#eeeeee</color>
+    <color name="status_bar">#24a1fd</color>
+    <color name="title_bar">#24a1fd</color>
+    <color name="main_color">#24a1fd</color>
+    <!--调色，不可使用-->
+    <color name="palette">#49ccfd</color>
 </resources>

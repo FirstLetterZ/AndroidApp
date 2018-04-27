@@ -10,8 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import com.zpf.appLib.view.def.DefaultCheckImpl;
 import com.zpf.appLib.view.def.DefaultStretchyView;
-import com.zpf.appLib.view.def.ViewStateCheckImpl;
 import com.zpf.appLib.view.interfaces.ViewStateCheckListener;
 
 import java.util.Timer;
@@ -85,7 +85,15 @@ public class StretchyLayout extends RelativeLayout {
 
     public StretchyLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        initWithStyle(defStyleAttr);
         timer = new MyTimer(updateHandler);
+    }
+
+    public void initWithStyle(int defStyleAttr) {
+        if (defStyleAttr == 0) {
+            setCheckListener(new DefaultCheckImpl());
+            setHeadFootLayout(new DefaultStretchyView(getContext()), new DefaultStretchyView(getContext()));
+        }
     }
 
     @Override
@@ -107,7 +115,9 @@ public class StretchyLayout extends RelativeLayout {
                     (int) (pullDownY + pullUpY) - refreshLayout.getContainerLayout().getMeasuredHeight(),
                     refreshLayout.getContainerLayout().getMeasuredWidth(), (int) (pullDownY + pullUpY));
         }
-        getCheckListener().relayout(contentView, pullDownY, pullUpY);
+        if (checkListener != null) {
+            checkListener.relayout(contentView, pullDownY, pullUpY);
+        }
         if (loadLayout != null) {
             loadLayout.getContainerLayout().layout(0,
                     (int) (pullDownY + pullUpY) + contentView.getMeasuredHeight(),
@@ -231,9 +241,8 @@ public class StretchyLayout extends RelativeLayout {
             case MotionEvent.ACTION_UP:
                 mInterceptTouchDownX = -1;
                 mInterceptTouchDownY = -1;
-                if (pullDownY > refreshDist || -pullUpY > loadmoreDist)
                 // 正在刷新时往下拉（正在加载时往上拉），释放后下拉头（上拉头）不隐藏
-                {
+                if (pullDownY > refreshDist || -pullUpY > loadmoreDist) {
                     isTouch = false;
                 }
                 if (state == TO_REFRESH && (type == ONLY_PULL_DOWN || type == BOTH_UP_DOWN)) {
@@ -286,8 +295,8 @@ public class StretchyLayout extends RelativeLayout {
 
     //上拉或下拉后重回状态，不限制上拉或下拉
     private void releasePull() {
-        canPullDown = true;
-        canPullUp = true;
+        canPullDown = (type == ONLY_PULL_DOWN || type == ONLY_STRETCHY || type == BOTH_UP_DOWN);
+        canPullUp = (type == ONLY_PULL_UP || type == ONLY_STRETCHY || type == BOTH_UP_DOWN);
     }
 
     private void changeState(int state) {
@@ -331,22 +340,8 @@ public class StretchyLayout extends RelativeLayout {
         }
     }
 
-    private ViewStateCheckListener getCheckListener() {
-        if (checkListener == null) {
-            checkListener = new ViewStateCheckImpl();
-        }
-        return checkListener;
-    }
-
     public void setType(int type) {
         this.type = type;
-        if (refreshLayout == null && type != NO_STRETCHY) {
-            refreshLayout = new DefaultStretchyView(getContext()) {
-            };
-        }
-        if (loadLayout == null && type != NO_STRETCHY) {
-            loadLayout = new DefaultStretchyView(getContext(), true);
-        }
         if (refreshLayout != null) {
             refreshLayout.setType(type);
         }
@@ -379,7 +374,7 @@ public class StretchyLayout extends RelativeLayout {
     }
 
     public void doRefresh() {
-        if (state != INIT) {
+        if (state != INIT || (type != ONLY_PULL_DOWN && type != BOTH_UP_DOWN)) {
             return;
         }
         if (ifFinishInflate) {
@@ -403,6 +398,10 @@ public class StretchyLayout extends RelativeLayout {
 
     public void setCheckListener(ViewStateCheckListener checkListener) {
         this.checkListener = checkListener;
+    }
+
+    public ViewStateCheckListener getCheckListener() {
+        return checkListener;
     }
 
     public void setOnRefreshListener(OnRefreshListener listener) {

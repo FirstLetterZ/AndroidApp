@@ -43,6 +43,15 @@ public class BaseCallBack<T> implements Observer<T> {
     protected boolean isCancel = false;
     protected Observable observable;
     protected BaseViewContainer container;
+    protected int bindId;
+
+    public BaseCallBack() {
+
+    }
+
+    public BaseCallBack(@IntRange(from = 0, to = 16) int type) {
+        setType(type);
+    }
 
     public BaseCallBack(BaseViewContainer container) {
         this.container = container;
@@ -87,10 +96,12 @@ public class BaseCallBack<T> implements Observer<T> {
 
     @Override
     public void onNext(T t) {
+        removeObservable();
     }
 
     @Override
     public void onError(Throwable e) {
+        removeObservable();
         e.printStackTrace();
         if (!ignore()) {
             String description;
@@ -138,14 +149,24 @@ public class BaseCallBack<T> implements Observer<T> {
     }
 
     /**
+     * 取消生命周期绑定
+     */
+    protected void removeObservable(){
+        if (container != null) {
+            container.removeRequest(bindId);
+            container = null;
+        }
+    }
+
+    /**
      * 取消订阅
      */
     public void cancel() {
         if (disposable != null && !disposable.isDisposed()) {
             isCancel = true;
+            removeObservable();
             disposable.dispose();
-            this.container = null;
-            this.observable = null;
+            observable = null;
         }
     }
 

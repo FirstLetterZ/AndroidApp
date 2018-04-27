@@ -3,25 +3,29 @@ package com.zpf.appLib.base;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
 import com.zpf.appLib.activity.PageActivity;
-import com.zpf.appLib.util.DialogControlUtil;
-import com.zpf.appLib.util.RouteUtil;
 import com.zpf.appLib.constant.AppConst;
+import com.zpf.appLib.util.DialogControlUtil;
+import com.zpf.appLib.util.PermissionHelper;
+import com.zpf.appLib.util.RouteUtil;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by ZPF on 2018/4/14.
@@ -34,8 +38,9 @@ public class BaseFragment extends Fragment implements BaseViewContainer {
     private BaseViewLayout mView;
     protected final String INTENT_TARGET_CLASS = "viewClass";
     private List<Runnable> mWaitingList;
-    private Class<? extends BaseViewLayout> mViewClass;
-    private LinkedList<Class<? extends BaseViewLayout>> mTargetViewList = new LinkedList<>();
+    private Class<? extends BaseViewLayout> mViewClass;//当前页面
+    private LinkedList<Class<? extends BaseViewLayout>> mTargetViewList = new LinkedList<>();//启动列表
+    private SparseArray<BaseCallBack> mObserverArray = new SparseArray<>();//绑定生命周期的网络请求
     private boolean isActivityVisible = false;
     private boolean isFragmentVisible = false;
     private DialogControlUtil dialogControlUtil = new DialogControlUtil(new DialogControlUtil.LifeControl() {
@@ -144,6 +149,10 @@ public class BaseFragment extends Fragment implements BaseViewContainer {
     public void onDestroyView() {
         isDestroy = true;
         dialogControlUtil.onDestroy();
+        for (int i = 0; i < mObserverArray.size(); i++) {
+            mObserverArray.valueAt(i).cancel();
+        }
+        mObserverArray.clear();
         if (mView != null) {
             mView.onDestroy();
             mView = null;
@@ -186,6 +195,19 @@ public class BaseFragment extends Fragment implements BaseViewContainer {
                 mView.onActivityResult(requestCode, resultCode, data);
             }
             super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    @Override
+    public boolean shouldShowRequestPermissionRationale(@NonNull String permission) {
+        return super.shouldShowRequestPermissionRationale(permission);
+    }
+
+    @Override
+    public void requestPermission(@NonNull String[] permissions, int requestCode, PermissionHelper helper) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            super.requestPermissions(permissions, requestCode);
+            mView.setPermissionHelper(helper);
         }
     }
 
@@ -311,6 +333,22 @@ public class BaseFragment extends Fragment implements BaseViewContainer {
     }
 
     @Override
+    public int addRequest(BaseCallBack callBack) {
+        int id = UUID.randomUUID().hashCode();
+        if (callBack != null) {
+            mObserverArray.put(id, callBack);
+        }
+        return id;
+    }
+
+    @Override
+    public void removeRequest(int id) {
+        if (!isDestroy) {
+            mObserverArray.remove(id);
+        }
+    }
+
+    @Override
     public void sendMessage(String name, Object value) {
         if (isCreated) {
             handleMessage(name, value);
@@ -331,7 +369,7 @@ public class BaseFragment extends Fragment implements BaseViewContainer {
 
     @Override
     public void handleMessage(String name, Object value) {
-
+        //需要复写处理sendMessage传来的信息
     }
 
     @Override

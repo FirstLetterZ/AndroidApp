@@ -19,6 +19,12 @@ import org.json.JSONObject;
  * Created by ZPF on 2018/4/23.
  */
 public abstract class NetCallBack<T> extends BaseCallBack<T> {
+    public NetCallBack() {
+    }
+
+    public NetCallBack(int type) {
+        super(type);
+    }
 
     public NetCallBack(BaseViewContainer container) {
         super(container);
@@ -30,6 +36,7 @@ public abstract class NetCallBack<T> extends BaseCallBack<T> {
 
     @Override
     public void onNext(T t) {
+        removeObservable();
         if (!ignore()) {
             if (checkNull(t)) {
                 fail(DATA_NULL, "返回数据为空");

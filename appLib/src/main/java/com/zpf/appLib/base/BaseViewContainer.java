@@ -2,13 +2,14 @@ package com.zpf.appLib.base;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.Window;
 
-import java.util.List;
+import com.zpf.appLib.util.PermissionHelper;
 
-import io.reactivex.Observer;
+import java.util.List;
 
 /**
  * 替代activity与fragment
@@ -34,6 +35,11 @@ public interface BaseViewContainer {
 
     Intent obtainIntent(@Nullable Intent intent);
 
+    boolean shouldShowRequestPermissionRationale(String permission);
+
+    //请求权限
+    void requestPermission(@NonNull String[] permissions, int requestCode, PermissionHelper helper);
+
     void pickActivity(Class<? extends BaseViewLayout> viewClass);
 
     void pushActivity(Class<? extends BaseViewLayout> viewClass);
@@ -52,7 +58,9 @@ public interface BaseViewContainer {
     void showDialog(BaseDialog dialog);
 
     //绑定生命周期的网络请求
-    void addRequest(Observer observer);
+    int addRequest(BaseCallBack callBack);
+
+    void removeRequest(int id);
 
     //activity与fragment预留交互通道
     void sendMessage(String name, Object value);

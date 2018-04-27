@@ -35,6 +35,11 @@ public class PublicUtil {
         return ContextCompat.getColor(AppConst.instance().getApplication(), resId);
     }
 
+    public static String getString(int resId) {
+        return AppConst.instance().getApplication().getString(resId);
+    }
+
+
     //获取APP版本号
     public static int getAppVersionCode(Context context) {
         PackageManager packageManager = context.getPackageManager();
