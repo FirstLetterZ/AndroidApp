@@ -4,7 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import com.zpf.appLib.constant.KeyConst;
+import com.zpf.middleware.constants.KeyConst;
 import com.zpf.appLib.util.CacheMapUtil;
 
 import java.io.IOException;

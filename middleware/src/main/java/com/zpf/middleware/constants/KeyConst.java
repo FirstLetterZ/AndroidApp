@@ -1,4 +1,4 @@
-package com.zpf.appLib.constant;
+package com.zpf.middleware.constants;
 
 /**
  * 全局动态变量对应存储key值

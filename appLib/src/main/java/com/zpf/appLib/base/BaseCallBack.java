@@ -55,7 +55,7 @@ public class BaseCallBack<T> implements Observer<T> {
 
     public BaseCallBack(BaseViewContainer container) {
         this.container = container;
-        container.addRequest(this);
+        bindId = container.addRequest(this);
     }
 
     public BaseCallBack(BaseViewContainer container, @IntRange(from = 0, to = 16) int type) {
@@ -151,7 +151,7 @@ public class BaseCallBack<T> implements Observer<T> {
     /**
      * 取消生命周期绑定
      */
-    protected void removeObservable(){
+    protected void removeObservable() {
         if (container != null) {
             container.removeRequest(bindId);
             container = null;

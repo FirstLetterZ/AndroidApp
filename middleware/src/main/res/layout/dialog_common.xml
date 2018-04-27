@@ -44,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing02"
-            android:background="@drawable/bg_lightGray_border_gray_r02"
+            android:background="@drawable/bg_gray_border_gray_r02"
             android:padding="@dimen/spacing01"
             android:textSize="@dimen/txt_normal02"
             android:visibility="gone"
