@@ -20,7 +20,6 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        isDebug = "true".equals(FileUtil.getPropertiesValue("DEBUG", StringConst.CONFIG_FILE_DEFAULT));
         AppConst.init(new AppInitInterface() {
             @NonNull
             @Override
@@ -50,5 +49,6 @@ public class MyApplication extends Application {
                 return "ZPF";
             }
         });
+        isDebug = "true".equals(FileUtil.getPropertiesValue("DEBUG", StringConst.CONFIG_FILE_DEFAULT));
     }
 }

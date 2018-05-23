@@ -41,7 +41,7 @@ public class BaseCallBack<T> implements Observer<T> {
 
     protected Disposable disposable;
     protected boolean isCancel = false;
-    protected Observable observable;
+    protected Observable<T> observable;
     protected BaseViewContainer container;
     protected int bindId;
 
@@ -82,7 +82,11 @@ public class BaseCallBack<T> implements Observer<T> {
         }
     }
 
-    public void bindObservable(Observable observable) {
+    public void pretreatment(T t) {
+
+    }
+
+    public void bindObservable(Observable<T> observable) {
         this.observable = observable;
     }
 

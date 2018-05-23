@@ -24,6 +24,9 @@ public class AppConst implements AppInitInterface {
     public static final int REQUEST_CODE_CHECK_TARGET = 65533;
     public static final int REQUEST_CODE_CHECK_PERMISSION = 65532;
 
+    public static final String INTENT_FROM_OTHER_APK = "class_is_from_other_apk";
+    public static final String INTENT_CLASS_NAME = "class_name_in_apk";
+
     public static final String CACHE_SP_KEY = "cache_map_";
     public static final String CACHE_SP_FILE_NAME = "cache_sp_data";
 
@@ -114,14 +117,14 @@ public class AppConst implements AppInitInterface {
         if (appInitInterface == null) {
             throw new IllegalStateException("uninitialized!Please complete the initialization first.");
         }
-        if(appInitInterface.getAppTag()==null){
+        if (appInitInterface.getAppTag() == null) {
             return "appLib";
-        }else {
+        } else {
             return appInitInterface.getAppTag();
         }
     }
 
-    public PathInfo getPathInfo(){
+    public PathInfo getPathInfo() {
         if (pathInfo == null) {
             pathInfo = FileUtil.initPathInfo(instance().appInitInterface.getApplication());
         }

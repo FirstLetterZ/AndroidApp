@@ -3,6 +3,10 @@ package com.zpf.middleware.network.callback;
 import com.zpf.appLib.base.BaseViewContainer;
 import com.zpf.middleware.network.helper.HttpResult;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
 /**
  * Created by ZPF on 2018/4/23.
  */
@@ -37,6 +41,14 @@ public abstract class ResultCallBack<T> extends NetCallBack<HttpResult<T>> {
             } else {
                 response(t);
                 complete(true);
+                Observable<HttpResult<T>> newObservable = observable.retry();
+                bindObservable(newObservable);
+                newObservable.subscribeOn(Schedulers.io())
+                        .unsubscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this);
+
+
             }
         } else {
             fail(httpResult.getCode(), httpResult.getMessage());

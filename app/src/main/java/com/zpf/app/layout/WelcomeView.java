@@ -8,7 +8,6 @@ import android.widget.Button;
 import com.zpf.app.R;
 import com.zpf.appLib.base.BaseViewContainer;
 import com.zpf.appLib.base.BaseViewLayout;
-import com.zpf.middleware.constants.StringConst;
 
 /**
  * Created by ZPF on 2018/4/14.
@@ -21,18 +20,19 @@ public class WelcomeView extends BaseViewLayout {
     }
 
     @Override
+    protected int getLayoutId() {
+        return R.layout.welcome_layout;
+    }
+
+    @Override
     public void afterCreate(@Nullable Bundle savedInstanceState) {
         btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getContainer().pushActivity(StringConst.VIEW_CLASS_INTRODUCE);
-                getContainer().finish();
+//                getContainer().pushActivity(StringConst.VIEW_CLASS_INTRODUCE);
+
             }
         });
     }
 
-    @Override
-    protected int getLayoutId() {
-        return R.layout.welcome_layout;
-    }
 }
