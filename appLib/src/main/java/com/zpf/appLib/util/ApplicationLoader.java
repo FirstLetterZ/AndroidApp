@@ -30,6 +30,7 @@ public class ApplicationLoader {
                 ex.printStackTrace();
             }
         }
+        sApplication = application;
         return application;
     }
 
