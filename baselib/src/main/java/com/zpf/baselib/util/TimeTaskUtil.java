@@ -1,4 +1,4 @@
-package com.zpf.appLib.util;
+package com.zpf.baselib.util;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -7,7 +7,7 @@ public abstract class TimeTaskUtil {
     private Timer timer;
     private TimerTask timerTask;
     private long timeInterval = 3000;//间隔
-    private boolean isRunning = false;
+    private volatile boolean isRunning = false;
 
     //停止轮播
     public void stopPlay() {
@@ -55,7 +55,7 @@ public abstract class TimeTaskUtil {
         try {
             timer.schedule(timerTask, delay, timeInterval);//轮播间隔
         } catch (Exception e) {
-            isRunning = true;
+            isRunning = false;
             e.printStackTrace();
         }
     }

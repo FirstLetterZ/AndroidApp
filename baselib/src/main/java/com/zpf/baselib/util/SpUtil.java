@@ -1,21 +1,21 @@
-package com.zpf.appLib.util;
+package com.zpf.baselib.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 
-import com.zpf.appLib.constant.AppConst;
+import com.zpf.baselib.cache.AppConst;
 
 /**
  * Created by ZPF on 2017/9/29.
  */
 public class SpUtil {
-
     private static volatile SpUtil mySpUtil;
     private SharedPreferences sp;
+    private static final String TAG = "SpUtil";
 
     private SpUtil() {
-        sp = AppContext.get() .getSharedPreferences(AppConst.CACHE_SP_FILE_NAME, Context.MODE_PRIVATE);
+
     }
 
     private static SpUtil get() {
@@ -30,7 +30,7 @@ public class SpUtil {
     }
 
     public static void putValue(String key, Object value) {
-        SharedPreferences.Editor editor = get().sp.edit();
+        SharedPreferences.Editor editor = getSP().edit();
         if (key == null) {
             return;
         } else if (value == null) {
@@ -49,6 +49,30 @@ public class SpUtil {
             editor.putString(key, JsonUtil.toString(value));
         }
         editor.commit();
+    }
+
+    public static SharedPreferences.Editor putValues(SharedPreferences.Editor editor, String key, Object value) {
+        if (editor == null) {
+            editor = getSP().edit();
+        }
+        if (key == null) {
+            return editor;
+        } else if (value == null) {
+            editor.remove(key);
+        } else if (value instanceof String) {
+            editor.putString(key, (String) value);
+        } else if (value instanceof Integer) {
+            editor.putInt(key, (int) value);
+        } else if (value instanceof Boolean) {
+            editor.putBoolean(key, (boolean) value);
+        } else if (value instanceof Float) {
+            editor.putFloat(key, (float) value);
+        } else if (value instanceof Long) {
+            editor.putLong(key, (long) value);
+        } else {
+            editor.putString(key, JsonUtil.toString(value));
+        }
+        return editor;
     }
 
     public static <T> T getValue(@NonNull String key, @NonNull Class<T> cls) {
@@ -73,38 +97,38 @@ public class SpUtil {
     }
 
     public static String getString(@NonNull String key) {
-        return get().sp.getString(key, AppConst.DEF_STRING);
+        return getSP().getString(key, AppConst.DEF_STRING);
     }
 
 
     public static boolean getBoolean(@NonNull String key) {
-        return get().sp.getBoolean(key, AppConst.DEF_BOOLEAN);
+        return getSP().getBoolean(key, AppConst.DEF_BOOLEAN);
     }
 
     public static int getInt(@NonNull String key) {
-        return get().sp.getInt(key, AppConst.DEF_INT);
+        return getSP().getInt(key, AppConst.DEF_INT);
     }
 
 
     public static long getLong(@NonNull String key) {
-        return get().sp.getLong(key, AppConst.DEF_LONG);
+        return getSP().getLong(key, AppConst.DEF_LONG);
     }
 
     public static float getFloat(@NonNull String key) {
-        return get().sp.getFloat(key, AppConst.DEF_FLOAT);
+        return getSP().getFloat(key, AppConst.DEF_FLOAT);
     }
 
     public static <T> T getValue(@NonNull String key, @NonNull T defaultValue) {
         if (defaultValue instanceof String) {
-            defaultValue = (T) getString(key);
+            defaultValue = (T) get().getSP().getString(key, (String) defaultValue);
         } else if (defaultValue instanceof Integer) {
-            defaultValue = (T) (Integer) getInt(key);
+            defaultValue = (T) (Integer) get().getSP().getInt(key, (Integer) defaultValue);
         } else if (defaultValue instanceof Long) {
-            defaultValue = (T) (Long) getLong(key);
+            defaultValue = (T) (Long) get().getSP().getLong(key, (Long) defaultValue);
         } else if (defaultValue instanceof Float) {
-            defaultValue = (T) (Float) getFloat(key);
+            defaultValue = (T) (Float) get().getSP().getFloat(key, (Float) defaultValue);
         } else if (defaultValue instanceof Boolean) {
-            defaultValue = (T) (Boolean) getBoolean(key);
+            defaultValue = (T) (Boolean) get().getSP().getBoolean(key, (Boolean) defaultValue);
         } else {
             String str = getString(key);
             if (str.length() > 0) {
@@ -119,15 +143,17 @@ public class SpUtil {
     }
 
     public static void remove(String key) {
-        get().sp.edit().remove(key).commit();
+        getSP().edit().remove(key).commit();
     }
 
     public static void clear() {
-        get().sp.edit().clear().commit();
+        getSP().edit().clear().commit();
     }
 
-    public interface ContextHelper {
-        Context getContext();
+    private static SharedPreferences getSP() {
+        if (get().sp == null) {
+            get().sp = AppContext.get().getSharedPreferences(AppConst.CACHE_SP_FILE_NAME, Context.MODE_PRIVATE);
+        }
+        return get().sp;
     }
-
 }
