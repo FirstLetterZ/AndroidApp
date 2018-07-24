@@ -1,6 +1,7 @@
-package com.zpf.baselib.interfaces;
+package com.zpf.support.interfaces;
 
-import com.zpf.baselib.cache.LifecycleState;
+
+import com.zpf.support.interfaces.annotation.LifecycleState;
 
 /**
  * 常用的有生命周的监听器控制

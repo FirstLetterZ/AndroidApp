@@ -20,7 +20,7 @@ public class LifecycleLogUtil implements LifecycleInterface {
         viewContainerInterface.addLifecycleListener(this);
     }
 
-    public void onLogUtilInit() {
+    private void onLogUtilInit() {
         log("onLogUtilInit");
     }
 

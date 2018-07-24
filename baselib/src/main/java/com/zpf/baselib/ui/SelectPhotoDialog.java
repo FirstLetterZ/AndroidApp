@@ -12,7 +12,7 @@ import com.zpf.baselib.cache.AppConst;
 import com.zpf.baselib.interfaces.OnItemClickListener;
 import com.zpf.baselib.interfaces.ViewContainerInterface;
 import com.zpf.baselib.util.FileUtil;
-import com.zpf.baselib.util.ImageUtil;
+import com.zpf.baselib.util.PhotoUtil;
 import com.zpf.baselib.util.SpUtil;
 
 import java.io.File;
@@ -95,21 +95,21 @@ public class SelectPhotoDialog extends BottomDialog {
         File photoFile = FileUtil.getFileOrCreate(FileUtil.getCameraCachePath(), name);
         SpUtil.putValue(PHOTO_PATH, photoFile.getAbsolutePath());
         if (viewContainer != null) {
-            ImageUtil.takePhoto(viewContainer, photoFile.getAbsolutePath(), REQ_CAMERA);
+            PhotoUtil.takePhoto(viewContainer, photoFile.getAbsolutePath(), REQ_CAMERA);
         } else if (activity != null) {
-            ImageUtil.takePhoto(activity, photoFile.getAbsolutePath(), REQ_CAMERA);
+            PhotoUtil.takePhoto(activity, photoFile.getAbsolutePath(), REQ_CAMERA);
         } else if (fragment != null) {
-            ImageUtil.takePhoto(fragment, photoFile.getAbsolutePath(), REQ_CAMERA);
+            PhotoUtil.takePhoto(fragment, photoFile.getAbsolutePath(), REQ_CAMERA);
         }
     }
 
     private void selectAlbum() {
         if (viewContainer != null) {
-            ImageUtil.selectFromAlbum(viewContainer, REQ_ALBUM);
+            PhotoUtil.selectFromAlbum(viewContainer, REQ_ALBUM);
         } else if (activity != null) {
-            ImageUtil.selectFromAlbum(activity, REQ_ALBUM);
+            PhotoUtil.selectFromAlbum(activity, REQ_ALBUM);
         } else if (fragment != null) {
-            ImageUtil.selectFromAlbum(fragment, REQ_ALBUM);
+            PhotoUtil.selectFromAlbum(fragment, REQ_ALBUM);
         }
     }
 

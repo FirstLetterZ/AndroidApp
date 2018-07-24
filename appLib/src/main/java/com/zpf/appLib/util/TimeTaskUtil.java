@@ -36,12 +36,12 @@ public abstract class TimeTaskUtil {
                 @Override
                 public void run() {
                     doInChildThread();
-                    MainHandler.get().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            doInMainThread();
-                        }
-                    });
+//                    MainHandler.get().post(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            doInMainThread();
+//                        }
+//                    });
                 }
             };
         }

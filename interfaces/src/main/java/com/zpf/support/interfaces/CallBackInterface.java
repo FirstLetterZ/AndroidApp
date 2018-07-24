@@ -1,4 +1,4 @@
-package com.zpf.baselib.interfaces;
+package com.zpf.support.interfaces;
 
 import android.app.Dialog;
 
@@ -6,7 +6,7 @@ import android.app.Dialog;
  * Created by ZPF on 2018/6/14.
  */
 
-public interface CallBackInterface extends OnDestroyListener {
+public interface CallBackInterface extends com.zpf.support.interfaces.OnDestroyListener {
     void cancel();
 
     CallBackInterface bindToManager(CallBackManagerInterface manager);

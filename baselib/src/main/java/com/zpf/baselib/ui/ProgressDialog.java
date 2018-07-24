@@ -1,7 +1,6 @@
 package com.zpf.baselib.ui;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.view.Gravity;
 import android.view.Window;
@@ -18,6 +17,7 @@ import com.zpf.baselib.interfaces.CallBackInterface;
 public class ProgressDialog extends BaseDialog {
 
     private TextView textView;
+    private CallBackInterface callBack;
 
     public ProgressDialog(@NonNull Context context) {
         this(context, R.style.customDialog);
@@ -48,18 +48,21 @@ public class ProgressDialog extends BaseDialog {
         }
     }
 
-    //绑定请求
-    public void bindRequest(final CallBackInterface callBackInterface) {
-        setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                try {
-                    callBackInterface.cancel();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (this.callBack != null) {
+            try {
+                callBack.cancel();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        });
+        }
+    }
+
+    //绑定网络请求
+    public void bindRequest(final CallBackInterface callBackInterface) {
+        this.callBack = callBackInterface;
     }
 
 }

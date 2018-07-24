@@ -15,7 +15,7 @@ public class SpUtil {
     private SharedPreferences sp;
 
     private SpUtil() {
-        sp = AppContext.get() .getSharedPreferences(AppConst.CACHE_SP_FILE_NAME, Context.MODE_PRIVATE);
+       // sp = AppContext.get() .getSharedPreferences(AppConst.CACHE_SP_FILE_NAME, Context.MODE_PRIVATE);
     }
 
     private static SpUtil get() {

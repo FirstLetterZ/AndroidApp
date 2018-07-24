@@ -1,2 +1,2 @@
-include ':app', ':appLib', ':processor', ':login', ':middleware', ':base'
+include ':app', ':appLib', ':processor', 'interfaces',':base'
 project(':base').projectDir = new File('baselib')

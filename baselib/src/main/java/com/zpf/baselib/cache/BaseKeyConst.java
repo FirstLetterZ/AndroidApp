@@ -19,4 +19,7 @@ public class BaseKeyConst {
     protected final static int FLOAT = 5 * TYPE_BASE;
 
     public static final int IS_DEBUG = MODULE_BASE + BOOLEAN + 1;
+    public static final int ASSET_TOKEN = MODULE_BASE + STRING + 1;
+    public static final int REFRESH_TOKEN = MODULE_BASE + STRING + 2;
+    public static final int DEVICE_ID = MODULE_BASE + STRING + 3;
 }

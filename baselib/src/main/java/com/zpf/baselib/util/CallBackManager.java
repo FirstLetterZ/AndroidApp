@@ -2,17 +2,18 @@ package com.zpf.baselib.util;
 
 import android.util.LongSparseArray;
 
-import com.zpf.baselib.http.BaseCallBack;
-import com.zpf.baselib.interfaces.OnDestroyListener;
+import com.zpf.baselib.interfaces.CallBackInterface;
+import com.zpf.baselib.interfaces.CallBackManagerInterface;
 
 /**
  * Created by ZPF on 2018/6/13.
  */
-public class CallBackManager implements OnDestroyListener {
-    private LongSparseArray<BaseCallBack> callBackList = new LongSparseArray<>();
+public class CallBackManager implements CallBackManagerInterface {
+    private LongSparseArray<CallBackInterface> callBackList = new LongSparseArray<>();
     private volatile boolean cancelAll = false;
 
-    public long addCallBack(BaseCallBack callBack) {
+    @Override
+    public long addCallBack(CallBackInterface callBack) {
         if (cancelAll) {
             callBack.cancel();
             return -1;
@@ -23,15 +24,17 @@ public class CallBackManager implements OnDestroyListener {
         }
     }
 
+    @Override
     public void removeCallBack(long id) {
         if (!cancelAll) {
             callBackList.remove(id);
         }
     }
 
+    @Override
     public void cancelCallBack(long id) {
         if (!cancelAll) {
-            BaseCallBack callBack = callBackList.get(id);
+            CallBackInterface callBack = callBackList.get(id);
             if (callBack != null) {
                 callBack.cancel();
             }
@@ -39,10 +42,11 @@ public class CallBackManager implements OnDestroyListener {
         }
     }
 
+    @Override
     public void cancelAll() {
         synchronized (this) {
             for (int i = 0; i < callBackList.size(); i++) {
-                BaseCallBack callBack = callBackList.valueAt(i);
+                CallBackInterface callBack = callBackList.valueAt(i);
                 if (callBack != null) {
                     callBack.cancel();
                 }

@@ -9,7 +9,7 @@ import android.text.TextUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.zpf.baselib.interfaces.CallBackInterface;
-import com.zpf.baselib.util.CallBackManager;
+import com.zpf.baselib.interfaces.CallBackManagerInterface;
 import com.zpf.baselib.util.PublicUtil;
 
 import org.json.JSONException;
@@ -25,7 +25,7 @@ import retrofit2.HttpException;
 
 /**
  * @author ZPF
- *         网络返回处理
+ * 网络返回处理
  */
 public abstract class BaseCallBack<T> implements Observer<T>, CallBackInterface {
     protected int[] type = new int[]{0, 0, 0, 0};//{不弹出错误提示，结果可为空，预留，预留}
@@ -42,7 +42,7 @@ public abstract class BaseCallBack<T> implements Observer<T>, CallBackInterface 
 
     private boolean isCancel = false;
     protected Disposable disposable;
-    protected CallBackManager manager;
+    protected CallBackManagerInterface manager;
     protected Dialog dialog;
     protected long bindId;
 
@@ -215,7 +215,7 @@ public abstract class BaseCallBack<T> implements Observer<T>, CallBackInterface 
     }
 
     @Override
-    public BaseCallBack<T> bindToManager(CallBackManager manager) {
+    public BaseCallBack<T> bindToManager(CallBackManagerInterface manager) {
         if (manager != null) {
             this.manager = manager;
             bindId = manager.addCallBack(this);
@@ -224,7 +224,7 @@ public abstract class BaseCallBack<T> implements Observer<T>, CallBackInterface 
     }
 
     @Override
-    public BaseCallBack<T> bindToManager(CallBackManager manager, Dialog dialog) {
+    public BaseCallBack<T> bindToManager(CallBackManagerInterface manager, Dialog dialog) {
         if (manager != null) {
             this.manager = manager;
             bindId = manager.addCallBack(this);
