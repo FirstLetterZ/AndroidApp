@@ -20,6 +20,6 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation project(':appLib')
-    implementation project(':base')
+    implementation project(':support')
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
 }

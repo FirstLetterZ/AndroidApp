@@ -6,6 +6,10 @@ package com.zpf.support.interfaces;
 
 public interface SafeWindowInterface {
     void show();
+
     void dismiss();
+
     void bindController(SafeWindowController controller);
+
+    void bindRequest(CallBackInterface callBackInterface);
 }

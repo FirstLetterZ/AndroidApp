@@ -1,2 +1,1 @@
-include ':app', ':appLib', ':processor', 'interfaces',':base'
-project(':base').projectDir = new File('baselib')
+include ':app', ':util', ':data', ':support', ':glideutil', ':network', ':refresh', ':webview', 'interfaces'

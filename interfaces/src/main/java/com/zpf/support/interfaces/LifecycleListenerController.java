@@ -1,7 +1,6 @@
 package com.zpf.support.interfaces;
 
-
-import com.zpf.support.interfaces.annotation.LifecycleState;
+import com.zpf.support.data.constant.LifecycleState;
 
 /**
  * 常用的有生命周的监听器控制
