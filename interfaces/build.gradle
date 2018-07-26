@@ -17,5 +17,5 @@ android {
 }
 
 dependencies {
-    api project(':data')
+    api rootProject.ext.dependencies.annotations
 }

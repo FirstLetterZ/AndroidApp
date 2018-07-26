@@ -1,7 +1,5 @@
 package com.zpf.support.interfaces;
 
-import android.app.Dialog;
-
 /**
  * Created by ZPF on 2018/6/14.
  */
@@ -11,5 +9,5 @@ public interface CallBackInterface extends com.zpf.support.interfaces.OnDestroyL
 
     CallBackInterface bindToManager(CallBackManagerInterface manager);
 
-    CallBackInterface bindToManager(CallBackManagerInterface manager, Dialog dialog);
+    CallBackInterface bindToManager(CallBackManagerInterface manager, SafeWindowInterface dialog);
 }

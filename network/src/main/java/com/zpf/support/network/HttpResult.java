@@ -5,14 +5,15 @@ package com.zpf.support.network;
  */
 
 public class HttpResult<T> {
-    private String code;
+    private int code;
     private String message;
     private T data;
-    public String getCode() {
+
+    public int getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    public void setCode(int code) {
         this.code = code;
     }
 
@@ -30,5 +31,9 @@ public class HttpResult<T> {
 
     public void setData(T data) {
         this.data = data;
+    }
+
+    public boolean isSuccess() {
+        return code == 200;
     }
 }

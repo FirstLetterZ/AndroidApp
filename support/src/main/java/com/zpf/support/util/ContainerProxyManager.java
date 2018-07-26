@@ -3,8 +3,8 @@ package com.zpf.support.util;
 import android.app.Activity;
 import android.support.v4.app.FragmentActivity;
 
-import com.zpf.support.view.ProxySupportViewContainer;
-import com.zpf.support.view.ProxyViewContainer;
+import com.zpf.support.defview.ProxySupportViewContainer;
+import com.zpf.support.defview.ProxyViewContainer;
 import com.zpf.support.interfaces.ViewContainerInterface;
 
 /**

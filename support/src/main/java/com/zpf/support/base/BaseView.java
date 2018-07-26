@@ -9,12 +9,11 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
-import com.zpf.support.data.constant.AppContext;
-import com.zpf.support.data.constant.LifecycleState;
+import com.zpf.support.generalUtil.SafeClickListener;
 import com.zpf.support.interfaces.TitleBarInterface;
 import com.zpf.support.interfaces.ViewContainerInterface;
 import com.zpf.support.interfaces.ViewInterface;
-import com.zpf.support.util.SafeClickListener;
+import com.zpf.support.interfaces.constant.LifecycleState;
 
 /**
  * Created by ZPF on 2018/6/14.
@@ -106,7 +105,11 @@ public abstract class BaseView implements ViewInterface {
     }
 
     public Context getContext() {
-        return mContainer != null ? mContainer.getContext() : AppContext.get();
+        if(mContainer!=null){
+            return mContainer.getContext();
+        }else {
+            return null;
+        }
     }
 
     public <T extends View> T $(int viewId) {

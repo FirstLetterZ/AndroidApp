@@ -13,9 +13,13 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.zpf.support.data.constant.AppConst;
-import com.zpf.support.data.constant.LifecycleState;
-import com.zpf.support.view.RootLayout;
+import com.zpf.support.constant.AppConst;
+import com.zpf.support.defview.ProgressDialog;
+import com.zpf.support.defview.RootLayout;
+import com.zpf.support.util.ContainerListenerController;
+import com.zpf.support.util.LifecycleLogUtil;
+import com.zpf.support.util.PermissionUtil;
+import com.zpf.support.util.PublicUtil;
 import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.LifecycleInterface;
 import com.zpf.support.interfaces.OnDestroyListener;
@@ -24,10 +28,7 @@ import com.zpf.support.interfaces.RootLayoutInterface;
 import com.zpf.support.interfaces.SafeWindowInterface;
 import com.zpf.support.interfaces.ViewContainerInterface;
 import com.zpf.support.interfaces.ViewInterface;
-import com.zpf.support.util.ContainerListenerController;
-import com.zpf.support.util.LifecycleLogUtil;
-import com.zpf.support.util.PublicUtil;
-import com.zpf.support.view.ProgressDialog;
+import com.zpf.support.interfaces.constant.LifecycleState;
 
 import java.lang.reflect.Constructor;
 
@@ -36,7 +37,7 @@ import java.lang.reflect.Constructor;
  */
 public abstract class BaseActivity<T extends ViewInterface> extends AppCompatActivity implements ViewContainerInterface {
     protected T mView;
-    private RootLayout mRootLayout;
+    private RootLayoutInterface mRootLayout;
     private final ContainerListenerController mController = new ContainerListenerController();
     private ProgressDialog loadingDialog;
 
@@ -59,7 +60,7 @@ public abstract class BaseActivity<T extends ViewInterface> extends AppCompatAct
         } else {
             mRootLayout.setContentView(layoutView);
         }
-        setContentView(mRootLayout);
+        setContentView(mRootLayout.getLayout());
         try {
             Class<T> cls = PublicUtil.getViewClass(getClass());
             if (cls != null) {
@@ -141,6 +142,7 @@ public abstract class BaseActivity<T extends ViewInterface> extends AppCompatAct
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        PermissionUtil.get().onRequestPermissionsResult(this, permissions, grantResults);
         mController.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 

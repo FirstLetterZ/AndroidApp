@@ -1,1 +1,1 @@
-include ':app', ':util', ':data', ':support', ':glideutil', ':network', ':refresh', ':webview', 'interfaces'
+include ':app', ':generalUtil', ':support', ':glideutil', ':network', ':refresh', ':webview', 'interfaces'

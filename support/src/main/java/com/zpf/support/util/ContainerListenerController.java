@@ -5,12 +5,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.zpf.support.data.constant.LifecycleState;
 import com.zpf.support.interfaces.LifecycleInterface;
 import com.zpf.support.interfaces.LifecycleListenerController;
 import com.zpf.support.interfaces.OnDestroyListener;
 import com.zpf.support.interfaces.ResultCallBackListener;
 import com.zpf.support.interfaces.SafeWindowInterface;
+import com.zpf.support.interfaces.constant.LifecycleState;
 
 import java.util.ArrayList;
 import java.util.List;

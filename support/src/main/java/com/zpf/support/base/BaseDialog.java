@@ -70,6 +70,11 @@ public class BaseDialog extends Dialog implements SafeWindowInterface {
     }
 
     @Override
+    public boolean isShowing() {
+        return super.isShowing();
+    }
+
+    @Override
     public void bindController(SafeWindowController controller) {
         this.listener = controller;
     }

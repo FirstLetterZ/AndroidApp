@@ -17,6 +17,8 @@ android {
 }
 
 dependencies {
-    implementation project(':util')
-    implementation rootProject.ext.dependencies.design
+    api project(':generalUtil')
+    api project(':interfaces')
+    api rootProject.ext.dependencies.design
+    api rootProject.ext.dependencies.gson
 }

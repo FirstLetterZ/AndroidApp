@@ -12,7 +12,7 @@ import com.zpf.support.data.constant.AppConst;
 import com.zpf.support.data.util.SpUtil;
 import com.zpf.support.interfaces.OnItemClickListener;
 import com.zpf.support.interfaces.ViewContainerInterface;
-import com.zpf.support.util.FileUtil;
+import com.zpf.support.generalUtil.FileUtil;
 import com.zpf.support.util.PhotoUtil;
 
 import java.io.File;

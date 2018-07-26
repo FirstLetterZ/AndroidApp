@@ -9,6 +9,8 @@ public interface SafeWindowInterface {
 
     void dismiss();
 
+    boolean isShowing();
+
     void bindController(SafeWindowController controller);
 
     void bindRequest(CallBackInterface callBackInterface);
