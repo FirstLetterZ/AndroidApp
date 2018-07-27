@@ -1,10 +1,8 @@
 package com.zpf.support.util;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
 import com.zpf.support.constant.BaseKeyConst;
@@ -79,23 +77,6 @@ public class PublicUtil {
             }
         }
         return name;
-    }
-
-    @SuppressLint({"MissingPermission", "HardwareIds"})
-    public static String getDeviceId(Context context) {
-        String result = "";
-        try {
-            TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-            if (telephonyManager != null) {
-                result = telephonyManager.getDeviceId();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (result == null) {
-            result = "";
-        }
-        return result;
     }
 
 }

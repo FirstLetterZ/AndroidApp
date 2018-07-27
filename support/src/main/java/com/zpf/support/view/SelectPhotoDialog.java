@@ -8,12 +8,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 
-import com.zpf.support.data.constant.AppConst;
-import com.zpf.support.data.util.SpUtil;
+import com.zpf.support.constant.AppConst;
+import com.zpf.support.generalUtil.FileUtil;
 import com.zpf.support.interfaces.OnItemClickListener;
 import com.zpf.support.interfaces.ViewContainerInterface;
-import com.zpf.support.generalUtil.FileUtil;
 import com.zpf.support.util.PhotoUtil;
+import com.zpf.support.util.SpUtil;
 
 import java.io.File;
 

@@ -22,3 +22,4 @@ dependencies {
     api rootProject.ext.dependencies.design
     api rootProject.ext.dependencies.gson
 }
+apply from: "bintrayUpload.gradle"

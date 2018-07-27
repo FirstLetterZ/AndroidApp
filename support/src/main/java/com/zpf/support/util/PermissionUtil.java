@@ -1,6 +1,7 @@
 package com.zpf.support.util;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.View;
 
@@ -302,8 +304,40 @@ public class PermissionUtil {
         }
     }
 
+    @SuppressLint({"MissingPermission", "HardwareIds"})
+    public void getDeviceId(final ViewContainerInterface viewContainer, final DeviceIdListener listener) {
+        if (viewContainer == null || viewContainer.getContext() == null || listener == null) {
+            return;
+        }
+        checkPermission(viewContainer, new OnPermissionResult() {
+
+            @Override
+            public void onSuccess() {
+                String result;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    result = Build.getSerial();
+                } else {
+                    result = Build.SERIAL;
+                }
+                if (TextUtils.isEmpty(result) || "unknown".equalsIgnoreCase(result)) {
+                    if (viewContainer != null && viewContainer.getContext() != null) {
+                        TelephonyManager telephonyManager = (TelephonyManager) viewContainer.getContext()
+                                .getSystemService(Context.TELEPHONY_SERVICE);
+                        if (telephonyManager != null) {
+                            result = telephonyManager.getDeviceId();
+                        }
+                    }
+                }
+                listener.onSuccess(result);
+            }
+        }, Manifest.permission.READ_PHONE_STATE);
+    }
 
     public interface OnPermissionResult {
         void onSuccess();
+    }
+
+    public interface DeviceIdListener {
+        void onSuccess(String deviceId);
     }
 }
