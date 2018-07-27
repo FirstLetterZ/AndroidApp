@@ -1,5 +1,6 @@
 package com.zpf.support.defview;
 
+import android.app.Application;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -13,9 +14,11 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import com.zpf.support.generalUtil.AppContext;
+import com.zpf.support.generalUtil.ViewUtil;
+import com.zpf.support.interfaces.GlobalSettingInterface;
 import com.zpf.support.interfaces.RootLayoutInterface;
 import com.zpf.support.interfaces.TitleBarInterface;
-import com.zpf.support.generalUtil.ViewUtil;
 
 
 /**
@@ -67,6 +70,10 @@ public class RootLayout extends LinearLayout implements RootLayoutInterface {
                 ViewGroup.LayoutParams.MATCH_PARENT));
         addView(contentLayout);
         hasAddChildren = true;
+        Application application = AppContext.get();
+        if (application != null && application instanceof GlobalSettingInterface) {
+            ((GlobalSettingInterface) application).initRootLayout(this);
+        }
     }
 
     @Override
