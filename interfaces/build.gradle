@@ -19,3 +19,4 @@ android {
 dependencies {
     api rootProject.ext.dependencies.annotations
 }
+//apply from: "bintrayUpload.gradle"

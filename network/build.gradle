@@ -26,3 +26,4 @@ dependencies {
     api project(':interfaces')
     api project(':generalUtil')
 }
+//apply from: "bintrayUpload.gradle"

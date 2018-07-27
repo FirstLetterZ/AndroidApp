@@ -20,3 +20,4 @@ dependencies {
     api rootProject.ext.dependencies.annotations
     api rootProject.ext.dependencies.recyclerview
 }
+//apply from: "bintrayUpload.gradle"

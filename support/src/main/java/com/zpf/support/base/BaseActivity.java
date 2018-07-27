@@ -49,6 +49,15 @@ public abstract class BaseActivity<T extends ViewInterface> extends AppCompatAct
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //防止初次安装从后台返回的重启问题
+        Intent intent = getIntent();
+        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
+            String action = intent.getAction();
+            if (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && Intent.ACTION_MAIN.equals(action)) {
+                finish();
+                return;
+            }
+        }
         initWindow();
         if (PublicUtil.isDebug()) {
             new LifecycleLogUtil(this);
