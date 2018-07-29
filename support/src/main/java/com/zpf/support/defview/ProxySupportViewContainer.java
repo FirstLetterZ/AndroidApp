@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.zpf.support.constant.BaseKeyConst;
 import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.LifecycleInterface;
 import com.zpf.support.interfaces.OnDestroyListener;
@@ -19,7 +20,9 @@ import com.zpf.support.interfaces.RootLayoutInterface;
 import com.zpf.support.interfaces.SafeWindowInterface;
 import com.zpf.support.interfaces.ViewContainerInterface;
 import com.zpf.support.interfaces.constant.LifecycleState;
+import com.zpf.support.util.CacheMap;
 import com.zpf.support.util.ContainerListenerController;
+import com.zpf.support.util.LifecycleLogUtil;
 import com.zpf.support.util.PermissionUtil;
 
 /**
@@ -35,10 +38,18 @@ public class ProxySupportViewContainer extends Fragment implements ViewContainer
 
     public void onConditionsCompleted(FragmentActivity activity) {
         this.activity = activity;
+        if (CacheMap.getBoolean(BaseKeyConst.IS_DEBUG) && activity != null) {
+            LifecycleLogUtil lifecycleLogUtil = new LifecycleLogUtil(this);
+            lifecycleLogUtil.setName(activity.getClass().getName());
+        }
     }
 
     public void onConditionsCompleted(Fragment fragment) {
         this.fragment = fragment;
+        if (CacheMap.getBoolean(BaseKeyConst.IS_DEBUG) && fragment != null) {
+            LifecycleLogUtil lifecycleLogUtil = new LifecycleLogUtil(this);
+            lifecycleLogUtil.setName(fragment.getClass().getName());
+        }
     }
 
     @Override

@@ -11,12 +11,19 @@ import com.zpf.support.interfaces.ViewContainerInterface;
  * Created by ZPF on 2018/6/26.
  */
 public class LifecycleLogUtil implements LifecycleInterface {
-    private ViewContainerInterface viewContainerInterface;
+    private String name;
 
-    public LifecycleLogUtil(@NonNull ViewContainerInterface viewContainerInterface) {
-        this.viewContainerInterface = viewContainerInterface;
-        onLogUtilInit();
-        viewContainerInterface.addLifecycleListener(this);
+    public LifecycleLogUtil(ViewContainerInterface viewContainerInterface) {
+        if (viewContainerInterface != null) {
+            viewContainerInterface.addLifecycleListener(this);
+            this.name = viewContainerInterface.getClass().getName();
+            onLogUtilInit();
+        }
+
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     private void onLogUtilInit() {
@@ -26,7 +33,6 @@ public class LifecycleLogUtil implements LifecycleInterface {
     @Override
     public void onDestroy() {
         log("onDestroy");
-        viewContainerInterface = null;
     }
 
     @Override
@@ -70,8 +76,6 @@ public class LifecycleLogUtil implements LifecycleInterface {
     }
 
     private void log(String msg) {
-        if (viewContainerInterface != null) {
-            LogUtil.d(viewContainerInterface.getClass().getName() + " ===>>> " + msg);
-        }
+        LogUtil.d(this.name + " ===>>> " + msg);
     }
 }

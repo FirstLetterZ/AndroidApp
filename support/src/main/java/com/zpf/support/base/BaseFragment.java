@@ -11,8 +11,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.zpf.support.constant.AppConst;
+import com.zpf.support.constant.BaseKeyConst;
 import com.zpf.support.defview.ProgressDialog;
 import com.zpf.support.defview.RootLayout;
+import com.zpf.support.util.CacheMap;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.support.util.LifecycleLogUtil;
 import com.zpf.support.util.PermissionUtil;
@@ -42,7 +44,7 @@ public abstract class BaseFragment<T extends ViewInterface> extends Fragment imp
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        if (PublicUtil.isDebug()) {
+        if(CacheMap.getBoolean(BaseKeyConst.IS_DEBUG)){
             new LifecycleLogUtil(this);
         }
         mRootLayout = new RootLayout(getContext());
