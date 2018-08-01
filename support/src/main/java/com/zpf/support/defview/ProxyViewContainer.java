@@ -186,13 +186,15 @@ public class ProxyViewContainer extends Fragment implements ViewContainerInterfa
 
     @Override
     public void showLoading(String message) {
-        if (loadingDialog == null) {
-            loadingDialog = createProgressDialog();
+        if (getState() < LifecycleState.AFTER_DESTROY) {
+            if (loadingDialog != null) {
+                loadingDialog = createProgressDialog();
+            }
+            if (loadingDialog != null && !loadingDialog.isShowing()) {
+                loadingDialog.setText(message);
+                loadingDialog.show();
+            }
         }
-        if (loadingDialog != null) {
-            loadingDialog.setText(message);
-        }
-        show(loadingDialog);
     }
 
     @Nullable

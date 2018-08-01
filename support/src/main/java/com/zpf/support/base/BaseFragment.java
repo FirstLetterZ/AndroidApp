@@ -266,13 +266,15 @@ public abstract class BaseFragment<T extends ViewInterface> extends Fragment imp
 
     @Override
     public void showLoading(String message) {
-        if (loadingDialog != null) {
-            loadingDialog = getProgressDialog();
+        if (getState() < LifecycleState.AFTER_DESTROY) {
+            if (loadingDialog != null) {
+                loadingDialog = getProgressDialog();
+            }
+            if (loadingDialog != null && !loadingDialog.isShowing()) {
+                loadingDialog.setText(message);
+                loadingDialog.show();
+            }
         }
-        if (loadingDialog != null) {
-            loadingDialog.setText(message);
-        }
-        show(loadingDialog);
     }
 
     protected ProgressDialog getProgressDialog() {

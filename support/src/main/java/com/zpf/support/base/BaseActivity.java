@@ -61,7 +61,7 @@ public abstract class BaseActivity<T extends ViewInterface> extends AppCompatAct
             }
         }
         initWindow();
-        if(CacheMap.getBoolean(BaseKeyConst.IS_DEBUG)){
+        if (CacheMap.getBoolean(BaseKeyConst.IS_DEBUG)) {
             new LifecycleLogUtil(this);
         }
         mRootLayout = new RootLayout(getContext());
@@ -259,13 +259,15 @@ public abstract class BaseActivity<T extends ViewInterface> extends AppCompatAct
 
     @Override
     public void showLoading(String message) {
-        if (loadingDialog != null) {
-            loadingDialog = getProgressDialog();
+        if (getState() < LifecycleState.AFTER_DESTROY) {
+            if (loadingDialog != null) {
+                loadingDialog = getProgressDialog();
+            }
+            if (loadingDialog != null && !loadingDialog.isShowing()) {
+                loadingDialog.setText(message);
+                loadingDialog.show();
+            }
         }
-        if (loadingDialog != null) {
-            loadingDialog.setText(message);
-        }
-        show(loadingDialog);
     }
 
     @Override

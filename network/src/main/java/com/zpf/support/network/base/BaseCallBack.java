@@ -1,5 +1,6 @@
 package com.zpf.support.network.base;
 
+import android.accounts.AccountsException;
 import android.app.Dialog;
 import android.net.ParseException;
 import android.support.annotation.IntRange;
@@ -7,6 +8,7 @@ import android.text.TextUtils;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.google.gson.stream.MalformedJsonException;
 import com.zpf.support.generalUtil.ToastUtil;
 import com.zpf.support.interfaces.CallBackInterface;
 import com.zpf.support.interfaces.CallBackManagerInterface;
@@ -14,7 +16,8 @@ import com.zpf.support.interfaces.SafeWindowInterface;
 
 import org.json.JSONException;
 
-import java.net.ConnectException;
+import java.io.IOException;
+import java.net.SocketException;
 import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -37,6 +40,7 @@ public abstract class BaseCallBack implements CallBackInterface {
     protected final int NETWORK_ERROR = -902;
     protected final int PARSE_ERROR = -903;
     protected final int SSL_ERROR = -904;
+    protected final int IO_ERROR = -905;
 
     private boolean isCancel = false;
     protected CallBackManagerInterface manager;
@@ -109,39 +113,44 @@ public abstract class BaseCallBack implements CallBackInterface {
     protected void handleError(Throwable e) {
         removeObservable();
         e.printStackTrace();
-        String msg = e.getMessage();
         String description = e.toString();
         int code;
         if (e instanceof HttpException) {
             HttpException exception = (HttpException) e;
             description = exception.response().message();
             code = exception.response().code();
+        } else if (e instanceof AccountsException) {
+            code = SSL_ERROR;
+            description = "证书验证失败";
         } else if (e instanceof SSLHandshakeException) {
             code = SSL_ERROR;
             description = "证书验证失败";
         } else if (e instanceof JsonParseException
                 || e instanceof JSONException
-                || e instanceof ParseException) {
+                || e instanceof ParseException
+                || e instanceof MalformedJsonException) {
             code = PARSE_ERROR;
             description = "数据解析异常";
+        } else if (e instanceof SocketException) {
+            code = NETWORK_ERROR;
+            description = "网络连接异常";
+        } else if (e instanceof TimeoutException) {
+            code = NETWORK_ERROR;
+            description = "连接超时，请稍后再试";
+        } else if (e instanceof IOException) {
+            code = IO_ERROR;
+            description = "数据流异常，解析失败";
+        } else if (description.contains("com.google.gson.JsonNull")) {
+            description = "返回数据为空";
+            code = DATA_NULL;
+        } else if (description.contains("Unable to resolve host")) {
+            description = "网络连接异常";
+            code = NETWORK_ERROR;
         } else {
-            if (e instanceof ConnectException) {
-                code = NETWORK_ERROR;
-                description = "网络连接异常";
-            } else if (e instanceof TimeoutException) {
-                code = NETWORK_ERROR;
-                description = "连接超时，请稍后再试";
-            } else if (description.contains("com.google.gson.JsonNull")) {
-                description = "返回数据为空";
-                code = DATA_NULL;
-            } else if (description.contains("Unable to resolve host")) {
-                description = "网络连接异常";
-                code = NETWORK_ERROR;
-            } else {
-                code = NO_SERVER_CODE;
-                if (!TextUtils.isEmpty(msg)) {
-                    description = msg;
-                }
+            code = NO_SERVER_CODE;
+            String msg = e.getMessage();
+            if (!TextUtils.isEmpty(msg)) {
+                description = msg;
             }
         }
         fail(code, description, true);
