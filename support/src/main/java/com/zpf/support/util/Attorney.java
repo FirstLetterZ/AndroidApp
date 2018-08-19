@@ -28,7 +28,7 @@ public class Attorney {
                                     heritage.data=new Intent();
                                 }
                                 heritage.data.putExtra("from",heritage.from);
-                                activity.on(heritage.resultCode,heritage.data);
+                                activity.onProvideAssistData(heritage.data.getBundleExtra(""));
                             }
                         }
 
