@@ -162,16 +162,19 @@ public abstract class BaseCallBack implements CallBackInterface {
      * @param complete    是否执行complete（）
      */
     protected void fail(int code, String description, boolean complete) {
-        if (code > -900 && showError(code, description) != null) {
+        boolean showDialog = code > -900;
+        if (showDialog) {
             Dialog dialog = showError(code, description);
-            if (dialog != null && !dialog.isShowing() && dialog.getWindow() != null) {
+            showDialog = dialog != null;
+            if (showDialog && !dialog.isShowing() && dialog.getWindow() != null) {
                 try {
                     dialog.show();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        } else if (autoToast()) {
+        }
+        if (!showDialog && autoToast()) {
             if (TextUtils.isEmpty(description)) {
                 description = "请求失败，请稍后重试";
             }

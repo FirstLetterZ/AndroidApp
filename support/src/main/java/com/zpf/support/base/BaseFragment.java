@@ -30,6 +30,7 @@ import com.zpf.support.interfaces.ViewInterface;
 import com.zpf.support.interfaces.constant.LifecycleState;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Created by ZPF on 2018/6/14.
@@ -44,29 +45,18 @@ public abstract class BaseFragment<T extends ViewInterface> extends Fragment imp
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        if(CacheMap.getBoolean(BaseKeyConst.IS_DEBUG)){
-            new LifecycleLogUtil(this);
-        }
-        mRootLayout = new RootLayout(getContext());
-        if (getLayoutView() == null) {
-            mRootLayout.setContentView(inflater, getLayoutId());
-        } else {
-            mRootLayout.setContentView(getLayoutView());
-        }
+        mRootLayout = createRootLayout();
         mRootLayout.getStatusBar().setVisibility(View.GONE);
         mRootLayout.getTitleBar().getLayout().setVisibility(View.GONE);
-        try {
-            Class<T> cls = PublicUtil.getViewClass(getClass());
-            if (cls != null) {
-                Class[] pType = new Class[]{ViewContainerInterface.class};
-                Constructor<T> constructor = cls.getConstructor(pType);
-                mView = constructor.newInstance(this);
-                mController.addLifecycleListener(mView);
-                mController.addResultCallBackListener(mView);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e.toString());
+        View layoutView = getLayoutView();
+        if (layoutView == null) {
+            mRootLayout.setContentView(inflater, getLayoutId());
+        } else {
+            mRootLayout.setContentView(layoutView);
         }
+        mView = createContent();
+        mController.addLifecycleListener(mView);
+        mController.addResultCallBackListener(mView);
         mController.onPreCreate(savedInstanceState);
         initView(savedInstanceState);
         mController.afterCreate(savedInstanceState);
@@ -277,6 +267,24 @@ public abstract class BaseFragment<T extends ViewInterface> extends Fragment imp
         }
     }
 
+    protected RootLayoutInterface createRootLayout() {
+        return new RootLayout(getContext());
+    }
+
+    protected T createContent() {
+        Class<T> cls = PublicUtil.getViewClass(getClass());
+        if (cls != null) {
+            try {
+                Class[] pType = new Class[]{ViewContainerInterface.class};
+                Constructor<T> constructor = cls.getConstructor(pType);
+                return constructor.newInstance(this);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
     protected ProgressDialog getProgressDialog() {
         if (loadingDialog == null && getState() < LifecycleState.AFTER_DESTROY && getContext() != null) {
             loadingDialog = new ProgressDialog(getContext());
@@ -293,7 +301,7 @@ public abstract class BaseFragment<T extends ViewInterface> extends Fragment imp
     public abstract void initView(@Nullable Bundle savedInstanceState);
 
     private void checkVisibleChange() {
-        boolean newVisible = isVisible();
+        boolean newVisible = getUserVisibleHint() && isVisible();
         if (newVisible != this.isVisible) {
             this.isVisible = newVisible;
             mController.onVisibleChanged(newVisible);

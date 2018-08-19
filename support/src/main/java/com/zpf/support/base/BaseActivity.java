@@ -43,10 +43,6 @@ public abstract class BaseActivity<T extends ViewInterface> extends AppCompatAct
     private final ContainerListenerController mController = new ContainerListenerController();
     private ProgressDialog loadingDialog;
 
-    protected void initWindow() {
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setStatusBarTranslucent();
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,7 +60,7 @@ public abstract class BaseActivity<T extends ViewInterface> extends AppCompatAct
         if (CacheMap.getBoolean(BaseKeyConst.IS_DEBUG)) {
             new LifecycleLogUtil(this);
         }
-        mRootLayout = new RootLayout(getContext());
+        mRootLayout = createRootLayout();
         View layoutView = getLayoutView();
         if (layoutView == null) {
             mRootLayout.setContentView(getLayoutInflater(), getLayoutId());
@@ -72,22 +68,14 @@ public abstract class BaseActivity<T extends ViewInterface> extends AppCompatAct
             mRootLayout.setContentView(layoutView);
         }
         setContentView(mRootLayout.getLayout());
-        try {
-            Class<T> cls = PublicUtil.getViewClass(getClass());
-            if (cls != null) {
-                Class[] pType = new Class[]{ViewContainerInterface.class};
-                Constructor<T> constructor = cls.getConstructor(pType);
-                mView = constructor.newInstance(this);
-                mController.addLifecycleListener(mView);
-                mController.addResultCallBackListener(mView);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e.toString());
-        }
+        mView=createContent();
+        mController.addLifecycleListener(mView);
+        mController.addResultCallBackListener(mView);
         mController.onPreCreate(savedInstanceState);
         initView(savedInstanceState);
         mController.afterCreate(savedInstanceState);
     }
+
 
     @Override
     public void onStart() {
@@ -275,6 +263,29 @@ public abstract class BaseActivity<T extends ViewInterface> extends AppCompatAct
         if (!hideLoading()) {
             super.onBackPressed();
         }
+    }
+
+    protected void initWindow() {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setStatusBarTranslucent();
+    }
+
+    protected RootLayoutInterface createRootLayout() {
+        return new RootLayout(getContext());
+    }
+
+    protected T createContent() {
+        Class<T> cls = PublicUtil.getViewClass(getClass());
+        if (cls != null) {
+            try {
+                Class[] pType = new Class[]{ViewContainerInterface.class};
+                Constructor<T> constructor = cls.getConstructor(pType);
+                return constructor.newInstance(this);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     protected ProgressDialog getProgressDialog() {

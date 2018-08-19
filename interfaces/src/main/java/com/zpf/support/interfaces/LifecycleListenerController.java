@@ -11,8 +11,16 @@ public interface LifecycleListenerController {
     @LifecycleState
     int getState();
 
+    //已创建到销毁之间的状态
+    boolean isLiving();
+
+    //可交互的状态
+    boolean isActive();
+
     //绑定生命周期的弹窗
     void show(SafeWindowInterface window);
+
+    boolean dismiss(SafeWindowInterface window);
 
     //绑定生命周期的网络请求控制器
     CallBackManagerInterface getCallBackManager();
