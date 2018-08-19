@@ -2,6 +2,7 @@ package com.zpf.support.util;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,10 +11,32 @@ import java.util.List;
 
 public class Attorney {
     private List<Activity> customerList = new LinkedList<>();
-    private HashMap<String,Record> archives=new HashMap<>();
+    private HashMap<String, Record> archives = new HashMap<>();
 //    private HashMap<String,Record> archives=new HashMap<>();
 
-    public void join(Activity activity, boolean isNew) {
+    public void join(Activity activity, boolean isNew,HeritageReceiver  heritageReceiver) {
+        if (activity != null) {
+            Record record = archives.get(activity.getClass().getName());
+            if (record == null) {
+                customerList.add(activity);
+            } else {
+                if (record.aList.size()>0) {
+                    for(Heritage heritage:record.aList){
+                        if(TextUtils.equals(heritage.successor,activity.getClass().getName())){
+                            if(isNew==heritage.canBeNew){
+                                if (heritage.data==null) {
+                                    heritage.data=new Intent();
+                                }
+                                heritage.data.putExtra("from",heritage.from);
+                                activity.on(heritage.resultCode,heritage.data);
+                            }
+                        }
+
+                    }
+                }
+            }
+
+        }
         //检查
         customerList.add(activity);
     }
@@ -67,5 +90,9 @@ public class Attorney {
         int effective;
         List<Heritage> aList = new ArrayList<>();
         List<Testament> bList = new ArrayList<>();
+    }
+
+    interface HeritageReceiver{
+        void onReceive(int cipher ,String from,Intent data);
     }
 }
