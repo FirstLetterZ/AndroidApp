@@ -310,7 +310,6 @@ public class PermissionUtil {
             return;
         }
         checkPermission(viewContainer, new OnPermissionResult() {
-
             @Override
             public void onSuccess() {
                 String result;
@@ -320,7 +319,7 @@ public class PermissionUtil {
                     result = Build.SERIAL;
                 }
                 if (TextUtils.isEmpty(result) || "unknown".equalsIgnoreCase(result)) {
-                    if (viewContainer != null && viewContainer.getContext() != null) {
+                    if (viewContainer.getContext() != null) {
                         TelephonyManager telephonyManager = (TelephonyManager) viewContainer.getContext()
                                 .getSystemService(Context.TELEPHONY_SERVICE);
                         if (telephonyManager != null) {

@@ -1,23 +1,26 @@
 package com.zpf.support.defview;
 
+import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.BaseKeyConst;
 import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.LifecycleInterface;
 import com.zpf.support.interfaces.OnDestroyListener;
+import com.zpf.support.interfaces.OnLackOfPermissions;
 import com.zpf.support.interfaces.ResultCallBackListener;
 import com.zpf.support.interfaces.RootLayoutInterface;
 import com.zpf.support.interfaces.SafeWindowInterface;
+import com.zpf.support.interfaces.TitleBarInterface;
 import com.zpf.support.interfaces.ViewContainerInterface;
 import com.zpf.support.interfaces.constant.LifecycleState;
 import com.zpf.support.util.CacheMap;
@@ -29,19 +32,20 @@ import com.zpf.support.util.PermissionUtil;
  * 将普通的activity或fragment打造成ViewContainerInterface
  * Created by ZPF on 2018/6/28.
  */
-public class ProxySupportViewContainer extends Fragment implements ViewContainerInterface {
-    private FragmentActivity activity;
+public class ProxyContainer extends Fragment implements ViewContainerInterface {
+    private Activity activity;
     private Fragment fragment;
     private ProgressDialog loadingDialog;
     private boolean isVisible;
     private final ContainerListenerController mController = new ContainerListenerController();
 
-    public void onConditionsCompleted(FragmentActivity activity) {
+    public void onConditionsCompleted(Activity activity) {
         this.activity = activity;
         if (CacheMap.getBoolean(BaseKeyConst.IS_DEBUG) && activity != null) {
             LifecycleLogUtil lifecycleLogUtil = new LifecycleLogUtil(this);
             lifecycleLogUtil.setName(activity.getClass().getName());
         }
+
     }
 
     public void onConditionsCompleted(Fragment fragment) {
@@ -59,11 +63,21 @@ public class ProxySupportViewContainer extends Fragment implements ViewContainer
     }
 
     @Override
+    public boolean isLiving() {
+        return mController.isLiving();
+    }
+
+    @Override
+    public boolean isActive() {
+        return mController.isActive();
+    }
+
+    @Override
     public Context getContext() {
         if (activity != null) {
             return activity;
         } else if (fragment != null) {
-            return fragment.getContext();
+            return fragment.getActivity();
         } else {
             return null;
         }
@@ -81,7 +95,23 @@ public class ProxySupportViewContainer extends Fragment implements ViewContainer
     }
 
     @Override
+    public Activity getCurrentActivity() {
+        if (activity != null) {
+            return activity;
+        } else if (fragment != null) {
+            return fragment.getActivity();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public RootLayoutInterface getRootLayout() {
+        return null;
+    }
+
+    @Override
+    public TitleBarInterface getTitleBar() {
         return null;
     }
 
@@ -91,6 +121,32 @@ public class ProxySupportViewContainer extends Fragment implements ViewContainer
             activity.startActivity(intent);
         } else if (fragment != null) {
             fragment.startActivity(intent);
+        }
+    }
+    @Override
+    public void startActivity(Intent intent, @Nullable Bundle options) {
+        if (activity != null) {
+            activity.startActivity(intent, options);
+        } else if (fragment != null) {
+            fragment.startActivity(intent, options);
+        }
+    }
+
+    @Override
+    public void startActivities(Intent[] intents) {
+        if (activity != null) {
+            activity.startActivities(intents);
+        } else if (fragment != null && fragment.getActivity() != null) {
+            fragment.getActivity().startActivities(intents);
+        }
+    }
+
+    @Override
+    public void startActivities(Intent[] intents, @Nullable Bundle options) {
+        if (activity != null) {
+            activity.startActivities(intents, options);
+        } else if (fragment != null && fragment.getActivity() != null) {
+            fragment.getActivity().startActivities(intents, options);
         }
     }
 
@@ -104,8 +160,30 @@ public class ProxySupportViewContainer extends Fragment implements ViewContainer
     }
 
     @Override
+    public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
+        if (activity != null) {
+            activity.startActivityForResult(intent, requestCode, options);
+        } else if (fragment != null) {
+            fragment.startActivityForResult(intent, requestCode, options);
+        }
+    }
+    @Override
     public void show(SafeWindowInterface window) {
         mController.show(window);
+    }
+
+    @Override
+    public boolean dismiss() {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            try {
+                loadingDialog.dismiss();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return true;
+        } else {
+            return mController.dismiss();
+        }
     }
 
     @Override
@@ -165,29 +243,36 @@ public class ProxySupportViewContainer extends Fragment implements ViewContainer
 
     @Override
     public boolean hideLoading() {
-        boolean result;
         if (loadingDialog != null && loadingDialog.isShowing()) {
-            result = true;
             loadingDialog.dismiss();
+            return true;
         } else {
-            result = mController.dismiss();
+            return mController.dismiss();
         }
-        return result;
+    }
+
+    @Override
+    public ProgressDialog getProgressDialog() {
+        if (loadingDialog == null && getState() < LifecycleState.AFTER_DESTROY && getActivity() != null) {
+            if (activity != null) {
+                loadingDialog = new ProgressDialog(activity);
+            } else if (fragment != null && fragment.getActivity() != null) {
+                loadingDialog = new ProgressDialog(fragment.getActivity());
+            }
+        }
+        return loadingDialog;
     }
 
     @Override
     public void showLoading() {
-        if (loadingDialog == null) {
-            loadingDialog = createProgressDialog();
-        }
-        show(loadingDialog);
+        showLoading(AppConst.PROGRESS_WAITTING);
     }
 
     @Override
     public void showLoading(String message) {
         if (getState() < LifecycleState.AFTER_DESTROY) {
             if (loadingDialog != null) {
-                loadingDialog = createProgressDialog();
+                loadingDialog = getProgressDialog();
             }
             if (loadingDialog != null && !loadingDialog.isShowing()) {
                 loadingDialog.setText(message);
@@ -288,20 +373,36 @@ public class ProxySupportViewContainer extends Fragment implements ViewContainer
         checkVisibleChange();
     }
 
-    protected ProgressDialog createProgressDialog() {
-        if (activity != null) {
-            return new ProgressDialog(activity);
-        } else if (fragment != null && fragment.getContext() != null) {
-            return new ProgressDialog(fragment.getContext());
-        }
-        return null;
-    }
-
     private void checkVisibleChange() {
         boolean newVisible = isVisible();
         if (newVisible != this.isVisible) {
             this.isVisible = newVisible;
             mController.onVisibleChanged(newVisible);
         }
+    }
+
+    @Override
+    public boolean checkPermissions(String... permissions) {
+        return false;
+    }
+
+    @Override
+    public boolean checkPermissions(int requestCode, String... permissions) {
+        return false;
+    }
+
+    @Override
+    public void checkPermissions(Runnable runnable, OnLackOfPermissions onLackOfPermissions, String... permissions) {
+
+    }
+
+    @Override
+    public void checkPermissions(Runnable runnable, OnLackOfPermissions onLackOfPermissions, int requestCode, String... permissions) {
+
+    }
+
+    @Override
+    public Object invoke(String name, Object params) {
+        return null;
     }
 }

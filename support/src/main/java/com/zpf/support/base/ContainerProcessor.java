@@ -1,6 +1,5 @@
 package com.zpf.support.base;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -9,28 +8,34 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
+import com.zpf.support.constant.BaseKeyConst;
 import com.zpf.support.generalUtil.SafeClickListener;
+import com.zpf.support.interfaces.OnLackOfPermissions;
 import com.zpf.support.interfaces.TitleBarInterface;
 import com.zpf.support.interfaces.ViewContainerInterface;
-import com.zpf.support.interfaces.ViewInterface;
-import com.zpf.support.interfaces.constant.LifecycleState;
+import com.zpf.support.interfaces.ContainerProcessorInterface;
+import com.zpf.support.util.CacheMap;
+import com.zpf.support.util.LifecycleLogUtil;
 
 /**
  * Created by ZPF on 2018/6/14.
  */
-public abstract class BaseView implements ViewInterface {
+public abstract class ContainerProcessor implements ContainerProcessorInterface {
     protected ViewContainerInterface mContainer;
     protected TitleBarInterface mTitleBar;
     private SafeClickListener safeClickListener = new SafeClickListener() {
         @Override
         public void click(View v) {
-            BaseView.this.onClick(v);
+            ContainerProcessor.this.onClick(v);
         }
     };
 
-    public BaseView(ViewContainerInterface container) {
+    public ContainerProcessor(ViewContainerInterface container) {
         this.mContainer = container;
         this.mTitleBar = container.getRootLayout().getTitleBar();
+        if (CacheMap.getBoolean(BaseKeyConst.IS_DEBUG)) {
+            new LifecycleLogUtil(container);
+        }
     }
 
     @Override
@@ -60,8 +65,7 @@ public abstract class BaseView implements ViewInterface {
 
     @Override
     public void onDestroy() {
-        this.mContainer = null;
-        this.mTitleBar = null;
+
     }
 
     @Override
@@ -94,26 +98,22 @@ public abstract class BaseView implements ViewInterface {
 
     }
 
-    public boolean isAfterState(@LifecycleState int state) {
-        int lifeState;
-        if (mContainer == null) {
-            lifeState = LifecycleState.AFTER_DESTROY;
-        } else {
-            lifeState = mContainer.getState();
-        }
-        return lifeState >= state;
+    @Override
+    public void runWithPermission(Runnable runnable, String... permissions) {
+        mContainer.checkPermissions(runnable, null, permissions);
     }
 
-    public Context getContext() {
-        if(mContainer!=null){
-            return mContainer.getContext();
-        }else {
-            return null;
-        }
+    @Override
+    public void runWithPermission(Runnable runnable, OnLackOfPermissions onLackOfPermissions, String... permissions) {
+        mContainer.checkPermissions(runnable, onLackOfPermissions, permissions);
     }
 
     public <T extends View> T $(int viewId) {
-        return mContainer.getRootLayout().getLayout().findViewById(viewId);
+        if (mContainer != null) {
+            return mContainer.getRootLayout().getLayout().findViewById(viewId);
+        } else {
+            return null;
+        }
     }
 
     public void setText(int viewId, CharSequence content) {

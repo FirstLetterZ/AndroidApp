@@ -3,8 +3,8 @@ package com.zpf.support.util;
 import android.app.Activity;
 import android.support.v4.app.FragmentActivity;
 
-import com.zpf.support.defview.ProxySupportViewContainer;
-import com.zpf.support.defview.ProxyViewContainer;
+import com.zpf.support.defview.ProxyCompatContainer;
+import com.zpf.support.defview.ProxyContainer;
 import com.zpf.support.interfaces.ViewContainerInterface;
 
 /**
@@ -16,34 +16,34 @@ public class ContainerProxyManager {
 
     public static ViewContainerInterface create(Activity activity) {
         if (activity instanceof FragmentActivity) {
-            ProxySupportViewContainer proxyViewContainer;
+            ProxyCompatContainer proxyViewContainer;
             android.support.v4.app.FragmentManager manager = ((FragmentActivity) activity).getSupportFragmentManager();
             android.support.v4.app.FragmentTransaction transaction = manager.beginTransaction();
             android.support.v4.app.Fragment fragment = manager.findFragmentByTag(TAG + activity.getClass().getName());
-            if (fragment != null && fragment instanceof ProxySupportViewContainer) {
-                proxyViewContainer = (ProxySupportViewContainer) fragment;
+            if (fragment != null && fragment instanceof ProxyCompatContainer) {
+                proxyViewContainer = (ProxyCompatContainer) fragment;
                 if (proxyViewContainer.isHidden()) {
                     transaction.show(fragment);
                 }
             } else {
-                proxyViewContainer = new ProxySupportViewContainer();
+                proxyViewContainer = new ProxyCompatContainer();
                 proxyViewContainer.onConditionsCompleted(((FragmentActivity) activity));
                 transaction.add(proxyViewContainer, TAG + activity.getClass().getName());
             }
             transaction.commitAllowingStateLoss();
             return proxyViewContainer;
         } else {
-            ProxyViewContainer proxyViewContainer;
+            ProxyContainer proxyViewContainer;
             android.app.FragmentManager manager = activity.getFragmentManager();
             android.app.FragmentTransaction transaction = manager.beginTransaction();
             android.app.Fragment fragment = manager.findFragmentByTag(TAG + activity.getClass().getName());
-            if (fragment != null && fragment instanceof ProxyViewContainer) {
-                proxyViewContainer = (ProxyViewContainer) fragment;
+            if (fragment != null && fragment instanceof ProxyContainer) {
+                proxyViewContainer = (ProxyContainer) fragment;
                 if (proxyViewContainer.isHidden()) {
                     transaction.show(fragment);
                 }
             } else {
-                proxyViewContainer = new ProxyViewContainer();
+                proxyViewContainer = new ProxyContainer();
                 proxyViewContainer.onConditionsCompleted(activity);
                 transaction.add(proxyViewContainer, TAG + activity.getClass().getName());
             }
@@ -53,17 +53,17 @@ public class ContainerProxyManager {
     }
 
     public static ViewContainerInterface create(android.app.Fragment fragment) {
-        ProxyViewContainer proxyViewContainer;
+        ProxyContainer proxyViewContainer;
         android.app.FragmentManager manager = fragment.getChildFragmentManager();
         android.app.FragmentTransaction transaction = manager.beginTransaction();
         android.app.Fragment childFragment = manager.findFragmentByTag(TAG + fragment.getClass().getName());
-        if (childFragment != null && childFragment instanceof ProxyViewContainer) {
-            proxyViewContainer = (ProxyViewContainer) childFragment;
+        if (childFragment != null && childFragment instanceof ProxyContainer) {
+            proxyViewContainer = (ProxyContainer) childFragment;
             if (proxyViewContainer.isHidden()) {
                 transaction.show(childFragment);
             }
         } else {
-            proxyViewContainer = new ProxyViewContainer();
+            proxyViewContainer = new ProxyContainer();
             proxyViewContainer.onConditionsCompleted(fragment);
             transaction.add(proxyViewContainer, TAG + fragment.getClass().getName());
         }
@@ -72,17 +72,17 @@ public class ContainerProxyManager {
     }
 
     public static ViewContainerInterface create(android.support.v4.app.Fragment fragment) {
-        ProxySupportViewContainer proxyViewContainer;
+        ProxyCompatContainer proxyViewContainer;
         android.support.v4.app.FragmentManager manager = fragment.getChildFragmentManager();
         android.support.v4.app.FragmentTransaction transaction = manager.beginTransaction();
         android.support.v4.app.Fragment childFragment = manager.findFragmentByTag(TAG + fragment.getClass().getName());
-        if (childFragment != null && childFragment instanceof ProxySupportViewContainer) {
-            proxyViewContainer = (ProxySupportViewContainer) childFragment;
+        if (childFragment != null && childFragment instanceof ProxyCompatContainer) {
+            proxyViewContainer = (ProxyCompatContainer) childFragment;
             if (proxyViewContainer.isHidden()) {
                 transaction.show(childFragment);
             }
         } else {
-            proxyViewContainer = new ProxySupportViewContainer();
+            proxyViewContainer = new ProxyCompatContainer();
             proxyViewContainer.onConditionsCompleted(fragment);
             transaction.add(proxyViewContainer, TAG + fragment.getClass().getName());
         }

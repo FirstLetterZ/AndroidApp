@@ -1,33 +1,25 @@
 package com.zpf.support.interfaces;
 
-import android.content.Context;
-import android.content.Intent;
 
 /**
  * 替代activity与fragment
  * Created by ZPF on 2018/3/22.
  */
-public interface ViewContainerInterface extends LifecycleListenerController {
-
-    //获取上下文
-    Context getContext();
-
-    Intent getIntent();
+public interface ViewContainerInterface extends LifecycleListenerController, ActivityController
+        , PermissionCheckerInterface {
 
     RootLayoutInterface getRootLayout();
 
-    void startActivity(Intent intent);
-
-    void startActivityForResult(Intent intent, int requestCode);
-
-    void finishWithResult(int resultCode, Intent data);
-
-    void finish();
+    TitleBarInterface getTitleBar();
 
     void showLoading();
 
     void showLoading(String msg);
 
     boolean hideLoading();
+
+    SafeWindowInterface getProgressDialog();
+
+    public Object invoke(String name, Object params);
 
 }

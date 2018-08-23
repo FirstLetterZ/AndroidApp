@@ -1,19 +1,29 @@
 package com.zpf.support.base;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.BaseKeyConst;
 import com.zpf.support.defview.ProgressDialog;
 import com.zpf.support.defview.RootLayout;
+import com.zpf.support.generalUtil.MainHandler;
+import com.zpf.support.interfaces.OnLackOfPermissions;
+import com.zpf.support.interfaces.TitleBarInterface;
 import com.zpf.support.util.CacheMap;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.support.util.LifecycleLogUtil;
@@ -26,42 +36,55 @@ import com.zpf.support.interfaces.ResultCallBackListener;
 import com.zpf.support.interfaces.RootLayoutInterface;
 import com.zpf.support.interfaces.SafeWindowInterface;
 import com.zpf.support.interfaces.ViewContainerInterface;
-import com.zpf.support.interfaces.ViewInterface;
+import com.zpf.support.interfaces.ContainerProcessorInterface;
 import com.zpf.support.interfaces.constant.LifecycleState;
+import com.zpf.support.util.SpUtil;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Created by ZPF on 2018/6/14.
  */
-public abstract class BaseFragment<T extends ViewInterface> extends Fragment implements ViewContainerInterface {
+public abstract class CompatActivityContainer<T extends ContainerProcessorInterface> extends AppCompatActivity implements ViewContainerInterface {
     protected T mView;
     private RootLayoutInterface mRootLayout;
-    private boolean isVisible;
-    private ProgressDialog loadingDialog;
     private final ContainerListenerController mController = new ContainerListenerController();
+    private ProgressDialog loadingDialog;
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //防止初次安装从后台返回的重启问题
+        Intent intent = getIntent();
+        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
+            String action = intent.getAction();
+            if (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && Intent.ACTION_MAIN.equals(action)) {
+                finish();
+                return;
+            }
+        }
+        initWindow();
+        if (CacheMap.getBoolean(BaseKeyConst.IS_DEBUG)) {
+            new LifecycleLogUtil(this);
+        }
         mRootLayout = createRootLayout();
-        mRootLayout.getStatusBar().setVisibility(View.GONE);
-        mRootLayout.getTitleBar().getLayout().setVisibility(View.GONE);
         View layoutView = getLayoutView();
         if (layoutView == null) {
-            mRootLayout.setContentView(inflater, getLayoutId());
+            mRootLayout.setContentView(getLayoutInflater(), getLayoutId());
         } else {
             mRootLayout.setContentView(layoutView);
         }
-        mView = createContent();
-        mController.addLifecycleListener(mView);
-        mController.addResultCallBackListener(mView);
+        setContentView(mRootLayout.getLayout());
+        mView = createProcessor();
+        if (mView != null) {
+            mController.addLifecycleListener(mView);
+            mController.addResultCallBackListener(mView);
+        }
         mController.onPreCreate(savedInstanceState);
         initView(savedInstanceState);
         mController.afterCreate(savedInstanceState);
-        return mRootLayout.getLayout();
     }
+
 
     @Override
     public void onStart() {
@@ -73,7 +96,7 @@ public abstract class BaseFragment<T extends ViewInterface> extends Fragment imp
     public void onResume() {
         super.onResume();
         mController.onResume();
-        checkVisibleChange();
+        mController.onVisibleChanged(true);
     }
 
     @Override
@@ -86,40 +109,37 @@ public abstract class BaseFragment<T extends ViewInterface> extends Fragment imp
     public void onStop() {
         super.onStop();
         mController.onStop();
-        checkVisibleChange();
-    }
-
-
-    @Override
-    public void onDestroyView() {
-        if (mController.getState() < LifecycleState.AFTER_DESTROY) {
-            mController.onDestroy();
-            loadingDialog = null;
-        }
-        super.onDestroyView();
+        mController.onVisibleChanged(false);
     }
 
     @Override
     public void onDestroy() {
-        if (mController.getState() < LifecycleState.AFTER_DESTROY) {
-            mController.onDestroy();
-            loadingDialog = null;
-        }
+        mController.onDestroy();
         super.onDestroy();
+        loadingDialog = null;
+        mView = null;
     }
 
     @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        mController.onSaveInstanceState(outState);
+    public void onSaveInstanceState(Bundle outState) {
+        if (outState != null) {
+            mController.onSaveInstanceState(outState);
+        }
         super.onSaveInstanceState(outState);
     }
 
     @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
+    public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState != null) {
             mController.onRestoreInstanceState(savedInstanceState);
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        mController.onNewIntent(intent);
     }
 
     @Override
@@ -136,40 +156,48 @@ public abstract class BaseFragment<T extends ViewInterface> extends Fragment imp
     }
 
     @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        checkVisibleChange();
-    }
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        checkVisibleChange();
-    }
-
-    @Override
     @LifecycleState
     public int getState() {
         return mController.getState();
     }
 
     @Override
+    public boolean isLiving() {
+        return mController.isLiving();
+    }
+
+    @Override
+    public boolean isActive() {
+        return mController.isActive();
+    }
+
+    @Override
     public Context getContext() {
-        return super.getContext();
+        return this;
     }
 
     @Override
     public Intent getIntent() {
-        if (getActivity() != null) {
-            return getActivity().getIntent();
-        } else {
-            return null;
-        }
+        return super.getIntent();
+    }
+
+    @Override
+    public Activity getCurrentActivity() {
+        return this;
     }
 
     @Override
     public RootLayoutInterface getRootLayout() {
         return mRootLayout;
+    }
+
+    @Override
+    public TitleBarInterface getTitleBar() {
+        if (mRootLayout != null) {
+            return mRootLayout.getTitleBar();
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -183,8 +211,31 @@ public abstract class BaseFragment<T extends ViewInterface> extends Fragment imp
     }
 
     @Override
-    public void show(SafeWindowInterface window) {
-        mController.show(window);
+    public void show(final SafeWindowInterface window) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            mController.show(window);
+        } else {
+            MainHandler.get().post(new Runnable() {
+                @Override
+                public void run() {
+                    mController.show(window);
+                }
+            });
+        }
+    }
+
+    @Override
+    public boolean dismiss() {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            try {
+                loadingDialog.dismiss();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return true;
+        } else {
+            return mController.dismiss();
+        }
     }
 
     @Override
@@ -194,17 +245,13 @@ public abstract class BaseFragment<T extends ViewInterface> extends Fragment imp
 
     @Override
     public void finishWithResult(int resultCode, Intent data) {
-        if (getActivity() != null) {
-            getActivity().setResult(resultCode, data);
-            getActivity().finish();
-        }
+        setResult(resultCode, data);
+        super.finish();
     }
 
     @Override
     public void finish() {
-        if (getActivity() != null) {
-            getActivity().finish();
-        }
+        super.finish();
     }
 
     @Override
@@ -239,14 +286,24 @@ public abstract class BaseFragment<T extends ViewInterface> extends Fragment imp
 
     @Override
     public boolean hideLoading() {
-        boolean result;
         if (loadingDialog != null && loadingDialog.isShowing()) {
-            result = true;
-            loadingDialog.dismiss();
+            try {
+                loadingDialog.dismiss();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return true;
         } else {
-            result = mController.dismiss();
+            return mController.dismiss();
         }
-        return result;
+    }
+
+    @Override
+    public ProgressDialog getProgressDialog() {
+        if (loadingDialog == null && getState() < LifecycleState.AFTER_DESTROY) {
+            loadingDialog = new ProgressDialog(this);
+        }
+        return loadingDialog;
     }
 
     @Override
@@ -256,7 +313,7 @@ public abstract class BaseFragment<T extends ViewInterface> extends Fragment imp
 
     @Override
     public void showLoading(String message) {
-        if (getState() < LifecycleState.AFTER_DESTROY) {
+        if (isLiving()) {
             if (loadingDialog != null) {
                 loadingDialog = getProgressDialog();
             }
@@ -267,11 +324,52 @@ public abstract class BaseFragment<T extends ViewInterface> extends Fragment imp
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (!hideLoading()) {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean checkPermissions(String... permissions) {
+        return false;
+    }
+
+    @Override
+    public boolean checkPermissions(int requestCode, String... permissions) {
+        for (String per : permissions) {
+            if (ActivityCompat.checkSelfPermission(this, per) != PackageManager.PERMISSION_GRANTED) {
+            }
+        }
+    }
+
+    @Override
+    public void checkPermissions(Runnable runnable, OnLackOfPermissions onLackOfPermissions, String... permissions) {
+
+    }
+
+    @Override
+    public void checkPermissions(Runnable runnable, OnLackOfPermissions onLackOfPermissions, int requestCode, String... permissions) {
+
+    }
+
+    @Override
+    public Object invoke(String name, Object params) {
+        return null;
+    }
+
+
+    protected void initWindow() {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setStatusBarTranslucent();
+    }
+
     protected RootLayoutInterface createRootLayout() {
         return new RootLayout(getContext());
     }
 
-    protected T createContent() {
+    protected T createProcessor() {
         Class<T> cls = PublicUtil.getViewClass(getClass());
         if (cls != null) {
             try {
@@ -285,11 +383,17 @@ public abstract class BaseFragment<T extends ViewInterface> extends Fragment imp
         return null;
     }
 
-    protected ProgressDialog getProgressDialog() {
-        if (loadingDialog == null && getState() < LifecycleState.AFTER_DESTROY && getContext() != null) {
-            loadingDialog = new ProgressDialog(getContext());
+    protected void setStatusBarTranslucent() {
+        Window window = getWindow();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {//判断版本是5.0以上
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.TRANSPARENT);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {//判断版本是4.4以上
+            window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
-        return loadingDialog;
     }
 
     public View getLayoutView() {
@@ -299,12 +403,4 @@ public abstract class BaseFragment<T extends ViewInterface> extends Fragment imp
     public abstract int getLayoutId();
 
     public abstract void initView(@Nullable Bundle savedInstanceState);
-
-    private void checkVisibleChange() {
-        boolean newVisible = getUserVisibleHint() && isVisible();
-        if (newVisible != this.isVisible) {
-            this.isVisible = newVisible;
-            mController.onVisibleChanged(newVisible);
-        }
-    }
 }

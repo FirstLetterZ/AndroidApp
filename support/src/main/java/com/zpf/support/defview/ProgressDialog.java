@@ -15,7 +15,7 @@ import com.zpf.support.base.R;
  */
 public class ProgressDialog extends BaseDialog {
 
-    private TextView textView;
+    protected TextView textView;
 
     public ProgressDialog(@NonNull Context context) {
         this(context, R.style.customDialog);

@@ -154,6 +154,8 @@ public class CacheMap {
             if (!TextUtils.isEmpty(jsonString)) {
                 result = JsonUtil.fromJsonList(jsonString, cls);
                 get().cacheValue.put(key, result);
+            } else {
+                get().cacheValue.remove(key);
             }
         }
         return result;

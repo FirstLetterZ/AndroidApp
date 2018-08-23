@@ -121,6 +121,9 @@ public class ContainerListenerController implements LifecycleListenerController,
         for (OnDestroyListener listener : mDestroyListenerList) {
             listener.onDestroy();
         }
+        mLifecycleList.clear();
+        mDestroyListenerList.clear();
+        mCallBackList.clear();
     }
 
     @Override
@@ -130,8 +133,24 @@ public class ContainerListenerController implements LifecycleListenerController,
     }
 
     @Override
+    public boolean isLiving() {
+        return mStateListener.getState() >= LifecycleState.AFTER_CREATE
+                && mStateListener.getState() < LifecycleState.AFTER_DESTROY;
+    }
+
+    @Override
+    public boolean isActive() {
+        return mStateListener.getState() == LifecycleState.AFTER_RESUME;
+    }
+
+    @Override
     public void show(SafeWindowInterface window) {
         mDialogController.show(window);
+    }
+
+    @Override
+    public boolean dismiss() {
+        return mDialogController.dismiss();
     }
 
     @Override
@@ -173,9 +192,5 @@ public class ContainerListenerController implements LifecycleListenerController,
     @Override
     public void removeResultCallBackListener(ResultCallBackListener callBackListener) {
         mCallBackList.remove(callBackListener);
-    }
-
-    public boolean dismiss() {
-        return mDialogController.dismiss();
     }
 }

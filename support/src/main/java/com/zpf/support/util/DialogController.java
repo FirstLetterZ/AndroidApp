@@ -19,7 +19,7 @@ public class DialogController implements SafeWindowController {
             return;
         }
         safeWindow.bindController(this);
-        if (showingWindow == null) {
+        if (showingWindow == null || !showingWindow.isShowing()) {
             showingWindow = safeWindow;
             showingWindow.show();
         } else {
@@ -63,8 +63,12 @@ public class DialogController implements SafeWindowController {
 
     @Override
     public boolean dismiss() {
-        if (showingWindow != null) {
-            showingWindow.dismiss();
+        if (showingWindow != null && showingWindow.isShowing()) {
+            try {
+                showingWindow.dismiss();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return true;
         } else {
             return false;

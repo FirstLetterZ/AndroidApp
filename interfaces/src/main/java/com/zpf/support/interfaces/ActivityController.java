@@ -27,6 +27,6 @@ public interface ActivityController {
 
     Intent getIntent();
 
-    Activity getActivity();
+    Activity getCurrentActivity();
 
 }

@@ -19,7 +19,6 @@ public class LifecycleLogUtil implements LifecycleInterface {
             this.name = viewContainerInterface.getClass().getName();
             onLogUtilInit();
         }
-
     }
 
     public void setName(String name) {

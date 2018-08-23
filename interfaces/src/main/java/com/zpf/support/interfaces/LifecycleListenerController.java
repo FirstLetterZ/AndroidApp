@@ -18,9 +18,10 @@ public interface LifecycleListenerController {
     boolean isActive();
 
     //绑定生命周期的弹窗
-    void show(SafeWindowInterface window);
+    void show(final SafeWindowInterface window);
 
-    boolean dismiss(SafeWindowInterface window);
+    //关闭当前弹窗
+    boolean dismiss();
 
     //绑定生命周期的网络请求控制器
     CallBackManagerInterface getCallBackManager();
