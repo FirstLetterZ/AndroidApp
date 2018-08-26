@@ -9,8 +9,8 @@ public interface PermissionCheckerInterface {
 
     boolean checkPermissions(int requestCode, String... permissions);
 
-    void checkPermissions(Runnable runnable, OnLackOfPermissions onLackOfPermissions, String... permissions);
+    void checkPermissions(Runnable onPermission,Runnable onLock, String... permissions);
 
-    void checkPermissions(Runnable runnable, OnLackOfPermissions onLackOfPermissions, int requestCode, String... permissions);
+    void checkPermissions(Runnable onPermission, Runnable onLock, int requestCode, String... permissions);
 
 }

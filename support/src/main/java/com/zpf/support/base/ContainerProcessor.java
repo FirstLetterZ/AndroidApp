@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.zpf.support.constant.BaseKeyConst;
 import com.zpf.support.generalUtil.SafeClickListener;
-import com.zpf.support.interfaces.OnLackOfPermissions;
+import com.zpf.support.generalUtil.permission.OnLockPermissionRunnable;
 import com.zpf.support.interfaces.TitleBarInterface;
 import com.zpf.support.interfaces.ViewContainerInterface;
 import com.zpf.support.interfaces.ContainerProcessorInterface;
@@ -104,7 +104,11 @@ public abstract class ContainerProcessor implements ContainerProcessorInterface 
     }
 
     @Override
-    public void runWithPermission(Runnable runnable, OnLackOfPermissions onLackOfPermissions, String... permissions) {
+    public void runWithPermission(Runnable runnable, Runnable onLackOfPermissions, String... permissions) {
+        mContainer.checkPermissions(runnable, onLackOfPermissions, permissions);
+    }
+
+    public void runWithPermission(Runnable runnable, OnLockPermissionRunnable onLackOfPermissions, String... permissions) {
         mContainer.checkPermissions(runnable, onLackOfPermissions, permissions);
     }
 

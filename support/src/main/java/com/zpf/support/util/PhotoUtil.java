@@ -7,14 +7,22 @@ import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 
 import com.zpf.support.generalUtil.FileUtil;
+import com.zpf.support.generalUtil.permission.OnLockPermissionRunnable;
+import com.zpf.support.generalUtil.permission.PermissionInfo;
 import com.zpf.support.interfaces.ViewContainerInterface;
+
+import java.util.List;
+
+/**
+ * 拍照和从相册中选取
+ */
 public class PhotoUtil {
 
     public static boolean takePhoto(final ViewContainerInterface viewContainer, final String filePath, final int requestCode) {
         if (viewContainer != null) {
-            PermissionUtil.get().checkPermission(viewContainer, new PermissionUtil.OnPermissionResult() {
+            viewContainer.checkPermissions(new Runnable() {
                 @Override
-                public void onSuccess() {
+                public void run() {
                     try {
                         Intent capIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         capIntent.putExtra(MediaStore.EXTRA_OUTPUT, FileUtil.getUri(filePath));
@@ -22,6 +30,11 @@ public class PhotoUtil {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                }
+            }, new OnLockPermissionRunnable() {
+                @Override
+                public void onLock(List<PermissionInfo> list) {
+                    PermissionUtil.get().showPermissionRationaleDialog(viewContainer.getCurrentActivity(), list);
                 }
             }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA);
         }
@@ -52,9 +65,9 @@ public class PhotoUtil {
 
     public static boolean selectFromAlbum(final ViewContainerInterface viewContainer, final int requestCode) {
         if (viewContainer != null) {
-            PermissionUtil.get().checkPermission(viewContainer, new PermissionUtil.OnPermissionResult() {
+            viewContainer.checkPermissions(new Runnable() {
                 @Override
-                public void onSuccess() {
+                public void run() {
                     try {
                         Intent albumIntent = new Intent(Intent.ACTION_GET_CONTENT);
                         albumIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
@@ -64,6 +77,11 @@ public class PhotoUtil {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                }
+            }, new OnLockPermissionRunnable() {
+                @Override
+                public void onLock(List<PermissionInfo> list) {
+                    PermissionUtil.get().showPermissionRationaleDialog(viewContainer.getCurrentActivity(), list);
                 }
             }, Manifest.permission.READ_EXTERNAL_STORAGE);
         }

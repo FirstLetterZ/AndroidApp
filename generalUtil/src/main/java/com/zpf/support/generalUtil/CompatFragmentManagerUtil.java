@@ -1,15 +1,15 @@
 package com.zpf.support.generalUtil;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 
 import java.util.HashMap;
 
 /**
  * Created by ZPF on 2018/6/14.
  */
-public class FragmentManagerUtil {
+public class CompatFragmentManagerUtil {
 
     private FragmentManager mFragmentManager;
     private MyFragmentCreator mCreator;
@@ -18,8 +18,8 @@ public class FragmentManagerUtil {
     private int mCurrentIndex = 0;
     private HashMap<String, Fragment> fragmentCache = new HashMap<>();
 
-    public FragmentManagerUtil(FragmentManager mFragmentManager, int mContainerViewId,
-                               String[] tagArray, MyFragmentCreator mCreator) {
+    public CompatFragmentManagerUtil(FragmentManager mFragmentManager, int mContainerViewId,
+                                     String[] tagArray, MyFragmentCreator mCreator) {
         this.mFragmentManager = mFragmentManager;
         this.mCreator = mCreator;
         this.mTagArray = tagArray;

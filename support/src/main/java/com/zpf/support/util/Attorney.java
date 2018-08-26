@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * 未完成
+ */
 public class Attorney {
     private List<Activity> customerList = new LinkedList<>();
     private HashMap<String, Record> archives = new HashMap<>();

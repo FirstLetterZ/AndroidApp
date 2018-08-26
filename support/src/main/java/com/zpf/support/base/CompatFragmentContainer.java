@@ -14,11 +14,9 @@ import android.view.ViewGroup;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.defview.ProgressDialog;
 import com.zpf.support.defview.RootLayout;
-import com.zpf.support.interfaces.OnLackOfPermissions;
+import com.zpf.support.generalUtil.PublicUtil;
 import com.zpf.support.interfaces.TitleBarInterface;
 import com.zpf.support.util.ContainerListenerController;
-import com.zpf.support.util.PermissionUtil;
-import com.zpf.support.util.PublicUtil;
 import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.LifecycleInterface;
 import com.zpf.support.interfaces.OnDestroyListener;
@@ -136,7 +134,6 @@ public abstract class CompatFragmentContainer<T extends ContainerProcessorInterf
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        PermissionUtil.get().onRequestPermissionsResult(this, permissions, grantResults);
         mController.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
@@ -207,18 +204,30 @@ public abstract class CompatFragmentContainer<T extends ContainerProcessorInterf
     }
 
     @Override
-    public void startActivities(Intent[] intents) {
+    public void startActivity(Intent intent, @Nullable Bundle options) {
+        super.startActivity(intent, options);
+    }
 
+    @Override
+    public void startActivities(Intent[] intents) {
+        this.startActivities(intents, null);
     }
 
     @Override
     public void startActivities(Intent[] intents, @Nullable Bundle options) {
-
+        if (getActivity() != null) {
+            getActivity().startActivities(intents, options);
+        }
     }
 
     @Override
     public void startActivityForResult(Intent intent, int requestCode) {
         super.startActivityForResult(intent, requestCode);
+    }
+
+    @Override
+    public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
+        super.startActivityForResult(intent, requestCode, options);
     }
 
     @Override
@@ -325,24 +334,25 @@ public abstract class CompatFragmentContainer<T extends ContainerProcessorInterf
             }
         }
     }
+
     @Override
     public boolean checkPermissions(String... permissions) {
-        return false;
+        return mController.getSupportFragmentPermissionChecker().checkPermissions(this, permissions);
     }
 
     @Override
     public boolean checkPermissions(int requestCode, String... permissions) {
-        return false;
+        return mController.getSupportFragmentPermissionChecker().checkPermissions(this, requestCode, permissions);
     }
 
     @Override
-    public void checkPermissions(Runnable runnable, OnLackOfPermissions onLackOfPermissions, String... permissions) {
-
+    public void checkPermissions(Runnable onPermission,Runnable onLock, String... permissions) {
+        mController.getSupportFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, permissions);
     }
 
     @Override
-    public void checkPermissions(Runnable runnable, OnLackOfPermissions onLackOfPermissions, int requestCode, String... permissions) {
-
+    public void checkPermissions(Runnable onPermission,Runnable onLock,int requestCode, String... permissions) {
+        mController.getSupportFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
     }
 
     @Override

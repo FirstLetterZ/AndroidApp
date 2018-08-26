@@ -5,6 +5,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.zpf.support.generalUtil.permission.ActivityPermissionChecker;
+import com.zpf.support.generalUtil.permission.CompatFragmentPermissionChecker;
+import com.zpf.support.generalUtil.permission.FragmentPermissionChecker;
+import com.zpf.support.generalUtil.permission.PermissionChecker;
 import com.zpf.support.interfaces.LifecycleInterface;
 import com.zpf.support.interfaces.LifecycleListenerController;
 import com.zpf.support.interfaces.OnDestroyListener;
@@ -25,6 +29,7 @@ public class ContainerListenerController implements LifecycleListenerController,
     private final DialogController mDialogController = new DialogController();
     private final CallBackManager mCallBackManager = new CallBackManager();
     private final ViewStateListener mStateListener = new ViewStateListener();
+    private PermissionChecker mPermissionChecker;
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -35,6 +40,9 @@ public class ContainerListenerController implements LifecycleListenerController,
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (mPermissionChecker != null) {
+            mPermissionChecker.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
         for (ResultCallBackListener listener : mCallBackList) {
             listener.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
@@ -192,5 +200,41 @@ public class ContainerListenerController implements LifecycleListenerController,
     @Override
     public void removeResultCallBackListener(ResultCallBackListener callBackListener) {
         mCallBackList.remove(callBackListener);
+    }
+
+    public ActivityPermissionChecker getActivityPermissionChecker() {
+        if (mPermissionChecker == null) {
+            mPermissionChecker = new ActivityPermissionChecker();
+            addOnDestroyListener(mPermissionChecker);
+        } else if (!(mPermissionChecker instanceof ActivityPermissionChecker)) {
+            removeOnDestroyListener(mPermissionChecker);
+            mPermissionChecker = new ActivityPermissionChecker();
+            addOnDestroyListener(mPermissionChecker);
+        }
+        return (ActivityPermissionChecker) mPermissionChecker;
+    }
+
+    public FragmentPermissionChecker getFragmentPermissionChecker() {
+        if (mPermissionChecker == null) {
+            mPermissionChecker = new FragmentPermissionChecker();
+            addOnDestroyListener(mPermissionChecker);
+        } else if (!(mPermissionChecker instanceof FragmentPermissionChecker)) {
+            removeOnDestroyListener(mPermissionChecker);
+            mPermissionChecker.onDestroy();
+            addOnDestroyListener(mPermissionChecker);
+        }
+        return (FragmentPermissionChecker) mPermissionChecker;
+    }
+
+    public CompatFragmentPermissionChecker getSupportFragmentPermissionChecker() {
+        if (mPermissionChecker == null) {
+            mPermissionChecker = new CompatFragmentPermissionChecker();
+            addOnDestroyListener(mPermissionChecker);
+        } else if (!(mPermissionChecker instanceof CompatFragmentPermissionChecker)) {
+            removeOnDestroyListener(mPermissionChecker);
+            mPermissionChecker = new CompatFragmentPermissionChecker();
+            addOnDestroyListener(mPermissionChecker);
+        }
+        return (CompatFragmentPermissionChecker) mPermissionChecker;
     }
 }

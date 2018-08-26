@@ -6,6 +6,6 @@ package com.zpf.support.interfaces;
 public interface ContainerProcessorInterface extends LifecycleInterface, ResultCallBackListener {
     void runWithPermission(Runnable runnable, String... permissions);
 
-    void runWithPermission(Runnable runnable, OnLackOfPermissions onLack, String... permissions);
+    void runWithPermission(Runnable runnable, Runnable onLack, String... permissions);
 
 }

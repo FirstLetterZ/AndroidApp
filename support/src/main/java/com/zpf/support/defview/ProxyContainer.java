@@ -16,7 +16,6 @@ import com.zpf.support.constant.BaseKeyConst;
 import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.LifecycleInterface;
 import com.zpf.support.interfaces.OnDestroyListener;
-import com.zpf.support.interfaces.OnLackOfPermissions;
 import com.zpf.support.interfaces.ResultCallBackListener;
 import com.zpf.support.interfaces.RootLayoutInterface;
 import com.zpf.support.interfaces.SafeWindowInterface;
@@ -26,7 +25,6 @@ import com.zpf.support.interfaces.constant.LifecycleState;
 import com.zpf.support.util.CacheMap;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.support.util.LifecycleLogUtil;
-import com.zpf.support.util.PermissionUtil;
 
 /**
  * 将普通的activity或fragment打造成ViewContainerInterface
@@ -45,7 +43,6 @@ public class ProxyContainer extends Fragment implements ViewContainerInterface {
             LifecycleLogUtil lifecycleLogUtil = new LifecycleLogUtil(this);
             lifecycleLogUtil.setName(activity.getClass().getName());
         }
-
     }
 
     public void onConditionsCompleted(Fragment fragment) {
@@ -357,7 +354,6 @@ public class ProxyContainer extends Fragment implements ViewContainerInterface {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        PermissionUtil.get().onRequestPermissionsResult(this, permissions, grantResults);
         mController.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
@@ -383,22 +379,22 @@ public class ProxyContainer extends Fragment implements ViewContainerInterface {
 
     @Override
     public boolean checkPermissions(String... permissions) {
-        return false;
+        return mController.getFragmentPermissionChecker().checkPermissions(this, permissions);
     }
 
     @Override
     public boolean checkPermissions(int requestCode, String... permissions) {
-        return false;
+        return mController.getFragmentPermissionChecker().checkPermissions(this, requestCode, permissions);
     }
 
     @Override
-    public void checkPermissions(Runnable runnable, OnLackOfPermissions onLackOfPermissions, String... permissions) {
-
+    public void checkPermissions(Runnable onPermission,Runnable onLock, String... permissions) {
+        mController.getFragmentPermissionChecker().checkPermissions(this, onPermission, onLock,permissions);
     }
 
     @Override
-    public void checkPermissions(Runnable runnable, OnLackOfPermissions onLackOfPermissions, int requestCode, String... permissions) {
-
+    public void checkPermissions(Runnable onPermission,Runnable onLock, int requestCode, String... permissions) {
+        mController.getFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
     }
 
     @Override

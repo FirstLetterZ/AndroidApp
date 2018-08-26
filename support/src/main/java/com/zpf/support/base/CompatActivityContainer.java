@@ -1,17 +1,16 @@
 package com.zpf.support.base;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
@@ -22,13 +21,11 @@ import com.zpf.support.constant.BaseKeyConst;
 import com.zpf.support.defview.ProgressDialog;
 import com.zpf.support.defview.RootLayout;
 import com.zpf.support.generalUtil.MainHandler;
-import com.zpf.support.interfaces.OnLackOfPermissions;
+import com.zpf.support.generalUtil.PublicUtil;
 import com.zpf.support.interfaces.TitleBarInterface;
 import com.zpf.support.util.CacheMap;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.support.util.LifecycleLogUtil;
-import com.zpf.support.util.PermissionUtil;
-import com.zpf.support.util.PublicUtil;
 import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.LifecycleInterface;
 import com.zpf.support.interfaces.OnDestroyListener;
@@ -38,7 +35,6 @@ import com.zpf.support.interfaces.SafeWindowInterface;
 import com.zpf.support.interfaces.ViewContainerInterface;
 import com.zpf.support.interfaces.ContainerProcessorInterface;
 import com.zpf.support.interfaces.constant.LifecycleState;
-import com.zpf.support.util.SpUtil;
 
 import java.lang.reflect.Constructor;
 
@@ -151,7 +147,6 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        PermissionUtil.get().onRequestPermissionsResult(this, permissions, grantResults);
         mController.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
@@ -206,8 +201,29 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
     }
 
     @Override
+    public void startActivity(Intent intent, @Nullable Bundle options) {
+        super.startActivity(intent, options);
+    }
+
+    @Override
+    public void startActivities(Intent[] intents) {
+        super.startActivities(intents);
+    }
+
+    @Override
+    public void startActivities(Intent[] intents, @Nullable Bundle options) {
+        super.startActivities(intents, options);
+    }
+
+    @Override
     public void startActivityForResult(Intent intent, int requestCode) {
         super.startActivityForResult(intent, requestCode);
+    }
+
+    @SuppressLint("RestrictedApi")
+    @Override
+    public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
+        super.startActivityForResult(intent, requestCode, options);
     }
 
     @Override
@@ -333,25 +349,22 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
 
     @Override
     public boolean checkPermissions(String... permissions) {
-        return false;
+        return mController.getActivityPermissionChecker().checkPermissions(this, permissions);
     }
 
     @Override
     public boolean checkPermissions(int requestCode, String... permissions) {
-        for (String per : permissions) {
-            if (ActivityCompat.checkSelfPermission(this, per) != PackageManager.PERMISSION_GRANTED) {
-            }
-        }
+        return mController.getActivityPermissionChecker().checkPermissions(this, requestCode, permissions);
     }
 
     @Override
-    public void checkPermissions(Runnable runnable, OnLackOfPermissions onLackOfPermissions, String... permissions) {
-
+    public void checkPermissions(Runnable onPermission,Runnable onLock, String... permissions) {
+        mController.getActivityPermissionChecker().checkPermissions(this, onPermission, onLock, permissions);
     }
 
     @Override
-    public void checkPermissions(Runnable runnable, OnLackOfPermissions onLackOfPermissions, int requestCode, String... permissions) {
-
+    public void checkPermissions(Runnable onPermission,Runnable onLock, int requestCode, String... permissions) {
+        mController.getActivityPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
     }
 
     @Override

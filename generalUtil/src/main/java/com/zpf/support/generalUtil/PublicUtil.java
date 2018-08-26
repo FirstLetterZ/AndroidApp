@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 
 /**
  * Created by ZPF on 2018/7/26.
@@ -70,5 +71,12 @@ public class PublicUtil {
             }
         }
         return name;
+    }
+
+    public static String getMoneyValue(BigDecimal bigDecimal, int scale) {
+        if (bigDecimal == null) {
+            return "";
+        }
+        return bigDecimal.setScale(scale, BigDecimal.ROUND_HALF_UP).toPlainString();
     }
 }

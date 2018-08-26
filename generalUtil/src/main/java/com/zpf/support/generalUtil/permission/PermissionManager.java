@@ -1,4 +1,4 @@
-package com.zpf.support.generalUtil;
+package com.zpf.support.generalUtil.permission;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,10 +12,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class JumpPermissionManagement {
+public class PermissionManager {
     private String APPLICATION_ID;
 
-    public void goToSetting(Context context) {
+    public void jumpToPermissionSetting(Context context) {
         Intent intent = null;
         APPLICATION_ID = context.getApplicationInfo().packageName;
         if (!TextUtils.isEmpty(Build.MANUFACTURER)) {
@@ -63,6 +63,50 @@ public class JumpPermissionManagement {
                 }
             }
         }
+    }
+
+    public void jumpToNoticeSetting(Context context){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Intent intent = new Intent();
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+            intent.putExtra("app_package",context.getPackageName());
+            intent.putExtra("app_uid", context.getApplicationInfo().uid);
+            context.startActivity(intent);
+        } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
+            Intent intent = new Intent();
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+            intent.setData(Uri.parse("package:" + context.getPackageName()));
+            context.startActivity(intent);
+        }
+    }
+
+    public void jumpToAppSetting(Context context){
+        context.startActivity(getAppInfoIntent(context));
+    }
+
+    public void jumpToSystemSetting(Context context){
+        context.startActivity(getSystemConfig());
+    }
+
+    /**
+     * 应用信息界面
+     */
+    private Intent getAppInfoIntent(Context context) {
+        Intent localIntent = new Intent();
+        localIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        localIntent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        localIntent.setData(Uri.fromParts("package", context.getPackageName(), null));
+        return localIntent;
+    }
+
+    /**
+     * 系统设置界面
+     */
+    private Intent getSystemConfig() {
+        return new Intent(Settings.ACTION_SETTINGS);
     }
 
     private Intent getHuaWeiIntent() {
@@ -149,25 +193,7 @@ public class JumpPermissionManagement {
         return intent;
     }
 
-    /**
-     * 应用信息界面
-     */
-    private Intent getAppInfoIntent(Context context) {
-        Intent localIntent = new Intent();
-        localIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        localIntent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        localIntent.setData(Uri.fromParts("package", context.getPackageName(), null));
-        return localIntent;
-    }
-
-    /**
-     * 系统设置界面
-     */
-    private Intent getSystemConfig() {
-        return new Intent(Settings.ACTION_SETTINGS);
-    }
-
-    private static String getMiuiVersion() {
+    private  String getMiuiVersion() {
         String propName = "ro.miui.ui.version.name";
         String line;
         BufferedReader input = null;
