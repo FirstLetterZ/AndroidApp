@@ -20,7 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TextView;
 
-import com.zpf.support.base.BaseDialog;
+import com.zpf.support.base.SafeDialog;
 import com.zpf.support.base.R;
 import com.zpf.support.interfaces.OnItemClickListener;
 import com.zpf.support.generalUtil.SafeClickListener;
@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * Created by ZPF on 2018/6/18.
  */
-public class BottomDialog extends BaseDialog {
+public class BottomDialog extends SafeDialog {
     private TextView tvBottom;
     private LinearLayout rootView;
     private List<MenuItemInfo> menuList;

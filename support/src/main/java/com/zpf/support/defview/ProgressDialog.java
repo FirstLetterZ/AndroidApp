@@ -7,13 +7,14 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.zpf.support.base.BaseDialog;
+import com.zpf.support.base.SafeDialog;
 import com.zpf.support.base.R;
 
 /**
+ * 默认的等待弹窗
  * Created by ZPF on 2018/6/14.
  */
-public class ProgressDialog extends BaseDialog {
+public class ProgressDialog extends SafeDialog {
 
     protected TextView textView;
 

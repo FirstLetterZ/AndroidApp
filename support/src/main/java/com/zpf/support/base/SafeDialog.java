@@ -13,21 +13,21 @@ import com.zpf.support.interfaces.SafeWindowInterface;
 /**
  * Created by ZPF on 2018/3/22.
  */
-public class BaseDialog extends Dialog implements SafeWindowInterface {
+public class SafeDialog extends Dialog implements SafeWindowInterface {
     protected SafeWindowController listener;
     protected CallBackInterface callBack;
 
-    public BaseDialog(@NonNull Context context) {
+    public SafeDialog(@NonNull Context context) {
         super(context);
         init();
     }
 
-    public BaseDialog(@NonNull Context context, int themeResId) {
+    public SafeDialog(@NonNull Context context, int themeResId) {
         super(context, themeResId);
         init();
     }
 
-    protected BaseDialog(@NonNull Context context, boolean cancelable, @Nullable OnCancelListener cancelListener) {
+    protected SafeDialog(@NonNull Context context, boolean cancelable, @Nullable OnCancelListener cancelListener) {
         super(context, cancelable, cancelListener);
         init();
     }
