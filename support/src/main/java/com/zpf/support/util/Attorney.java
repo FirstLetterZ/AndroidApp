@@ -14,31 +14,33 @@ import java.util.List;
  */
 public class Attorney {
     private List<Activity> customerList = new LinkedList<>();
-    private HashMap<String, Record> archives = new HashMap<>();
-//    private HashMap<String,Record> archives=new HashMap<>();
+    private HashMap<String, Record> archives = new HashMap<>();//档案库（将被受理的申请）
+    private HashMap<String, HeritageReceiver> receivers = new HashMap<>();//接收到对应遗产时的处理
+    private HashMap<String, Record> applications = new HashMap<>();//申请表
 
-    public void join(Activity activity, boolean isNew,HeritageReceiver  heritageReceiver) {
+    public void join(Activity activity, boolean isNew, HeritageReceiver heritageReceiver) {
         if (activity != null) {
             Record record = archives.get(activity.getClass().getName());
             if (record == null) {
                 customerList.add(activity);
             } else {
-                if (record.aList.size()>0) {
-                    for(Heritage heritage:record.aList){
-                        if(TextUtils.equals(heritage.successor,activity.getClass().getName())){
-                            if(isNew==heritage.canBeNew){
-                                if (heritage.data==null) {
-                                    heritage.data=new Intent();
+                if (record.aList.size() > 0) {
+                    for (Heritage heritage : record.aList) {
+                        if (TextUtils.equals(heritage.successor, activity.getClass().getName())) {
+                            if (isNew == heritage.canBeNew) {
+                                if (heritage.data == null) {
+                                    heritage.data = new Intent();
                                 }
-                                heritage.data.putExtra("from",heritage.from);
+                                heritage.data.putExtra("from", heritage.from);
                                 activity.onProvideAssistData(heritage.data.getBundleExtra(""));
                             }
                         }
-
                     }
                 }
+                if (!activity.isFinishing() && !activity.isDestroyed()) {
+                    customerList.add(activity);
+                }
             }
-
         }
         //检查
         customerList.add(activity);
@@ -95,7 +97,7 @@ public class Attorney {
         List<Testament> bList = new ArrayList<>();
     }
 
-    interface HeritageReceiver{
-        void onReceive(int cipher ,String from,Intent data);
+    interface HeritageReceiver {
+        void onReceive(int cipher, String from, Intent data);
     }
 }
