@@ -132,6 +132,10 @@ public class ContainerListenerController implements LifecycleListenerController,
         mLifecycleList.clear();
         mDestroyListenerList.clear();
         mCallBackList.clear();
+        if (mPermissionChecker != null) {
+            mPermissionChecker.onDestroy();
+            mPermissionChecker = null;
+        }
     }
 
     @Override
@@ -205,11 +209,8 @@ public class ContainerListenerController implements LifecycleListenerController,
     public ActivityPermissionChecker getActivityPermissionChecker() {
         if (mPermissionChecker == null) {
             mPermissionChecker = new ActivityPermissionChecker();
-            addOnDestroyListener(mPermissionChecker);
         } else if (!(mPermissionChecker instanceof ActivityPermissionChecker)) {
-            removeOnDestroyListener(mPermissionChecker);
             mPermissionChecker = new ActivityPermissionChecker();
-            addOnDestroyListener(mPermissionChecker);
         }
         return (ActivityPermissionChecker) mPermissionChecker;
     }
@@ -217,11 +218,8 @@ public class ContainerListenerController implements LifecycleListenerController,
     public FragmentPermissionChecker getFragmentPermissionChecker() {
         if (mPermissionChecker == null) {
             mPermissionChecker = new FragmentPermissionChecker();
-            addOnDestroyListener(mPermissionChecker);
         } else if (!(mPermissionChecker instanceof FragmentPermissionChecker)) {
-            removeOnDestroyListener(mPermissionChecker);
             mPermissionChecker.onDestroy();
-            addOnDestroyListener(mPermissionChecker);
         }
         return (FragmentPermissionChecker) mPermissionChecker;
     }
@@ -229,11 +227,8 @@ public class ContainerListenerController implements LifecycleListenerController,
     public CompatFragmentPermissionChecker getSupportFragmentPermissionChecker() {
         if (mPermissionChecker == null) {
             mPermissionChecker = new CompatFragmentPermissionChecker();
-            addOnDestroyListener(mPermissionChecker);
         } else if (!(mPermissionChecker instanceof CompatFragmentPermissionChecker)) {
-            removeOnDestroyListener(mPermissionChecker);
             mPermissionChecker = new CompatFragmentPermissionChecker();
-            addOnDestroyListener(mPermissionChecker);
         }
         return (CompatFragmentPermissionChecker) mPermissionChecker;
     }
