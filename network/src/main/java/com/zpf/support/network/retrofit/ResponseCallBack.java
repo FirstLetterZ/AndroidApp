@@ -1,6 +1,8 @@
 package com.zpf.support.network.retrofit;
 
 import com.zpf.support.generalUtil.MainHandler;
+import com.zpf.support.interfaces.CallBackManagerInterface;
+import com.zpf.support.interfaces.SafeWindowInterface;
 import com.zpf.support.network.base.BaseCallBack;
 
 import retrofit2.Call;
@@ -10,7 +12,7 @@ import retrofit2.Response;
 /**
  * Created by ZPF on 2018/7/26.
  */
-public abstract class NetCallBack<T> extends BaseCallBack implements Callback<T> {
+public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Callback<T> {
     private Call call;
 
     @Override
@@ -28,17 +30,22 @@ public abstract class NetCallBack<T> extends BaseCallBack implements Callback<T>
         }
         removeObservable();
         if (response.isSuccessful()) {
+            final T result = response.body();
             if (checkNull(response.body())) {
-                fail(DATA_NULL, "返回数据为空", true);
+                onDataNull();
             } else {
                 MainHandler.get().post(new Runnable() {
                     @Override
                     public void run() {
-                        try {
-                            handleResponse(response.body());
-                            complete(true);
-                        } catch (Exception e) {
-                            handleError(e);
+                        if (checkResult(result)) {
+                            try {
+                                handleResponse(result);
+                                complete(true);
+                            } catch (Exception e) {
+                                handleError(e);
+                            }
+                        } else {
+                            onResultIllegal(result);
                         }
                     }
                 });
@@ -64,6 +71,18 @@ public abstract class NetCallBack<T> extends BaseCallBack implements Callback<T>
                 handleError(t);
             }
         });
+    }
+
+    @Override
+    public ResponseCallBack<T> bindToManager(CallBackManagerInterface manager) {
+        super.bindToManager(manager);
+        return this;
+    }
+
+    @Override
+    public ResponseCallBack<T> bindToManager(CallBackManagerInterface manager, SafeWindowInterface dialog) {
+        super.bindToManager(manager, dialog);
+        return this;
     }
 
     //执行网络请求

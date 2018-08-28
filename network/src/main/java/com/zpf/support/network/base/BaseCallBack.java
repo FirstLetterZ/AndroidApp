@@ -4,6 +4,7 @@ import android.accounts.AccountsException;
 import android.app.Dialog;
 import android.net.ParseException;
 import android.support.annotation.IntRange;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.google.gson.JsonElement;
@@ -27,8 +28,7 @@ import retrofit2.HttpException;
 /**
  * Created by ZPF on 2018/7/26.
  */
-
-public abstract class BaseCallBack implements CallBackInterface {
+public abstract class BaseCallBack<T> implements CallBackInterface {
     protected int[] type = new int[]{0, 0, 0, 0};//{不弹出错误提示，结果可为空，预留，预留}
 
     public static final int NOTTOAST = 1;
@@ -121,10 +121,10 @@ public abstract class BaseCallBack implements CallBackInterface {
             code = exception.response().code();
         } else if (e instanceof AccountsException) {
             code = SSL_ERROR;
-            description = "证书验证失败";
+            description = "身份验证失败";
         } else if (e instanceof SSLHandshakeException) {
             code = SSL_ERROR;
-            description = "证书验证失败";
+            description = "网络连接握手失败";
         } else if (e instanceof JsonParseException
                 || e instanceof JSONException
                 || e instanceof ParseException
@@ -140,11 +140,8 @@ public abstract class BaseCallBack implements CallBackInterface {
         } else if (e instanceof IOException) {
             code = IO_ERROR;
             description = "数据流异常，解析失败";
-        } else if (description.contains("com.google.gson.JsonNull")) {
-            description = "返回数据为空";
-            code = DATA_NULL;
         } else if (description.contains("Unable to resolve host")) {
-            description = "网络连接异常";
+            description = "连接服务器失败";
             code = NETWORK_ERROR;
         } else {
             code = NO_SERVER_CODE;
@@ -162,7 +159,7 @@ public abstract class BaseCallBack implements CallBackInterface {
      * @param complete    是否执行complete（）
      */
     protected void fail(int code, String description, boolean complete) {
-        if(!checkLoginEffective(code,description)){
+        if (!checkLoginEffective(code, description)) {
             return;
         }
         boolean showDialog = code > -900;
@@ -210,6 +207,33 @@ public abstract class BaseCallBack implements CallBackInterface {
     }
 
     /**
+     * 检查内容是否满足自定义的条件
+     *
+     * @param result
+     * @return
+     */
+    protected boolean checkResult(@Nullable T result) {
+        return true;
+    }
+
+    /**
+     * 如果不满足自定义的检查条件则执行下面的方法
+     *
+     * @param result
+     */
+    protected void onResultIllegal(@Nullable T result) {
+
+    }
+
+
+    /**
+     * 当返回数据为空或者解析为空
+     */
+    protected void onDataNull() {
+        fail(DATA_NULL, "返回数据为空", true);
+    }
+
+    /**
      * 检查是否弹窗
      */
     private boolean autoToast() {
@@ -219,6 +243,7 @@ public abstract class BaseCallBack implements CallBackInterface {
     /**
      * 检查登录信息是否失效
      * TODO 需要覆写
+     *
      * @param code
      * @param description
      * @return true---有效；false----失效

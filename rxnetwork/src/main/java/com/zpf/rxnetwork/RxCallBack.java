@@ -1,5 +1,6 @@
 package com.zpf.rxnetwork;
 
+
 import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.SafeWindowInterface;
 import com.zpf.support.network.base.BaseCallBack;
@@ -11,7 +12,7 @@ import io.reactivex.disposables.Disposable;
  * Created by ZPF on 2018/7/26.
  */
 
-public abstract class RxCallBack<T> extends BaseCallBack implements Observer<T> {
+public abstract class RxCallBack<T> extends BaseCallBack<T> implements Observer<T> {
     protected Disposable disposable;
 
     @Override
@@ -31,15 +32,22 @@ public abstract class RxCallBack<T> extends BaseCallBack implements Observer<T> 
 
     @Override
     public void onNext(T t) {
+        if (isCancel()) {
+            return;
+        }
         removeObservable();
         if (checkNull(t)) {
-            fail(DATA_NULL, "返回数据为空", true);
+            onDataNull();
         } else {
-            try {
-                handleResponse(t);
-                complete(true);
-            } catch (Exception e) {
-                handleError(e);
+            if (checkResult(t)) {
+                try {
+                    handleResponse(t);
+                    complete(true);
+                } catch (Exception e) {
+                    handleError(e);
+                }
+            } else {
+                onResultIllegal(t);
             }
         }
     }
