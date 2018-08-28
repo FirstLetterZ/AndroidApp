@@ -1,4 +1,4 @@
-package com.zpf.support.network.rx;
+package com.zpf.rxnetwork;
 
 import com.zpf.support.network.HttpResult;
 

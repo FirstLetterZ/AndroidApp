@@ -1,4 +1,4 @@
-package com.zpf.support.network.rx;
+package com.zpf.rxnetwork;
 
 import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.SafeWindowInterface;
@@ -66,5 +66,5 @@ public abstract class RxCallBack<T> extends BaseCallBack implements Observer<T> 
         return this;
     }
 
-    protected   abstract void handleResponse(T response);
+    protected abstract void handleResponse(T response);
 }

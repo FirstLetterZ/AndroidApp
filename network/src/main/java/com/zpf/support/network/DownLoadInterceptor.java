@@ -10,9 +10,9 @@ import okhttp3.Interceptor;
 import okhttp3.Response;
 
 /**
+ * 下载拦截
  * Created by ZPF on 2018/7/26.
  */
-
 public class DownLoadInterceptor implements Interceptor {
     private OnProgressChangedListener<View> listener;
 

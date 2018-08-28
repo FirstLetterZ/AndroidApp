@@ -162,6 +162,9 @@ public abstract class BaseCallBack implements CallBackInterface {
      * @param complete    是否执行complete（）
      */
     protected void fail(int code, String description, boolean complete) {
+        if(!checkLoginEffective(code,description)){
+            return;
+        }
         boolean showDialog = code > -900;
         if (showDialog) {
             Dialog dialog = showError(code, description);
@@ -211,6 +214,17 @@ public abstract class BaseCallBack implements CallBackInterface {
      */
     private boolean autoToast() {
         return type[0] == 0;
+    }
+
+    /**
+     * 检查登录信息是否失效
+     * TODO 需要覆写
+     * @param code
+     * @param description
+     * @return true---有效；false----失效
+     */
+    public boolean checkLoginEffective(int code, String description) {
+        return true;
     }
 
     /**

@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/interfaces" />
             <option value="$PROJECT_DIR$/network" />
             <option value="$PROJECT_DIR$/refresh" />
+            <option value="$PROJECT_DIR$/rxnetwork" />
             <option value="$PROJECT_DIR$/support" />
             <option value="$PROJECT_DIR$/webview" />
           </set>

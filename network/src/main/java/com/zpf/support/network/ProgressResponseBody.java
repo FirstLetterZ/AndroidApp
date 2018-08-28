@@ -18,10 +18,10 @@ import okio.Okio;
 import okio.Source;
 
 /**
- * Created by ZPF on 2018/2/28.
+ * 下载进度监听
+ * Created by ZPF on 2018/8/28.
  */
 public class ProgressResponseBody extends ResponseBody {
-    private static final int UPDATE = -1;
     private ResponseBody responseBody;
     private Handler myHandler;
     private BufferedSource bufferedSource;
