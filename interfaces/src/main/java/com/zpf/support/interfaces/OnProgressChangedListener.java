@@ -1,5 +1,6 @@
 package com.zpf.support.interfaces;
 
+import android.support.annotation.Nullable;
 import android.view.View;
 
 /**
@@ -11,5 +12,5 @@ public interface OnProgressChangedListener<T extends View> {
      * @param total 总数据量
      * @param current 当前进度量
      */
-    void onProgressChanged(T view, long total, long current);
+    void onProgressChanged(@Nullable T view, long total, long current);
 }

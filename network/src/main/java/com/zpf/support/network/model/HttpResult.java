@@ -1,4 +1,4 @@
-package com.zpf.support.network;
+package com.zpf.support.network.model;
 
 public class HttpResult<T> {
     private int code;

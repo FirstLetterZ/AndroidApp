@@ -18,10 +18,7 @@ android {
 
 dependencies {
     api rootProject.ext.dependencies.retrofitGsonConverter
-    api rootProject.ext.dependencies.retrofitRxjava2Adapter
     api rootProject.ext.dependencies.retrofit
-    api rootProject.ext.dependencies.rxandroid
-    api rootProject.ext.dependencies.rxjava
     api rootProject.ext.dependencies.gson
     api project(':interfaces')
     api project(':generalUtil')

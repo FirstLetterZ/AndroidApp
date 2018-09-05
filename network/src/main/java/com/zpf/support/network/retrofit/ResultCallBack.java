@@ -2,7 +2,7 @@ package com.zpf.support.network.retrofit;
 
 import android.support.annotation.Nullable;
 
-import com.zpf.support.network.HttpResult;
+import com.zpf.support.network.model.HttpResult;
 
 /**
  * Created by ZPF on 2018/7/26.

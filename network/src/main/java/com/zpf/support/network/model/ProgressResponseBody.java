@@ -1,4 +1,4 @@
-package com.zpf.support.network;
+package com.zpf.support.network.model;
 
 import android.os.Handler;
 import android.os.Looper;

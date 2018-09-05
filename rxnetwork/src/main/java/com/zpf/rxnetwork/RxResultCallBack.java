@@ -1,10 +1,8 @@
 package com.zpf.rxnetwork;
 
-import android.support.annotation.Nullable;
-
 import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.SafeWindowInterface;
-import com.zpf.support.network.HttpResult;
+import com.zpf.support.network.model.HttpResult;
 
 /**
  * Created by ZPF on 2018/7/26.
