@@ -21,4 +21,4 @@ dependencies {
     api rootProject.ext.dependencies.recyclerview
 }
 
-//apply from: "bintrayUpload.gradle"
+apply from: "../bintrayUpload.gradle"
