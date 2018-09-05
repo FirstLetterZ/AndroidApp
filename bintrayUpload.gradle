@@ -40,16 +40,16 @@ def bintrayApikey = identifiable.getProperty('bintray.apikey')
 group = projectGroupId
 version = projectVersionName
 
-//task javadoc(type: Javadoc) {
-//    options.encoding = "UTF-8"
-//    source = android.sourceSets.main.java.srcDirs
-//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-//}
-//
-//task javadocJar(type: Jar, dependsOn: javadoc) {
-//    from javadoc.destinationDir
-//    classifier = 'javadoc'
-//}
+task javadoc(type: Javadoc) {
+    options.encoding = "UTF-8"
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    from javadoc.destinationDir
+    classifier = 'javadoc'
+}
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
@@ -57,7 +57,7 @@ task sourcesJar(type: Jar) {
 }
 
 artifacts {
-//    archives javadocJar
+    archives javadocJar
     archives sourcesJar
 }
 

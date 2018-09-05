@@ -16,7 +16,7 @@ import com.zpf.support.base.R;
 
 /**
  * @author ZPF
- * @date 2018/07/10.
+ * 2018/07/10.
  */
 public class CommonDialog extends SafeDialog {
     private ImageView ivIcon;
