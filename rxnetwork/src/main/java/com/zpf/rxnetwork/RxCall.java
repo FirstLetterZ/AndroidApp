@@ -3,18 +3,25 @@ package com.zpf.rxnetwork;
 import com.zpf.support.generalUtil.FileUtil;
 import com.zpf.support.network.base.BaseCall;
 
+import java.util.Map;
+
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
 /**
  * Created by ZPF on 2018/7/26.
  */
-
 public class RxCall extends BaseCall {
+
+    public RxCall(Map<String, Object> map) {
+        super(map);
+        mBuilder.addCallAdapterFactory(RxJava2CallAdapterFactory.create());
+    }
 
     public <T> void toSubscribe(Observable<T> o, Observer<T> s) {
         o.subscribeOn(Schedulers.io())
