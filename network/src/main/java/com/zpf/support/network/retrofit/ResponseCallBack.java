@@ -37,6 +37,9 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
                 MainHandler.get().post(new Runnable() {
                     @Override
                     public void run() {
+                        if (isCancel()) {
+                            return;
+                        }
                         if (checkResult(result)) {
                             try {
                                 handleResponse(result);
@@ -54,6 +57,9 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
             MainHandler.get().post(new Runnable() {
                 @Override
                 public void run() {
+                    if (isCancel()) {
+                        return;
+                    }
                     fail(response.code(), response.message(), true);
                 }
             });
@@ -68,6 +74,9 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
         MainHandler.get().post(new Runnable() {
             @Override
             public void run() {
+                if (isCancel()) {
+                    return;
+                }
                 handleError(t);
             }
         });
@@ -87,9 +96,22 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
 
     //执行网络请求
     public void requestCall(Call<T> call) {
+        requestCall(call, true);
+    }
+
+    public void requestCall(Call<T> call, boolean async) {
         this.call = call;
-        if (call != null) {
-            call.enqueue(this);
+        if (call != null && !isCancel()) {
+            if (async) {
+                call.enqueue(this);
+            } else {
+                try {
+                    Response<T> response = call.execute();
+                    onResponse(call, response);
+                } catch (Exception e) {
+                    onFailure(call, e);
+                }
+            }
         }
     }
 

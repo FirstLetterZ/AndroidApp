@@ -39,6 +39,7 @@ import com.zpf.support.interfaces.constant.LifecycleState;
 import java.lang.reflect.Constructor;
 
 /**
+ * 基于AppCompatActivity的视图容器层
  * Created by ZPF on 2018/6/14.
  */
 public abstract class CompatActivityContainer<T extends ContainerProcessorInterface> extends AppCompatActivity implements ViewContainerInterface {
@@ -113,7 +114,6 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
         mController.onDestroy();
         super.onDestroy();
         loadingDialog = null;
-        mView = null;
     }
 
     @Override

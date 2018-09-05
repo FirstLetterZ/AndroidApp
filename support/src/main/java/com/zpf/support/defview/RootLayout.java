@@ -16,12 +16,12 @@ import android.widget.LinearLayout;
 
 import com.zpf.support.generalUtil.AppContext;
 import com.zpf.support.generalUtil.ViewUtil;
-import com.zpf.support.interfaces.GlobalSettingInterface;
+import com.zpf.support.interfaces.GlobalConfigInterface;
 import com.zpf.support.interfaces.RootLayoutInterface;
 import com.zpf.support.interfaces.TitleBarInterface;
 
-
 /**
+ * 带标题栏的默认布局
  * Created by ZPF on 2018/6/14.
  */
 public class RootLayout extends LinearLayout implements RootLayoutInterface {
@@ -71,8 +71,8 @@ public class RootLayout extends LinearLayout implements RootLayoutInterface {
         addView(contentLayout);
         hasAddChildren = true;
         Application application = AppContext.get();
-        if (application != null && application instanceof GlobalSettingInterface) {
-            ((GlobalSettingInterface) application).initRootLayout(this);
+        if (application != null && application instanceof GlobalConfigInterface) {
+            ((GlobalConfigInterface) application).objectInit(this);
         }
     }
 

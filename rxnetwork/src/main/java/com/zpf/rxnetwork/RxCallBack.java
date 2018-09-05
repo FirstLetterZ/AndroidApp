@@ -1,6 +1,5 @@
 package com.zpf.rxnetwork;
 
-
 import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.SafeWindowInterface;
 import com.zpf.support.network.base.BaseCallBack;
@@ -11,7 +10,6 @@ import io.reactivex.disposables.Disposable;
 /**
  * Created by ZPF on 2018/7/26.
  */
-
 public abstract class RxCallBack<T> extends BaseCallBack<T> implements Observer<T> {
     protected Disposable disposable;
 
@@ -54,6 +52,9 @@ public abstract class RxCallBack<T> extends BaseCallBack<T> implements Observer<
 
     @Override
     public void onError(Throwable e) {
+        if (isCancel()) {
+            return;
+        }
         handleError(e);
     }
 

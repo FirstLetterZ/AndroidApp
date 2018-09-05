@@ -30,6 +30,7 @@ import com.zpf.support.interfaces.constant.LifecycleState;
 import java.lang.reflect.Constructor;
 
 /**
+ * 基于android.support.v4.app.Fragment的视图容器层
  * Created by ZPF on 2018/6/14.
  */
 public abstract class CompatFragmentContainer<T extends ContainerProcessorInterface> extends Fragment implements ViewContainerInterface {
@@ -44,8 +45,6 @@ public abstract class CompatFragmentContainer<T extends ContainerProcessorInterf
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (mRootLayout == null) {
             mRootLayout = createRootLayout();
-            mRootLayout.getStatusBar().setVisibility(View.GONE);
-            mRootLayout.getTitleBar().getLayout().setVisibility(View.GONE);
             View layoutView = getLayoutView();
             if (layoutView == null) {
                 mRootLayout.setContentView(inflater, getLayoutId());
@@ -108,7 +107,6 @@ public abstract class CompatFragmentContainer<T extends ContainerProcessorInterf
         }
         super.onDestroy();
         loadingDialog = null;
-        mView = null;
     }
 
     @Override
@@ -361,7 +359,10 @@ public abstract class CompatFragmentContainer<T extends ContainerProcessorInterf
     }
 
     protected RootLayoutInterface createRootLayout() {
-        return new RootLayout(getContext());
+        RootLayout rootLayout = new RootLayout(getContext());
+        rootLayout.getStatusBar().setVisibility(View.GONE);
+        rootLayout.getTitleBar().getLayout().setVisibility(View.GONE);
+        return rootLayout;
     }
 
     protected T createProcessor() {

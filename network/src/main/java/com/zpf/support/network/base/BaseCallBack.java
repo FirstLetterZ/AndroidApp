@@ -1,6 +1,7 @@
 package com.zpf.support.network.base;
 
 import android.accounts.AccountsException;
+import android.app.Application;
 import android.app.Dialog;
 import android.net.ParseException;
 import android.support.annotation.IntRange;
@@ -10,15 +11,20 @@ import android.text.TextUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.stream.MalformedJsonException;
+import com.zpf.support.generalUtil.AppContext;
 import com.zpf.support.generalUtil.ToastUtil;
 import com.zpf.support.interfaces.CallBackInterface;
 import com.zpf.support.interfaces.CallBackManagerInterface;
+import com.zpf.support.interfaces.GlobalConfigInterface;
 import com.zpf.support.interfaces.SafeWindowInterface;
 
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.net.ConnectException;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -35,14 +41,18 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
     public static final int NULLABLE = 2;
     public static final int NULLABLE_NOTTOAST = 3;
 
-    protected final int NO_SERVER_CODE = -900;
-    protected final int DATA_NULL = -901;
-    protected final int NETWORK_ERROR = -902;
+    protected static final int DATA_NULL = -900;
+    public final int NO_SERVER_CODE = -901;
+    protected final int SSL_ERROR = -902;
     protected final int PARSE_ERROR = -903;
-    protected final int SSL_ERROR = -904;
-    protected final int IO_ERROR = -905;
+    protected final int ACCOUNT_ERROR = -904;
+    protected final int NETWORK_ERROR = -910;
+    protected final int CONNECT_ERROR = -911;
+    protected final int TIMEOUT_ERROR = -912;
+    protected final int INTERRUPTED_ERROR = -913;
+    protected final int IO_ERROR = -920;
 
-    private boolean isCancel = false;
+    private volatile boolean isCancel = false;
     protected CallBackManagerInterface manager;
     protected SafeWindowInterface dialog;
     protected long bindId;
@@ -120,35 +130,38 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
             description = exception.response().message();
             code = exception.response().code();
         } else if (e instanceof AccountsException) {
-            code = SSL_ERROR;
-            description = "身份验证失败";
+            code = ACCOUNT_ERROR;
+            description = "账号验证失败";
         } else if (e instanceof SSLHandshakeException) {
             code = SSL_ERROR;
-            description = "网络连接握手失败";
+            description = "网络证书验证失败";
         } else if (e instanceof JsonParseException
                 || e instanceof JSONException
                 || e instanceof ParseException
                 || e instanceof MalformedJsonException) {
             code = PARSE_ERROR;
             description = "数据解析异常";
+        } else if (e instanceof ConnectException) {
+            code = CONNECT_ERROR;
+            description = "连接服务器失败";
+        } else if (e instanceof TimeoutException
+                || e instanceof SocketTimeoutException) {
+            code = TIMEOUT_ERROR;
+            description = "连接超时，请稍后再试";
+        } else if (e instanceof InterruptedIOException) {
+            code = INTERRUPTED_ERROR;
+            description = "连接中断，请稍后再试";
         } else if (e instanceof SocketException) {
             code = NETWORK_ERROR;
             description = "网络连接异常";
-        } else if (e instanceof TimeoutException) {
-            code = NETWORK_ERROR;
-            description = "连接超时，请稍后再试";
         } else if (e instanceof IOException) {
             code = IO_ERROR;
             description = "数据流异常，解析失败";
-        } else if (description.contains("Unable to resolve host")) {
-            description = "连接服务器失败";
-            code = NETWORK_ERROR;
         } else {
             code = NO_SERVER_CODE;
-            String msg = e.getMessage();
-            if (!TextUtils.isEmpty(msg)) {
-                description = msg;
-            }
+        }
+        if (code != NO_SERVER_CODE) {
+            description = description + "\n" + e.getMessage();
         }
         fail(code, description, true);
     }
@@ -159,8 +172,17 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
      * @param complete    是否执行complete（）
      */
     protected void fail(int code, String description, boolean complete) {
-        if (!checkLoginEffective(code, description)) {
-            return;
+        Application application = AppContext.get();
+        if (application != null && application instanceof GlobalConfigInterface) {
+            //检查登录信息是否失效
+            Object result = ((GlobalConfigInterface) application).invokeMethod(
+                    this, "checkLoginEffective", code);
+            if (result != null && result instanceof Boolean) {
+                if ((boolean) result && complete) {
+                    complete(false);
+                }
+                return;
+            }
         }
         boolean showDialog = code > -900;
         if (showDialog) {
@@ -225,7 +247,6 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
 
     }
 
-
     /**
      * 当返回数据为空或者解析为空
      */
@@ -238,18 +259,6 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
      */
     private boolean autoToast() {
         return type[0] == 0;
-    }
-
-    /**
-     * 检查登录信息是否失效
-     * TODO 需要覆写
-     *
-     * @param code
-     * @param description
-     * @return true---有效；false----失效
-     */
-    public boolean checkLoginEffective(int code, String description) {
-        return true;
     }
 
     /**

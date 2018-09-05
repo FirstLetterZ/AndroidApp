@@ -1,9 +1,5 @@
 package com.zpf.support.network;
 
-/**
- * Created by itzhoubin on 2017/7/8.
- */
-
 public class HttpResult<T> {
     private int code;
     private String message;
