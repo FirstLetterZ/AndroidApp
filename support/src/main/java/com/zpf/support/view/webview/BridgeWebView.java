@@ -111,6 +111,15 @@ public class BridgeWebView extends WebView {
                     "    if (!name) {\n" +
                     "        return;\n" +
                     "    }\n" +
+                    "    var id = \"\";\n" +
+                    "    var param;\n" +
+                    "    if(!body){\n" +
+                    "        param = \"\";\n" +
+                    "    }else if(typeof body === 'string'){\n" +
+                    "        param = body;\n" +
+                    "    }else{\n" +
+                    "        param = JSON.stringify(body);\n" +
+                    "    }\n" +
                     "    if(callBack && typeof callBack === 'function'){\n" +
                     "        var date = new Date();\n" +
                     "        var id = date.toISOString();\n" +
@@ -119,11 +128,8 @@ public class BridgeWebView extends WebView {
                     "            callBack: callBack,\n" +
                     "        };\n" +
                     "        Native.actions.push(newAction);\n" +
-                    "        window.bridge.callNative(name,body,id);\n" +
-                    "    }else{\n" +
-                    "        var id = \"\";\n" +
-                    "        window.bridge.callNative(name,body,id);\n" +
                     "    }\n" +
+                    "   return window.bridge.callNative(name,param,id);\n" +
                     "};\n" +
                     "function NativeCallBack(id, body) {\n" +
                     "    if (!id) {\n" +
@@ -148,11 +154,11 @@ public class BridgeWebView extends WebView {
                     "    }\n" +
                     "};\n" +
                     "if (!Native) {\n" +
-                    "    var Native = window.Native={\n" +
+                    "    var Native = window.Native ={\n" +
                     "        actions : [],\n" +
                     "        jsCall : CallNative\n" +
                     "    };\n" +
-                    "}\n";
+                    "}";
         } else {
             try {
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));

@@ -44,14 +44,19 @@ public class CallBackManager implements CallBackManagerInterface {
 
     @Override
     public void cancelAll() {
-        synchronized (this) {
-            for (int i = 0; i < callBackList.size(); i++) {
-                CallBackInterface callBack = callBackList.valueAt(i);
-                if (callBack != null) {
-                    callBack.cancel();
+        cancelAll = true;
+        if (callBackList.size() > 0) {
+            synchronized (this) {
+                if (callBackList.size() > 0) {
+                    for (int i = 0; i < callBackList.size(); i++) {
+                        CallBackInterface callBack = callBackList.valueAt(i);
+                        if (callBack != null) {
+                            callBack.cancel();
+                        }
+                    }
+                    callBackList.clear();
                 }
             }
-            callBackList.clear();
         }
     }
 

@@ -17,15 +17,12 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.zpf.support.constant.AppConst;
-import com.zpf.support.constant.BaseKeyConst;
 import com.zpf.support.defview.ProgressDialog;
 import com.zpf.support.defview.RootLayout;
 import com.zpf.support.generalUtil.MainHandler;
 import com.zpf.support.generalUtil.PublicUtil;
 import com.zpf.support.interfaces.TitleBarInterface;
-import com.zpf.support.util.CacheMap;
 import com.zpf.support.util.ContainerListenerController;
-import com.zpf.support.util.LifecycleLogUtil;
 import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.LifecycleInterface;
 import com.zpf.support.interfaces.OnDestroyListener;
@@ -61,9 +58,6 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
             }
         }
         initWindow();
-        if (CacheMap.getBoolean(BaseKeyConst.IS_DEBUG)) {
-            new LifecycleLogUtil(this);
-        }
         mRootLayout = createRootLayout();
         View layoutView = getLayoutView();
         if (layoutView == null) {

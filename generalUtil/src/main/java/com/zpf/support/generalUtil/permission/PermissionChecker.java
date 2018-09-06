@@ -4,12 +4,9 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.util.Pair;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.SparseArray;
 
@@ -114,34 +111,6 @@ public class PermissionChecker {
 
     public boolean checkToastEnabled(@NonNull Context context) {
         return NotificationManagerCompat.from(context).areNotificationsEnabled();
-    }
-
-    @SuppressLint({"HardwareIds", "MissingPermission"})
-    public String getDeviceId(@NonNull Context context) {
-        String result;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                return null;
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                result = Build.getSerial();
-            } else {
-                result = Build.SERIAL;
-            }
-        } else {
-            result = Build.SERIAL;
-        }
-        if (TextUtils.isEmpty(result) || "unknown".equalsIgnoreCase(result)) {
-            TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-            if (telephonyManager != null) {
-                result = telephonyManager.getDeviceId();
-            }
-        }
-        if (TextUtils.isEmpty(result)) {
-            result = "unknown";
-        }
-        return result;
     }
 
     public Pair<Runnable, Runnable> getPermissionCallBack(int requestCode) {

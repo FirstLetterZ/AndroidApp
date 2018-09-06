@@ -20,6 +20,6 @@ public interface ViewContainerInterface extends LifecycleListenerController, Act
 
     SafeWindowInterface getProgressDialog();
 
-    public Object invoke(String name, Object params);
+    Object invoke(String name, Object params);
 
 }

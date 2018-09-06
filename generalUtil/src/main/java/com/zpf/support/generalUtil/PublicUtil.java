@@ -1,8 +1,15 @@
 package com.zpf.support.generalUtil;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -78,5 +85,38 @@ public class PublicUtil {
             return "";
         }
         return bigDecimal.setScale(scale, BigDecimal.ROUND_HALF_UP).toPlainString();
+    }
+
+    /**
+     * 获取设备识别id
+     *
+     * @return 如果返回null则代表缺少权限，若返回"unknown"代表获取失败
+     */
+    @SuppressLint({"HardwareIds", "MissingPermission"})
+    public String getDeviceId(@NonNull Context context) {
+        String result;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return null;
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                result = Build.getSerial();
+            } else {
+                result = Build.SERIAL;
+            }
+        } else {
+            result = Build.SERIAL;
+        }
+        if (TextUtils.isEmpty(result) || "unknown".equalsIgnoreCase(result)) {
+            TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            if (telephonyManager != null) {
+                result = telephonyManager.getDeviceId();
+            }
+        }
+        if (TextUtils.isEmpty(result)) {
+            result = "unknown";
+        }
+        return result;
     }
 }

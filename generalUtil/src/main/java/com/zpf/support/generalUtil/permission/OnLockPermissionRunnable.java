@@ -19,5 +19,5 @@ public abstract class OnLockPermissionRunnable implements Runnable {
         onLock(permissions);
     }
 
-  public   abstract void onLock(List<PermissionInfo> list);
+    public abstract void onLock(List<PermissionInfo> list);
 }
