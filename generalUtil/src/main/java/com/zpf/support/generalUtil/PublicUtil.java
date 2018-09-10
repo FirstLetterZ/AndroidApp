@@ -93,7 +93,7 @@ public class PublicUtil {
      * @return 如果返回null则代表缺少权限，若返回"unknown"代表获取失败
      */
     @SuppressLint({"HardwareIds", "MissingPermission"})
-    public String getDeviceId(@NonNull Context context) {
+    public static String getDeviceId(@NonNull Context context) {
         String result;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE)
