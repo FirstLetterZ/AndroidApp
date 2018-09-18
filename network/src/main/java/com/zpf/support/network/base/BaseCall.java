@@ -1,6 +1,6 @@
 package com.zpf.support.network.base;
 
-import com.zpf.support.network.interceptor.HeaderInterceptor;
+import com.zpf.support.network.header.ClientHeader;
 import com.zpf.support.network.model.ClientBuilder;
 
 import org.json.JSONObject;
@@ -18,14 +18,18 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by ZPF on 2018/7/26.
  */
 public class BaseCall {
-    protected ClientBuilder mBuilder;
+    private Map<String, ClientHeader> headerMap;
 
-    public BaseCall(Map<String, Object> map) {
-        mBuilder = ClientBuilder.createDefBuilder();
-        if (map != null && map.size() > 0) {
-            mBuilder.addInterceptor(new HeaderInterceptor(map));
-        }
-        mBuilder.addConverterFactory(GsonConverterFactory.create());
+    public BaseCall(Map<String, ClientHeader> headerMap) {
+        this.headerMap = headerMap;
+    }
+
+
+    public ClientBuilder builder() {
+        ClientBuilder builder = ClientBuilder.createDefBuilder();
+        builder.retrofitBuilder().addConverterFactory(GsonConverterFactory.create());
+        builder.headerBuilder().addHeaderMap(headerMap);
+        return builder;
     }
 
     public RequestBody getRequestBody(JSONObject params) {

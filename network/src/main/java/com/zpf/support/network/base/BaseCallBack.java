@@ -17,6 +17,7 @@ import com.zpf.support.interfaces.CallBackInterface;
 import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.GlobalConfigInterface;
 import com.zpf.support.interfaces.SafeWindowInterface;
+import com.zpf.support.network.model.CustomException;
 
 import org.json.JSONException;
 
@@ -129,6 +130,9 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
             HttpException exception = (HttpException) e;
             description = exception.response().message();
             code = exception.response().code();
+        } else if (e instanceof CustomException) {
+            code = ((CustomException)e).getCode();
+            description = e.getMessage();
         } else if (e instanceof AccountsException) {
             code = ACCOUNT_ERROR;
             description = "账号验证失败";

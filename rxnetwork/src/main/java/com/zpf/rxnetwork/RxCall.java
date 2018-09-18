@@ -2,6 +2,8 @@ package com.zpf.rxnetwork;
 
 import com.zpf.support.generalUtil.FileUtil;
 import com.zpf.support.network.base.BaseCall;
+import com.zpf.support.network.header.ClientHeader;
+import com.zpf.support.network.model.ClientBuilder;
 
 import java.util.Map;
 
@@ -18,9 +20,15 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
  */
 public class RxCall extends BaseCall {
 
-    public RxCall(Map<String, Object> map) {
+    public RxCall(Map<String, ClientHeader> map) {
         super(map);
-        mBuilder.addCallAdapterFactory(RxJava2CallAdapterFactory.create());
+    }
+
+    @Override
+    public ClientBuilder builder() {
+        ClientBuilder builder = super.builder();
+        builder.retrofitBuilder().addCallAdapterFactory(RxJava2CallAdapterFactory.create());
+        return builder;
     }
 
     public <T> void toSubscribe(Observable<T> o, Observer<T> s) {
