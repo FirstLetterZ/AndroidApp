@@ -8,6 +8,13 @@ import com.zpf.support.network.model.HttpResult;
  * Created by ZPF on 2018/7/26.
  */
 public abstract class ResultCallBack<T> extends ResponseCallBack<HttpResult<T>> {
+    public ResultCallBack() {
+        super();
+    }
+
+    public ResultCallBack(int type) {
+        super(type);
+    }
 
     @Override
     protected void handleResponse(HttpResult<T> result) {

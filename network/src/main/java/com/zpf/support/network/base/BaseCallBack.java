@@ -42,17 +42,6 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
     public static final int NULLABLE = 2;
     public static final int NULLABLE_NOTTOAST = 3;
 
-    protected static final int DATA_NULL = -900;
-    public final int NO_SERVER_CODE = -901;
-    protected final int SSL_ERROR = -902;
-    protected final int PARSE_ERROR = -903;
-    protected final int ACCOUNT_ERROR = -904;
-    protected final int NETWORK_ERROR = -910;
-    protected final int CONNECT_ERROR = -911;
-    protected final int TIMEOUT_ERROR = -912;
-    protected final int INTERRUPTED_ERROR = -913;
-    protected final int IO_ERROR = -920;
-
     private volatile boolean isCancel = false;
     protected CallBackManagerInterface manager;
     protected SafeWindowInterface dialog;
@@ -134,37 +123,37 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
             code = ((CustomException)e).getCode();
             description = e.getMessage();
         } else if (e instanceof AccountsException) {
-            code = ACCOUNT_ERROR;
+            code = ErrorCode.ACCOUNT_ERROR;
             description = "账号验证失败";
         } else if (e instanceof SSLHandshakeException) {
-            code = SSL_ERROR;
+            code = ErrorCode.SSL_ERROR;
             description = "网络证书验证失败";
         } else if (e instanceof JsonParseException
                 || e instanceof JSONException
                 || e instanceof ParseException
                 || e instanceof MalformedJsonException) {
-            code = PARSE_ERROR;
+            code = ErrorCode.PARSE_ERROR;
             description = "数据解析异常";
         } else if (e instanceof ConnectException) {
-            code = CONNECT_ERROR;
+            code = ErrorCode.CONNECT_ERROR;
             description = "连接服务器失败";
         } else if (e instanceof TimeoutException
                 || e instanceof SocketTimeoutException) {
-            code = TIMEOUT_ERROR;
+            code = ErrorCode.TIMEOUT_ERROR;
             description = "连接超时，请稍后再试";
         } else if (e instanceof InterruptedIOException) {
-            code = INTERRUPTED_ERROR;
+            code = ErrorCode.INTERRUPTED_ERROR;
             description = "连接中断，请稍后再试";
         } else if (e instanceof SocketException) {
-            code = NETWORK_ERROR;
+            code = ErrorCode.NETWORK_ERROR;
             description = "网络连接异常";
         } else if (e instanceof IOException) {
-            code = IO_ERROR;
+            code = ErrorCode.IO_ERROR;
             description = "数据流异常，解析失败";
         } else {
-            code = NO_SERVER_CODE;
+            code = ErrorCode.NO_SERVER_CODE;
         }
-        if (code != NO_SERVER_CODE) {
+        if (code != ErrorCode.NO_SERVER_CODE) {
             description = description + "\n" + e.getMessage();
         }
         fail(code, description, true);
@@ -184,12 +173,12 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
             if (result != null && result instanceof Boolean) {
                 if ((boolean) result && complete) {
                     complete(false);
+                    return;
                 }
-                return;
             }
         }
-        boolean showDialog = code > -900;
-        if (showDialog) {
+        boolean showDialog = false;
+        if (code <= -900) {
             Dialog dialog = showError(code, description);
             showDialog = dialog != null;
             if (showDialog && !dialog.isShowing() && dialog.getWindow() != null) {
@@ -255,7 +244,7 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
      * 当返回数据为空或者解析为空
      */
     protected void onDataNull() {
-        fail(DATA_NULL, "返回数据为空", true);
+        fail(ErrorCode.DATA_NULL, "返回数据为空", true);
     }
 
     /**

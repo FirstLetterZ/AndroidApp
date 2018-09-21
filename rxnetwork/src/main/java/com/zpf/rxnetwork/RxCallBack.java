@@ -13,6 +13,14 @@ import io.reactivex.disposables.Disposable;
 public abstract class RxCallBack<T> extends BaseCallBack<T> implements Observer<T> {
     protected Disposable disposable;
 
+    public RxCallBack() {
+        super();
+    }
+
+    public RxCallBack(int type) {
+        super(type);
+    }
+
     @Override
     protected void doCancel() {
         if (!isCancel() && disposable != null && !disposable.isDisposed()) {

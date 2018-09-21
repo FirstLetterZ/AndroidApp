@@ -1,4 +1,1 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.zpf.rxnetwork">
-
-</manifest>
+<manifest package="com.zpf.rxnetwork"/>

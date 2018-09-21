@@ -15,6 +15,14 @@ import retrofit2.Response;
 public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Callback<T> {
     private Call call;
 
+    public ResponseCallBack() {
+        super();
+    }
+
+    public ResponseCallBack(int type) {
+        super(type);
+    }
+
     @Override
     protected void doCancel() {
         if (call != null) {

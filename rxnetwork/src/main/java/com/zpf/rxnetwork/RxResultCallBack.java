@@ -9,6 +9,13 @@ import com.zpf.support.network.model.HttpResult;
  */
 
 public abstract class RxResultCallBack<T> extends RxCallBack<HttpResult<T>> {
+    public RxResultCallBack() {
+        super();
+    }
+
+    public RxResultCallBack(int type) {
+        super(type);
+    }
 
     @Override
     protected final void handleResponse(HttpResult<T> response) {

@@ -1,8 +1,9 @@
 package com.zpf.support.network.base;
 
-import com.zpf.support.network.header.ClientHeader;
+import com.zpf.support.network.header.HeaderCarrier;
 import com.zpf.support.network.model.ClientBuilder;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -18,28 +19,31 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by ZPF on 2018/7/26.
  */
 public class BaseCall {
-    private Map<String, ClientHeader> headerMap;
+    protected HeaderCarrier headerCarrier;
 
-    public BaseCall(Map<String, ClientHeader> headerMap) {
-        this.headerMap = headerMap;
+    public BaseCall(HeaderCarrier headerCarrier) {
+        this.headerCarrier = headerCarrier;
     }
-
 
     public ClientBuilder builder() {
         ClientBuilder builder = ClientBuilder.createDefBuilder();
         builder.retrofitBuilder().addConverterFactory(GsonConverterFactory.create());
-        builder.headerBuilder().addHeaderMap(headerMap);
+        builder.headerBuilder().reset(headerCarrier);
         return builder;
     }
 
-    public RequestBody getRequestBody(JSONObject params) {
+    public static RequestBody getRequestBody() {
+        return RequestBody.create(MediaType.parse("application/json;charset=utf-8"), "{}");
+    }
+
+    public static RequestBody getRequestBody(JSONObject params) {
         if (params == null) {
             params = new JSONObject();
         }
         return RequestBody.create(MediaType.parse("application/json;charset=utf-8"), params.toString());
     }
 
-    public RequestBody getRequestBody(Map<String, Object> params) {
+    public static RequestBody getRequestBody(Map<String, Object> params) {
         if (params == null) {
             params = new HashMap<>();
         }
@@ -61,6 +65,33 @@ public class BaseCall {
             params.put(entry.getKey(), requestBody);
         }
         return params;
+    }
+
+    public interface RequestBuilder {
+        RequestBuilder put(String name, Object value);
+
+        RequestBody build();
+    }
+
+    public static RequestBuilder buildRequest() {
+        return new RequestBuilder() {
+            JSONObject params = new JSONObject();
+
+            @Override
+            public RequestBuilder put(String name, Object value) {
+                try {
+                    params.put(name, value);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                return this;
+            }
+
+            @Override
+            public RequestBody build() {
+                return getRequestBody(params);
+            }
+        };
     }
 
 }

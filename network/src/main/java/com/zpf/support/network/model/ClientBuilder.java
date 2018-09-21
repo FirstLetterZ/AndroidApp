@@ -1,5 +1,6 @@
 package com.zpf.support.network.model;
 
+import com.zpf.support.network.header.HeaderCarrier;
 import com.zpf.support.network.interceptor.HeaderInterceptor;
 
 import java.util.concurrent.TimeUnit;
@@ -32,8 +33,8 @@ public class ClientBuilder {
         return clientBuilder;
     }
 
-    public HeaderInterceptor headerBuilder() {
-        return headerInterceptor;
+    public HeaderCarrier headerBuilder() {
+        return headerInterceptor.getHeaderCarrier();
     }
 
     public Retrofit.Builder retrofitBuilder() {
@@ -43,7 +44,6 @@ public class ClientBuilder {
     public OkHttpClient.Builder clientBuilder() {
         return httpClientBuilder;
     }
-
 
     public <T> T build(String url, Class<T> service) {
         retrofitBuilder.client(httpClientBuilder.build());
