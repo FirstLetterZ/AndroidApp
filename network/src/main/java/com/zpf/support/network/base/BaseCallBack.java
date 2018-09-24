@@ -18,6 +18,7 @@ import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.GlobalConfigInterface;
 import com.zpf.support.interfaces.SafeWindowInterface;
 import com.zpf.support.network.model.CustomException;
+import com.zpf.support.network.model.HttpResult;
 
 import org.json.JSONException;
 
@@ -258,7 +259,17 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
      * 检查数据视为null或JsonNull
      */
     protected final boolean checkNull(Object value) {
-        return type[1] != 1 && (value == null || ((value instanceof JsonElement) && ((JsonElement) value).isJsonNull()));
+        if (type[1] == 1) {
+            return false;
+        } else if (value == null) {
+            return true;
+        } else if (value instanceof JsonElement) {
+            return ((JsonElement) value).isJsonNull();
+        } else if (value instanceof HttpResult) {
+            return ((HttpResult) value).getData() == null;
+        } else {
+            return true;
+        }
     }
 
     public boolean isCancel() {

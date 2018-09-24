@@ -63,11 +63,11 @@ public class BottomDialog extends SafeDialog {
         rootView.setPadding((int) (10 * density), 0, (int) (10 * density), (int) (10 * density));
         Space space = new Space(getContext());
         space.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, (int) (10 * density)));
-        GradientDrawable bg=new GradientDrawable();
-        bg.setCornerRadius((int) (10 * density));
-        bg.setColor(Color.WHITE);
+        GradientDrawable rvBg = new GradientDrawable();
+        rvBg.setCornerRadius((int) (10 * density));
+        rvBg.setColor(Color.WHITE);
         RecyclerView rvContent = new RecyclerView(getContext());
-        rvContent.setBackground(bg);
+        rvContent.setBackground(rvBg);
         rvContent.setLayoutManager(new LinearLayoutManager(getContext()));
         menuAdapter = new BottomDialogListAdapter();
         rvContent.setAdapter(menuAdapter);
@@ -77,7 +77,10 @@ public class BottomDialog extends SafeDialog {
         tvBottom.setGravity(Gravity.CENTER);
         tvBottom.setTextColor(Color.RED);
         tvBottom.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) (44 * density)));
-        tvBottom.setBackground(bg);
+        GradientDrawable btnBg = new GradientDrawable();
+        btnBg.setCornerRadius((int) (10 * density));
+        btnBg.setColor(Color.WHITE);
+        tvBottom.setBackground(btnBg);
         tvBottom.setOnClickListener(new SafeClickListener() {
             @Override
             public void click(View v) {

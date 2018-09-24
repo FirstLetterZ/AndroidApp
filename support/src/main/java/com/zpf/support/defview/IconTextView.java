@@ -10,6 +10,7 @@ import android.support.annotation.StringRes;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.View;
 
 import com.zpf.support.interfaces.IconText;
 
@@ -22,8 +23,8 @@ public class IconTextView extends android.support.v7.widget.AppCompatTextView im
     private Typeface mOriginalTypeface;
     private Typeface mTypeface;
     private int imageHeight;
-    private final String defaultTtfFilePath = "iconfont/iconfont.ttf";//默认的ttf文件文职
-    private boolean forcedHidden;
+    private final String defaultTtfFilePath = "iconfont/iconfont.ttf";//默认的ttf文件位置
+    private boolean autoCheck = true;
 
     public IconTextView(Context context) {
         super(context);
@@ -59,8 +60,14 @@ public class IconTextView extends android.support.v7.widget.AppCompatTextView im
     @Override
     public void setImageOnly(Drawable drawable) {
         setText(null);
-        zoom(drawable);
-        setCompoundDrawables(drawable, null, null, null);
+        if (drawable != null && drawable.getIntrinsicHeight() > 0) {
+            if (imageHeight > 0) {
+                zoom(drawable);
+                setCompoundDrawables(drawable, null, null, null);
+            } else {
+                setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
+            }
+        }
     }
 
     @Override
@@ -168,13 +175,22 @@ public class IconTextView extends android.support.v7.widget.AppCompatTextView im
     }
 
     @Override
+    public void setAutoCheck(boolean autoCheck) {
+        this.autoCheck = autoCheck;
+    }
+
+    @Override
     public void setVisibility(int visibility) {
-        forcedHidden = visibility != VISIBLE;
-        if (visibility == VISIBLE) {
+        if (autoCheck) {
             checkViewShow();
         } else {
             super.setVisibility(visibility);
         }
+    }
+
+    @Override
+    public View getView() {
+        return this;
     }
 
     /**
@@ -196,7 +212,7 @@ public class IconTextView extends android.support.v7.widget.AppCompatTextView im
     }
 
     public void checkViewShow() {
-        if (forcedHidden) {
+        if (!autoCheck) {
             return;
         }
         boolean isEmpty = TextUtils.isEmpty(getText());

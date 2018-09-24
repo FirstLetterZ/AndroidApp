@@ -1,6 +1,7 @@
 package com.zpf.support.util;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
@@ -85,13 +86,13 @@ public class PermissionUtil extends PermissionChecker {
         }
     }
 
-    public boolean checkToastEnable(Activity activity) {
+    public boolean checkToastEnabled(Activity activity, DialogInterface.OnDismissListener listener) {
         boolean isOpen = super.checkToastEnabled(activity);
-        showHintDialog(activity);
+        showHintDialog(activity, listener);
         return isOpen;
     }
 
-    public void showHintDialog(Activity activity) {
+    public void showHintDialog(Activity activity, DialogInterface.OnDismissListener listener) {
         if (activity == null || activity.getWindow() == null) {
             return;
         }
@@ -119,6 +120,7 @@ public class PermissionUtil extends PermissionChecker {
                 permissionManager.jumpToNoticeSetting(v.getContext());
             }
         });
+        hintDialog.setOnDismissListener(listener);
         try {
             hintDialog.show();
         } catch (Exception e) {

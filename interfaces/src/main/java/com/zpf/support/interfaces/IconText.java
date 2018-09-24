@@ -6,6 +6,7 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IntRange;
 import android.support.annotation.StringRes;
+import android.view.View;
 
 import java.io.File;
 
@@ -56,4 +57,11 @@ public interface IconText {
 
     int getTextColor();
 
+    void setOnClickListener(View.OnClickListener listener);
+
+    void setAutoCheck(boolean autoCheck);
+
+    void setVisibility(int visibility);
+
+    View getView();
 }
