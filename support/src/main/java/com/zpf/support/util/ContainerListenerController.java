@@ -146,7 +146,7 @@ public class ContainerListenerController implements LifecycleListenerController,
 
     @Override
     public boolean isLiving() {
-        return mStateListener.getState() >= LifecycleState.AFTER_CREATE
+        return mStateListener.getState() >= LifecycleState.BEFORE_CREATE
                 && mStateListener.getState() < LifecycleState.AFTER_DESTROY;
     }
 

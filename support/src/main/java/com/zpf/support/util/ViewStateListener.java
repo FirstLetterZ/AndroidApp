@@ -12,7 +12,7 @@ import com.zpf.support.interfaces.constant.LifecycleState;
  */
 
 public class ViewStateListener implements LifecycleInterface {
-    private int mViewState = LifecycleState.BEFORE_CREATE;
+    private int mViewState = -1;
 
     @Override
     public void onPreCreate(@Nullable Bundle savedInstanceState) {

@@ -10,24 +10,25 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.ref.SoftReference;
+
 /**
  * Created by ZPF on 2018/7/26.
  */
-
 public class ToastUtil {
-    private static ToastUtil mUtil;
+    private static SoftReference<ToastUtil> mUtil;
     private Toast mToast;
     private TextView mText;
 
     private static ToastUtil get() {
-        if (mUtil == null) {
+        if (mUtil == null || mUtil.get() == null) {
             synchronized (ToastUtil.class) {
-                if (mUtil == null) {
-                    mUtil = new ToastUtil();
+                if (mUtil == null || mUtil.get() == null) {
+                    mUtil = new SoftReference<>(new ToastUtil());
                 }
             }
         }
-        return mUtil;
+        return mUtil.get();
     }
 
     private ToastUtil() {
@@ -40,16 +41,19 @@ public class ToastUtil {
             WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT);
             toastLayout.setLayoutParams(params);
-            toastLayout.setPadding((int)(20 * density),(int)(20 * density),(int)(20 * density),(int)(20 * density));
+            toastLayout.setPadding((int) (20 * density), (int) (20 * density), (int) (20 * density), (int) (20 * density));
             toastLayout.setGravity(Gravity.CENTER);
             mText = new TextView(context);
-            mText.setPadding((int)(10 * density),(int)(10 * density),(int)(10 * density),(int)(10 * density));
-            mText.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);
+            mText.setMinWidth((int) (50 * density));
+            mText.setPadding((int) (16 * density), (int) (10 * density), (int) (16 * density), (int) (10 * density));
+            mText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
             mText.setTextColor(Color.WHITE);
             mText.setGravity(Gravity.CENTER_HORIZONTAL);
             GradientDrawable gradientDrawable = new GradientDrawable();
-            gradientDrawable.setCornerRadius(10 * density);
-            gradientDrawable.setColor(Color.parseColor("#aa000000"));
+            gradientDrawable.setCornerRadius(18 * density);
+            gradientDrawable.setColor(Color.parseColor("#90000000"));
+            mText.setBackground(gradientDrawable);
+            toastLayout.addView(mText);
             mToast.setDuration(Toast.LENGTH_LONG);
             mToast.setGravity(Gravity.CENTER, 0, 0);
             mToast.setView(toastLayout);
