@@ -304,7 +304,7 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
             }
             return true;
         } else {
-            return mController.dismiss();
+            return false;
         }
     }
 
@@ -335,13 +335,6 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
     }
 
     @Override
-    public void onBackPressed() {
-        if (!hideLoading()) {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
     public boolean checkPermissions(String... permissions) {
         return mController.getActivityPermissionChecker().checkPermissions(this, permissions);
     }
@@ -352,12 +345,12 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
     }
 
     @Override
-    public void checkPermissions(Runnable onPermission,Runnable onLock, String... permissions) {
+    public void checkPermissions(Runnable onPermission, Runnable onLock, String... permissions) {
         mController.getActivityPermissionChecker().checkPermissions(this, onPermission, onLock, permissions);
     }
 
     @Override
-    public void checkPermissions(Runnable onPermission,Runnable onLock, int requestCode, String... permissions) {
+    public void checkPermissions(Runnable onPermission, Runnable onLock, int requestCode, String... permissions) {
         mController.getActivityPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
     }
 

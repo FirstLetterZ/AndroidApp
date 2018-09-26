@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -299,11 +300,18 @@ public abstract class CompatFragmentContainer<T extends ContainerProcessorInterf
 
     @Override
     public boolean hideLoading() {
-        if (loadingDialog != null && loadingDialog.isShowing()) {
-            loadingDialog.dismiss();
+        FragmentActivity activity = getActivity();
+        if (activity != null && activity instanceof ViewContainerInterface) {
+            return ((ViewContainerInterface) activity).hideLoading();
+        } else if (loadingDialog != null && loadingDialog.isShowing()) {
+            try {
+                loadingDialog.dismiss();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return true;
         } else {
-            return mController.dismiss();
+            return false;
         }
     }
 
@@ -322,13 +330,18 @@ public abstract class CompatFragmentContainer<T extends ContainerProcessorInterf
 
     @Override
     public void showLoading(String message) {
-        if (getState() < LifecycleState.AFTER_DESTROY) {
-            if (loadingDialog != null) {
-                loadingDialog = getProgressDialog();
-            }
-            if (loadingDialog != null && !loadingDialog.isShowing()) {
-                loadingDialog.setText(message);
-                loadingDialog.show();
+        FragmentActivity activity = getActivity();
+        if (activity != null) {
+            if (activity instanceof ViewContainerInterface) {
+                ((ViewContainerInterface) activity).showLoading(message);
+            } else if (isLiving()) {
+                if (loadingDialog == null) {
+                    loadingDialog = getProgressDialog();
+                }
+                if (loadingDialog != null && !loadingDialog.isShowing()) {
+                    loadingDialog.setText(message);
+                    loadingDialog.show();
+                }
             }
         }
     }
@@ -344,12 +357,12 @@ public abstract class CompatFragmentContainer<T extends ContainerProcessorInterf
     }
 
     @Override
-    public void checkPermissions(Runnable onPermission,Runnable onLock, String... permissions) {
+    public void checkPermissions(Runnable onPermission, Runnable onLock, String... permissions) {
         mController.getSupportFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, permissions);
     }
 
     @Override
-    public void checkPermissions(Runnable onPermission,Runnable onLock,int requestCode, String... permissions) {
+    public void checkPermissions(Runnable onPermission, Runnable onLock, int requestCode, String... permissions) {
         mController.getSupportFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
     }
 

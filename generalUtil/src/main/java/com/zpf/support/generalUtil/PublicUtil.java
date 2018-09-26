@@ -72,7 +72,8 @@ public class PublicUtil {
             try {
                 PackageManager manager = context.getPackageManager();
                 PackageInfo info = manager.getPackageInfo(context.getPackageName(), 0);
-                name = info.packageName;
+                int labelRes = info.applicationInfo.labelRes;
+                name = context.getResources().getString(labelRes);
             } catch (Exception e) {
                 e.printStackTrace();
             }

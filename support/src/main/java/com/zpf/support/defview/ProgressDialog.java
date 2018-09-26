@@ -30,11 +30,14 @@ public class ProgressDialog extends SafeDialog {
     protected void initView() {
         setContentView(R.layout.progress_loding);
         textView = findViewById(R.id.tvLoadingPrompt_lib);
+        setCancelable(true);
+        setCanceledOnTouchOutside(false);
     }
 
     @Override
     protected void initWindow(@NonNull Window window) {
         window.getDecorView().setPadding(0, 0, 0, 0);
+        window.setDimAmount(0.16f);
         window.getAttributes().gravity = Gravity.CENTER;
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         window.setBackgroundDrawableResource(android.R.color.transparent);

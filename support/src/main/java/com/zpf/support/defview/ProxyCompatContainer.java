@@ -257,11 +257,18 @@ public class ProxyCompatContainer extends Fragment implements ViewContainerInter
 
     @Override
     public boolean hideLoading() {
-        if (loadingDialog != null && loadingDialog.isShowing()) {
-            loadingDialog.dismiss();
+        FragmentActivity activity = getActivity();
+        if (activity != null && activity instanceof ViewContainerInterface) {
+            return ((ViewContainerInterface) activity).hideLoading();
+        } else if (loadingDialog != null && loadingDialog.isShowing()) {
+            try {
+                loadingDialog.dismiss();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return true;
         } else {
-            return mController.dismiss();
+            return false;
         }
     }
 
@@ -272,13 +279,18 @@ public class ProxyCompatContainer extends Fragment implements ViewContainerInter
 
     @Override
     public void showLoading(String message) {
-        if (getState() < LifecycleState.AFTER_DESTROY) {
-            if (loadingDialog != null) {
-                loadingDialog = getProgressDialog();
-            }
-            if (loadingDialog != null && !loadingDialog.isShowing()) {
-                loadingDialog.setText(message);
-                loadingDialog.show();
+        FragmentActivity activity = getActivity();
+        if (activity != null) {
+            if (activity instanceof ViewContainerInterface) {
+                ((ViewContainerInterface) activity).showLoading(message);
+            } else if (isLiving()) {
+                if (loadingDialog == null) {
+                    loadingDialog = getProgressDialog();
+                }
+                if (loadingDialog != null && !loadingDialog.isShowing()) {
+                    loadingDialog.setText(message);
+                    loadingDialog.show();
+                }
             }
         }
     }
@@ -329,24 +341,11 @@ public class ProxyCompatContainer extends Fragment implements ViewContainerInter
     }
 
     @Override
-    public void onDestroyView() {
-        if (mController.getState() < LifecycleState.AFTER_DESTROY) {
-            mController.onDestroy();
-            loadingDialog = null;
-            activity = null;
-            fragment = null;
-        }
-        super.onDestroyView();
-    }
-
-    @Override
     public void onDestroy() {
-        if (mController.getState() < LifecycleState.AFTER_DESTROY) {
-            mController.onDestroy();
-            loadingDialog = null;
-            activity = null;
-            fragment = null;
-        }
+        mController.onDestroy();
+        loadingDialog = null;
+        activity = null;
+        fragment = null;
         super.onDestroy();
     }
 
@@ -393,12 +392,12 @@ public class ProxyCompatContainer extends Fragment implements ViewContainerInter
     }
 
     @Override
-    public void checkPermissions(Runnable onPermission,Runnable onLock, String... permissions) {
+    public void checkPermissions(Runnable onPermission, Runnable onLock, String... permissions) {
         mController.getSupportFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, permissions);
     }
 
     @Override
-    public void checkPermissions(Runnable onPermission,Runnable onLock, int requestCode, String... permissions) {
+    public void checkPermissions(Runnable onPermission, Runnable onLock, int requestCode, String... permissions) {
         mController.getSupportFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
     }
 

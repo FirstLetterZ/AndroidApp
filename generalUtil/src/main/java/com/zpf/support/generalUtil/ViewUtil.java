@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.AbsListView;
+import android.widget.TextView;
 
 import java.lang.reflect.Field;
 
@@ -163,8 +164,17 @@ public class ViewUtil {
         }
     }
 
+    public void pickUpKeyBoard(TextView view) {
+        InputMethodManager mInputMethodManager = (InputMethodManager) view
+                .getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (mInputMethodManager != null) {
+            mInputMethodManager.hideSoftInputFromWindow(view.getWindowToken(),
+                    InputMethodManager.RESULT_UNCHANGED_SHOWN);
+        }
+    }
+
     //弹出软键盘
-    public static void showKeyboard(Activity activity) {
+    public static void showKeyBoard(Activity activity) {
         /*如果顶部视图可见高度大于2/3屏幕高度，则认定软键盘未弹出（大约计算）*/
         Rect rect = new Rect();
         activity.getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
@@ -173,6 +183,16 @@ public class ViewUtil {
             if (imm != null) {
                 imm.toggleSoftInput(0, InputMethodManager.SHOW_FORCED);
             }
+        }
+    }
+
+    public static void showKeyBoard(TextView view) {
+        view.setFocusable(true);
+        view.requestFocus();
+        InputMethodManager inputManager = (InputMethodManager) view
+                .getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (inputManager != null) {
+            inputManager.showSoftInput(view, 0);
         }
     }
 }

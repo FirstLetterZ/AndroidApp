@@ -120,6 +120,7 @@ public class ProxyContainer extends Fragment implements ViewContainerInterface {
             fragment.startActivity(intent);
         }
     }
+
     @Override
     public void startActivity(Intent intent, @Nullable Bundle options) {
         if (activity != null) {
@@ -164,6 +165,7 @@ public class ProxyContainer extends Fragment implements ViewContainerInterface {
             fragment.startActivityForResult(intent, requestCode, options);
         }
     }
+
     @Override
     public void show(SafeWindowInterface window) {
         mController.show(window);
@@ -240,11 +242,18 @@ public class ProxyContainer extends Fragment implements ViewContainerInterface {
 
     @Override
     public boolean hideLoading() {
-        if (loadingDialog != null && loadingDialog.isShowing()) {
-            loadingDialog.dismiss();
+        Activity activity = getActivity();
+        if (activity != null && activity instanceof ViewContainerInterface) {
+            return ((ViewContainerInterface) activity).hideLoading();
+        } else if (loadingDialog != null && loadingDialog.isShowing()) {
+            try {
+                loadingDialog.dismiss();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return true;
         } else {
-            return mController.dismiss();
+            return false;
         }
     }
 
@@ -267,13 +276,18 @@ public class ProxyContainer extends Fragment implements ViewContainerInterface {
 
     @Override
     public void showLoading(String message) {
-        if (getState() < LifecycleState.AFTER_DESTROY) {
-            if (loadingDialog != null) {
-                loadingDialog = getProgressDialog();
-            }
-            if (loadingDialog != null && !loadingDialog.isShowing()) {
-                loadingDialog.setText(message);
-                loadingDialog.show();
+        Activity activity = getActivity();
+        if (activity != null) {
+            if (activity instanceof ViewContainerInterface) {
+                ((ViewContainerInterface) activity).showLoading(message);
+            } else if (isLiving()) {
+                if (loadingDialog == null) {
+                    loadingDialog = getProgressDialog();
+                }
+                if (loadingDialog != null && !loadingDialog.isShowing()) {
+                    loadingDialog.setText(message);
+                    loadingDialog.show();
+                }
             }
         }
     }
@@ -324,24 +338,11 @@ public class ProxyContainer extends Fragment implements ViewContainerInterface {
     }
 
     @Override
-    public void onDestroyView() {
-        if (mController.getState() < LifecycleState.AFTER_DESTROY) {
-            mController.onDestroy();
-            loadingDialog = null;
-            activity = null;
-            fragment = null;
-        }
-        super.onDestroyView();
-    }
-
-    @Override
     public void onDestroy() {
-        if (mController.getState() < LifecycleState.AFTER_DESTROY) {
-            mController.onDestroy();
-            loadingDialog = null;
-            activity = null;
-            fragment = null;
-        }
+        mController.onDestroy();
+        loadingDialog = null;
+        activity = null;
+        fragment = null;
         super.onDestroy();
     }
 
@@ -388,12 +389,12 @@ public class ProxyContainer extends Fragment implements ViewContainerInterface {
     }
 
     @Override
-    public void checkPermissions(Runnable onPermission,Runnable onLock, String... permissions) {
-        mController.getFragmentPermissionChecker().checkPermissions(this, onPermission, onLock,permissions);
+    public void checkPermissions(Runnable onPermission, Runnable onLock, String... permissions) {
+        mController.getFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, permissions);
     }
 
     @Override
-    public void checkPermissions(Runnable onPermission,Runnable onLock, int requestCode, String... permissions) {
+    public void checkPermissions(Runnable onPermission, Runnable onLock, int requestCode, String... permissions) {
         mController.getFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
     }
 

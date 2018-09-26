@@ -16,6 +16,7 @@ import com.zpf.support.interfaces.SafeWindowInterface;
 public class SafeDialog extends Dialog implements SafeWindowInterface {
     protected SafeWindowController listener;
     protected CallBackInterface callBack;
+    protected volatile boolean waitShow;
 
     public SafeDialog(@NonNull Context context) {
         super(context);
@@ -71,7 +72,7 @@ public class SafeDialog extends Dialog implements SafeWindowInterface {
 
     @Override
     public boolean isShowing() {
-        return super.isShowing();
+        return waitShow || super.isShowing();
     }
 
     @Override
@@ -91,6 +92,7 @@ public class SafeDialog extends Dialog implements SafeWindowInterface {
 
     @Override
     protected void onStop() {
+        waitShow = false;
         super.onStop();
         if (this.callBack != null) {
             try {

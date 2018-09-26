@@ -2,6 +2,7 @@ package com.zpf.support.base;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -11,11 +12,15 @@ import android.widget.TextView;
 import com.zpf.support.constant.BaseKeyConst;
 import com.zpf.support.generalUtil.SafeClickListener;
 import com.zpf.support.generalUtil.permission.OnLockPermissionRunnable;
+import com.zpf.support.generalUtil.permission.PermissionInfo;
+import com.zpf.support.interfaces.ContainerProcessorInterface;
 import com.zpf.support.interfaces.TitleBarInterface;
 import com.zpf.support.interfaces.ViewContainerInterface;
-import com.zpf.support.interfaces.ContainerProcessorInterface;
 import com.zpf.support.util.CacheMap;
 import com.zpf.support.util.LifecycleLogUtil;
+import com.zpf.support.util.PermissionUtil;
+
+import java.util.List;
 
 /**
  * Created by ZPF on 2018/6/14.
@@ -100,7 +105,12 @@ public abstract class ContainerProcessor implements ContainerProcessorInterface 
 
     @Override
     public void runWithPermission(Runnable runnable, String... permissions) {
-        mContainer.checkPermissions(runnable, null, permissions);
+        mContainer.checkPermissions(runnable, new OnLockPermissionRunnable() {
+            @Override
+            public void onLock(List<PermissionInfo> list) {
+                PermissionUtil.get().showPermissionRationaleDialog(mContainer.getCurrentActivity(), list);
+            }
+        }, permissions);
     }
 
     @Override
@@ -110,6 +120,22 @@ public abstract class ContainerProcessor implements ContainerProcessorInterface 
 
     public void runWithPermission(Runnable runnable, OnLockPermissionRunnable onLackOfPermissions, String... permissions) {
         mContainer.checkPermissions(runnable, onLackOfPermissions, permissions);
+    }
+
+    public <T extends View> T bind(@IdRes int viewId) {
+        return bind(viewId, safeClickListener);
+    }
+
+    @Override
+    public <T extends View> T bind(@IdRes int viewId, View.OnClickListener clickListener) {
+        T result = null;
+        if (mContainer != null) {
+            result = mContainer.getRootLayout().getLayout().findViewById(viewId);
+            if (result != null) {
+                result.setOnClickListener(clickListener);
+            }
+        }
+        return result;
     }
 
     public <T extends View> T $(int viewId) {

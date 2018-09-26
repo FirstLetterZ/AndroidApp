@@ -41,17 +41,17 @@ public class ToastUtil {
             WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT);
             toastLayout.setLayoutParams(params);
-            toastLayout.setPadding((int) (20 * density), (int) (20 * density), (int) (20 * density), (int) (20 * density));
+            toastLayout.setPadding((int) (16 * density), (int) (16 * density), (int) (16 * density), (int) (16 * density));
             toastLayout.setGravity(Gravity.CENTER);
             mText = new TextView(context);
-            mText.setMinWidth((int) (50 * density));
-            mText.setPadding((int) (16 * density), (int) (10 * density), (int) (16 * density), (int) (10 * density));
+            mText.setMinWidth((int) (80 * density));
+            mText.setPadding((int) (12 * density), (int) (8 * density), (int) (12 * density), (int) (8 * density));
             mText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
             mText.setTextColor(Color.WHITE);
             mText.setGravity(Gravity.CENTER_HORIZONTAL);
             GradientDrawable gradientDrawable = new GradientDrawable();
-            gradientDrawable.setCornerRadius(18 * density);
-            gradientDrawable.setColor(Color.parseColor("#90000000"));
+            gradientDrawable.setCornerRadius(12 * density);
+            gradientDrawable.setColor(Color.parseColor("#aa000000"));
             mText.setBackground(gradientDrawable);
             toastLayout.addView(mText);
             mToast.setDuration(Toast.LENGTH_LONG);
@@ -70,5 +70,13 @@ public class ToastUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static TextView getTextView() {
+        return get().mText;
+    }
+
+    public static Toast getToastView() {
+        return get().mToast;
     }
 }
