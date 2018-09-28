@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="StretchableIndicator">
+        <attr name="dotHeight" format="dimension"/>
+        <attr name="dotWidth" format="dimension"/>
+        <attr name="dotSpace" format="dimension"/>
+        <attr name="dotFront" format="reference"/>
+        <attr name="dotBack" format="reference"/>
+    </declare-styleable>
+</resources>

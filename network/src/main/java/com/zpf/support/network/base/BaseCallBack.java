@@ -121,7 +121,7 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
             description = exception.response().message();
             code = exception.response().code();
         } else if (e instanceof CustomException) {
-            code = ((CustomException)e).getCode();
+            code = ((CustomException) e).getCode();
             description = e.getMessage();
         } else if (e instanceof AccountsException) {
             code = ErrorCode.ACCOUNT_ERROR;
@@ -172,14 +172,16 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
             Object result = ((GlobalConfigInterface) application).invokeMethod(
                     this, "checkLoginEffective", code);
             if (result != null && result instanceof Boolean) {
-                if ((boolean) result && complete) {
-                    complete(false);
+                if ((boolean) result) {
+                    if (complete) {
+                        complete(false);
+                    }
                     return;
                 }
             }
         }
         boolean showDialog = false;
-        if (code <= -900) {
+        if (code > -900) {
             Dialog dialog = showError(code, description);
             showDialog = dialog != null;
             if (showDialog && !dialog.isShowing() && dialog.getWindow() != null) {
@@ -223,10 +225,24 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
     }
 
     /**
+     * 检查数据视为null或JsonNull
+     */
+    protected final boolean checkNull(Object value) {
+        if (type[1] == 1) {
+            return false;
+        } else if (value == null) {
+            return true;
+        } else if (value instanceof JsonElement) {
+            return ((JsonElement) value).isJsonNull();
+        } else if (value instanceof HttpResult) {
+            return ((HttpResult) value).getData() == null;
+        } else {
+            return true;
+        }
+    }
+
+    /**
      * 检查内容是否满足自定义的条件
-     *
-     * @param result
-     * @return
      */
     protected boolean checkResult(@Nullable T result) {
         return true;
@@ -234,8 +250,6 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
 
     /**
      * 如果不满足自定义的检查条件则执行下面的方法
-     *
-     * @param result
      */
     protected void onResultIllegal(@Nullable T result) {
 
@@ -253,23 +267,6 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
      */
     private boolean autoToast() {
         return type[0] == 0;
-    }
-
-    /**
-     * 检查数据视为null或JsonNull
-     */
-    protected final boolean checkNull(Object value) {
-        if (type[1] == 1) {
-            return false;
-        } else if (value == null) {
-            return true;
-        } else if (value instanceof JsonElement) {
-            return ((JsonElement) value).isJsonNull();
-        } else if (value instanceof HttpResult) {
-            return ((HttpResult) value).getData() == null;
-        } else {
-            return true;
-        }
     }
 
     public boolean isCancel() {

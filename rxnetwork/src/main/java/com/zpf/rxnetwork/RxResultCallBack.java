@@ -1,5 +1,7 @@
 package com.zpf.rxnetwork;
 
+import android.support.annotation.Nullable;
+
 import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.SafeWindowInterface;
 import com.zpf.support.network.model.HttpResult;
@@ -23,6 +25,20 @@ public abstract class RxResultCallBack<T> extends RxCallBack<HttpResult<T>> {
     }
 
     @Override
+    protected boolean checkSuccessful(@Nullable HttpResult<T> result) {
+        return result != null && result.isSuccess();
+    }
+
+    @Override
+    protected void onUnsuccessful(@Nullable HttpResult<T> result) {
+        if (result == null) {
+            onDataNull();
+        } else {
+            fail(result.getCode(), result.getMessage(), true);
+        }
+    }
+
+    @Override
     public RxResultCallBack<T> bindToManager(CallBackManagerInterface manager) {
         super.bindToManager(manager);
         return this;
@@ -32,6 +48,20 @@ public abstract class RxResultCallBack<T> extends RxCallBack<HttpResult<T>> {
     public RxResultCallBack<T> bindToManager(CallBackManagerInterface manager, SafeWindowInterface dialog) {
         super.bindToManager(manager, dialog);
         return this;
+    }
+
+    @Override
+    protected boolean checkResult(@Nullable HttpResult<T> result) {
+        return (result == null || result.isSuccess());
+    }
+
+    @Override
+    protected void onResultIllegal(@Nullable HttpResult<T> result) {
+        if (result != null) {
+            fail(result.getCode(), result.getMessage(), true);
+        } else {
+            onDataNull();
+        }
     }
 
     protected abstract void handleResult(T result);

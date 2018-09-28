@@ -1,5 +1,7 @@
 package com.zpf.support.network.retrofit;
 
+import android.support.annotation.Nullable;
+
 import com.zpf.support.generalUtil.MainHandler;
 import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.SafeWindowInterface;
@@ -37,30 +39,28 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
             return;
         }
         removeObservable();
-        if (response.isSuccessful()) {
+        if (checkSuccessful(response)) {
             final T result = response.body();
-            if (checkNull(response.body())) {
-                onDataNull();
-            } else {
-                MainHandler.get().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (isCancel()) {
-                            return;
-                        }
-                        if (checkResult(result)) {
-                            try {
-                                handleResponse(result);
-                                complete(true);
-                            } catch (Exception e) {
-                                handleError(e);
-                            }
-                        } else {
-                            onResultIllegal(result);
-                        }
+            MainHandler.get().post(new Runnable() {
+                @Override
+                public void run() {
+                    if (isCancel()) {
+                        return;
                     }
-                });
-            }
+                    if (checkNull(result)) {
+                        onDataNull();
+                    } else if (checkResult(result)) {
+                        try {
+                            handleResponse(result);
+                            complete(true);
+                        } catch (Exception e) {
+                            handleError(e);
+                        }
+                    } else {
+                        onResultIllegal(result);
+                    }
+                }
+            });
         } else {
             MainHandler.get().post(new Runnable() {
                 @Override
@@ -68,7 +68,7 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
                     if (isCancel()) {
                         return;
                     }
-                    fail(response.code(), response.message(), true);
+                    onUnsuccessful(response);
                 }
             });
         }
@@ -88,6 +88,24 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
                 handleError(t);
             }
         });
+    }
+
+    /**
+     * 检查是否为成功返回
+     */
+    protected boolean checkSuccessful(@Nullable Response<T> response) {
+        return response != null && response.isSuccessful();
+    }
+
+    /**
+     * 不是成功返回
+     */
+    protected void onUnsuccessful(@Nullable Response<T> response) {
+        if (response == null) {
+            onDataNull();
+        } else {
+            fail(response.code(), response.message(), true);
+        }
     }
 
     @Override

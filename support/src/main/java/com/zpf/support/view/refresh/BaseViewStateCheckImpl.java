@@ -6,8 +6,9 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.AbsListView;
 
-import com.zpf.support.interfaces.PackedLayoutInterface;
 import com.zpf.support.generalUtil.ViewUtil;
+import com.zpf.support.interfaces.PackedLayoutInterface;
+import com.zpf.support.view.StickyNavLayout;
 
 /**
  * Created by ZPF on 2017/11/15.
@@ -26,6 +27,8 @@ public class BaseViewStateCheckImpl implements ViewStateCheckListener {
             return ViewUtil.isRecyclerViewToBottom((RecyclerView) view);
         } else if (view instanceof PackedLayoutInterface) {
             return checkPullUp(((PackedLayoutInterface) view).getCurrentChild());
+        } else if (view instanceof StickyNavLayout) {
+            return ((StickyNavLayout) view).isContentViewToBottom();
         } else {
             return !(view instanceof ViewGroup) || ViewUtil.isViewGroupToBottom((ViewGroup) view);
         }
@@ -50,6 +53,18 @@ public class BaseViewStateCheckImpl implements ViewStateCheckListener {
     public void relayout(View view, float pullDownY, float pullUpY) {
         if (view == null) {
             return;
+        } else if (view instanceof StickyNavLayout) {
+            int remainHeaderHeight = ((StickyNavLayout) view).getHeaderViewHeight() - view.getScrollY();
+            if (remainHeaderHeight + (pullDownY + pullUpY) < 0) {
+                View childTwo = ((StickyNavLayout) view).getChildAt(2);
+                view.layout(0, -remainHeaderHeight, view.getMeasuredWidth(), view.getMeasuredHeight() - (int) (pullDownY + pullUpY) - remainHeaderHeight);
+                childTwo.layout(0, childTwo.getTop(), view.getMeasuredWidth(),
+                        view.getMeasuredHeight() + (int) (pullDownY + pullUpY) + ((StickyNavLayout) view).getHeaderViewHeight());
+                childTwo.scrollBy(0, (int) (-pullDownY - pullUpY));//滚到到最下面一条
+            } else {
+                view.layout(0, (int) (pullDownY + pullUpY), view.getMeasuredWidth(),
+                        (int) (pullDownY + pullUpY) + view.getMeasuredHeight());
+            }
         } else {
             view.layout(0, (int) (pullDownY + pullUpY), view.getMeasuredWidth(),
                     (int) (pullDownY + pullUpY) + view.getMeasuredHeight());
