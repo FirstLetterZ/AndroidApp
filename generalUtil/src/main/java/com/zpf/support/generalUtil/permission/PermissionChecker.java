@@ -11,7 +11,6 @@ import android.text.TextUtils;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -24,7 +23,7 @@ public class PermissionChecker {
 
     @SuppressLint("InlinedApi")
     private void initPermissionList() {
-        permissionList = new LinkedList<>();
+        permissionList = new ArrayList<>(24);
         permissionList.add(new PermissionInfo(Manifest.permission.WRITE_CONTACTS, "写入联系人", Manifest.permission_group.CONTACTS));
         permissionList.add(new PermissionInfo(Manifest.permission.READ_CONTACTS, "读取联系人", Manifest.permission_group.CONTACTS));
         permissionList.add(new PermissionInfo(Manifest.permission.GET_ACCOUNTS, "访问账户Gmail列表", Manifest.permission_group.CONTACTS));
@@ -46,7 +45,6 @@ public class PermissionChecker {
 
         permissionList.add(new PermissionInfo(Manifest.permission.ACCESS_FINE_LOCATION, "获取精确位置", Manifest.permission_group.LOCATION));
         permissionList.add(new PermissionInfo(Manifest.permission.ACCESS_COARSE_LOCATION, "获取粗略位置", Manifest.permission_group.LOCATION));
-
 
         permissionList.add(new PermissionInfo(Manifest.permission.READ_EXTERNAL_STORAGE, "读取外部存储", Manifest.permission_group.STORAGE));
         permissionList.add(new PermissionInfo(Manifest.permission.WRITE_EXTERNAL_STORAGE, "写入外部存储", Manifest.permission_group.STORAGE));

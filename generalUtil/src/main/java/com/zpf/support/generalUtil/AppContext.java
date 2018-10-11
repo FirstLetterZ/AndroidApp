@@ -10,9 +10,15 @@ import java.lang.reflect.Method;
  */
 public class AppContext {
     private static Application sApplication;
+
     public static Application get() {
         return sApplication != null ? sApplication : getApplication();
     }
+
+    public static void init(Application application) {
+        sApplication = application;
+    }
+
     @SuppressLint("PrivateApi")
     private static Application getApplication() {
         Application application = null;

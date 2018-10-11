@@ -101,7 +101,7 @@ public class HeaderCarrier {
                 if (entryValue != null && entryValue.getValue() != null) {
                     String value = entryValue.getValue();
                     if (value != null) {
-                        builder.addHeader(entry.getKey(), value);
+                        builder.header(entry.getKey(), value);
                     }
                 }
             }
