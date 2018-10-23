@@ -1,4 +1,4 @@
-package com.zpf.support.generalUtil.permission;
+package com.zpf.permission;
 
 import android.content.ComponentName;
 import android.content.Context;

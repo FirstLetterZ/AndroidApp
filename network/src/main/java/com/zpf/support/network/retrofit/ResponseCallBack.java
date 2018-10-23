@@ -2,7 +2,7 @@ package com.zpf.support.network.retrofit;
 
 import android.support.annotation.Nullable;
 
-import com.zpf.support.generalUtil.MainHandler;
+import com.zpf.generalUtil.MainHandler;
 import com.zpf.support.interfaces.CallBackManagerInterface;
 import com.zpf.support.interfaces.SafeWindowInterface;
 import com.zpf.support.network.base.BaseCallBack;

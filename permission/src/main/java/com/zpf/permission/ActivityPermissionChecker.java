@@ -1,4 +1,4 @@
-package com.zpf.support.generalUtil.permission;
+package com.zpf.permission;
 
 import android.app.Activity;
 import android.content.pm.PackageManager;

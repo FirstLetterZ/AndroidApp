@@ -1,4 +1,4 @@
-package com.zpf.support.generalUtil;
+package com.zpf.generalUtil;
 
 import android.app.Fragment;
 import android.app.FragmentManager;

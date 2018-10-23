@@ -1,4 +1,4 @@
-package com.zpf.support.generalUtil;
+package com.zpf.generalUtil;
 
 import java.util.Timer;
 import java.util.TimerTask;

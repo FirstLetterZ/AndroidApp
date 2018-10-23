@@ -20,7 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.OverScroller;
 import android.widget.ScrollView;
 
-import com.zpf.support.generalUtil.ViewUtil;
+import com.zpf.generalUtil.ViewUtil;
 import com.zpf.support.interfaces.PackedLayoutInterface;
 
 public class StickyNavLayout extends LinearLayout {

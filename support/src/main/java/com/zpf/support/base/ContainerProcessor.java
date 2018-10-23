@@ -10,9 +10,9 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.zpf.support.constant.BaseKeyConst;
-import com.zpf.support.generalUtil.SafeClickListener;
-import com.zpf.support.generalUtil.permission.OnLockPermissionRunnable;
-import com.zpf.support.generalUtil.permission.PermissionInfo;
+import com.zpf.generalUtil.SafeClickListener;
+import com.zpf.permission.OnLockPermissionRunnable;
+import com.zpf.permission.PermissionInfo;
 import com.zpf.support.interfaces.ContainerProcessorInterface;
 import com.zpf.support.interfaces.TitleBarInterface;
 import com.zpf.support.interfaces.ViewContainerInterface;
@@ -28,7 +28,7 @@ import java.util.List;
 public abstract class ContainerProcessor implements ContainerProcessorInterface {
     protected ViewContainerInterface mContainer;
     protected TitleBarInterface mTitleBar;
-    private SafeClickListener safeClickListener = new SafeClickListener() {
+    protected final SafeClickListener safeClickListener = new SafeClickListener() {
         @Override
         public void click(View v) {
             ContainerProcessor.this.onClick(v);

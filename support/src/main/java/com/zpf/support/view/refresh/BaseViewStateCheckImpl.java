@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.AbsListView;
 
-import com.zpf.support.generalUtil.ViewUtil;
+import com.zpf.generalUtil.ViewUtil;
 import com.zpf.support.interfaces.PackedLayoutInterface;
 import com.zpf.support.view.StickyNavLayout;
 

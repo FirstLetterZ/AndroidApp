@@ -14,8 +14,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import com.zpf.support.generalUtil.AppContext;
-import com.zpf.support.generalUtil.ViewUtil;
+import com.zpf.generalUtil.AppContext;
+import com.zpf.generalUtil.ViewUtil;
 import com.zpf.support.interfaces.GlobalConfigInterface;
 import com.zpf.support.interfaces.RootLayoutInterface;
 import com.zpf.support.interfaces.TitleBarInterface;

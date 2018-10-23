@@ -1,4 +1,4 @@
-package com.zpf.support.generalUtil.permission;
+package com.zpf.permission;
 
 import java.util.ArrayList;
 import java.util.List;

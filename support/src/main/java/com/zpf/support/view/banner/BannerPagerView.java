@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.widget.Scroller;
 
-import com.zpf.support.generalUtil.TimeTaskUtil;
+import com.zpf.generalUtil.TimeTaskUtil;
 
 import java.lang.reflect.Field;
 

@@ -4,8 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 
-import com.zpf.support.generalUtil.AppContext;
-import com.zpf.support.generalUtil.DataDefault;
+import com.zpf.generalUtil.AppContext;
+import com.zpf.generalUtil.DataDefault;
 
 /**
  * Created by ZPF on 2017/9/29.

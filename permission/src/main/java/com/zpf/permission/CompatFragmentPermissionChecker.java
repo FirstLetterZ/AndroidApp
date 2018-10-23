@@ -1,20 +1,21 @@
-package com.zpf.support.generalUtil.permission;
+package com.zpf.permission;
 
-import android.app.Fragment;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 使用android.app.Fragment检查权限
+ * 使用android.support.v4.app.Fragment检查权限
  * Created by ZPF on 2018/8/22.
  */
-public class FragmentPermissionChecker extends PermissionChecker {
+public class CompatFragmentPermissionChecker extends PermissionChecker {
+
     public boolean checkPermissions(@NonNull Fragment fragment, String... permissions) {
         return checkPermissions(fragment, REQ_PERMISSION_CODE, permissions);
     }
@@ -72,4 +73,5 @@ public class FragmentPermissionChecker extends PermissionChecker {
             }
         }
     }
+
 }

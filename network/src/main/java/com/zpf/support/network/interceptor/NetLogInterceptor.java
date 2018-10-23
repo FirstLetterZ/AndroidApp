@@ -84,8 +84,8 @@ public class NetLogInterceptor implements Interceptor {
             }
             if (TextUtils.isEmpty(bodyString)) {
                 bodyString = "{\"code\":" + response.code() + ",\"message\":\"" + response.message() +
-                        ",\"Content-Type\":\"" + response.headers().get("Content-Type") +
-                        ",\"Content-Length\":\"" + response.headers().get("Content-Length") +
+                        "\",\"Content-Type\":\"" + response.headers().get("Content-Type") +
+                        "\",\"Content-Length\":\"" + response.headers().get("Content-Length") +
                         "\"}";
             }
             String msg = buildLogMessage(url, method, t1, t2, params, bodyString);

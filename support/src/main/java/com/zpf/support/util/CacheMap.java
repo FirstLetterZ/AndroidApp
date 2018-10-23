@@ -6,7 +6,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.SparseArray;
 
-import com.zpf.support.generalUtil.DataDefault;
+import com.zpf.generalUtil.DataDefault;
 
 import java.util.List;
 

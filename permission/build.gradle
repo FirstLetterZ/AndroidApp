@@ -17,12 +17,6 @@ android {
 }
 
 dependencies {
-    api project(':generalUtil')
-    api project(':interfaces')
-    api project(':permission')
-//    api 'com.zpf:interfaces:0.0.2'
-//    api 'com.zpf:generalUtil:0.0.1'
-    api rootProject.ext.dependencies.design
-    api rootProject.ext.dependencies.gson
+    api rootProject.ext.dependencies.supportV4
 }
-apply from: "../bintrayUpload.gradle"
+//apply from: "../bintrayUpload.gradle"
