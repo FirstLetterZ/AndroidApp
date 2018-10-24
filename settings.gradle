@@ -1,2 +1,2 @@
-include ':app', ':generalUtil', ':support', ':glideutil', ':network', ':refresh', ':webview', ':gsonParse', ':permission',
+include ':app', ':toolkit', ':support', ':glideutil', ':network', ':refresh', ':webview', ':gsonParse', ':permission',
         ':rxnetwork', 'interfaces'

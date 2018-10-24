@@ -14,6 +14,8 @@ import android.text.TextUtils;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ZPF on 2018/7/26.
@@ -79,6 +81,20 @@ public class PublicUtil {
             }
         }
         return name;
+    }
+
+    public static boolean isAppInstalled(Context context, String packagename) {
+        List<PackageInfo> pInfo = context.getPackageManager().getInstalledPackages(0);
+        if (pInfo == null) {
+            return false;
+        } else {
+            for (PackageInfo info : pInfo) {
+                if (TextUtils.equals(info.packageName, packagename)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static String getMoneyValue(BigDecimal bigDecimal, int scale) {
