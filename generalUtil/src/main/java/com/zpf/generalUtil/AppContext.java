@@ -19,6 +19,12 @@ public class AppContext {
         sApplication = application;
     }
 
+    public static void checkInit(Application application) {
+        if (get() == null) {
+            sApplication = application;
+        }
+    }
+
     @SuppressLint("PrivateApi")
     private static Application getApplication() {
         Application application = null;

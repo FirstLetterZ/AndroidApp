@@ -14,20 +14,28 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Base64;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 public class FileUtil {
 
@@ -49,83 +57,21 @@ public class FileUtil {
         }
     }
 
-    //通过name查找Provider返回对应的ProviderInfo
-    public static ProviderInfo getProviderByName(Context context, String name) {
-        ProviderInfo info = null;
+    public static List<String> getProviderAuthorityList(Context context) {
+        List<String> providerArray = new ArrayList<>();
         try {
-            PackageInfo packageInfo = context.getPackageManager()
-                    .getPackageInfo(context.getPackageName(), PackageManager.GET_PROVIDERS);
-            ProviderInfo[] providers = packageInfo.providers;
-            for (ProviderInfo providerInfo : providers) {
-                if (TextUtils.equals(providerInfo.name, name)) {
-                    info = providerInfo;
-                    break;
+            PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(),
+                    PackageManager.GET_PROVIDERS);
+            ProviderInfo[] providers = info.providers;
+            if (providers != null && providers.length > 0) {
+                for (ProviderInfo provider : providers) {
+                    providerArray.add(provider.authority);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return info;
-    }
-
-    public static void closeQuietly(Closeable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (RuntimeException ex) {
-                throw ex;
-            } catch (Exception ignored) {
-
-            }
-        }
-    }
-
-    public static File base64ToFile(String base64, File file) {
-        FileOutputStream out = null;
-        try {
-            // 解码，然后将字节转换为文件
-            byte[] bytes = Base64.decode(base64, Base64.DEFAULT);// 将字符串转换为byte数组
-            ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-            byte[] buffer = new byte[1024];
-            out = new FileOutputStream(file);
-            int byteRead;
-            while ((byteRead = in.read(buffer)) != -1) {
-                out.write(buffer, 0, byteRead); // 文件写操作
-            }
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-        } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return file;
-    }
-
-    public static String fileToBase64(File file) {
-        String base64 = "";
-        InputStream in = null;
-        try {
-            in = new FileInputStream(file);
-            byte[] bytes = new byte[in.available()];
-            int length = in.read(bytes);
-            base64 = Base64.encodeToString(bytes, 0, length, Base64.DEFAULT);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return base64;
+        return providerArray;
     }
 
     public static String getCameraCachePath() {
@@ -183,6 +129,20 @@ public class FileUtil {
     }
 
     //向文件中写入数据
+    public static boolean writeToFile(String file, String content) {
+        return writeToFile(file, content, Charset.defaultCharset());
+    }
+
+    public static boolean writeToFile(String file, String content, Charset charset) {
+        try {
+            byte[] data = content.getBytes(charset);
+            return writeToFile(file, data);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public static boolean writeToFile(String filePath, byte[] data) {
         BufferedOutputStream bufferedOut = null;
         try {
@@ -213,7 +173,6 @@ public class FileUtil {
             while ((len = inputStream.read(buf)) != -1) {
                 fos.write(buf, 0, len);
                 fos.flush();
-
             }
             if (filePath.endsWith(".jpg") || filePath.endsWith(".png")) {
                 notifyPhotoAlbum(AppContext.get(), filePath);
@@ -232,6 +191,142 @@ public class FileUtil {
         return false;
     }
 
+    public static File zipFiles(File[] files, String filename) throws IOException {
+        File target;
+        File zip = new File(filename);
+        if (!zip.exists()) {
+            if (zip.isDirectory()) {
+                zip.mkdirs();
+            } else {
+                zip.createNewFile();
+            }
+        }
+        if (!zip.exists()) {
+            return null;
+        } else {
+            if (zip.isDirectory()) {
+                target = new File(zip, "Files_" + System.currentTimeMillis() + ".zip");
+                if (!target.exists()) {
+                    target.createNewFile();
+                }
+            } else {
+                target = zip;
+            }
+        }
+        if (!target.exists()) {
+            return null;
+        }
+        List<String> names = new ArrayList<>();
+        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(target));
+        for (File f : files) {
+            String name = f.getName();
+            if (names.contains(name)) {
+                name = UUID.randomUUID() + "_" + name;
+            }
+            zos.putNextEntry(new ZipEntry(name));
+            names.add(name);
+            InputStream fis = new FileInputStream(f);
+            byte content[] = new byte[1024];
+            int dataLen;
+            while ((dataLen = fis.read(content)) > 0) {
+                zos.write(content, 0, dataLen);
+            }
+            fis.close();
+        }
+        zos.closeEntry();
+        zos.flush();
+        zos.close();
+        return target;
+    }
+
+    public boolean upZipFile(String filePath, String folderPath) {
+        ZipFile zipFile;
+        File folder = new File(folderPath);
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+        try {
+            // 转码为GBK格式，支持中文
+            zipFile = new ZipFile(filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        Enumeration zList = zipFile.entries();
+        ZipEntry ze;
+        byte[] buf = new byte[1024];
+        while (zList.hasMoreElements()) {
+            ze = (ZipEntry) zList.nextElement();
+            // 列举的压缩文件里面的各个文件，判断是否为目录
+            if (ze.isDirectory()) {
+                String dirstr = folderPath + ze.getName();
+                dirstr.trim();
+                File f = new File(dirstr);
+                f.mkdir();
+                continue;
+            }
+            OutputStream os;
+            FileOutputStream fos;
+            // ze.getName()会返回 script/start.script这样的，是为了返回实体的File
+            File realFile = getRealFileName(folderPath, ze.getName());
+            try {
+                fos = new FileOutputStream(realFile);
+            } catch (FileNotFoundException e) {
+                return false;
+            }
+            os = new BufferedOutputStream(fos);
+            InputStream is;
+            try {
+                is = new BufferedInputStream(zipFile.getInputStream(ze));
+            } catch (IOException e) {
+                return false;
+            }
+            int readLen = 0;
+            // 进行一些内容复制操作
+            try {
+                while ((readLen = is.read(buf, 0, 1024)) != -1) {
+                    os.write(buf, 0, readLen);
+                }
+            } catch (IOException e) {
+                return false;
+            }
+            try {
+                is.close();
+                os.close();
+            } catch (IOException e) {
+                return false;
+            }
+        }
+        try {
+            zipFile.close();
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public static File getRealFileName(String baseDir, String absFileName) {
+        absFileName = absFileName.replace("\\", "/");
+        String[] dirs = absFileName.split("/");
+        File ret = new File(baseDir);
+        String substr;
+        if (dirs.length > 1) {
+            for (int i = 0; i < dirs.length - 1; i++) {
+                substr = dirs[i];
+                ret = new File(ret, substr);
+            }
+
+            if (!ret.exists())
+                ret.mkdirs();
+            substr = dirs[dirs.length - 1];
+            ret = new File(ret, substr);
+            return ret;
+        } else {
+            ret = new File(ret, absFileName);
+        }
+        return ret;
+    }
+
     public static File getFileOrCreate(String folderPath, String name) {
         File file = new File(folderPath);
         if (!file.exists()) {
@@ -246,6 +341,38 @@ public class FileUtil {
             }
         }
         return f;
+    }
+
+    public static byte[] readBytes(String file) {
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            int len = fis.available();
+            byte[] buffer = new byte[len];
+            fis.read(buffer);
+            fis.close();
+            return buffer;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String readFile(String fileName) {
+        return readFile(fileName, "UTF-8");
+    }
+
+    public static String readFile(String fileName, String charset) {
+        byte[] data = readBytes(fileName);
+        if (data == null || data.length == 0) {
+            return null;
+        } else {
+            try {
+                return new String(data, charset);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
     }
 
     public static String readAssetFile(Context context, String fileName) {

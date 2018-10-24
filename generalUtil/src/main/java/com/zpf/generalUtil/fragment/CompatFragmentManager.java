@@ -1,47 +1,46 @@
-package com.zpf.generalUtil;
+package com.zpf.generalUtil.fragment;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
 /**
  * Created by ZPF on 2018/6/14.
  */
-public class FragmentManagerUtil {
+public class CompatFragmentManager implements FragmentManagerInterface {
 
     private FragmentManager mFragmentManager;
-    private MyFragmentCreator mCreator;
+    private FragmentCreator mCreator;
     private int mContainerViewId;
     private String[] mTagArray;
     private int mCurrentIndex = 0;
-    private HashMap<String, Fragment> fragmentCache = new HashMap<>();
+    private HashMap<String, WeakReference<Fragment>> fragmentCache = new HashMap<>();
 
-    public FragmentManagerUtil(FragmentManager mFragmentManager, int mContainerViewId,
-                               String[] tagArray, MyFragmentCreator mCreator) {
+    public CompatFragmentManager(FragmentManager mFragmentManager, int mContainerViewId,
+                                 String[] tagArray, FragmentCreator mCreator) {
         this.mFragmentManager = mFragmentManager;
         this.mCreator = mCreator;
         this.mTagArray = tagArray;
         this.mContainerViewId = mContainerViewId;
     }
 
+    @Override
     public void showFragment(int index) {
         if (mTagArray == null || mTagArray.length - 1 < index) {
             return;
         }
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
         for (int i = 0; i < mTagArray.length; i++) {
-            Fragment fragment = fragmentCache.get(mTagArray[i]);
-            if (fragment == null) {
-                fragment = mFragmentManager.findFragmentByTag(mTagArray[i]);
-            }
+            Fragment fragment = getFragment(i);
             if (i == index) {
                 if (fragment == null) {
                     fragment = mCreator.create(index);
                     if (fragment != null) {
                         transaction.add(mContainerViewId, fragment, mTagArray[i]);
-                        fragmentCache.put(mTagArray[i], fragment);
+                        fragmentCache.put(mTagArray[i], new WeakReference<>(fragment));
                     }
                 } else {
                     transaction.show(fragment);
@@ -54,14 +53,19 @@ public class FragmentManagerUtil {
         transaction.commitAllowingStateLoss();
     }
 
+    @Override
     public int getCurrentIndex() {
         return mCurrentIndex;
     }
 
+    @Override
     public Fragment getFragment(int index) {
         Fragment fragment = null;
         if (mTagArray != null && index < mTagArray.length) {
-            fragment = fragmentCache.get(mTagArray[index]);
+            WeakReference<Fragment> weakReference = fragmentCache.get(mTagArray[index]);
+            if (weakReference != null) {
+                fragment = weakReference.get();
+            }
             if (fragment == null) {
                 fragment = mFragmentManager.findFragmentByTag(mTagArray[index]);
             }
@@ -69,7 +73,7 @@ public class FragmentManagerUtil {
         return fragment;
     }
 
-    public interface MyFragmentCreator {
+    public interface FragmentCreator {
         Fragment create(int index);
     }
 
