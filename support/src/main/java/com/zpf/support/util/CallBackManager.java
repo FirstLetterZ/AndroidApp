@@ -2,8 +2,8 @@ package com.zpf.support.util;
 
 import android.util.LongSparseArray;
 
-import com.zpf.support.interfaces.CallBackInterface;
-import com.zpf.support.interfaces.CallBackManagerInterface;
+import com.zpf.support.api.CallBackInterface;
+import com.zpf.support.api.CallBackManagerInterface;
 
 /**
  * Created by ZPF on 2018/6/13.

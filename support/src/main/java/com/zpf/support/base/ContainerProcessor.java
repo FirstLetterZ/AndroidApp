@@ -10,12 +10,12 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.zpf.support.constant.BaseKeyConst;
-import com.zpf.generalUtil.SafeClickListener;
-import com.zpf.permission.OnLockPermissionRunnable;
-import com.zpf.permission.PermissionInfo;
-import com.zpf.support.interfaces.ContainerProcessorInterface;
-import com.zpf.support.interfaces.TitleBarInterface;
-import com.zpf.support.interfaces.ViewContainerInterface;
+import com.zpf.tool.SafeClickListener;
+import com.zpf.tool.permission.OnLockPermissionRunnable;
+import com.zpf.tool.permission.PermissionInfo;
+import com.zpf.support.api.ContainerProcessorInterface;
+import com.zpf.support.api.TitleBarInterface;
+import com.zpf.support.api.ViewContainerInterface;
 import com.zpf.support.util.CacheMap;
 import com.zpf.support.util.LifecycleLogUtil;
 import com.zpf.support.util.PermissionUtil;

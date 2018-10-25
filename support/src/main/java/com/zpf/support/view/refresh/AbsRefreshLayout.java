@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import com.zpf.support.interfaces.PackedLayoutInterface;
+import com.zpf.support.api.PackedLayoutInterface;
 
 import java.util.Timer;
 import java.util.TimerTask;

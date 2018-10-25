@@ -2,7 +2,7 @@ package com.zpf.support.network.header;
 
 import android.text.TextUtils;
 
-import com.zpf.support.interfaces.VariableParameterInterface;
+import com.zpf.support.api.VariableParameterInterface;
 
 import java.util.HashMap;
 import java.util.Map;

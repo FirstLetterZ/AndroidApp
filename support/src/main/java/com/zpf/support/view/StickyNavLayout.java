@@ -20,8 +20,8 @@ import android.widget.LinearLayout;
 import android.widget.OverScroller;
 import android.widget.ScrollView;
 
-import com.zpf.generalUtil.ViewUtil;
-import com.zpf.support.interfaces.PackedLayoutInterface;
+import com.zpf.tool.ViewUtil;
+import com.zpf.support.api.PackedLayoutInterface;
 
 public class StickyNavLayout extends LinearLayout {
     private View mHeaderView;

@@ -6,10 +6,10 @@ import android.content.Intent;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 
-import com.zpf.generalUtil.FileUtil;
-import com.zpf.permission.OnLockPermissionRunnable;
-import com.zpf.permission.PermissionInfo;
-import com.zpf.support.interfaces.ViewContainerInterface;
+import com.zpf.tool.FileUtil;
+import com.zpf.tool.permission.OnLockPermissionRunnable;
+import com.zpf.tool.permission.PermissionInfo;
+import com.zpf.support.api.ViewContainerInterface;
 
 import java.util.List;
 

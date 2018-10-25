@@ -28,7 +28,7 @@ import android.webkit.WebViewClient;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
-import com.zpf.support.interfaces.OnProgressChangedListener;
+import com.zpf.support.api.OnProgressChangedListener;
 import com.zpf.support.util.JsonUtil;
 
 import org.json.JSONArray;
@@ -40,7 +40,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ZPF on 2018/7/25.
@@ -58,6 +60,10 @@ public class BridgeWebView extends WebView {
     private UrlInterceptor urlInterceptor;
     private JsCallNativeListener jsCallNativeListener;
     private String TAG = "BridgeWebView";
+    private boolean isTraceless;//无痕浏览
+    private boolean useWebTitle = true;//使用浏览器标题
+    private String startUrl;//当前正在加载的url
+    private HashMap<String, Boolean> redirectedUrlMap = new HashMap<>();//重定向原始url集合
 
     public BridgeWebView(Context context) {
         super(context);
@@ -90,6 +96,7 @@ public class BridgeWebView extends WebView {
         setting.setSaveFormData(true);
         setting.setGeolocationEnabled(true);
         setting.setDomStorageEnabled(true);
+        setting.setAppCacheEnabled(true);
         setting.setDefaultTextEncodingName("UTF-8");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setting.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
@@ -106,7 +113,31 @@ public class BridgeWebView extends WebView {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (in == null) {
+        if (in != null) {
+            try {
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
+                String line;
+                StringBuilder sb = new StringBuilder();
+                do {
+                    line = bufferedReader.readLine();
+                    if (line != null && !line.matches("^\\s*\\/\\/.*")) {
+                        sb.append(line);
+                    }
+                } while (line != null);
+                bufferedReader.close();
+                in.close();
+                jsFileString = sb.toString();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    //ignore
+                }
+            }
+        }
+        if (jsFileString == null) {
             jsFileString = "function CallNative(name, body, callBack) {\n" +
                     "    if (!name) {\n" +
                     "        return;\n" +
@@ -159,29 +190,6 @@ public class BridgeWebView extends WebView {
                     "        jsCall : CallNative\n" +
                     "    };\n" +
                     "}";
-        } else {
-            try {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
-                String line;
-                StringBuilder sb = new StringBuilder();
-                do {
-                    line = bufferedReader.readLine();
-                    if (line != null && !line.matches("^\\s*\\/\\/.*")) {
-                        sb.append(line);
-                    }
-                } while (line != null);
-                bufferedReader.close();
-                in.close();
-                jsFileString = sb.toString();
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    //ignore
-                }
-            }
         }
     }
 
@@ -201,7 +209,7 @@ public class BridgeWebView extends WebView {
                     Log.i(TAG, "title=" + title);
                 }
                 if (webPageListener != null) {
-                    webPageListener.onReceivedTitle(view, title);
+                    webPageListener.onReceivedTitle(title);
                 }
                 super.onReceivedTitle(view, title);
             }
@@ -221,7 +229,7 @@ public class BridgeWebView extends WebView {
                     }
                 }
                 if (webPageListener != null) {
-                    webPageListener.onReceivedIcon(view, icon);
+                    webPageListener.onReceivedIcon(icon);
                 }
                 super.onReceivedIcon(view, icon);
             }
@@ -276,6 +284,7 @@ public class BridgeWebView extends WebView {
         };
     }
 
+
     /**
      * 创建默认的 WebViewClient
      */
@@ -287,11 +296,16 @@ public class BridgeWebView extends WebView {
                     Log.i(TAG, "========================onPageStarted======================");
                     Log.i(TAG, "url=" + url);
                 }
-                if (urlInterceptor != null && urlInterceptor.check(url)) {
+                startUrl = null;
+                for (Map.Entry<String, Boolean> entry : redirectedUrlMap.entrySet()) {
+                    entry.setValue(true);
+                }
+                if ((interceptRedirected(url)) || (urlInterceptor != null && urlInterceptor.check(url))) {
                     view.stopLoading();
                     goBack();
                     return;
                 }
+                startUrl = url;
                 if (stateListenerList.size() > 0) {
                     for (WebViewStateListener listener : stateListenerList) {
                         listener.onPageStart(view, url, favicon);
@@ -311,12 +325,22 @@ public class BridgeWebView extends WebView {
                     goBack();
                     return;
                 }
+                startUrl = null;
                 if (stateListenerList.size() > 0) {
                     for (WebViewStateListener listener : stateListenerList) {
                         listener.onPageFinish(view, url);
                     }
                 }
                 waitInit = false;
+                if (webPageListener != null) {
+                    view.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            webPageListener.onReceivedTitle(getTitle());
+                            webPageListener.onReceivedIcon(getFavicon());
+                        }
+                    });
+                }
                 super.onPageFinished(view, url);
             }
 
@@ -327,7 +351,9 @@ public class BridgeWebView extends WebView {
                     Log.i(TAG, "url=" + url);
                     Log.i(TAG, "isReload=" + isReload);
                 }
-                view.clearHistory();
+                if (isTraceless) {
+                    view.clearHistory();
+                }
                 super.doUpdateVisitedHistory(view, url, isReload);
             }
 
@@ -343,6 +369,9 @@ public class BridgeWebView extends WebView {
                 if (intercept) {
                     return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
                 } else if (view.getHitTestResult() != null) {
+                    if (!TextUtils.isEmpty(startUrl)) {
+                        redirectedUrlMap.put(startUrl, false);
+                    }
                     view.loadUrl(url);
                     return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
                 } else if (!url.startsWith("http://") && !url.startsWith("https://")
@@ -370,6 +399,9 @@ public class BridgeWebView extends WebView {
                 if (intercept) {
                     return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
                 } else if (view.getHitTestResult() != null) {
+                    if (!TextUtils.isEmpty(startUrl)) {
+                        redirectedUrlMap.put(startUrl, false);
+                    }
                     view.loadUrl(url);
                     return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
                 } else if (!url.startsWith("http://") && !url.startsWith("https://")
@@ -511,7 +543,15 @@ public class BridgeWebView extends WebView {
                 return JsonUtil.toString(result);
             }
         }
+    }
 
+    private boolean interceptRedirected(String url) {
+        Boolean flag = redirectedUrlMap.get(url);
+        if (flag == null) {
+            return false;
+        } else {
+            return flag;
+        }
     }
 
     public void onCallBack(String fucName, Object result) {
@@ -545,15 +585,20 @@ public class BridgeWebView extends WebView {
 
     @Override
     public void goBack() {
-        if (canGoBack()) {
-            super.goBack();
-        } else if (getContext() != null || getContext() instanceof Activity) {
-            try {
-                ((Activity) getContext()).finish();
-            } catch (Exception e) {
-                e.printStackTrace();
+        post(new Runnable() {
+            @Override
+            public void run() {
+                if (canGoBack()) {
+                    BridgeWebView.super.goBack();
+                } else if (getContext() != null || getContext() instanceof Activity) {
+                    try {
+                        ((Activity) getContext()).finish();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-        }
+        });
     }
 
     public boolean initJsBridge() {
@@ -612,5 +657,21 @@ public class BridgeWebView extends WebView {
 
     public void setProgressChangedListener(OnProgressChangedListener<WebView> progressChangedListener) {
         this.progressChangedListener = progressChangedListener;
+    }
+
+    public boolean isTraceless() {
+        return isTraceless;
+    }
+
+    public void setTraceless(boolean traceless) {
+        isTraceless = traceless;
+    }
+
+    public boolean isUseWebTitle() {
+        return useWebTitle;
+    }
+
+    public void setUseWebTitle(boolean useWebTitle) {
+        this.useWebTitle = useWebTitle;
     }
 }

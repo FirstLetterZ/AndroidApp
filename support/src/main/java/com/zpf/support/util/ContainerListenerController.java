@@ -5,16 +5,16 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.zpf.permission.ActivityPermissionChecker;
-import com.zpf.permission.CompatFragmentPermissionChecker;
-import com.zpf.permission.FragmentPermissionChecker;
-import com.zpf.permission.PermissionChecker;
-import com.zpf.support.interfaces.LifecycleInterface;
-import com.zpf.support.interfaces.LifecycleListenerController;
-import com.zpf.support.interfaces.OnDestroyListener;
-import com.zpf.support.interfaces.ResultCallBackListener;
-import com.zpf.support.interfaces.SafeWindowInterface;
-import com.zpf.support.interfaces.constant.LifecycleState;
+import com.zpf.tool.permission.ActivityPermissionChecker;
+import com.zpf.tool.permission.CompatFragmentPermissionChecker;
+import com.zpf.tool.permission.FragmentPermissionChecker;
+import com.zpf.tool.permission.PermissionChecker;
+import com.zpf.support.api.LifecycleInterface;
+import com.zpf.support.api.LifecycleListenerController;
+import com.zpf.support.api.OnDestroyListener;
+import com.zpf.support.api.ResultCallBackListener;
+import com.zpf.support.api.SafeWindowInterface;
+import com.zpf.support.api.constant.LifecycleState;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -8,7 +8,7 @@ import android.webkit.WebView;
  * 详细见 WebChromeClient
  */
 public interface OnReceivedWebPageListener {
-    void onReceivedTitle(WebView view, String title);
+    void onReceivedTitle(String title);
 
-    void onReceivedIcon(WebView view, Bitmap icon);
+    void onReceivedIcon(Bitmap icon);
 }

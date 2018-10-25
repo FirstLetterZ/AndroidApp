@@ -7,7 +7,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.zpf.support.interfaces.PackedLayoutInterface;
+import com.zpf.support.api.PackedLayoutInterface;
 
 /**
  * Created by ZPF on 2018/7/7.

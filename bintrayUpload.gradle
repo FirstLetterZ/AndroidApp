@@ -20,16 +20,16 @@ if (identifiableFile.exists()) {
 }
 
 // read properties
-def projectName = properties.getProperty('project.name')
+def projectName = project.name
+def projectArtifactId = project.artifactId
+def projectVersionName = project.versionName
+def projectPackaging = project.packaging
+def libraryDescription = project.description
+
 def projectMaven = properties.getProperty('project.maven')
 def projectGroupId = properties.getProperty('project.groupId')
-def projectArtifactId = properties.getProperty('project.artifactId')
-def projectVersionName = properties.getProperty('project.versionName')
-def projectPackaging = properties.getProperty('project.packaging')
 def projectSiteUrl = properties.getProperty('project.siteUrl')
 def projectGitUrl = properties.getProperty('project.gitUrl')
-def libraryDescription = properties.getProperty('project.description')
-
 def developerId = properties.getProperty('developer.id')
 def developerName = properties.getProperty('developer.name')
 def developerEmail = properties.getProperty('developer.email')

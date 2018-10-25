@@ -1,6 +1,6 @@
 package com.zpf.support.network.header;
 
-import com.zpf.support.interfaces.VariableParameterInterface;
+import com.zpf.support.api.VariableParameterInterface;
 
 /**
  * Created by ZPF on 2018/9/18.

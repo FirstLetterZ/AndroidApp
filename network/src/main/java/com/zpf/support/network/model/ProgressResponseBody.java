@@ -5,7 +5,7 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.view.View;
 
-import com.zpf.support.interfaces.OnProgressChangedListener;
+import com.zpf.support.api.OnProgressChangedListener;
 
 import java.io.IOException;
 

@@ -18,7 +18,7 @@ android {
 
 dependencies {
     api project(':toolkit')
-    api project(':interfaces')
+    api project(':api')
     api project(':permission')
 //    api 'com.zpf:interfaces:0.0.2'
 //    api 'com.zpf:generalUtil:0.0.1'

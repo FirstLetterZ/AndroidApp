@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
-import com.zpf.support.interfaces.RouteIntereface;
+import com.zpf.support.api.RouteIntereface;
 
 /**
  * 路由工具

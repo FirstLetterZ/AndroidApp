@@ -14,11 +14,11 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import com.zpf.generalUtil.AppContext;
-import com.zpf.generalUtil.ViewUtil;
-import com.zpf.support.interfaces.GlobalConfigInterface;
-import com.zpf.support.interfaces.RootLayoutInterface;
-import com.zpf.support.interfaces.TitleBarInterface;
+import com.zpf.tool.AppContext;
+import com.zpf.tool.ViewUtil;
+import com.zpf.support.api.GlobalConfigInterface;
+import com.zpf.support.api.RootLayoutInterface;
+import com.zpf.support.api.TitleBarInterface;
 
 /**
  * 带标题栏的默认布局

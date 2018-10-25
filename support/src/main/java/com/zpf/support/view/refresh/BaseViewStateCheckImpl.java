@@ -6,8 +6,8 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.AbsListView;
 
-import com.zpf.generalUtil.ViewUtil;
-import com.zpf.support.interfaces.PackedLayoutInterface;
+import com.zpf.tool.ViewUtil;
+import com.zpf.support.api.PackedLayoutInterface;
 import com.zpf.support.view.StickyNavLayout;
 
 /**
@@ -54,16 +54,31 @@ public class BaseViewStateCheckImpl implements ViewStateCheckListener {
         if (view == null) {
             return;
         } else if (view instanceof StickyNavLayout) {
-            int remainHeaderHeight = ((StickyNavLayout) view).getHeaderViewHeight() - view.getScrollY();
-            if (remainHeaderHeight + (pullDownY + pullUpY) < 0) {
-                View childTwo = ((StickyNavLayout) view).getChildAt(2);
-                view.layout(0, -remainHeaderHeight, view.getMeasuredWidth(), view.getMeasuredHeight() - (int) (pullDownY + pullUpY) - remainHeaderHeight);
-                childTwo.layout(0, childTwo.getTop(), view.getMeasuredWidth(),
-                        view.getMeasuredHeight() + (int) (pullDownY + pullUpY) + ((StickyNavLayout) view).getHeaderViewHeight());
-                childTwo.scrollBy(0, (int) (-pullDownY - pullUpY));//滚到到最下面一条
-            } else {
+            if ((pullDownY + pullUpY) >= 0) {
                 view.layout(0, (int) (pullDownY + pullUpY), view.getMeasuredWidth(),
                         (int) (pullDownY + pullUpY) + view.getMeasuredHeight());
+            } else {
+                float dY = pullDownY + pullUpY;
+                int newTop = view.getTop();
+                int remainHeaderHeight = ((StickyNavLayout) view).getHeaderViewHeight()
+                        - view.getScrollY();
+                if (remainHeaderHeight > 0) {
+                    if (remainHeaderHeight + dY < 0) {
+                        dY = remainHeaderHeight + dY;
+                        newTop = -remainHeaderHeight;
+                    } else {
+                        newTop = (int) dY;
+                        dY = 0;
+                    }
+                }
+                view.layout(0, newTop, view.getMeasuredWidth(),
+                        newTop + view.getMeasuredHeight());
+                int headerHeight = ((StickyNavLayout) view).getHeaderViewHeight();
+                int navViewHeight = ((StickyNavLayout) view).getNavViewHeight();
+                View contentView = ((StickyNavLayout) view).getChildAt(2);
+                contentView.layout(0, headerHeight + navViewHeight, contentView.getMeasuredWidth(),
+                        (int) (view.getMeasuredHeight() + headerHeight + navViewHeight + dY));
+                contentView.scrollTo(0, (int) (-dY));//滚到到最下面一条
             }
         } else {
             view.layout(0, (int) (pullDownY + pullUpY), view.getMeasuredWidth(),

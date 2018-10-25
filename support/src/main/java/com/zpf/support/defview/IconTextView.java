@@ -12,7 +12,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
 
-import com.zpf.support.interfaces.IconText;
+import com.zpf.support.api.IconText;
 
 import java.io.File;
 

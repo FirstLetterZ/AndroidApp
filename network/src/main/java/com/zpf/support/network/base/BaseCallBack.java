@@ -11,12 +11,12 @@ import android.text.TextUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.stream.MalformedJsonException;
-import com.zpf.generalUtil.AppContext;
-import com.zpf.generalUtil.ToastUtil;
-import com.zpf.support.interfaces.CallBackInterface;
-import com.zpf.support.interfaces.CallBackManagerInterface;
-import com.zpf.support.interfaces.GlobalConfigInterface;
-import com.zpf.support.interfaces.SafeWindowInterface;
+import com.zpf.tool.AppContext;
+import com.zpf.tool.ToastUtil;
+import com.zpf.support.api.CallBackInterface;
+import com.zpf.support.api.CallBackManagerInterface;
+import com.zpf.support.api.GlobalConfigInterface;
+import com.zpf.support.api.SafeWindowInterface;
 import com.zpf.support.network.model.CustomException;
 import com.zpf.support.network.model.HttpResult;
 
