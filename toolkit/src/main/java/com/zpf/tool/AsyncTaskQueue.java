@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
  */
 public class AsyncTaskQueue {
     private static volatile AsyncTaskQueue mInstance;
-    private volatile AsyncTask doingTask;
+    private volatile AsyncTaskInfo doingTask;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final TaskArray taskArray = new TaskArray();
     private final Runnable taskRunnable = new Runnable() {
@@ -38,11 +38,11 @@ public class AsyncTaskQueue {
         return mInstance;
     }
 
-    private void startTask(AsyncTask runnable) {
-        startTask(runnable, AsyncTask.LEVEL_NORMAL);
+    public void startTask(AsyncTaskInfo runnable) {
+        startTask(runnable, AsyncTaskInfo.LEVEL_NORMAL);
     }
 
-    private void startTask(AsyncTask runnable, @IntRange(from = 0, to = 2) int taskLevel) {
+    public void startTask(AsyncTaskInfo runnable, @IntRange(from = 0, to = 2) int taskLevel) {
         if (taskArray.addTask(runnable, taskLevel)) {
             checkTaskStart();
         }
@@ -50,31 +50,31 @@ public class AsyncTaskQueue {
 
     private synchronized void checkTaskStart() {
         if (doingTask == null) {
-            synchronized (taskArray) {
+            synchronized (AsyncTaskQueue.class) {
                 if (doingTask == null) {
                     doingTask = taskArray.pollTask();
-                } else {
-                    return;
                 }
             }
-            executorService.execute(taskRunnable);
+            if (doingTask != null) {
+                executorService.execute(taskRunnable);
+            }
         }
     }
 
     private class TaskArray {
-        private LinkedList<AsyncTask> heightLevelTaskList = new LinkedList<>();
-        private LinkedList<AsyncTask> normalLevelTaskList = new LinkedList<>();
-        private LinkedList<AsyncTask> lowLevelTaskList = new LinkedList<>();
+        private LinkedList<AsyncTaskInfo> heightLevelTaskList = new LinkedList<>();
+        private LinkedList<AsyncTaskInfo> normalLevelTaskList = new LinkedList<>();
+        private LinkedList<AsyncTaskInfo> lowLevelTaskList = new LinkedList<>();
 
-        private boolean addTask(AsyncTask runnable, @IntRange(from = 0, to = 2) int taskLevel) {
+        private boolean addTask(AsyncTaskInfo runnable, @IntRange(from = 0, to = 2) int taskLevel) {
             switch (taskLevel) {
-                case AsyncTask.LEVEL_HEIGHT:
+                case AsyncTaskInfo.LEVEL_HEIGHT:
                     heightLevelTaskList.add(runnable);
                     break;
-                case AsyncTask.LEVEL_NORMAL:
+                case AsyncTaskInfo.LEVEL_NORMAL:
                     normalLevelTaskList.add(runnable);
                     break;
-                case AsyncTask.LEVEL_LOW:
+                case AsyncTaskInfo.LEVEL_LOW:
                     lowLevelTaskList.add(runnable);
                     break;
                 default:
@@ -83,8 +83,8 @@ public class AsyncTaskQueue {
             return true;
         }
 
-        private AsyncTask pollTask() {
-            AsyncTask task = heightLevelTaskList.pollFirst();
+        private AsyncTaskInfo pollTask() {
+            AsyncTaskInfo task = heightLevelTaskList.pollFirst();
             if (task != null) {
                 return task;
             }
