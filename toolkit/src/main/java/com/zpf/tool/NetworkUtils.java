@@ -6,9 +6,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.telephony.TelephonyManager;
 
+@SuppressLint("MissingPermission")
 public class NetworkUtils {
 
-    @SuppressLint("MissingPermission")
     @NetworkState
     public static int getNetworkType(Context context) {
         if (null == context) {
@@ -66,7 +66,6 @@ public class NetworkUtils {
         return NetworkState.NETWORK_NONE;
     }
 
-    @SuppressLint("MissingPermission")
     public static boolean isNetworkAvailable(Context context) {
         if (context == null) {
             return false;
@@ -77,7 +76,6 @@ public class NetworkUtils {
         if (connectivityManager == null) {
             return false;
         }
-
         NetworkInfo networkinfo = null;
         try {
             networkinfo = connectivityManager.getActiveNetworkInfo();
