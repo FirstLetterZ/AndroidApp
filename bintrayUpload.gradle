@@ -8,6 +8,17 @@ if (localPropertiesFile.exists()) {
     properties.load(localPropertiesFile.newDataInputStream())
 }
 
+Properties baseProperties = new Properties()
+File basePropertiesFile = project.file('base.properties')
+if (basePropertiesFile.exists()) {
+    baseProperties.load(basePropertiesFile.newDataInputStream())
+}else{
+    basePropertiesFile = project.file('../base.properties')
+    if (basePropertiesFile.exists()) {
+        baseProperties.load(basePropertiesFile.newDataInputStream())
+    }
+}
+
 Properties identifiable = new Properties()
 File identifiableFile = project.file('account.properties')
 if (identifiableFile.exists()) {
@@ -20,19 +31,19 @@ if (identifiableFile.exists()) {
 }
 
 // read properties
-def projectName = project.name
-def projectArtifactId = project.artifactId
-def projectVersionName = project.versionName
-def projectPackaging = project.packaging
-def libraryDescription = project.description
-
+def projectName = properties.getProperty('project.projectName')
+def projectVersionName = properties.getProperty('project.versionName')
+def libraryDescription = properties.getProperty('project.description')
+def projectArtifactId = properties.getProperty('project.artifactId')
+def projectPackaging = properties.getProperty('project.packaging')
 def projectMaven = properties.getProperty('project.maven')
-def projectGroupId = properties.getProperty('project.groupId')
-def projectSiteUrl = properties.getProperty('project.siteUrl')
-def projectGitUrl = properties.getProperty('project.gitUrl')
-def developerId = properties.getProperty('developer.id')
-def developerName = properties.getProperty('developer.name')
-def developerEmail = properties.getProperty('developer.email')
+
+def projectGroupId = baseProperties.getProperty('project.groupId')
+def projectSiteUrl = baseProperties.getProperty('project.siteUrl')
+def projectGitUrl = baseProperties.getProperty('project.gitUrl')
+def developerId = baseProperties.getProperty('developer.id')
+def developerName = baseProperties.getProperty('developer.name')
+def developerEmail = baseProperties.getProperty('developer.email')
 
 def bintrayUser = identifiable.getProperty('bintray.user')
 def bintrayApikey = identifiable.getProperty('bintray.apikey')

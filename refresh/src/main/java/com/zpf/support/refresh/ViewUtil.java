@@ -121,7 +121,7 @@ public class ViewUtil {
 
     /**
      * 视图必须可以滚动
-     * 即view.getChildAt(0).getHeight() > view.getMeasuredHeight()
+     * 即view.getChildAt(0).getHeight() 大于 view.getMeasuredHeight()
      *
      * @param view
      */
