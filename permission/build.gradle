@@ -19,4 +19,4 @@ android {
 dependencies {
     api rootProject.ext.dependencies.supportV4
 }
-//apply from: "../bintrayUpload.gradle"
+apply from: "../bintrayUpload.gradle"
