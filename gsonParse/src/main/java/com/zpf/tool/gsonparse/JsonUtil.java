@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -51,6 +52,8 @@ public class JsonUtil {
                     jsonElement = (JsonElement) object;
                 } else if (object instanceof Reader) {
                     jsonElement = mJsonParser.parse((Reader) object);
+                } else if (object instanceof JsonReader) {
+                    jsonElement = mJsonParser.parse((JsonReader) object);
                 } else {
                     jsonElement = mJsonParser.parse(toString(object));
                 }

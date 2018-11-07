@@ -1,5 +1,6 @@
 package com.zpf.support.api;
 
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.view.View;
 
@@ -11,4 +12,7 @@ public interface PackedLayoutInterface {
     @NonNull
     View getCurrentChild();
 
+    boolean showChildByKey(@IntRange(from = 1, to = 16) int key);
+
+    void addChildByKey(@IntRange(from = 1, to = 16) int key, View view);
 }

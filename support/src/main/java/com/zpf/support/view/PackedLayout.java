@@ -1,10 +1,13 @@
 package com.zpf.support.view;
 
 import android.content.Context;
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.zpf.support.api.PackedLayoutInterface;
@@ -13,40 +16,27 @@ import com.zpf.support.api.PackedLayoutInterface;
  * Created by ZPF on 2018/7/7.
  */
 public abstract class PackedLayout<T extends View> extends FrameLayout implements PackedLayoutInterface {
-    protected View loadView;
-    protected View errorView;
-    protected View emptyView;
     protected T contentView;
+    private final SparseArray<View> childrenArray = new SparseArray<>();
 
     public PackedLayout(@NonNull Context context) {
-        super(context);
-        initView(context, null, 0);
-        addChild(contentView);
-        addChild(emptyView);
-        addChild(errorView);
-        addChild(loadView);
-        showContent();
+        this(context, null, 0);
     }
 
     public PackedLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        initView(context, attrs, 0);
-        addChild(contentView);
-        addChild(emptyView);
-        addChild(errorView);
-        addChild(loadView);
-        showContent();
+        this(context, attrs, 0);
     }
 
     public PackedLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        contentView = createContentView(context, attrs, defStyleAttr);
+        childrenArray.put(0, contentView);
+        addView(contentView, new LayoutParams(LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT));
         initView(context, attrs, defStyleAttr);
-        addChild(errorView);
-        addChild(emptyView);
-        addChild(contentView);
-        addChild(loadView);
-        showContent();
     }
+
+    protected abstract T createContentView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr);
 
     //初始化全部要用的视图
     public abstract void initView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr);
@@ -54,85 +44,60 @@ public abstract class PackedLayout<T extends View> extends FrameLayout implement
     @NonNull
     @Override
     public View getCurrentChild() {
-        if (loadView != null && loadView.getVisibility() == View.VISIBLE) {
-            return loadView;
-        } else if (emptyView != null && emptyView.getVisibility() == View.VISIBLE) {
-            return emptyView;
-        } else if (contentView != null && contentView.getVisibility() == View.VISIBLE) {
-            return contentView;
-        } else if (errorView != null) {
-            errorView.setVisibility(VISIBLE);
-            return errorView;
-        } else {
+        View showingView = null;
+        for (int i = 0; i < getChildCount(); i++) {
+            if (showingView == null) {
+                if (getChildAt(i).getVisibility() == VISIBLE) {
+                    showingView = getChildAt(i);
+                }
+            } else {
+                getChildAt(i).setVisibility(GONE);
+            }
+        }
+        if (showingView == null) {
             throw new NullPointerException("no available view!");
+        } else {
+            return showingView;
         }
     }
 
-    private void addChild(View view) {
+    @Override
+    public boolean showChildByKey(@IntRange(from = 1, to = 16) int key) {
+        View showView = childrenArray.get(key);
+        boolean result = false;
+        if (showView != null) {
+            for (int i = 0; i < getChildCount(); i++) {
+                if (getChildAt(i) == showView) {
+                    getChildAt(i).setVisibility(VISIBLE);
+                    result = true;
+                } else {
+                    getChildAt(i).setVisibility(GONE);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void addChildByKey(@IntRange(from = 1, to = 16) int key, View view) {
         if (view != null) {
-            addView(view, new LayoutParams(LayoutParams.MATCH_PARENT,
-                    LayoutParams.MATCH_PARENT));
+            ViewGroup.LayoutParams params = view.getLayoutParams();
+            if (params == null || !(params instanceof MarginLayoutParams)) {
+                params = new LayoutParams(LayoutParams.MATCH_PARENT,
+                        LayoutParams.MATCH_PARENT);
+            }
+            childrenArray.put(key, view);
+            addView(view, params);
         }
     }
 
-    public void showLoading() {
-        if (loadView != null) {
-            loadView.setVisibility(VISIBLE);
+    public void showContentView() {
+        for (int i = 0; i < getChildCount(); i++) {
+            if (getChildAt(i) != contentView) {
+                getChildAt(i).setVisibility(GONE);
+            }
         }
-        if (emptyView != null) {
-            emptyView.setVisibility(GONE);
-        }
-        if (contentView != null) {
-            contentView.setVisibility(GONE);
-        }
-        if (errorView != null) {
-            errorView.setVisibility(GONE);
-        }
-    }
-
-    public void showContent() {
-        if (loadView != null) {
-            loadView.setVisibility(GONE);
-        }
-        if (emptyView != null) {
-            emptyView.setVisibility(GONE);
-        }
-        if (contentView != null) {
-            contentView.setVisibility(VISIBLE);
-        }
-        if (errorView != null) {
-            errorView.setVisibility(GONE);
-        }
-    }
-
-    public void showEmpty() {
-        if (loadView != null) {
-            loadView.setVisibility(GONE);
-        }
-        if (emptyView != null) {
-            emptyView.setVisibility(VISIBLE);
-        }
-        if (contentView != null) {
-            contentView.setVisibility(GONE);
-        }
-        if (errorView != null) {
-            errorView.setVisibility(GONE);
-        }
-    }
-
-    public void showError() {
-        if (loadView != null) {
-            loadView.setVisibility(GONE);
-        }
-        if (emptyView != null) {
-            emptyView.setVisibility(GONE);
-        }
-        if (contentView != null) {
-            contentView.setVisibility(GONE);
-        }
-        if (errorView != null) {
-            errorView.setVisibility(VISIBLE);
-        }
+        contentView.setVisibility(VISIBLE);
     }
 
     public T getContentView() {

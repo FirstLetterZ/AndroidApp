@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
+import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -42,7 +43,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by ZPF on 2018/7/25.
@@ -62,7 +62,8 @@ public class BridgeWebView extends WebView {
     private String TAG = "BridgeWebView";
     private boolean isTraceless;//无痕浏览
     private boolean useWebTitle = true;//使用浏览器标题
-    private String startUrl;//当前正在加载的url
+    private String currentUrl;//当前完成加载的url
+    private long finishTime;//当前完成加载的时间
     private HashMap<String, Boolean> redirectedUrlMap = new HashMap<>();//重定向原始url集合
 
     public BridgeWebView(Context context) {
@@ -296,16 +297,12 @@ public class BridgeWebView extends WebView {
                     Log.i(TAG, "========================onPageStarted======================");
                     Log.i(TAG, "url=" + url);
                 }
-                startUrl = null;
-                for (Map.Entry<String, Boolean> entry : redirectedUrlMap.entrySet()) {
-                    entry.setValue(true);
-                }
                 if ((interceptRedirected(url)) || (urlInterceptor != null && urlInterceptor.check(url))) {
                     view.stopLoading();
                     goBack();
                     return;
                 }
-                startUrl = url;
+                currentUrl = url;
                 if (stateListenerList.size() > 0) {
                     for (WebViewStateListener listener : stateListenerList) {
                         listener.onPageStart(view, url, favicon);
@@ -325,15 +322,15 @@ public class BridgeWebView extends WebView {
                     goBack();
                     return;
                 }
-                startUrl = null;
                 if (stateListenerList.size() > 0) {
                     for (WebViewStateListener listener : stateListenerList) {
                         listener.onPageFinish(view, url);
                     }
                 }
                 waitInit = false;
+                finishTime = System.currentTimeMillis();
                 if (webPageListener != null) {
-                    view.post(new Runnable() {
+                    runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             webPageListener.onReceivedTitle(getTitle());
@@ -359,8 +356,8 @@ public class BridgeWebView extends WebView {
 
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                String url = request.getUrl().toString();
+            public boolean shouldOverrideUrlLoading(final WebView view, WebResourceRequest request) {
+                final String url = request.getUrl().toString();
                 if (logLevel >= WebViewLogLevel.LEVEL_NORMAL) {
                     Log.i(TAG, "========================shouldOverrideUrlLoading======================");
                     Log.i(TAG, "url=" + url);
@@ -369,10 +366,13 @@ public class BridgeWebView extends WebView {
                 if (intercept) {
                     return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
                 } else if (view.getHitTestResult() != null) {
-                    if (!TextUtils.isEmpty(startUrl)) {
-                        redirectedUrlMap.put(startUrl, false);
-                    }
-                    view.loadUrl(url);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            saveInterceptUrl(view.getUrl());
+                            view.loadUrl(url);
+                        }
+                    });
                     return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
                 } else if (!url.startsWith("http://") && !url.startsWith("https://")
                         && !url.startsWith("file://") && !url.equals("about:blank")) {
@@ -390,7 +390,7 @@ public class BridgeWebView extends WebView {
             }
 
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
                 if (logLevel >= WebViewLogLevel.LEVEL_NORMAL) {
                     Log.i(TAG, "========================shouldOverrideUrlLoading======================");
                     Log.i(TAG, "url=" + url);
@@ -399,10 +399,13 @@ public class BridgeWebView extends WebView {
                 if (intercept) {
                     return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
                 } else if (view.getHitTestResult() != null) {
-                    if (!TextUtils.isEmpty(startUrl)) {
-                        redirectedUrlMap.put(startUrl, false);
-                    }
-                    view.loadUrl(url);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            saveInterceptUrl(view.getUrl());
+                            view.loadUrl(url);
+                        }
+                    });
                     return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
                 } else if (!url.startsWith("http://") && !url.startsWith("https://")
                         && !url.startsWith("file://") && !url.equals("about:blank")) {
@@ -432,6 +435,7 @@ public class BridgeWebView extends WebView {
                     }
                 }
                 waitInit = false;
+                finishTime = System.currentTimeMillis();
                 super.onReceivedError(view, request, error);
             }
 
@@ -474,7 +478,7 @@ public class BridgeWebView extends WebView {
     private class JavaScriptInterface {
         @JavascriptInterface
         public void init() {
-            post(new Runnable() {
+            runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     initJsBridge();
@@ -482,6 +486,7 @@ public class BridgeWebView extends WebView {
             });
         }
 
+        //当前线程为JsBridge
         @JavascriptInterface
         public String callNative(String action, String params, String callBackName) {
             if (logLevel >= WebViewLogLevel.LEVEL_NORMAL) {
@@ -545,6 +550,14 @@ public class BridgeWebView extends WebView {
         }
     }
 
+    private void saveInterceptUrl(String url) {
+        //增加一个时间校验
+        if (finishTime == 0 || (System.currentTimeMillis() - finishTime) < 50
+                || !TextUtils.equals(url, currentUrl)) {
+            redirectedUrlMap.put(url, true);
+        }
+    }
+
     private boolean interceptRedirected(String url) {
         Boolean flag = redirectedUrlMap.get(url);
         if (flag == null) {
@@ -570,7 +583,7 @@ public class BridgeWebView extends WebView {
                 Log.i(TAG, "======================== onCallBack ======================");
                 Log.i(TAG, "javascript=" + javascript);
             }
-            post(new Runnable() {
+            runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -585,7 +598,7 @@ public class BridgeWebView extends WebView {
 
     @Override
     public void goBack() {
-        post(new Runnable() {
+        runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (canGoBack()) {
@@ -613,6 +626,14 @@ public class BridgeWebView extends WebView {
                 Log.w(TAG, "cannot load jsFile");
             }
             return false;
+        }
+    }
+
+    public final void runOnUiThread(Runnable action) {
+        if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
+            post(action);
+        } else {
+            action.run();
         }
     }
 
