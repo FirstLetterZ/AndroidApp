@@ -9,7 +9,7 @@ import android.support.annotation.Nullable;
 /**
  * Created by ZPF on 2018/8/22.
  */
-public interface RouteIntereface {
+public interface RouteInterface {
 
     void startActivity(Context context, int targetNumber, @Nullable Intent intent);
 
