@@ -2,7 +2,6 @@ package com.zpf.dhl;
 
 import com.zpf.dhl.interfaces.ExpressageInterface;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,6 +16,12 @@ public class SinglePartExpressage<T> implements ExpressageInterface<T> {
     public SinglePartExpressage(String receiver, String sender) {
         this.receiver = receiver;
         this.sender = sender;
+    }
+
+    public SinglePartExpressage(String receiver, String sender, T part) {
+        this.receiver = receiver;
+        this.sender = sender;
+        this.part = part;
     }
 
     @Override
