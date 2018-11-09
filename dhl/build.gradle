@@ -17,8 +17,6 @@ android {
 }
 
 dependencies {
-    api rootProject.ext.dependencies.supportV4
-    api rootProject.ext.dependencies.recyclerview
 }
 
 apply from: "../bintrayUpload.gradle"

@@ -5,14 +5,19 @@ import java.util.List;
 /**
  * Created by ZPF on 2018/11/8.
  */
-public interface ExpressageInterface {
-    void put(Object object);
+public interface ExpressageInterface<T> {
+    void put(T part);
 
-    boolean putOnlyOne(Object object);
+    boolean putOnlyOne(T part);
 
     String getReceiver();
 
     String getSender();
 
-    List<Object> getParts();
+    T getFirstPart();
+
+    T getLastPart();
+
+    List<T> getAllParts();
+
 }

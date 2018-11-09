@@ -3,6 +3,7 @@ package com.zpf.dhl;
 import com.zpf.dhl.interfaces.ExpressageInterface;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -12,23 +13,24 @@ import java.util.List;
 public class Expressage implements ExpressageInterface {
     private String receiver;//收件人
     private String sender;//发件人
-    private ArrayList<Object> parts;
+    private LinkedList<Object> parts;
 
     public Expressage(String receiver, String sender) {
         this.receiver = receiver;
         this.sender = sender;
-        parts = new ArrayList<>();
+        parts = new LinkedList<>();
     }
-
 
     @Override
     public void put(Object object) {
-        parts.add(object);
+        if (object != null) {
+            parts.add(object);
+        }
     }
 
     @Override
     public boolean putOnlyOne(Object object) {
-        if (!parts.contains(object)) {
+        if (object != null && !parts.contains(object)) {
             parts.add(object);
             return true;
         } else {
@@ -42,14 +44,23 @@ public class Expressage implements ExpressageInterface {
     }
 
     @Override
-
     public String getSender() {
         return sender;
     }
 
     @Override
+    public Object getFirstPart() {
+        return parts.peekFirst();
+    }
 
-    public List<Object> getParts() {
+    @Override
+    public Object getLastPart() {
+        return parts.peekLast();
+    }
+
+    @Override
+    public List getAllParts() {
         return parts;
     }
+
 }
