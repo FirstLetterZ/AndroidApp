@@ -11,12 +11,9 @@ import com.zpf.dhl.interfaces.ParcelReceiverInterface;
  */
 public class DHL {
     private SparseArray<DeliveryLocker> deliveryLockers = new SparseArray<>();
-    private final int DEF_ID;
+    private DeliveryLocker defDeliveryLockers = new DeliveryLocker();
 
     private DHL() {
-        DEF_ID = 0;
-        deliveryLockers = new SparseArray<>();
-        deliveryLockers.put(DEF_ID, new DeliveryLocker());
     }
 
     private static volatile DHL mInstance;
@@ -33,12 +30,16 @@ public class DHL {
     }
 
     public boolean put(ExpressageInterface expressageInterface) {
-        return put(DEF_ID, expressageInterface);
+        if (expressageInterface != null) {
+            defDeliveryLockers.put(expressageInterface);
+            return true;
+        }
+        return false;
     }
 
     public boolean put(int lockerId, ExpressageInterface expressageInterface) {
         DeliveryLocker deliveryLocker = deliveryLockers.get(lockerId);
-        if (deliveryLocker != null) {
+        if (expressageInterface != null && deliveryLocker != null) {
             deliveryLocker.put(expressageInterface);
             return true;
         } else {
@@ -47,20 +48,38 @@ public class DHL {
     }
 
     public void send(ParcelReceiverInterface receiverInterface) {
-        send(DEF_ID, receiverInterface);
-    }
-
-    public void send(int lockerId, ParcelReceiverInterface receiverInterface) {
-        DeliveryLocker deliveryLocker = deliveryLockers.get(lockerId);
-        if (deliveryLocker != null) {
-            deliveryLocker.pick(receiverInterface);
-        } else {
-            receiverInterface.unpackRemnants(null);
+        if (receiverInterface != null) {
+            defDeliveryLockers.pick(receiverInterface);
         }
     }
 
+    public void send(int lockerId, ParcelReceiverInterface receiverInterface) {
+        if (receiverInterface != null) {
+            DeliveryLocker deliveryLocker = deliveryLockers.get(lockerId);
+            if (deliveryLocker != null) {
+                deliveryLocker.pick(receiverInterface);
+            } else {
+                receiverInterface.unpackRemnants(null);
+            }
+        }
+    }
+
+    public void addDeliveryLocker(int lockerId, DeliveryLocker deliveryLocker) {
+        if (deliveryLocker != null) {
+            deliveryLockers.put(lockerId, deliveryLocker);
+        }
+    }
+
+    public void clear(int lockerId) {
+        deliveryLockers.remove(lockerId);
+    }
+
     public void clear() {
+        defDeliveryLockers.clear();
+    }
+
+    public void clearAll() {
+        defDeliveryLockers.clear();
         deliveryLockers.clear();
-        deliveryLockers.put(DEF_ID, new DeliveryLocker());
     }
 }
