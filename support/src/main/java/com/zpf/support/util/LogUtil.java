@@ -4,68 +4,62 @@ import android.util.Log;
 
 import com.zpf.support.api.LoggerInterface;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Created by ZPF on 2018/4/16.
  */
-public class LogUtil {
-    private static boolean logOut = false;
-    private static LoggerInterface realLogger;
+public class LogUtil implements LoggerInterface {
+    private boolean logOut = false;
+    private List<LoggerInterface> realLoggerList = new LinkedList<>();
     private static String TAG = "AppLog";
+    private static volatile LogUtil mInstance;
 
-    public static void d(String content) {
-        if (logOut) {
-            if (realLogger == null) {
-                Log.d(TAG, content);
-            } else {
-                realLogger.d(TAG, content);
+    public LogUtil() {
+    }
+
+    private static LogUtil get() {
+        if (mInstance == null) {
+            synchronized (LogUtil.class) {
+                if (mInstance == null) {
+                    mInstance = new LogUtil();
+                }
             }
         }
+        return mInstance;
+    }
+
+    public static void d(String content) {
+        get().log(Log.DEBUG, TAG, content);
     }
 
     public static void i(String content) {
-        if (logOut) {
-            if (realLogger == null) {
-                Log.i(TAG, content);
-            } else {
-                realLogger.i(TAG, content);
-            }
-        }
+        get().log(Log.INFO, TAG, content);
     }
 
     public static void w(String content) {
-        if (logOut) {
-            if (realLogger == null) {
-                Log.w(TAG, content);
-            } else {
-                realLogger.w(TAG, content);
-            }
-        }
+        get().log(Log.WARN, TAG, content);
     }
 
     public static void e(String content) {
-        if (logOut) {
-            if (realLogger == null) {
-                Log.e(TAG, content);
-            } else {
-                realLogger.e(TAG, content);
-            }
-        }
+        get().log(Log.ERROR, TAG, content);
     }
 
     public static void setLogOut(boolean logOut) {
-        LogUtil.logOut = logOut;
+        get().logOut = logOut;
     }
 
     public static boolean isLogOut() {
-        return logOut;
+        return get().logOut;
     }
 
-    public static LoggerInterface getRealLogger() {
-        return realLogger;
+    public static void removeLogger(LoggerInterface realLogger) {
+        get().realLoggerList.remove(realLogger);
     }
 
-    public static void setRealLogger(LoggerInterface realLogger) {
-        LogUtil.realLogger = realLogger;
+    public static void addLogger(LoggerInterface realLogger) {
+        get().realLoggerList.add(realLogger);
     }
 
     public static String getTAG() {
@@ -74,5 +68,18 @@ public class LogUtil {
 
     public static void setTAG(String TAG) {
         LogUtil.TAG = TAG;
+    }
+
+    @Override
+    public void log(int priority, String tag, String content) {
+        if (get().logOut) {
+            if (realLoggerList.size() > 0) {
+                for (LoggerInterface logger : realLoggerList) {
+                    logger.log(priority, tag, content);
+                }
+            } else {
+                Log.println(priority, tag, content);
+            }
+        }
     }
 }

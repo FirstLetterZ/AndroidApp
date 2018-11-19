@@ -45,6 +45,11 @@ public class LifecycleLogUtil implements LifecycleInterface {
     }
 
     @Override
+    public void onRestart() {
+        log("onRestart");
+    }
+
+    @Override
     public void onStart() {
         log("onStart");
     }

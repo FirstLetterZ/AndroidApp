@@ -12,6 +12,8 @@ public interface LifecycleInterface extends OnDestroyListener {
 
     void afterCreate(@Nullable Bundle savedInstanceState);
 
+    void onRestart();
+
     void onStart();
 
     void onResume();

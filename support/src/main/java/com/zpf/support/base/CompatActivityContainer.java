@@ -76,6 +76,12 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
         mController.afterCreate(savedInstanceState);
     }
 
+    @Override
+    public void onRestart() {
+        super.onRestart();
+        mController.onRestart();
+    }
+
 
     @Override
     public void onStart() {

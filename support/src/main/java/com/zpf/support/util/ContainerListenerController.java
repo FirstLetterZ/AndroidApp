@@ -80,6 +80,13 @@ public class ContainerListenerController implements LifecycleListenerController,
     }
 
     @Override
+    public void onRestart() {
+        for (LifecycleInterface lifecycle : mLifecycleList) {
+            lifecycle.onRestart();
+        }
+    }
+
+    @Override
     public void onStart() {
         for (LifecycleInterface lifecycle : mLifecycleList) {
             lifecycle.onStart();

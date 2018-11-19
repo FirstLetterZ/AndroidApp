@@ -49,6 +49,11 @@ public abstract class ContainerProcessor implements ContainerProcessorInterface 
     }
 
     @Override
+    public void onRestart() {
+
+    }
+
+    @Override
     public void onStart() {
 
     }

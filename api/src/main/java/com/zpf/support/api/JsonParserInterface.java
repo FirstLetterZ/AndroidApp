@@ -15,5 +15,5 @@ public interface JsonParserInterface {
 
     String getStringByName(Object element, String name);
 
-    Object getElementByName(Object element, String name);
+    <T> T getElementByName(T element, String name);
 }

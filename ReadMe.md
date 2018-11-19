@@ -13,6 +13,7 @@
     ./gradlew -p permission clean install bintrayUpload --info
     ./gradlew -p refresh clean install bintrayUpload --info
     ./gradlew -p webview clean install bintrayUpload --info
+    ./gradlew -p dhl clean install bintrayUpload --info
 全部上传：
     ./gradlew clean install bintrayUpload --info
 
