@@ -10,6 +10,9 @@ public abstract class AsyncTaskInfo<T> implements Runnable {
 
     private boolean onMainTread = true;
 
+    public AsyncTaskInfo() {
+    }
+
     public AsyncTaskInfo(boolean onMainTread) {
         this.onMainTread = onMainTread;
     }
