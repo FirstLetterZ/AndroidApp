@@ -22,7 +22,7 @@ import android.widget.TextView;
 
 import com.zpf.support.base.SafeDialog;
 import com.zpf.support.base.R;
-import com.zpf.support.api.OnItemClickListener;
+import com.zpf.api.OnItemClickListener;
 import com.zpf.tool.SafeClickListener;
 
 import java.util.ArrayList;

@@ -2,7 +2,7 @@ package com.zpf.support.util;
 
 import android.util.Log;
 
-import com.zpf.support.api.LoggerInterface;
+import com.zpf.api.LoggerInterface;
 
 import java.util.LinkedList;
 import java.util.List;

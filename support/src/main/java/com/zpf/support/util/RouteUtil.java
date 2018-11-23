@@ -6,13 +6,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
-import com.zpf.support.api.RouteIntereface;
+import com.zpf.api.RouteInterface;
 
 /**
  * 路由工具
  * Created by ZPF on 2018/8/26.
  */
-public class RouteUtil implements RouteIntereface {
+public class RouteUtil implements RouteInterface {
     private volatile RouteUtil realRoute;
     private static volatile RouteUtil routeUtil;
 

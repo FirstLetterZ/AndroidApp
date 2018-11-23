@@ -18,6 +18,7 @@ android {
 
 dependencies {
     api rootProject.ext.dependencies.gson
+    api project(':dataparser')
 }
 apply from: "../bintrayUpload.gradle"
 

@@ -3,8 +3,8 @@ package com.zpf.support.network.retrofit;
 import android.support.annotation.Nullable;
 
 import com.zpf.tool.MainHandler;
-import com.zpf.support.api.CallBackManagerInterface;
-import com.zpf.support.api.SafeWindowInterface;
+import com.zpf.api.CallBackManagerInterface;
+import com.zpf.api.SafeWindowInterface;
 import com.zpf.support.network.base.BaseCallBack;
 
 import retrofit2.Call;

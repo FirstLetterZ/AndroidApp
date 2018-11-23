@@ -13,10 +13,10 @@ import com.google.gson.JsonParseException;
 import com.google.gson.stream.MalformedJsonException;
 import com.zpf.tool.AppContext;
 import com.zpf.tool.ToastUtil;
-import com.zpf.support.api.CallBackInterface;
-import com.zpf.support.api.CallBackManagerInterface;
-import com.zpf.support.api.GlobalConfigInterface;
-import com.zpf.support.api.SafeWindowInterface;
+import com.zpf.api.CallBackInterface;
+import com.zpf.api.CallBackManagerInterface;
+import com.zpf.api.GlobalConfigInterface;
+import com.zpf.api.SafeWindowInterface;
 import com.zpf.support.network.model.CustomException;
 import com.zpf.support.network.model.HttpResult;
 

@@ -4,7 +4,7 @@ import android.app.Application;
 import android.content.pm.ApplicationInfo;
 import android.text.TextUtils;
 
-import com.zpf.support.api.GlobalConfigInterface;
+import com.zpf.api.GlobalConfigInterface;
 
 /**
  * Created by ZPF on 2018/10/12.

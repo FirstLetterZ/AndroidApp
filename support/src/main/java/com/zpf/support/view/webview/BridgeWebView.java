@@ -29,7 +29,7 @@ import android.webkit.WebViewClient;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
-import com.zpf.support.api.OnProgressChangedListener;
+import com.zpf.api.OnProgressChangedListener;
 import com.zpf.support.util.JsonUtil;
 
 import org.json.JSONArray;
@@ -520,26 +520,26 @@ public class BridgeWebView extends WebView {
                 } else if (jsonPrimitive.isString()) {
                     result = jsCallNativeListener.call(JsCallNativeListener.TYPE_STRING, jsonPrimitive.getAsString(), action, callBackName);
                 } else {
-                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_UNKOWN, null, action, callBackName);
+                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_UNKNOW, null, action, callBackName);
                 }
             } else if (element.isJsonObject()) {
                 try {
                     result = jsCallNativeListener.call(JsCallNativeListener.TYPE_JSONOBJECT, new JSONObject(params), action, callBackName);
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_UNKOWN, null, action, callBackName);
+                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_UNKNOW, null, action, callBackName);
                 }
             } else if (element.isJsonArray()) {
                 try {
                     result = jsCallNativeListener.call(JsCallNativeListener.TYPE_JSONARRAY, new JSONArray(params), action, callBackName);
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_UNKOWN, null, action, callBackName);
+                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_UNKNOW, null, action, callBackName);
                 }
             } else if (element.isJsonNull()) {
                 result = jsCallNativeListener.call(JsCallNativeListener.TYPE_NULL, null, action, callBackName);
             } else {
-                result = jsCallNativeListener.call(JsCallNativeListener.TYPE_UNKOWN, null, action, callBackName);
+                result = jsCallNativeListener.call(JsCallNativeListener.TYPE_UNKNOW, null, action, callBackName);
             }
             if (result == null) {
                 return "";

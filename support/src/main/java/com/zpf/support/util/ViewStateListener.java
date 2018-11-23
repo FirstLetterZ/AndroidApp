@@ -4,8 +4,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.zpf.support.api.LifecycleInterface;
-import com.zpf.support.api.constant.LifecycleState;
+import com.zpf.api.LifecycleInterface;
+import com.zpf.api.constant.LifecycleState;
 
 /**
  * Created by ZPF on 2018/6/28.

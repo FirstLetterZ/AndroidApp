@@ -13,7 +13,7 @@ public interface JsCallNativeListener {
     int TYPE_STRING = 3;
     int TYPE_JSONOBJECT = 4;
     int TYPE_JSONARRAY = 5;
-    int TYPE_UNKOWN = 6;
+    int TYPE_UNKNOW = 6;
 
     Object call(@IntRange(from = 0, to = 6) int type, Object object, String action, String callBackName);
 

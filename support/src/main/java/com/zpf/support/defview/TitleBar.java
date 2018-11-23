@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import com.zpf.support.api.TitleBarInterface;
+import com.zpf.api.TitleBarInterface;
 
 /**
  * Created by ZPF on 2018/6/14.

@@ -1,7 +1,7 @@
 package com.zpf.support.util;
 
-import com.zpf.support.api.SafeWindowController;
-import com.zpf.support.api.SafeWindowInterface;
+import com.zpf.api.SafeWindowController;
+import com.zpf.api.SafeWindowInterface;
 
 import java.util.LinkedList;
 

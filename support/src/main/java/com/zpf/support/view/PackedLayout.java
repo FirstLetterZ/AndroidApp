@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.zpf.support.api.PackedLayoutInterface;
+import com.zpf.api.PackedLayoutInterface;
 
 /**
  * Created by ZPF on 2018/7/7.

@@ -16,9 +16,9 @@ import android.widget.LinearLayout;
 
 import com.zpf.tool.AppContext;
 import com.zpf.tool.ViewUtil;
-import com.zpf.support.api.GlobalConfigInterface;
-import com.zpf.support.api.RootLayoutInterface;
-import com.zpf.support.api.TitleBarInterface;
+import com.zpf.api.GlobalConfigInterface;
+import com.zpf.api.RootLayoutInterface;
+import com.zpf.api.TitleBarInterface;
 
 /**
  * 带标题栏的默认布局

@@ -9,12 +9,12 @@ import com.zpf.tool.permission.ActivityPermissionChecker;
 import com.zpf.tool.permission.CompatFragmentPermissionChecker;
 import com.zpf.tool.permission.FragmentPermissionChecker;
 import com.zpf.tool.permission.PermissionChecker;
-import com.zpf.support.api.LifecycleInterface;
-import com.zpf.support.api.LifecycleListenerController;
-import com.zpf.support.api.OnDestroyListener;
-import com.zpf.support.api.ResultCallBackListener;
-import com.zpf.support.api.SafeWindowInterface;
-import com.zpf.support.api.constant.LifecycleState;
+import com.zpf.api.LifecycleInterface;
+import com.zpf.api.LifecycleListenerController;
+import com.zpf.api.OnDestroyListener;
+import com.zpf.api.ResultCallBackListener;
+import com.zpf.api.SafeWindowInterface;
+import com.zpf.api.constant.LifecycleState;
 
 import java.util.ArrayList;
 import java.util.List;

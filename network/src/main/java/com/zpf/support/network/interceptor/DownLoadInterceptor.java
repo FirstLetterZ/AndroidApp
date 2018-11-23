@@ -2,7 +2,7 @@ package com.zpf.support.network.interceptor;
 
 import android.view.View;
 
-import com.zpf.support.api.OnProgressChangedListener;
+import com.zpf.api.OnProgressChangedListener;
 import com.zpf.support.network.model.ProgressResponseBody;
 
 import java.io.IOException;
