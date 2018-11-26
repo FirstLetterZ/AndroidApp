@@ -1,4 +1,4 @@
-package com.zpf.support.view.webview;
+package com.zpf.support.webview;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -26,16 +26,11 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSyntaxException;
 import com.zpf.api.OnProgressChangedListener;
 import com.zpf.api.UrlInterceptor;
-import com.zpf.support.util.JsonUtil;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.zpf.api.dataparser.JsonParserInterface;
+import com.zpf.api.dataparser.StringParseResult;
+import com.zpf.api.dataparser.StringParseType;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -58,14 +53,16 @@ public class BridgeWebView extends WebView {
     private OnReceivedWebPageListener webPageListener;
     private WebViewWindowListener windowListener;
     private OnProgressChangedListener<WebView> progressChangedListener;
-    private UrlInterceptor urlInterceptor;
-    private JsCallNativeListener jsCallNativeListener;
+    private UrlInterceptor urlInterceptor;//url拦截
+    private JsCallNativeListener jsCallNativeListener;//js调用native的回调
+    private OverrideLoadUrlListener overrideLoadUrlListener;//OverrideLoadUrlListener
     private String TAG = "BridgeWebView";
     private boolean isTraceless;//无痕浏览
     private boolean useWebTitle = true;//使用浏览器标题
     private String currentUrl;//当前完成加载的url
     private long finishTime;//当前完成加载的时间
     private HashMap<String, Boolean> redirectedUrlMap = new HashMap<>();//重定向原始url集合
+    private JsonParserInterface realParser;//json解析
 
     public BridgeWebView(Context context) {
         super(context);
@@ -363,31 +360,7 @@ public class BridgeWebView extends WebView {
                     Log.i(TAG, "========================shouldOverrideUrlLoading======================");
                     Log.i(TAG, "url=" + url);
                 }
-                boolean intercept = urlInterceptor != null && urlInterceptor.check(url);
-                if (intercept) {
-                    return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
-                } else if (view.getHitTestResult() != null) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            saveInterceptUrl(view.getUrl());
-                            view.loadUrl(url);
-                        }
-                    });
-                    return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
-                } else if (!url.startsWith("http://") && !url.startsWith("https://")
-                        && !url.startsWith("file://") && !url.equals("about:blank")) {
-                    try {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, request.getUrl());
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        view.getContext().startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
-                        Log.w(TAG, "activity not found to handle uri scheme for: " + url);
-                    }
-                    return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
-                } else {
-                    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
-                }
+                return handleOverrideUrlLoading(view, url);
             }
 
             @Override
@@ -396,39 +369,19 @@ public class BridgeWebView extends WebView {
                     Log.i(TAG, "========================shouldOverrideUrlLoading======================");
                     Log.i(TAG, "url=" + url);
                 }
-                boolean intercept = urlInterceptor != null && urlInterceptor.check(url);
-                if (intercept) {
-                    return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
-                } else if (view.getHitTestResult() != null) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            saveInterceptUrl(view.getUrl());
-                            view.loadUrl(url);
-                        }
-                    });
-                    return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
-                } else if (!url.startsWith("http://") && !url.startsWith("https://")
-                        && !url.startsWith("file://") && !url.equals("about:blank")) {
-                    try {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        view.getContext().startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
-                        Log.w(TAG, "activity not found to handle uri scheme for: " + url);
-                    }
-                    return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
-                } else {
-                    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
-                }
+                return handleOverrideUrlLoading(view, url);
             }
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 if (logLevel >= WebViewLogLevel.LEVEL_NORMAL) {
                     Log.i(TAG, "========================onReceivedError======================");
-                    Log.i(TAG, "request=" + JsonUtil.toString(request));
-                    Log.i(TAG, "error=" + JsonUtil.toString(error));
+                    if (request != null) {
+                        Log.i(TAG, "request=" + request.toString());
+                    }
+                    if (error != null) {
+                        Log.i(TAG, "error=" + error.toString());
+                    }
                 }
                 if (stateListenerList.size() > 0) {
                     for (WebViewStateListener listener : stateListenerList) {
@@ -444,7 +397,9 @@ public class BridgeWebView extends WebView {
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
                 if (logLevel >= WebViewLogLevel.LEVEL_MOST) {
                     Log.i(TAG, "========================onReceivedSslError======================");
-                    Log.i(TAG, "error=" + JsonUtil.toString(error));
+                    if (error != null) {
+                        Log.i(TAG, "error=" + error.toString());
+                    }
                 }
                 handler.proceed(); // 接受证书
             }
@@ -500,63 +455,33 @@ public class BridgeWebView extends WebView {
                 return "";
             }
             Object result;
-            JsonElement element = null;
-            try {
-                element = JsonUtil.fromJson(params, JsonElement.class);
-            } catch (JsonSyntaxException e) {
-                e.printStackTrace();
-            }
-            if (element == null) {
-                if (TextUtils.isEmpty(params)) {
-                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_NULL, null, action, callBackName);
-                } else {
-                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_STRING, params, action, callBackName);
-                }
-            } else if (element.isJsonPrimitive()) {
-                JsonPrimitive jsonPrimitive = element.getAsJsonPrimitive();
-                if (jsonPrimitive.isBoolean()) {
-                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_BOOLEAN, jsonPrimitive.getAsBoolean(), action, callBackName);
-                } else if (jsonPrimitive.isNumber()) {
-                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_NUMBER, jsonPrimitive.getAsNumber(), action, callBackName);
-                } else if (jsonPrimitive.isString()) {
-                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_STRING, jsonPrimitive.getAsString(), action, callBackName);
-                } else {
-                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_UNKNOW, null, action, callBackName);
-                }
-            } else if (element.isJsonObject()) {
-                try {
-                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_JSONOBJECT, new JSONObject(params), action, callBackName);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_UNKNOW, null, action, callBackName);
-                }
-            } else if (element.isJsonArray()) {
-                try {
-                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_JSONARRAY, new JSONArray(params), action, callBackName);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    result = jsCallNativeListener.call(JsCallNativeListener.TYPE_UNKNOW, null, action, callBackName);
-                }
-            } else if (element.isJsonNull()) {
-                result = jsCallNativeListener.call(JsCallNativeListener.TYPE_NULL, null, action, callBackName);
+            if (realParser == null) {
+                result = jsCallNativeListener.call(StringParseType.TYPE_UNKNOWN, params, action, callBackName);
             } else {
-                result = jsCallNativeListener.call(JsCallNativeListener.TYPE_UNKNOW, null, action, callBackName);
+                StringParseResult parseResult = realParser.parseString(params);
+                if (parseResult == null) {
+                    result = jsCallNativeListener.call(StringParseType.TYPE_UNKNOWN, params, action, callBackName);
+                } else {
+                    result = jsCallNativeListener.call(parseResult.getType(), parseResult.getData(), action, callBackName);
+                }
             }
             if (result == null) {
                 return "";
             } else {
                 onCallBack(callBackName, result);
-                return JsonUtil.toString(result);
+                if (realParser == null) {
+                    return result.toString();
+                } else {
+                    return realParser.toString(result);
+                }
             }
         }
     }
 
-    private void saveInterceptUrl(String url) {
+    private boolean checkRedirect(String url) {
         //增加一个时间校验
-        if (finishTime == 0 || (System.currentTimeMillis() - finishTime) < 50
-                || !TextUtils.equals(url, currentUrl)) {
-            redirectedUrlMap.put(url, true);
-        }
+        return finishTime == 0 || (System.currentTimeMillis() - finishTime) < 50
+                || !TextUtils.equals(url, currentUrl);
     }
 
     private boolean interceptRedirected(String url) {
@@ -615,6 +540,40 @@ public class BridgeWebView extends WebView {
         });
     }
 
+    private boolean handleOverrideUrlLoading(WebView webView, final String url) {
+        boolean intercept = urlInterceptor != null && urlInterceptor.check(url);
+        if (intercept) {
+            return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
+        } else if (webView.getHitTestResult() != null) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (overrideLoadUrlListener == null) {
+                        if (checkRedirect(url)) {
+                            redirectedUrlMap.put(url, true);
+                        }
+                        loadUrl(url);
+                    } else {
+                        overrideLoadUrlListener.overrideLoadUrl(url, checkRedirect(url));
+                    }
+                }
+            });
+            return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
+        } else if (!url.startsWith("http://") && !url.startsWith("https://")
+                && !url.startsWith("file://") && !url.equals("about:blank")) {
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getContext().startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Log.w(TAG, "activity not found to handle uri scheme for: " + url);
+            }
+            return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
+        } else {
+            return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
+        }
+    }
+
     public boolean initJsBridge() {
         if (jsFileString != null) {
             if (logLevel >= WebViewLogLevel.LEVEL_ALL) {
@@ -643,6 +602,10 @@ public class BridgeWebView extends WebView {
         if (Build.VERSION.SDK_INT >= 19) {
             WebView.setWebContentsDebuggingEnabled(isDebug);
         }
+    }
+
+    public void setJsonParser(JsonParserInterface realParser) {
+        this.realParser = realParser;
     }
 
     public void setUrlInterceptor(UrlInterceptor urlInterceptor) {
@@ -679,6 +642,10 @@ public class BridgeWebView extends WebView {
 
     public void setProgressChangedListener(OnProgressChangedListener<WebView> progressChangedListener) {
         this.progressChangedListener = progressChangedListener;
+    }
+
+    public void setOverrideLoadUrlListener(OverrideLoadUrlListener overrideLoadUrlListener) {
+        this.overrideLoadUrlListener = overrideLoadUrlListener;
     }
 
     public boolean isTraceless() {

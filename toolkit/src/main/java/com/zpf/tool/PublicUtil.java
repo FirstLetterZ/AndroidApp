@@ -96,11 +96,17 @@ public class PublicUtil {
         return false;
     }
 
-    public static String getMoneyValue(BigDecimal bigDecimal, int scale) {
-        if (bigDecimal == null) {
-            return "";
+    public static String getMoneyValue(Number money, int scale) {
+        if (money == null) {
+            return "0.00";
         }
-        return bigDecimal.setScale(scale, BigDecimal.ROUND_HALF_UP).toPlainString();
+        BigDecimal amount;
+        if (money instanceof BigDecimal) {
+            amount = (BigDecimal) money;
+        } else {
+            amount = new BigDecimal(money.doubleValue());
+        }
+        return amount.setScale(scale, BigDecimal.ROUND_HALF_UP).toPlainString();
     }
 
     /**

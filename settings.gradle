@@ -1,2 +1,2 @@
-include ':app', ':dhl', ':dataparser', ':api', ':toolkit', ':support', ':glideutil', ':network', ':rxnetwork',
+include ':app', ':dhl', ':dataparser', ':api', ':toolkit', ':support', ':glideutil', ':network', ':rxnetwork', ':webview',
         ':gsonParse', ':permission'

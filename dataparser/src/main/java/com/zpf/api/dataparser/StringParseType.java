@@ -18,11 +18,11 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface StringParseType {
-    int TYPE_UNKNOWN = -1;
-    int TYPE_NULL = 0;
-    int TYPE_BOOLEAN = 1;
-    int TYPE_NUMBER = 2;
-    int TYPE_STRING = 3;
-    int TYPE_JSON_OBJECT = 4;
-    int TYPE_JSON_ARRAY = 5;
+    int TYPE_UNKNOWN = 0;
+    int TYPE_NULL = 1;
+    int TYPE_BOOLEAN = 2;
+    int TYPE_NUMBER = 3;
+    int TYPE_STRING = 4;
+    int TYPE_JSON_OBJECT = 5;
+    int TYPE_JSON_ARRAY = 6;
 }
