@@ -20,9 +20,9 @@ dependencies {
     api project(':toolkit')
     api project(':api')
     api project(':permission')
+    api project(':gsonParse')
 //    api 'com.zpf:interfaces:0.0.2'
 //    api 'com.zpf:generalUtil:0.0.1'
     api rootProject.ext.dependencies.design
-    api rootProject.ext.dependencies.gson
 }
 apply from: "../bintrayUpload.gradle"
