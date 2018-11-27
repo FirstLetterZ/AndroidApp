@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.zpf.support.base.SafeDialog;
-import com.zpf.support.base.R;
+import com.zpf.support.R;
 
 /**
  * @author ZPF

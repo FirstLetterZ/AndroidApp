@@ -66,21 +66,28 @@ public class BridgeWebView extends WebView {
 
     public BridgeWebView(Context context) {
         super(context);
-        initSetting();
+        init();
     }
 
     public BridgeWebView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initSetting();
+        init();
     }
 
     public BridgeWebView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init();
+    }
+
+    private void init(){
         initSetting();
+        setWebChromeClient(initWebChromeClient());
+        setWebViewClient(initWebViewClient());
+        initJsString();
     }
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
-    private void initSetting() {
+    protected void initSetting() {
         WebSettings setting = getSettings();
         setting.setJavaScriptEnabled(true);
         addJavascriptInterface(new JavaScriptInterface(), "bridge");
@@ -100,12 +107,9 @@ public class BridgeWebView extends WebView {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setting.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
-        setWebChromeClient(initWebChromeClient());
-        setWebViewClient(initWebViewClient());
-        initJsString();
     }
 
-    private void initJsString() {
+    protected void initJsString() {
         InputStream in = null;
         try {
             in = getContext().getAssets().open(jsFileName);
@@ -195,7 +199,7 @@ public class BridgeWebView extends WebView {
     /**
      * 创建默认的 WebChromeClient
      */
-    private WebChromeClient initWebChromeClient() {
+    protected WebChromeClient initWebChromeClient() {
         return new WebChromeClient() {
             @Override
             public void onReceivedTitle(WebView view, String title) {
@@ -287,7 +291,7 @@ public class BridgeWebView extends WebView {
     /**
      * 创建默认的 WebViewClient
      */
-    private WebViewClient initWebViewClient() {
+    protected WebViewClient initWebViewClient() {
         return new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {

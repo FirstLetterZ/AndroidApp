@@ -1,16 +1,21 @@
-package com.zpf.support.view.refresh;
+package com.zpf.refresh.view;
 
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.zpf.api.PackedLayoutInterface;
+import com.zpf.refresh.util.BaseViewStateCheckImpl;
+import com.zpf.refresh.util.HeadFootImpl;
+import com.zpf.refresh.util.HeadFootInterface;
+import com.zpf.refresh.util.OnRefreshListener;
+import com.zpf.refresh.util.RefreshLayoutState;
+import com.zpf.refresh.util.RefreshLayoutType;
+import com.zpf.refresh.util.ViewStateCheckListener;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,7 +24,7 @@ import java.util.TimerTask;
  * Created by ZPF on 2017/10/26.
  * 彷ios回弹布局，上拉刷新，下拉加载
  */
-public abstract class AbsRefreshLayout extends RelativeLayout {
+public class RefreshLayout extends RelativeLayout {
     private int state = RefreshLayoutState.INIT;// 当前状态
     private int type = RefreshLayoutType.ONLY_STRETCHY;//当前类型
     private float lastY;
@@ -28,8 +33,6 @@ public abstract class AbsRefreshLayout extends RelativeLayout {
     private int mEvents;// 过滤多点触碰
     private float pullDownY = 0; //下拉的距离。注意：pullDownY和pullUpY不可能同时不为0
     private float pullUpY = 0; //上拉的距离
-    private float refreshDist;//刷新布局悬停高度
-    private float loadmoreDist; //加载布局悬停高度
     private boolean isTouch = false;// 在刷新过程中滑动操作
     // 这两个变量用来控制pull的方向，如果不加控制，当情况满足可上拉又可下拉时没法下拉
     private boolean canPullDown = true;
@@ -39,75 +42,82 @@ public abstract class AbsRefreshLayout extends RelativeLayout {
     private OnRefreshListener mListener;//监听
     private float MOVE_SPEED = 8; //回滚速度
     private MyTimer timer;
-    private AbsHeadFootLayout refreshLayout;//刷新布局
-    private AbsHeadFootLayout loadLayout;//加载布局
+    private HeadFootLayout refreshLayout;//刷新布局
+    private HeadFootLayout loadLayout;//加载布局
     private View contentView;
     private ViewStateCheckListener checkListener;
     protected int loadDelayed = 600;//完成后停顿时间
     protected int refreshDelayed = 800;//完成后停顿时间
-    private boolean hasAddView;
-    private boolean hasLayoutView;
+    private boolean hasWindowFocus = false;
 
-    public AbsRefreshLayout(View contentView, AbsHeadFootLayout refreshLayout,
-                            AbsHeadFootLayout loadLayout, int type) {
-        super(contentView.getContext(), null, 0);
+    public RefreshLayout(View contentView) {
+        this(contentView.getContext(), null, 0);
         this.contentView = contentView;
-        this.refreshLayout = refreshLayout;
-        this.loadLayout = loadLayout;
-        this.type = type;
-        timer = new MyTimer(updateHandler);
-        initViews();
     }
 
-    public AbsRefreshLayout(Context context) {
+    public RefreshLayout(Context context) {
         this(context, null, 0);
     }
 
-    public AbsRefreshLayout(Context context, AttributeSet attrs) {
+    public RefreshLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public AbsRefreshLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+    public RefreshLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        refreshLayout = new HeadFootLayout(context);
+        refreshLayout.setHeadFootInterface(new HeadFootImpl());
+        loadLayout = new HeadFootLayout(context, true);
+        loadLayout.setHeadFootInterface(new HeadFootImpl());
         timer = new MyTimer(updateHandler);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        initViews();
+        int childCount = getChildCount();
+        if (contentView != null) {
+            removeAllViews();
+            addView(refreshLayout);
+            addView(loadLayout);
+            addView(contentView);
+        } else if (childCount == 1) {
+            contentView = getChildAt(0);
+            addView(refreshLayout);
+            addView(loadLayout);
+        } else {
+            throw new IllegalStateException("只能有一个控件");
+        }
     }
 
     //绘制布局
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        if (!hasLayoutView) {
-            hasLayoutView = true;
-        }
         if (type == RefreshLayoutType.NO_STRETCHY) {
             super.onLayout(changed, l, t, r, b);
             return;
         }
         // 改变子控件的布局，这里直接用(pullDownY + pullUpY)作为偏移量，这样就可以不对当前状态作区分,下拉大于0，上拉小于0
-        if (refreshLayout != null) {
-            refreshLayout.getContainerLayout().layout(0,
-                    (int) (pullDownY + pullUpY) - refreshLayout.getContainerLayout().getMeasuredHeight(),
-                    refreshLayout.getContainerLayout().getMeasuredWidth(), (int) (pullDownY + pullUpY));
+        if (type != RefreshLayoutType.ONLY_PULL_UP && refreshLayout.getDistHeight() > 0) {
+            refreshLayout.layout(0, (int) (pullDownY + pullUpY) - refreshLayout.getMeasuredHeight(),
+                    refreshLayout.getMeasuredWidth(), (int) (pullDownY + pullUpY));
         }
         getCheckListener().relayout(contentView, pullDownY, pullUpY);
-        if (loadLayout != null) {
-            loadLayout.getContainerLayout().layout(0,
-                    (int) (pullDownY + pullUpY) + contentView.getMeasuredHeight(),
-                    loadLayout.getContainerLayout().getMeasuredWidth(),
-                    (int) (pullDownY + pullUpY) + contentView.getMeasuredHeight()
-                            + loadLayout.getContainerLayout().getMeasuredHeight());
+        if (type != RefreshLayoutType.ONLY_PULL_DOWN && loadLayout.getDistHeight() > 0) {
+            loadLayout.layout(0, (int) (pullDownY + pullUpY) + contentView.getMeasuredHeight(),
+                    loadLayout.getMeasuredWidth(), (int) (pullDownY + pullUpY)
+                            + contentView.getMeasuredHeight() + loadLayout.getMeasuredHeight());
         }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        this.hasWindowFocus = hasWindowFocus;
     }
 
     /**
      * 由父控件决定是否分发事件，防止事件冲突
-     *
-     * @see ViewGroup#dispatchTouchEvent(MotionEvent)
      */
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
@@ -146,8 +156,8 @@ public abstract class AbsRefreshLayout extends RelativeLayout {
                             canPullUp = true;
                             requestLayout();
                         }
-                        if (pullDownY > 5 * refreshDist) {
-                            pullDownY = 5 * refreshDist;
+                        if (pullDownY > 5 * refreshLayout.getDistHeight()) {
+                            pullDownY = 5 * refreshLayout.getDistHeight();
                         }
                         if (pullDownY > getMeasuredHeight()) {
                             pullDownY = getMeasuredHeight();
@@ -166,8 +176,8 @@ public abstract class AbsRefreshLayout extends RelativeLayout {
                             canPullUp = false;
                             requestLayout();
                         }
-                        if (pullUpY < -5 * loadmoreDist) {
-                            pullUpY = -5 * loadmoreDist;
+                        if (pullUpY < -5 * loadLayout.getDistHeight()) {
+                            pullUpY = -5 * loadLayout.getDistHeight();
                         }
                         if (pullUpY < -getMeasuredHeight()) {
                             pullUpY = -getMeasuredHeight();
@@ -188,24 +198,24 @@ public abstract class AbsRefreshLayout extends RelativeLayout {
                         * 2 * (Math.abs(pullDownY + pullUpY)) / getMeasuredHeight()));
                 if (pullDownY > 0) {
                     requestLayout();
-                    if (pullDownY <= refreshDist
+                    if (pullDownY <= refreshLayout.getDistHeight()
                             && (state == RefreshLayoutState.TO_REFRESH || state == RefreshLayoutState.DONE)) {
                         // 如果下拉距离没达到刷新的距离且当前状态是释放刷新，改变状态为下拉刷新
                         changeState(RefreshLayoutState.INIT);
                     }
-                    if (pullDownY >= refreshDist && state == RefreshLayoutState.INIT) {
+                    if (pullDownY >= refreshLayout.getDistHeight() && state == RefreshLayoutState.INIT) {
                         // 如果下拉距离达到刷新的距离且当前状态是初始状态刷新，改变状态为释放刷新
                         changeState(RefreshLayoutState.TO_REFRESH);
                     }
                 } else if (pullUpY < 0) {
                     requestLayout();
                     // 下面是判断上拉加载的，同上，注意pullUpY是负值
-                    if (-pullUpY <= loadmoreDist
+                    if (-pullUpY <= loadLayout.getDistHeight()
                             && (state == RefreshLayoutState.TO_LOAD || state == RefreshLayoutState.DONE)) {
                         changeState(RefreshLayoutState.INIT);
                     }
                     // 上拉操作
-                    if (-pullUpY >= loadmoreDist && state == RefreshLayoutState.INIT) {
+                    if (-pullUpY >= loadLayout.getDistHeight() && state == RefreshLayoutState.INIT) {
                         changeState(RefreshLayoutState.TO_LOAD);
                     }
                 }
@@ -219,9 +229,8 @@ public abstract class AbsRefreshLayout extends RelativeLayout {
             case MotionEvent.ACTION_UP:
                 mInterceptTouchDownX = -1;
                 mInterceptTouchDownY = -1;
-                if (pullDownY > refreshDist || -pullUpY > loadmoreDist)
                 // 正在刷新时往下拉（正在加载时往上拉），释放后下拉头（上拉头）不隐藏
-                {
+                if (pullDownY > refreshLayout.getDistHeight() || -pullUpY > loadLayout.getDistHeight()) {
                     isTouch = false;
                 }
                 if (state == RefreshLayoutState.TO_REFRESH &&
@@ -247,29 +256,6 @@ public abstract class AbsRefreshLayout extends RelativeLayout {
         return true;
     }
 
-    private void initViews() {
-        if (getChildCount() == 0 && contentView != null) {
-            if (contentView.getParent() != null) {
-                ((ViewGroup) contentView.getParent()).removeView(contentView);
-            }
-            addView(contentView);
-        } else if (getChildCount() == 1 && contentView == null) {
-            contentView = getChildAt(0);
-        } else {
-            this.type = RefreshLayoutType.NO_STRETCHY;
-        }
-        setType(type);
-        if (refreshLayout != null) {
-            addView(refreshLayout.getContainerLayout(), 0);
-            refreshDist = refreshLayout.getDistHeight();
-        }
-        if (loadLayout != null) {
-            addView(loadLayout.getContainerLayout());
-            loadmoreDist = loadLayout.getDistHeight();
-        }
-        hasAddView = true;
-    }
-
     //每隔5m秒执行一次updateHandler，完成回滚
     private void hide() {
         timer.schedule(5);
@@ -284,22 +270,18 @@ public abstract class AbsRefreshLayout extends RelativeLayout {
     private void changeState(@RefreshLayoutState int state) {
         if (!(this.state == RefreshLayoutState.TO_LOAD || this.state == RefreshLayoutState.LOADING)
                 && !(state == RefreshLayoutState.TO_LOAD || state == RefreshLayoutState.LOADING)) {
-            if (refreshLayout != null) {
-                refreshLayout.changeState(state);
-            }
+            refreshLayout.changeState(state);
         }
         if (!(this.state == RefreshLayoutState.TO_REFRESH || this.state == RefreshLayoutState.REFRESHING)
                 && !(state == RefreshLayoutState.TO_REFRESH || state == RefreshLayoutState.REFRESHING)) {
-            if (loadLayout != null) {
-                loadLayout.changeState(state);
-            }
+            loadLayout.changeState(state);
         }
         if (state == RefreshLayoutState.SUCCEED || state == RefreshLayoutState.FAIL) {
             if (this.state == RefreshLayoutState.LOADING || this.state == RefreshLayoutState.TO_LOAD) {
                 this.state = RefreshLayoutState.DONE;
                 timer.cancel();
                 pullDownY = 0;
-                pullUpY = -loadmoreDist;
+                pullUpY = -loadLayout.getDistHeight();
                 requestLayout();
                 postDelayed(new Runnable() {
                     @Override
@@ -310,7 +292,7 @@ public abstract class AbsRefreshLayout extends RelativeLayout {
             } else {
                 this.state = RefreshLayoutState.DONE;
                 timer.cancel();
-                pullDownY = refreshDist;
+                pullDownY = refreshLayout.getDistHeight();
                 pullUpY = 0;
                 requestLayout();
                 postDelayed(new Runnable() {
@@ -332,42 +314,21 @@ public abstract class AbsRefreshLayout extends RelativeLayout {
         return checkListener;
     }
 
+    public void setHeadInterface(HeadFootInterface headInterface) {
+        refreshLayout.setHeadFootInterface(headInterface);
+    }
+
+    public void setFootInterface(HeadFootInterface footInterface) {
+        loadLayout.setHeadFootInterface(footInterface);
+    }
+
     public void setType(@RefreshLayoutType int type) {
         this.type = type;
-        if (refreshLayout == null && type != RefreshLayoutType.NO_STRETCHY) {
-            refreshLayout = getDefaultHeadLayout(getContext());
-        }
-        if (loadLayout == null && type != RefreshLayoutType.NO_STRETCHY) {
-            loadLayout = getDefaultFootLayout(getContext());
-        }
-        if (refreshLayout != null) {
-            refreshLayout.setType(type);
-        }
-        if (loadLayout != null) {
-            loadLayout.setType(type);
-        }
+        refreshLayout.setType(type);
+        loadLayout.setType(type);
     }
 
-    public void setHeadFootLayout(AbsHeadFootLayout headLayout, AbsHeadFootLayout footLayout) {
-        if (hasAddView) {
-            if (refreshLayout != null) {
-                removeView(refreshLayout.getContainerLayout());
-            }
-            if (loadLayout != null) {
-                removeView(loadLayout.getContainerLayout());
-            }
-            if (headLayout != null) {
-                addView(headLayout, 0);
-            }
-            if (footLayout != null) {
-                addView(footLayout);
-            }
-        }
-        this.refreshLayout = headLayout;
-        this.loadLayout = footLayout;
-        setType(type);
-    }
-
+    //设置刷新和加载布局停留时间
     public void setDelayedTime(int refreshDelayed, int loadDelayed) {
         if (refreshDelayed > 200) {
             this.refreshDelayed = refreshDelayed;
@@ -384,34 +345,56 @@ public abstract class AbsRefreshLayout extends RelativeLayout {
         changeState(success ? RefreshLayoutState.SUCCEED : RefreshLayoutState.FAIL);
     }
 
+    //模拟刷新
     public void doRefresh() {
         if (state != RefreshLayoutState.INIT) {
             return;
         }
-        if (hasLayoutView) {
-            if (contentView != null) {
-                if (contentView instanceof PackedLayoutInterface) {
-                    ((PackedLayoutInterface) contentView).getCurrentChild().scrollTo(0, 0);
-                } else {
-                    contentView.scrollTo(0, 0);
-                }
-            }
-            pullDownY = refreshDist;
+        tryRefresh(3);
+    }
+
+    private void tryRefresh(final int time) {
+        if (hasWindowFocus) {
+            scrollContentTop(contentView);
+            pullDownY = refreshLayout.getDistHeight();
             pullUpY = 0;
             isTouch = false;
-            requestLayout();
-            changeState(RefreshLayoutState.REFRESHING);
-            if (mListener != null) {
-                mListener.onRefresh();
-            }
+            postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    requestLayout();
+                    changeState(RefreshLayoutState.REFRESHING);
+                    if (mListener != null) {
+                        mListener.onRefresh();
+                    }
+                }
+            }, 200);
         } else {
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    doRefresh();
+                    tryRefresh(time - 1);
                 }
-            }, 200);
+            }, 400);
         }
+    }
+
+    private void scrollContentTop(View view) {
+        if (view != null) {
+            if (view instanceof PackedLayoutInterface) {
+                scrollContentTop(((PackedLayoutInterface) view).getCurrentChild());
+            } else {
+                view.scrollTo(0, 0);
+            }
+        }
+    }
+
+    public HeadFootLayout getHeadLayout() {
+        return refreshLayout;
+    }
+
+    public HeadFootLayout getFootLayout() {
+        return loadLayout;
     }
 
     public void setCheckListener(ViewStateCheckListener checkListener) {
@@ -420,14 +403,6 @@ public abstract class AbsRefreshLayout extends RelativeLayout {
 
     public void setOnRefreshListener(OnRefreshListener listener) {
         mListener = listener;
-    }
-
-    public interface OnRefreshListener {
-        //刷新操作
-        void onRefresh();
-
-        //加载操作
-        void onLoadMore();
     }
 
     //执行updateHandler
@@ -477,8 +452,8 @@ public abstract class AbsRefreshLayout extends RelativeLayout {
         public boolean handleMessage(Message msg) {
             if (state == RefreshLayoutState.DONE) {
                 state = RefreshLayoutState.INIT;
-                if (pullDownY >= refreshDist / 2) {
-                    pullDownY = refreshDist;
+                if (pullDownY >= refreshLayout.getDistHeight() / 2) {
+                    pullDownY = refreshLayout.getDistHeight();
                     pullUpY = 0;
                 } else if (pullUpY <= -loadDelayed / 2) {
                     pullDownY = 0;
@@ -497,11 +472,11 @@ public abstract class AbsRefreshLayout extends RelativeLayout {
             }
             if (!isTouch) {
                 // 正在刷新，且没有往上推的话则悬停，显示"正在刷新..."
-                if (state == RefreshLayoutState.REFRESHING && pullDownY <= refreshDist) {
-                    pullDownY = refreshDist;
+                if (state == RefreshLayoutState.REFRESHING && pullDownY <= refreshLayout.getDistHeight()) {
+                    pullDownY = refreshLayout.getDistHeight();
                     timer.cancel();
-                } else if (state == RefreshLayoutState.LOADING && -pullUpY <= loadmoreDist) {
-                    pullUpY = -loadmoreDist;
+                } else if (state == RefreshLayoutState.LOADING && -pullUpY <= loadLayout.getDistHeight()) {
+                    pullUpY = -loadLayout.getDistHeight();
                     timer.cancel();
                 }
             }
@@ -531,12 +506,6 @@ public abstract class AbsRefreshLayout extends RelativeLayout {
             return true;
         }
     });
-
-    @NonNull
-    public abstract AbsHeadFootLayout getDefaultHeadLayout(Context context);
-
-    @NonNull
-    public abstract AbsHeadFootLayout getDefaultFootLayout(Context context);
 
     //添加其他布局的时候需要复写
     protected ViewStateCheckListener getDefaultViewStateCheckListener() {

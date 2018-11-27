@@ -13,7 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Space;
 
-import com.zpf.support.base.R;
+import com.zpf.support.R;
 
 /**
  * Created by ZPF on 2018/9/27.
