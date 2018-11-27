@@ -6,6 +6,8 @@ buildscript {
         google()
         maven { url "https://jitpack.io" }
         maven { url 'https://dl.bintray.com/letterz/ToolMaven' }
+        maven { url 'https://dl.bintray.com/letterz/apiMaven' }
+        maven { url 'https://dl.bintray.com/letterz/SupportMaven' }
         jcenter()
         mavenCentral()
     }
@@ -22,6 +24,8 @@ allprojects {
     repositories {
         maven { url "https://jitpack.io" }
         maven { url 'https://dl.bintray.com/letterz/ToolMaven' }
+        maven { url 'https://dl.bintray.com/letterz/apiMaven' }
+        maven { url 'https://dl.bintray.com/letterz/SupportMaven' }
         jcenter()
         mavenCentral()
         google()
@@ -53,6 +57,19 @@ ext {
             rxandroid             : 'io.reactivex.rxjava2:rxandroid:2.0.1',
             design                : 'com.android.support:design:27.1.1',
             multidex              : 'com.android.support:multidex:1.0.2',
+            /* ============================== 项目内工具库 ================================ */
+            dataparser            : 'com.zpf:api-parse:0.0.2',
+            api                   : 'com.zpf:api-kit:0.0.2',
+            dhl                   : 'com.zpf:api-parse:0.0.2',
+            toolkit               : 'com.zpf:api-parse:0.0.2',
+            permission            : 'com.zpf:api-parse:0.0.2',
+            webview               : 'com.zpf:api-parse:0.0.2',
+            refresh               : 'com.zpf:api-parse:0.0.2',
+            network               : 'com.zpf:api-parse:0.0.2',
+            rxnetwork             : 'com.zpf:api-parse:0.0.2',
+            support               : 'com.zpf:api-parse:0.0.2',
+            gsonParse             : 'com.zpf:api-parse:0.0.2',
+            glideutil             : 'com.zpf:api-parse:0.0.2',
     ]
 }
 

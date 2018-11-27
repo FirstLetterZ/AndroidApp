@@ -21,4 +21,6 @@ android {
 dependencies {
     implementation project(':support')
     implementation project(':refresh')
+    implementation 'com.zpf:api-parse:0.0.2'
+
 }
