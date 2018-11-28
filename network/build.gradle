@@ -20,7 +20,7 @@ dependencies {
     api rootProject.ext.dependencies.retrofitGsonConverter
     api rootProject.ext.dependencies.retrofit
     api rootProject.ext.dependencies.gson
-    api project(':api')
-    api project(':toolkit')
+    api rootProject.ext.dependencies.api
+    api rootProject.ext.dependencies.toolkit
 }
 apply from: "../bintrayUpload.gradle"

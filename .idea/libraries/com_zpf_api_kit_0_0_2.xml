@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="com.zpf:api-kit-0.0.2">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/api-kit-0.0.2.aar/eceabb955dc665e353432323d02b613b/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/api-kit-0.0.2.aar/eceabb955dc665e353432323d02b613b/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.zpf/api-kit/0.0.2/64f85c9bddbc226ceb223c696bc7c9456600c013/api-kit-0.0.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

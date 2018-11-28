@@ -18,7 +18,7 @@ android {
 
 dependencies {
     api rootProject.ext.dependencies.supportV4
-    api project(':api')
-    api project(':dataparser')
+    api rootProject.ext.dependencies.api
+    api rootProject.ext.dependencies.dataparser
 }
 apply from: "../bintrayUpload.gradle"

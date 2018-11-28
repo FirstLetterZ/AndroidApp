@@ -2,19 +2,12 @@ package com.zpf.support.network.base;
 
 import com.zpf.support.network.header.HeaderCarrier;
 import com.zpf.support.network.model.ClientBuilder;
-import com.zpf.support.network.model.RequestBuilder;
 import com.zpf.support.network.model.RequestHelper;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.Request;
 import okhttp3.RequestBody;
 import retrofit2.converter.gson.GsonConverterFactory;
 

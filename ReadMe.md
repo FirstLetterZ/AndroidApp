@@ -4,19 +4,18 @@
     ./gradlew -p XXX clean install bintrayUpload --info
 各module上传：
     ./gradlew -p api clean install bintrayUpload --info
+    ./gradlew -p dataparser clean install bintrayUpload --info
     ./gradlew -p toolkit clean install bintrayUpload --info
-    ./gradlew -p support clean install bintrayUpload --info
+    ./gradlew -p dhl clean install bintrayUpload --info
+    ./gradlew -p permission clean install bintrayUpload --info
     ./gradlew -p glideutil clean install bintrayUpload --info
+    ./gradlew -p gsonParse clean install bintrayUpload --info
+    ./gradlew -p refresh clean install bintrayUpload --info
+    ./gradlew -p webview clean install bintrayUpload --info
+    ./gradlew -p support clean install bintrayUpload --info
     ./gradlew -p network clean install bintrayUpload --info
     ./gradlew -p rxnetwork clean install bintrayUpload --info
-    ./gradlew -p gsonParse clean install bintrayUpload --info
-    ./gradlew -p permission clean install bintrayUpload --info
-    ./gradlew -p refresh clean install bintrayUpload --info
-    ./gradlew -p webview clean install bintrayUpload --info
-    ./gradlew -p dhl clean install bintrayUpload --info
-    ./gradlew -p dataparser clean install bintrayUpload --info
-    ./gradlew -p refresh clean install bintrayUpload --info
-    ./gradlew -p webview clean install bintrayUpload --info
+    
 全部上传：
     ./gradlew clean install bintrayUpload --info
 

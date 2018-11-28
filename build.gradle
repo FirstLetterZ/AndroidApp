@@ -60,16 +60,16 @@ ext {
             /* ============================== 项目内工具库 ================================ */
             dataparser            : 'com.zpf:api-parse:0.0.2',
             api                   : 'com.zpf:api-kit:0.0.2',
-            dhl                   : 'com.zpf:api-parse:0.0.2',
-            toolkit               : 'com.zpf:api-parse:0.0.2',
-            permission            : 'com.zpf:api-parse:0.0.2',
-            webview               : 'com.zpf:api-parse:0.0.2',
-            refresh               : 'com.zpf:api-parse:0.0.2',
-            network               : 'com.zpf:api-parse:0.0.2',
-            rxnetwork             : 'com.zpf:api-parse:0.0.2',
-            support               : 'com.zpf:api-parse:0.0.2',
-            gsonParse             : 'com.zpf:api-parse:0.0.2',
-            glideutil             : 'com.zpf:api-parse:0.0.2',
+            dhl                   : 'com.zpf:tool-dhl:0.0.2',
+            toolkit               : 'com.zpf:tool-kit:0.0.1',
+            permission            : 'com.zpf:tool-permission:0.0.1',
+            webview               : 'com.zpf:bridgeWebview:0.0.1',
+            refresh               : 'com.zpf:pullRefresh:0.0.1',
+            network               : 'com.zpf:network:0.0.2',
+            rxnetwork             : 'com.zpf:rxNetwork:0.0.1',
+            support               : 'com.zpf:frame:0.0.1',
+            gsonParse             : 'com.zpf:parse-gson:0.0.3',
+            glideutil             : 'com.zpf:util-glide:0.0.1',
     ]
 }
 
