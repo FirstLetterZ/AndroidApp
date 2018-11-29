@@ -5,11 +5,13 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -21,6 +23,10 @@ import java.util.List;
  */
 
 public class PublicUtil {
+
+    public static DisplayMetrics getDisplayMetrics() {
+        return Resources.getSystem().getDisplayMetrics();
+    }
 
     public static int getColor(int color) {
         return AppContext.get().getResources().getColor(color);
