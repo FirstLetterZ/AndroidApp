@@ -59,6 +59,9 @@ public class BaseViewStateCheckImpl implements ViewStateCheckListener {
                 view.layout(0, (int) (pullDownY + pullUpY), view.getMeasuredWidth(),
                         (int) (pullDownY + pullUpY) + view.getMeasuredHeight());
                 contentView.layout(0, contentView.getTop(), contentView.getMeasuredWidth(), height);
+                if (contentView.getScrollY() != 0) {
+                    contentView.scrollTo(0, 0);
+                }
             } else {
                 float dY = pullDownY + pullUpY;
                 int newTop = view.getTop();
@@ -75,7 +78,7 @@ public class BaseViewStateCheckImpl implements ViewStateCheckListener {
                 }
                 view.layout(0, newTop, view.getMeasuredWidth(), newTop + view.getMeasuredHeight());
                 contentView.layout(0, contentView.getTop(), contentView.getMeasuredWidth(), (int) (height + dY));
-                contentView.scrollBy(0, (int) (-dY));//滚到到最下面一条
+                contentView.scrollTo(0, (int) (-dY));//滚到到最下面一条
             }
         } else {
             view.layout(0, (int) (pullDownY + pullUpY), view.getMeasuredWidth(),

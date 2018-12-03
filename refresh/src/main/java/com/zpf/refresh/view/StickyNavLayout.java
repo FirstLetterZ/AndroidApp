@@ -84,10 +84,9 @@ public class StickyNavLayout extends LinearLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        measureChild(mContentView, widthMeasureSpec, MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec) - getNavViewHeight(), MeasureSpec.EXACTLY));
-        if (mContentHeight == 0) {
-            mContentHeight = mContentView.getMeasuredHeight();
-        }
+        measureChild(mContentView, widthMeasureSpec, MeasureSpec.makeMeasureSpec(
+                MeasureSpec.getSize(heightMeasureSpec) - getNavViewHeight(), MeasureSpec.EXACTLY));
+        mContentHeight = mContentView.getMeasuredHeight();
     }
 
     @Override
