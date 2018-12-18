@@ -31,7 +31,6 @@ public class StickyNavLayout extends LinearLayout {
 
     private OverScroller mOverScroller;
     private VelocityTracker mVelocityTracker;
-    private int mTouchSlop;
     private int mMaximumVelocity;
     private int mMinimumVelocity;
 
@@ -50,7 +49,6 @@ public class StickyNavLayout extends LinearLayout {
         setOrientation(VERTICAL);
         mOverScroller = new OverScroller(context);
         final ViewConfiguration configuration = ViewConfiguration.get(context);
-        mTouchSlop = configuration.getScaledTouchSlop();
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
     }
@@ -146,6 +144,21 @@ public class StickyNavLayout extends LinearLayout {
     }
 
     /**
+     * 头部视图是否已经完全显示
+     */
+    private boolean isHeaderViewCompleteVisible() {
+        // 0表示x，1表示y
+        int[] location = new int[2];
+        getLocationOnScreen(location);
+        int contentOnScreenTopY = location[1] + getPaddingTop();
+
+        mHeaderView.getLocationOnScreen(location);
+        MarginLayoutParams params = (MarginLayoutParams) mHeaderView.getLayoutParams();
+        int navViewTopOnScreenY = location[1] - params.topMargin;
+        return navViewTopOnScreenY == contentOnScreenTopY;
+    }
+
+    /**
      * 头部视图是否已经完全隐藏
      */
     private boolean isHeaderViewCompleteInvisible() {
@@ -183,19 +196,42 @@ public class StickyNavLayout extends LinearLayout {
             case MotionEvent.ACTION_MOVE:
                 float differentY = currentTouchY - mLastDispatchY;
                 mLastDispatchY = currentTouchY;
-                if (isContentViewToTop() && isHeaderViewCompleteInvisible()) {
-                    if (differentY >= 0 && !mIsInControl) {
-                        mIsInControl = true;
-                        return resetDispatchTouchEvent(ev);
-                    }
-                    if (differentY <= 0 && mIsInControl) {
-                        mIsInControl = false;
-                        return resetDispatchTouchEvent(ev);
-                    }
+                if (checkContentLayout(mContentView)) {
+                    break;
+                } else if (differentY > 0) {
+                    mIsInControl = !isHeaderViewCompleteVisible();
+                } else if (differentY < 0) {
+                    mIsInControl = !isHeaderViewCompleteInvisible();
+                } else {
+                    mIsInControl = true;
+                    return resetDispatchTouchEvent(ev);
                 }
                 break;
         }
         return super.dispatchTouchEvent(ev);
+    }
+
+    private boolean checkContentLayout(View view) {
+        if (view != null) {
+            if (view instanceof RefreshLayout) {
+                if (!((RefreshLayout) view).isInitState()) {
+                    mIsInControl = false;
+                    return true;
+                }
+            } else if (view instanceof ViewPager) {
+                getNestedContentView((ViewPager) view);
+                return checkContentLayout(mNestedContentView);
+            } else if (view instanceof ViewGroup) {
+                if (((ViewGroup) view).getChildCount() > 0) {
+                    for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+                        if (checkContentLayout(((ViewGroup) view).getChildAt(i))) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private boolean resetDispatchTouchEvent(MotionEvent ev) {
@@ -215,8 +251,8 @@ public class StickyNavLayout extends LinearLayout {
                 break;
             case MotionEvent.ACTION_MOVE:
                 float differentY = currentTouchY - mLastTouchY;
-                if (Math.abs(differentY) > mTouchSlop) {
-                    if (!isHeaderViewCompleteInvisible() || (isContentViewToTop() && isHeaderViewCompleteInvisible() && mIsInControl)) {
+                if (Math.abs(differentY) > 0) {
+                    if (mIsInControl) {
                         mLastTouchY = currentTouchY;
                         return true;
                     }

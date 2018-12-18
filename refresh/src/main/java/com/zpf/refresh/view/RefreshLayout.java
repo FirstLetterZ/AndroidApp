@@ -405,6 +405,10 @@ public class RefreshLayout extends RelativeLayout {
         mListener = listener;
     }
 
+    public boolean isInitState() {
+        return pullDownY + Math.abs(pullUpY) == 0;
+    }
+
     //执行updateHandler
     private class MyTimer {
         private Handler handler;
