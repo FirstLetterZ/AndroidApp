@@ -35,10 +35,11 @@ public class StickyNavLayout extends LinearLayout {
     private int mMinimumVelocity;
 
     private boolean mIsInControl = true;
-
-    private float mLastDispatchY;
-    private float mLastTouchY;
     private int mContentHeight;
+
+    private float dY;
+    private float lastX = -1;
+    private float lastY = -1;
 
     public StickyNavLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -82,8 +83,7 @@ public class StickyNavLayout extends LinearLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        measureChild(mContentView, widthMeasureSpec, MeasureSpec.makeMeasureSpec(
-                MeasureSpec.getSize(heightMeasureSpec) - getNavViewHeight(), MeasureSpec.EXACTLY));
+        measureChild(mContentView, widthMeasureSpec, MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec) - getNavViewHeight(), MeasureSpec.EXACTLY));
         mContentHeight = mContentView.getMeasuredHeight();
     }
 
@@ -135,10 +135,6 @@ public class StickyNavLayout extends LinearLayout {
         return mNavView.getMeasuredHeight() + layoutParams.topMargin + layoutParams.bottomMargin;
     }
 
-    public int getContentHeight() {
-        return mContentHeight;
-    }
-
     public int getAllChildHeight() {
         return mContentHeight + getNavViewHeight() + getHeaderViewHeight();
     }
@@ -188,100 +184,111 @@ public class StickyNavLayout extends LinearLayout {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        float currentTouchY = ev.getY();
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mLastDispatchY = currentTouchY;
+                lastX = ev.getRawX();
+                lastY = ev.getRawY();
+                dY = 0;
+                mIsInControl = false;
                 break;
             case MotionEvent.ACTION_MOVE:
-                float differentY = currentTouchY - mLastDispatchY;
-                mLastDispatchY = currentTouchY;
-                if (checkContentLayout(mContentView)) {
-                    break;
-                } else if (differentY > 0) {
-                    mIsInControl = !isHeaderViewCompleteVisible();
-                } else if (differentY < 0) {
-                    mIsInControl = !isHeaderViewCompleteInvisible();
+                float currentX = ev.getRawX();
+                float currentY = ev.getRawY();
+                if (lastX == -1) {
+                    lastX = currentX;
+                }
+                if (lastY == -1) {
+                    lastY = currentY;
+                }
+                dY = currentY - lastY;
+                float dX = currentX - lastX;
+                if (Math.abs(dY) > 4) {
+                    lastX = currentX;
+                    lastY = currentY;
                 } else {
-                    mIsInControl = true;
-                    return resetDispatchTouchEvent(ev);
+                    dY = 0;
+                }
+                RefreshLayout refreshLayout = checkRefreshLayout(mContentView);
+                if (refreshLayout != null && !refreshLayout.isInitState()) {
+                    mIsInControl = false;
+                    break;
+                }
+                if (Math.abs(dY) > Math.abs(dX)) {
+                    boolean isContentViewToTop = isContentViewToTop();
+                    if (dY > 0) {
+                        mIsInControl = (refreshLayout == null || refreshLayout.checkPullDown())
+                                && isContentViewToTop && !isHeaderViewCompleteVisible();
+                    } else if (dY < 0) {
+                        mIsInControl = !isHeaderViewCompleteInvisible();
+                    }
+                    if (mIsInControl && isContentViewToTop) {
+                        scrollBy(0, (int) -dY);
+                    }
+                }
+                if (refreshLayout != null) {
+                    refreshLayout.setFreeze(mIsInControl || dY == 0);
                 }
                 break;
+            case MotionEvent.ACTION_UP:
+                lastX = -1;
+                lastY = -1;
+            case MotionEvent.ACTION_CANCEL:
+                mIsInControl = false;
+                break;
         }
-        return super.dispatchTouchEvent(ev);
+        super.dispatchTouchEvent(ev);
+        return true;
     }
 
-    private boolean checkContentLayout(View view) {
+    private RefreshLayout checkRefreshLayout(View view) {
+        RefreshLayout result = null;
         if (view != null) {
             if (view instanceof RefreshLayout) {
-                if (!((RefreshLayout) view).isInitState()) {
-                    mIsInControl = false;
-                    return true;
-                }
+                result = (RefreshLayout) view;
             } else if (view instanceof ViewPager) {
                 getNestedContentView((ViewPager) view);
-                return checkContentLayout(mNestedContentView);
+                result = checkRefreshLayout(mNestedContentView);
             } else if (view instanceof ViewGroup) {
                 if (((ViewGroup) view).getChildCount() > 0) {
                     for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-                        if (checkContentLayout(((ViewGroup) view).getChildAt(i))) {
-                            return true;
+                        result = checkRefreshLayout(((ViewGroup) view).getChildAt(i));
+                        if (result != null) {
+                            break;
                         }
                     }
                 }
             }
         }
-        return false;
-    }
-
-    private boolean resetDispatchTouchEvent(MotionEvent ev) {
-        MotionEvent newEvent = MotionEvent.obtain(ev);
-        ev.setAction(MotionEvent.ACTION_CANCEL);
-        dispatchTouchEvent(ev);
-        newEvent.setAction(MotionEvent.ACTION_DOWN);
-        return dispatchTouchEvent(newEvent);
+        return result;
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        float currentTouchY = ev.getY();
         switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                mLastTouchY = currentTouchY;
-                break;
             case MotionEvent.ACTION_MOVE:
-                float differentY = currentTouchY - mLastTouchY;
-                if (Math.abs(differentY) > 0) {
-                    if (mIsInControl) {
-                        mLastTouchY = currentTouchY;
-                        return true;
-                    }
+                if (Math.abs(dY) > 0 && mIsInControl) {
+                    return true;
                 }
                 break;
         }
-        return super.onInterceptTouchEvent(ev);
+        return false;
     }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!mIsInControl) {
+            return false;
+        }
         initVelocityTrackerIfNotExists();
         mVelocityTracker.addMovement(event);
-        float currentTouchY = event.getY();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 if (!mOverScroller.isFinished()) {
                     mOverScroller.abortAnimation();
                 }
-
-                mLastTouchY = currentTouchY;
                 break;
             case MotionEvent.ACTION_MOVE:
-                float differentY = currentTouchY - mLastTouchY;
-                if (isContentViewToTop() && Math.abs(differentY) > 0) {
-                    scrollBy(0, (int) -differentY);
-                }
-                mLastTouchY = currentTouchY;
                 break;
             case MotionEvent.ACTION_CANCEL:
                 recycleVelocityTracker();
@@ -355,6 +362,8 @@ public class StickyNavLayout extends LinearLayout {
 
     private boolean checkViewToBottom(View view) {
         if (view == null) {
+            return false;
+        } else if (!isHeaderViewCompleteInvisible()) {
             return false;
         } else if (view instanceof ViewPager) {
             if (mNestedContentView == null) {

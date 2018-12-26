@@ -49,6 +49,7 @@ public class RefreshLayout extends RelativeLayout {
     protected int loadDelayed = 600;//完成后停顿时间
     protected int refreshDelayed = 800;//完成后停顿时间
     private boolean hasWindowFocus = false;
+    private boolean freeze;//忽略dispatch
 
     public RefreshLayout(View contentView) {
         this(contentView.getContext(), null, 0);
@@ -121,6 +122,13 @@ public class RefreshLayout extends RelativeLayout {
      */
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (freeze) {
+            if (ev.getActionMasked() == MotionEvent.ACTION_DOWN || ev.getActionMasked() == MotionEvent.ACTION_MOVE) {
+                lastY = ev.getY();
+            }
+            super.dispatchTouchEvent(ev);
+            return true;
+        }
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 lastY = ev.getY();
@@ -144,9 +152,8 @@ public class RefreshLayout extends RelativeLayout {
                         mInterceptTouchDownY = (int) ev.getRawY();
                     }
                     int interceptTouchMoveDistanceY = (int) (ev.getRawY() - mInterceptTouchDownY);
-                    if ((pullDownY > 0 || (canPullDown && state != RefreshLayoutState.LOADING
-                            && getCheckListener().checkPullDown(contentView)))
-                            && (Math.abs(ev.getRawX() - mInterceptTouchDownX) < Math.abs(interceptTouchMoveDistanceY))) {
+                    boolean isHorizontalScrolling = Math.abs(ev.getRawX() - mInterceptTouchDownX) > Math.abs(interceptTouchMoveDistanceY);
+                    if (!isHorizontalScrolling && (pullDownY > 0 || (interceptTouchMoveDistanceY >= 0 && checkPullDown()))) {
                         // 可以下拉，正在加载时不能下拉
                         // 对实际滑动距离做缩小，造成用力拉的感觉
                         pullDownY = pullDownY + (ev.getY() - lastY) / radio;
@@ -166,8 +173,7 @@ public class RefreshLayout extends RelativeLayout {
                             // 正在刷新的时候触摸移动
                             isTouch = true;
                         }
-                    } else if ((pullUpY < 0 || (canPullUp && state != RefreshLayoutState.REFRESHING && getCheckListener().checkPullUp(contentView)))
-                            && (Math.abs(ev.getRawX() - mInterceptTouchDownX) < Math.abs(interceptTouchMoveDistanceY))) {
+                    } else if (!isHorizontalScrolling && (pullUpY < 0 || (interceptTouchMoveDistanceY <= 0 && checkPullUp()))) {
                         // 可以上拉，正在刷新时不能上拉
                         pullUpY = pullUpY + (ev.getY() - lastY) / radio;
                         if (pullUpY >= 0) {
@@ -322,10 +328,26 @@ public class RefreshLayout extends RelativeLayout {
         loadLayout.setHeadFootInterface(footInterface);
     }
 
+    public boolean checkPullDown() {
+        return canPullDown && state != RefreshLayoutState.LOADING && getCheckListener().checkPullDown(contentView);
+    }
+
+    public boolean checkPullUp() {
+        return canPullUp && state != RefreshLayoutState.REFRESHING && getCheckListener().checkPullUp(contentView);
+    }
+
     public void setType(@RefreshLayoutType int type) {
         this.type = type;
         refreshLayout.setType(type);
         loadLayout.setType(type);
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setFreeze(boolean freeze) {
+        this.freeze = freeze;
     }
 
     //设置刷新和加载布局停留时间
