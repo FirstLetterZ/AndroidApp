@@ -33,40 +33,34 @@ public class NetLogInterceptor implements Interceptor {
         if (logListener == null) {
             return chain.proceed(chain.request());
         }
+        StringBuilder resultBuilder = new StringBuilder(128);
+        resultBuilder.append("{");
         long t1 = System.currentTimeMillis();
         Request request = chain.request();
-        HttpUrl httpUrl = request.url();//请求url
-        String url = httpUrl.toString();
-        String method = request.method();  //请求类型
+        HttpUrl httpUrl = request.url();
+        resultBuilder.append("\"url\":\"").append(httpUrl.toString()).append("\"");//请求url
+        resultBuilder.append(",\"method\":\"").append(request.method()).append("\"");//请求类型
         //请求参数
-        String params = null;
+        resultBuilder.append(",\"params\":");
         RequestBody requestBody = request.body();
         if (requestBody != null) {
-            try {
-                params = getRequestParams(requestBody);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            addRequestParams(resultBuilder, requestBody);
         } else {
             int querySize = httpUrl.querySize();
+            resultBuilder.append("{");
             if (querySize > 0) {
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("{");
                 for (int i = 0; i < querySize; i++) {
-                    stringBuilder.append("\"").append(httpUrl.queryParameterName(i))
+                    resultBuilder.append("\"").append(httpUrl.queryParameterName(i))
                             .append("\":\"").append(httpUrl.queryParameterValue(i)).append("\"");
                     if (i < querySize - 1) {
-                        stringBuilder.append(",");
+                        resultBuilder.append(",");
                     }
                 }
-                stringBuilder.append("}");
-                params = stringBuilder.toString();
             }
-        }
-        if (TextUtils.isEmpty(params)) {
-            params = "{}";
+            resultBuilder.append("}");
         }
         //返回数据
+        resultBuilder.append(",\"body\":");
         Response response = chain.proceed(request);
         String bodyString = null;
         long t2 = System.currentTimeMillis();
@@ -88,64 +82,77 @@ public class NetLogInterceptor implements Interceptor {
                         "\",\"Content-Length\":\"" + response.headers().get("Content-Length") +
                         "\"}";
             }
-            String msg = buildLogMessage(url, method, t1, t2, params, bodyString);
-            logListener.onSuccess(msg);
+            resultBuilder.append(bodyString);
+            resultBuilder.append(",\"time-consuming\":").append((t2 - t1)).append("}");
+            logListener.onSuccess(resultBuilder.toString());
         } else {
-            String errorMsg = "{\"code\":" + response.code() + ",\"message\":\"" + response.message() + "\"}";
-            String msg = buildLogMessage(url, method, t1, t2, params, errorMsg);
-            logListener.onError(msg);
+            resultBuilder.append("{\"code\":").append(response.code()).append(",\"message\":\"").append(response.message()).append("\"}");
+            resultBuilder.append(",\"time-consuming\":").append((t2 - t1)).append("}");
+            logListener.onError(resultBuilder.toString());
         }
         return response;
     }
 
-    private String getRequestParams(RequestBody requestBody) throws IOException {
+    private void addRequestParams(StringBuilder builder, RequestBody requestBody) {
         if (requestBody == null) {
-            return "{}";
-        }
-        String params = null;
-        if (requestBody instanceof FormBody) {
+            builder.append("{}");
+        } else if (requestBody instanceof FormBody) {
             int size = ((FormBody) requestBody).size();
+            builder.append("{");
             if (size > 0) {
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("{");
                 for (int i = 0; i < size; i++) {
-                    stringBuilder.append("\"").append(((FormBody) requestBody).name(i))
+                    builder.append("\"").append(((FormBody) requestBody).name(i))
                             .append("\":\"").append(((FormBody) requestBody).value(i)).append("\"");
                     if (i < size - 1) {
-                        stringBuilder.append(",");
+                        builder.append(",");
                     }
                 }
-                stringBuilder.append("}");
-                params = stringBuilder.toString();
             }
+            builder.append("}");
         } else if (requestBody instanceof MultipartBody) {
             int size = ((MultipartBody) requestBody).size();
+            builder.append("[");
             if (size > 0) {
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("[");
                 for (int i = 0; i < size; i++) {
-                    getRequestParams(((MultipartBody) requestBody).part(i).body());
+                    addRequestParams(builder, ((MultipartBody) requestBody).part(i).body());
                 }
-                stringBuilder.append("]");
-                params = stringBuilder.toString();
             }
+            builder.append("]");
         } else {
-            long contentLength = requestBody.contentLength();
+            long contentLength;
+            try {
+                contentLength = requestBody.contentLength();
+            } catch (IOException e) {
+                contentLength = -1;
+            }
             if (contentLength > 5 * 1024) {
-                params = "{\"contentLength\":" + contentLength + "}";
+                builder.append("{\"contentLength\":").append(contentLength).append("}");
             } else {
-                Charset charset = checkCharset(requestBody.contentType());
-                Buffer buffer = new Buffer();
-                requestBody.writeTo(buffer);
-                if (isPlaintext(buffer)) {
-                    params = buffer.readString(charset);
+                if (contentLength >= 0) {
+                    Charset charset = checkCharset(requestBody.contentType());
+                    Buffer buffer = new Buffer();
+                    try {
+                        requestBody.writeTo(buffer);
+                        if (buffer.size() > 0 && isPlaintext(buffer)) {
+                            String par=buffer.readString(charset);
+                            if(TextUtils.isEmpty(par)){
+                                builder.append("{}");
+                            }else if(par.startsWith("{")||par.startsWith("[")){
+                                builder.append(par);
+                            }else {
+                                builder.append("\"").append(par).append("\"");
+                            }
+                        } else {
+                            builder.append("{}");
+                        }
+                    } catch (IOException e) {
+                        builder.append("{}");
+                    }
+                } else {
+                    builder.append("{}");
                 }
             }
         }
-        if (TextUtils.isEmpty(params)) {
-            params = "{}";
-        }
-        return params;
     }
 
     private boolean isPlaintext(Buffer buffer) {
@@ -178,18 +185,6 @@ public class NetLogInterceptor implements Interceptor {
             charset = defCharset;
         }
         return charset;
-    }
-
-    /**
-     * 创建一个json格式的日志信息
-     */
-    private String buildLogMessage(String url, String method, long startTime, long endTime, String params, String bodyString) {
-        long time = endTime - startTime;
-        return "{\"url\":\"" + url +
-                "\",\"method\":\"" + method +
-                "\",\"time\":" + time +
-                ",\"params\":" + params +
-                ",\"body\":" + bodyString + "}";
     }
 
     public OnNetLogListener getLogListener() {
