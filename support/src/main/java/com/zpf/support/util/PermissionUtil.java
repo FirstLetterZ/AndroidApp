@@ -86,7 +86,7 @@ public class PermissionUtil extends PermissionChecker {
         }
     }
 
-    public boolean checkToastEnabled(Activity activity, DialogInterface.OnDismissListener listener) {
+    public boolean checkToastEnabled(@NonNull Activity activity, DialogInterface.OnDismissListener listener) {
         boolean isOpen = super.checkToastEnabled(activity);
         showHintDialog(activity, listener);
         return isOpen;
