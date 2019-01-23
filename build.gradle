@@ -59,9 +59,10 @@ ext {
             multidex              : 'com.android.support:multidex:1.0.2',
             /* ============================== 项目内工具库 ================================ */
             dataparser            : 'com.zpf:api-parse:0.0.2',
-            api                   : 'com.zpf:api-kit:0.0.3',
+            api                   : 'com.zpf:api-kit:0.0.4',
             dhl                   : 'com.zpf:tool-dhl:0.0.2',
-            toolkit               : 'com.zpf:tool-kit:0.0.1',
+            toolkit               : 'com.zpf:tool-kit:0.0.2',
+            toolExpand            : 'com.zpf:tool-expand:0.0.1',
             permission            : 'com.zpf:tool-permission:0.0.1',
             webview               : 'com.zpf:bridgeWebview:0.0.3',
             refresh               : 'com.zpf:pullRefresh:0.0.2',
