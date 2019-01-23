@@ -57,6 +57,24 @@ public class FileUtil {
         }
     }
 
+    public static String getProviderAuthority(Context context, String name) {
+        String authority = "";
+        try {
+            PackageInfo packageInfo = context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), PackageManager.GET_PROVIDERS);
+            ProviderInfo[] providers = packageInfo.providers;
+            for (ProviderInfo providerInfo : providers) {
+                if (TextUtils.equals(providerInfo.name, name)) {
+                    authority = providerInfo.authority;
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return authority;
+    }
+
     public static List<String> getProviderAuthorityList(Context context) {
         List<String> providerArray = new ArrayList<>();
         try {

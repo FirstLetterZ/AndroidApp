@@ -1,4 +1,4 @@
-package com.zpf.support.util;
+package com.zpf.tool.expand.util;
 
 import android.content.ComponentCallbacks;
 import android.content.Context;
@@ -15,6 +15,9 @@ import com.zpf.api.RouteInterface;
 public class RouteUtil implements RouteInterface {
     private volatile RouteUtil realRoute;
     private static volatile RouteUtil routeUtil;
+
+    private RouteUtil() {
+    }
 
     public static RouteUtil get() {
         if (routeUtil == null) {

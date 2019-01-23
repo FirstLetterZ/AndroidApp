@@ -5,15 +5,15 @@ import android.view.View;
 /**
  * Created by ZPF on 2018/4/16.
  */
-public abstract class SafeClickListener implements View.OnClickListener {
+public abstract class SafeClickListener<T> implements View.OnClickListener {
     private long lastClick = 0;
     private long timeInterval = 200;
-    private Object condition;
+    private T condition;
 
     public SafeClickListener() {
     }
 
-    public SafeClickListener(Object condition) {
+    public SafeClickListener(T condition) {
         this.condition = condition;
     }
 
@@ -21,7 +21,7 @@ public abstract class SafeClickListener implements View.OnClickListener {
         this.timeInterval = timeInterval;
     }
 
-    public SafeClickListener(long timeInterval, Object condition) {
+    public SafeClickListener(long timeInterval, T condition) {
         this.timeInterval = timeInterval;
         this.condition = condition;
     }
@@ -49,7 +49,7 @@ public abstract class SafeClickListener implements View.OnClickListener {
         this.timeInterval = timeInterval;
     }
 
-    public void setCondition(Object condition) {
+    public void setCondition(T condition) {
         this.condition = condition;
     }
 

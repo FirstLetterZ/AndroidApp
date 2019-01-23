@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.zpf.support.constant.AppConst;
-import com.zpf.support.constant.BaseKeyConst;
 import com.zpf.api.CallBackManagerInterface;
 import com.zpf.api.LifecycleInterface;
 import com.zpf.api.OnDestroyListener;
@@ -22,9 +21,9 @@ import com.zpf.api.SafeWindowInterface;
 import com.zpf.api.TitleBarInterface;
 import com.zpf.api.ViewContainerInterface;
 import com.zpf.api.constant.LifecycleState;
-import com.zpf.support.util.CacheMap;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.support.util.LifecycleLogUtil;
+import com.zpf.tool.expand.util.GlobalConfigImpl;
 
 /**
  * 将普通的activity或fragment打造成ViewContainerInterface
@@ -39,7 +38,7 @@ public class ProxyContainer extends Fragment implements ViewContainerInterface {
 
     public void onConditionsCompleted(Activity activity) {
         this.activity = activity;
-        if (CacheMap.getBoolean(BaseKeyConst.IS_DEBUG) && activity != null) {
+        if (GlobalConfigImpl.get().isDebug() && activity != null) {
             LifecycleLogUtil lifecycleLogUtil = new LifecycleLogUtil(this);
             lifecycleLogUtil.setName(activity.getClass().getName());
         }
@@ -47,7 +46,7 @@ public class ProxyContainer extends Fragment implements ViewContainerInterface {
 
     public void onConditionsCompleted(Fragment fragment) {
         this.fragment = fragment;
-        if (CacheMap.getBoolean(BaseKeyConst.IS_DEBUG) && fragment != null) {
+        if (GlobalConfigImpl.get().isDebug() && fragment != null) {
             LifecycleLogUtil lifecycleLogUtil = new LifecycleLogUtil(this);
             lifecycleLogUtil.setName(fragment.getClass().getName());
         }

@@ -6,8 +6,8 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
+        buildConfigField("boolean", "MODEL_ID", "true")
     }
-
     buildTypes {
         release {
             minifyEnabled false
@@ -22,5 +22,6 @@ dependencies {
     api rootProject.ext.dependencies.toolkit
     api rootProject.ext.dependencies.permission
     api rootProject.ext.dependencies.gsonParse
+    api project(':toolexpand')
 }
 apply from: "../bintrayUpload.gradle"

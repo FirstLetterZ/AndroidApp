@@ -30,16 +30,12 @@ public class CacheMap {
         return appCacheUtil;
     }
 
-    public static void clearCache() {
+    public synchronized static void clearCache() {
         get().cacheValue.clear();
     }
 
-    public static void putValue(int key, Object value) {
-        if (value == null) {
-            get().cacheValue.remove(key);
-        } else {
-            get().cacheValue.put(key, value);
-        }
+    public synchronized static void putValue(int key, Object value) {
+        get().cacheValue.put(key, value);
         if (key > 0) {
             SpUtil.putValue(CACHE_SP_KEY + key, value);
         }
@@ -103,7 +99,7 @@ public class CacheMap {
      * 不推荐使用
      */
     @Deprecated
-    public static <T> T getValue(int key, @NonNull Class<T> cls) {
+    public synchronized static <T> T getValue(int key, @NonNull Class<T> cls) {
         Object value = get().cacheValue.get(key);
         T result = null;
         if (isDefaultValue(value)) {
@@ -132,7 +128,7 @@ public class CacheMap {
     }
 
     @Nullable
-    public static <T> List<T> getArray(int key, @NonNull Class<T> cls) {
+    public synchronized static <T> List<T> getArray(int key, @NonNull Class<T> cls) {
         Object value = get().cacheValue.get(key);
         List<T> result = null;
         if (value != null) {
@@ -164,7 +160,7 @@ public class CacheMap {
     /**
      * 推荐使用
      */
-    public static <T> T getValue(int key, @NonNull T defaultValue) {
+    public synchronized static <T> T getValue(int key, @NonNull T defaultValue) {
         T result = defaultValue;
         Object value = get().cacheValue.get(key);
         if (isDefaultValue(value)) {

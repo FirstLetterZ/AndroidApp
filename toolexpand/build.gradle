@@ -1,4 +1,4 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -6,10 +6,8 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        applicationId "com.zpf.app"
-        versionCode rootProject.ext.versionCode
-        versionName rootProject.ext.versionName
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -19,7 +17,10 @@ android {
 }
 
 dependencies {
-    implementation project(':support')
-    implementation project(':refresh')
-    implementation 'com.zpf:api-parse:0.0.2'
+//    api rootProject.ext.dependencies.api
+//    api rootProject.ext.dependencies.toolkit
+    api project(':api')
+    api project(':toolkit')
 }
+
+apply from: "../bintrayUpload.gradle"

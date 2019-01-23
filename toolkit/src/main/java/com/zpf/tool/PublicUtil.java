@@ -2,11 +2,13 @@ package com.zpf.tool;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Build;
+import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
@@ -36,7 +38,7 @@ public class PublicUtil {
         return AppContext.get().getResources().getString(id);
     }
 
-    public static <T> Class<T> getViewClass(Class<?> klass) {
+    public static <T> Class<T> getGenericClass(Class<?> klass) {
         Type type = klass.getGenericSuperclass();
         if (type == null || !(type instanceof ParameterizedType)) return null;
         ParameterizedType parameterizedType = (ParameterizedType) type;
@@ -102,17 +104,87 @@ public class PublicUtil {
         return false;
     }
 
-    public static String getMoneyValue(Number money, int scale) {
-        if (money == null) {
-            return "0.00";
+    public static boolean isPackageProces() {
+        ActivityManager activityManager = (ActivityManager) AppContext.get().getSystemService(Context.ACTIVITY_SERVICE);
+        if (activityManager != null) {
+            List<ActivityManager.RunningAppProcessInfo> appProcessInfoList = activityManager.getRunningAppProcesses();
+            String mainProcessName = AppContext.get().getPackageName();
+            int myPid = Process.myPid();
+            for (ActivityManager.RunningAppProcessInfo info : appProcessInfoList) {
+                if (info.pid == myPid && mainProcessName.equals(info.processName)) {
+                    return true;
+                }
+            }
         }
+        return false;
+    }
+
+    /**
+     * 将Activity转到前台
+     *
+     * @param targetClass 目标Activity对应Class
+     */
+    @SuppressLint("MissingPermission")
+    public static void setActivityToTop(Class targetClass) {
+        ActivityManager myManager = (ActivityManager) AppContext.get().getSystemService(Context.ACTIVITY_SERVICE);
+        if (myManager != null) {
+            List<ActivityManager.RunningTaskInfo> runningTaskList = myManager.getRunningTasks(16);
+            if (runningTaskList != null && runningTaskList.size() > 0) {
+                for (ActivityManager.RunningTaskInfo taskInfo : runningTaskList) {
+                    if (TextUtils.equals(taskInfo.topActivity.getClassName(), targetClass.getName())) {
+                        myManager.moveTaskToFront(taskInfo.id, 0);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 获取当前APP状态
+     *
+     * @return -1--未运行；0--在后台；1--在前台；
+     */
+    public static int getAppState(Context context) {
+        int result = -1;
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (activityManager != null) {
+            List<ActivityManager.RunningAppProcessInfo> appProcessInfoList = activityManager.getRunningAppProcesses();
+            String appProcessName = context.getApplicationInfo().processName;
+            for (ActivityManager.RunningAppProcessInfo appProcessInfo : appProcessInfoList) {
+                if (appProcessName.contains(appProcessInfo.processName) || appProcessInfo.processName.contains(appProcessName)) {
+                    if (appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                        result = 1;
+                    } else {
+                        result = 0;
+                    }
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 数字小数位数显示处理
+     *
+     * @param money 金额
+     * @param scale 保留位置
+     */
+    public static BigDecimal scaleNumber(Number money, int scale) {
         BigDecimal amount;
-        if (money instanceof BigDecimal) {
+        if (money == null) {
+            amount = new BigDecimal(0);
+        } else if (money instanceof BigDecimal) {
             amount = (BigDecimal) money;
         } else {
             amount = new BigDecimal(money.doubleValue());
         }
-        return amount.setScale(scale, BigDecimal.ROUND_HALF_UP).toPlainString();
+        return amount.setScale(scale, BigDecimal.ROUND_HALF_UP);
+    }
+
+    public static String scaleNumberString(Number money, int scale) {
+        return scaleNumber(money, scale).toPlainString();
     }
 
     /**

@@ -9,14 +9,13 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
-import com.zpf.support.constant.BaseKeyConst;
 import com.zpf.tool.SafeClickListener;
+import com.zpf.tool.expand.util.GlobalConfigImpl;
 import com.zpf.tool.permission.OnLockPermissionRunnable;
 import com.zpf.tool.permission.PermissionInfo;
 import com.zpf.api.ContainerProcessorInterface;
 import com.zpf.api.TitleBarInterface;
 import com.zpf.api.ViewContainerInterface;
-import com.zpf.support.util.CacheMap;
 import com.zpf.support.util.LifecycleLogUtil;
 import com.zpf.support.util.PermissionUtil;
 
@@ -38,7 +37,7 @@ public abstract class ContainerProcessor implements ContainerProcessorInterface 
     public ContainerProcessor(ViewContainerInterface container) {
         this.mContainer = container;
         this.mTitleBar = container.getRootLayout().getTitleBar();
-        if (CacheMap.getBoolean(BaseKeyConst.IS_DEBUG)) {
+        if (GlobalConfigImpl.get().isDebug()) {
             new LifecycleLogUtil(container);
         }
     }

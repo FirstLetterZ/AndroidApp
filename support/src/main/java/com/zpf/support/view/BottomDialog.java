@@ -20,7 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TextView;
 
-import com.zpf.support.base.SafeDialog;
+import com.zpf.tool.expand.view.SafeDialog;
 import com.zpf.support.R;
 import com.zpf.api.OnItemClickListener;
 import com.zpf.tool.SafeClickListener;

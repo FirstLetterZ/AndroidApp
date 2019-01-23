@@ -1,4 +1,4 @@
-package com.zpf.support.defview;
+package com.zpf.tool.expand.view;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.TextView;
 
 import com.zpf.api.IconText;
 
@@ -19,7 +20,7 @@ import java.io.File;
 /**
  * Created by ZPF on 2018/6/25.
  */
-public class IconTextView extends android.support.v7.widget.AppCompatTextView implements IconText {
+public class IconTextView extends TextView implements IconText {
     private Typeface mOriginalTypeface;
     private Typeface mTypeface;
     private int imageHeight;
@@ -217,8 +218,8 @@ public class IconTextView extends android.support.v7.widget.AppCompatTextView im
         }
         boolean isEmpty = TextUtils.isEmpty(getText());
         if (!isEmpty) {
-            if (getVisibility() != VISIBLE) {
-                super.setVisibility(VISIBLE);
+            if (getVisibility() != View.VISIBLE) {
+                super.setVisibility(View.VISIBLE);
             }
         } else {
             Drawable[] drawables = getCompoundDrawables();
@@ -229,12 +230,12 @@ public class IconTextView extends android.support.v7.widget.AppCompatTextView im
                 }
             }
             if (isEmpty) {
-                if (getVisibility() != GONE) {
-                    super.setVisibility(GONE);
+                if (getVisibility() != View.GONE) {
+                    super.setVisibility(View.GONE);
                 }
             } else {
-                if (getVisibility() != VISIBLE) {
-                    super.setVisibility(VISIBLE);
+                if (getVisibility() != View.VISIBLE) {
+                    super.setVisibility(View.VISIBLE);
                 }
             }
         }

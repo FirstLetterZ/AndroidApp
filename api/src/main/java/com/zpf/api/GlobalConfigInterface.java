@@ -3,7 +3,7 @@ package com.zpf.api;
 import android.support.annotation.NonNull;
 
 /**
- * 使用当前application继承此接口，然后使用处通过获取application强转获取内容
+ * 用于全局执行，需要在应用刚启动时完成初始化
  * Created by ZPF on 2018/7/27.
  */
 public interface GlobalConfigInterface {
@@ -16,7 +16,13 @@ public interface GlobalConfigInterface {
      * @param object     调用的对象
      * @param methodName 需要处理的方法
      * @param args       参数集合
-     * @return
      */
     Object invokeMethod(Object object, String methodName, Object... args);
+
+
+    /**
+     * @param target 目标对应的Class
+     * @return 对应的全局单例
+     */
+    <T> T getGlobalInstance(Class<T> target);
 }

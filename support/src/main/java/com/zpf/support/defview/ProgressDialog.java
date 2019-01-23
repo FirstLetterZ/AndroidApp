@@ -8,7 +8,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.zpf.support.R;
-import com.zpf.support.base.SafeDialog;
+import com.zpf.tool.expand.view.SafeDialog;
 
 /**
  * 默认的等待弹窗
