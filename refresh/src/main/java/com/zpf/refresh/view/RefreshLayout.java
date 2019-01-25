@@ -49,7 +49,6 @@ public class RefreshLayout extends RelativeLayout {
     protected int loadDelayed = 600;//完成后停顿时间
     protected int refreshDelayed = 800;//完成后停顿时间
     private boolean hasWindowFocus = false;
-    private boolean freeze;//忽略dispatch
 
     public RefreshLayout(View contentView) {
         this(contentView.getContext(), null, 0);
@@ -122,13 +121,6 @@ public class RefreshLayout extends RelativeLayout {
      */
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        if (freeze) {
-            if (ev.getActionMasked() == MotionEvent.ACTION_DOWN || ev.getActionMasked() == MotionEvent.ACTION_MOVE) {
-                lastY = ev.getY();
-            }
-            super.dispatchTouchEvent(ev);
-            return true;
-        }
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 lastY = ev.getY();
@@ -329,11 +321,19 @@ public class RefreshLayout extends RelativeLayout {
     }
 
     public boolean checkPullDown() {
-        return canPullDown && state != RefreshLayoutState.LOADING && getCheckListener().checkPullDown(contentView);
+        return canPullDown && state != RefreshLayoutState.LOADING && isContentToTop();
     }
 
     public boolean checkPullUp() {
-        return canPullUp && state != RefreshLayoutState.REFRESHING && getCheckListener().checkPullUp(contentView);
+        return canPullUp && state != RefreshLayoutState.REFRESHING && isContentToBottom();
+    }
+
+    public boolean isContentToBottom(){
+        return getCheckListener().checkPullUp(contentView);
+    }
+
+    public boolean isContentToTop(){
+       return getCheckListener().checkPullDown(contentView);
     }
 
     public void setType(@RefreshLayoutType int type) {
@@ -344,10 +344,6 @@ public class RefreshLayout extends RelativeLayout {
 
     public int getType() {
         return type;
-    }
-
-    public void setFreeze(boolean freeze) {
-        this.freeze = freeze;
     }
 
     //设置刷新和加载布局停留时间

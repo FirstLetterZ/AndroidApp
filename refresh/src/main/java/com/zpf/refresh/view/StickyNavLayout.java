@@ -1,6 +1,5 @@
 package com.zpf.refresh.view;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -9,6 +8,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -33,12 +33,9 @@ public class StickyNavLayout extends LinearLayout {
     private VelocityTracker mVelocityTracker;
     private int mMaximumVelocity;
     private int mMinimumVelocity;
-
-    private boolean mIsInControl = true;
+    boolean passChild = false;
     private int mContentHeight;
 
-    private float dY;
-    private float lastX = -1;
     private float lastY = -1;
 
     public StickyNavLayout(Context context, AttributeSet attrs) {
@@ -56,9 +53,7 @@ public class StickyNavLayout extends LinearLayout {
 
     @Override
     public void setOrientation(int orientation) {
-        if (VERTICAL == orientation) {
-            super.setOrientation(VERTICAL);
-        }
+        super.setOrientation(VERTICAL);
     }
 
     @Override
@@ -166,6 +161,7 @@ public class StickyNavLayout extends LinearLayout {
         mNavView.getLocationOnScreen(location);
         MarginLayoutParams params = (MarginLayoutParams) mNavView.getLayoutParams();
         int navViewTopOnScreenY = location[1] - params.topMargin;
+        Log.e("ZPF", "contentOnScreenTopY=" + contentOnScreenTopY + " ; navViewTopOnScreenY=" + navViewTopOnScreenY);
         return navViewTopOnScreenY == contentOnScreenTopY;
     }
 
@@ -184,125 +180,65 @@ public class StickyNavLayout extends LinearLayout {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                lastX = ev.getRawX();
-                lastY = ev.getRawY();
-                dY = 0;
-                mIsInControl = false;
-                break;
-            case MotionEvent.ACTION_MOVE:
-                float currentX = ev.getRawX();
-                float currentY = ev.getRawY();
-                if (lastX == -1) {
-                    lastX = currentX;
-                }
-                if (lastY == -1) {
-                    lastY = currentY;
-                }
-                dY = currentY - lastY;
-                float dX = currentX - lastX;
-                if (Math.abs(dY) > 4) {
-                    lastX = currentX;
-                    lastY = currentY;
-                } else {
-                    dY = 0;
-                }
-                RefreshLayout refreshLayout = checkRefreshLayout(mContentView);
-                if (refreshLayout != null && !refreshLayout.isInitState()) {
-                    mIsInControl = false;
-                    break;
-                }
-                if (Math.abs(dY) > Math.abs(dX)) {
-                    boolean isContentViewToTop = isContentViewToTop();
-                    if (dY > 0) {
-                        mIsInControl = (refreshLayout == null || refreshLayout.checkPullDown())
-                                && isContentViewToTop && !isHeaderViewCompleteVisible();
-                    } else if (dY < 0) {
-                        mIsInControl = !isHeaderViewCompleteInvisible();
-                    }
-                    if (mIsInControl && isContentViewToTop) {
-                        scrollBy(0, (int) -dY);
-                    }
-                }
-                if (refreshLayout != null) {
-                    refreshLayout.setFreeze(mIsInControl || dY == 0);
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                lastX = -1;
-                lastY = -1;
-            case MotionEvent.ACTION_CANCEL:
-                mIsInControl = false;
-                break;
-        }
-        super.dispatchTouchEvent(ev);
-        return true;
-    }
-
-    private RefreshLayout checkRefreshLayout(View view) {
-        RefreshLayout result = null;
-        if (view != null) {
-            if (view instanceof RefreshLayout) {
-                result = (RefreshLayout) view;
-            } else if (view instanceof ViewPager) {
-                getNestedContentView((ViewPager) view);
-                result = checkRefreshLayout(mNestedContentView);
-            } else if (view instanceof ViewGroup) {
-                if (((ViewGroup) view).getChildCount() > 0) {
-                    for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-                        result = checkRefreshLayout(((ViewGroup) view).getChildAt(i));
-                        if (result != null) {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_MOVE:
-                if (Math.abs(dY) > 0 && mIsInControl) {
-                    return true;
-                }
-                break;
-        }
-        return false;
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (!mIsInControl) {
-            return false;
-        }
         initVelocityTrackerIfNotExists();
-        mVelocityTracker.addMovement(event);
-        switch (event.getAction()) {
+        float dY;
+        switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                lastY = ev.getRawY();
+                mVelocityTracker.addMovement(ev);
                 if (!mOverScroller.isFinished()) {
                     mOverScroller.abortAnimation();
                 }
+                super.dispatchTouchEvent(ev);
+                passChild = false;
                 break;
             case MotionEvent.ACTION_MOVE:
-                break;
-            case MotionEvent.ACTION_CANCEL:
-                recycleVelocityTracker();
-                if (!mOverScroller.isFinished()) {
-                    mOverScroller.abortAnimation();
+                float currentY = ev.getRawY();
+                dY = currentY - lastY;
+                lastY = currentY;
+                boolean isContentViewToTop = isContentViewToTop();
+                if (dY > 0) {
+                    passChild = !isContentViewToTop || isHeaderViewCompleteVisible();
+                } else {
+                    passChild = isHeaderViewCompleteInvisible();
                 }
+                Log.e("ZPF", "MotionEvent.ACTION_MOVE----passChild=" + passChild + " ; dY=" + dY);
+                if (!passChild) {
+                    scrollBy(0, (int) -dY);
+                    mVelocityTracker.addMovement(ev);
+                    ev.setAction(MotionEvent.ACTION_CANCEL);
+                }
+                super.dispatchTouchEvent(ev);
                 break;
             case MotionEvent.ACTION_UP:
-                mVelocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
-                int initialVelocity = (int) mVelocityTracker.getYVelocity();
-                if ((Math.abs(initialVelocity) > mMinimumVelocity) && isContentViewToTop()) {
-                    fling(-initialVelocity);
+                Log.e("ZPF", "MotionEvent.ACTION_UP----passChild=" + passChild );
+                lastY = -1;
+                if (!passChild) {
+                    mVelocityTracker.addMovement(ev);
+                    mVelocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                    int initialVelocity = (int) mVelocityTracker.getYVelocity();
+                    if ((Math.abs(initialVelocity) > mMinimumVelocity) && isContentViewToTop()) {
+                        fling(-initialVelocity);
+                    }
+                    recycleVelocityTracker();
+                } else {
+                    super.dispatchTouchEvent(ev);
                 }
-                recycleVelocityTracker();
+            case MotionEvent.ACTION_CANCEL:
+                Log.e("ZPF", "MotionEvent.ACTION_CANCEL----passChild=" + passChild );
+                if (!passChild) {
+                    if (mVelocityTracker != null) {
+                        mVelocityTracker.addMovement(ev);
+                        recycleVelocityTracker();
+                    }
+                    if (!mOverScroller.isFinished()) {
+                        mOverScroller.abortAnimation();
+                    }
+                }
+                super.dispatchTouchEvent(ev);
+                break;
+            default:
+                super.dispatchTouchEvent(ev);
                 break;
         }
         return true;
@@ -355,6 +291,8 @@ public class StickyNavLayout extends LinearLayout {
             return ViewBorderUtil.isRecyclerViewToTop((RecyclerView) view);
         } else if (view instanceof PackedLayoutInterface) {
             return checkViewToTop(((PackedLayoutInterface) view).getCurrentChild());
+        } else if (view instanceof RefreshLayout) {
+            return ((RefreshLayout) view).checkPullDown();
         } else {
             return ViewBorderUtil.isViewToTop(view);
         }
@@ -378,6 +316,8 @@ public class StickyNavLayout extends LinearLayout {
             return ViewBorderUtil.isWebViewToBottom((WebView) view);
         } else if (view instanceof PackedLayoutInterface) {
             return checkViewToBottom(((PackedLayoutInterface) view).getCurrentChild());
+        } else if (view instanceof RefreshLayout) {
+            return ((RefreshLayout) view).checkPullUp();
         } else
             return view instanceof ViewGroup && ViewBorderUtil.isViewGroupToBottom((ViewGroup) view);
     }

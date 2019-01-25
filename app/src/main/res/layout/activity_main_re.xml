@@ -12,37 +12,41 @@
         android:gravity="center"
         android:text="Hello World!"/>
 
-    <com.zpf.refresh.view.RefreshLayout
-        android:id="@+id/rl_test"
+    <com.zpf.refresh.view.StickyNavLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <com.zpf.refresh.view.StickyNavLayout
+        <ImageView
+            android:id="@+id/iv_icon"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:background="#4fa8ff"
+            android:scaleType="fitXY"
+            android:src="@mipmap/ic_launcher"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:background="#eca9ff"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="13425463576879"/>
+        </LinearLayout>
+
+        <com.zpf.refresh.view.RefreshLayout
+            android:id="@+id/rl_test"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/iv_icon"
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_test"
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:scaleType="fitXY"
-                android:src="@mipmap/ic_launcher"/>
+                android:layout_height="match_parent"/>
+        </com.zpf.refresh.view.RefreshLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:background="#eca9ff">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="13425463576879"/>
-            </LinearLayout>
-
-          <android.support.v7.widget.RecyclerView
-              android:id="@+id/rv_test"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"/>
-        </com.zpf.refresh.view.StickyNavLayout>
-    </com.zpf.refresh.view.RefreshLayout>
+    </com.zpf.refresh.view.StickyNavLayout>
 </LinearLayout>

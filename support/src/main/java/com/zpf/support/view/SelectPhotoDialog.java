@@ -13,6 +13,7 @@ import com.zpf.tool.FileUtil;
 import com.zpf.api.OnItemClickListener;
 import com.zpf.api.ViewContainerInterface;
 import com.zpf.support.util.PhotoUtil;
+import com.zpf.tool.expand.util.SpUtil;
 
 import java.io.File;
 
@@ -92,7 +93,7 @@ public class SelectPhotoDialog extends BottomDialog {
     private void takePhoto() {
         String name = AppConst.CACHE_FILE_PREFIX + System.currentTimeMillis() + ".jpg";
         File photoFile = FileUtil.getFileOrCreate(FileUtil.getCameraCachePath(), name);
-        SpUtil.putValue(PHOTO_PATH, photoFile.getAbsolutePath());
+        SpUtil.put(PHOTO_PATH, photoFile.getAbsolutePath());
         if (viewContainer != null) {
             PhotoUtil.takePhoto(viewContainer, photoFile.getAbsolutePath(), REQ_CAMERA);
         } else if (activity != null) {

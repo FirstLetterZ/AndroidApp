@@ -379,7 +379,7 @@ public abstract class CompatFragmentContainer<T extends ContainerProcessorInterf
     }
 
     protected T createProcessor() {
-        Class<T> cls = PublicUtil.getViewClass(getClass());
+        Class<T> cls = PublicUtil.getGenericClass(getClass());
         if (cls != null) {
             try {
                 Class[] pType = new Class[]{ViewContainerInterface.class};
