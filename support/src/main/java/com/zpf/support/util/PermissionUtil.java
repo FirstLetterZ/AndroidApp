@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import android.view.View;
 
 import com.zpf.tool.AppContext;
+import com.zpf.tool.expand.util.SpUtil;
 import com.zpf.tool.permission.PermissionChecker;
 import com.zpf.tool.PublicUtil;
 import com.zpf.tool.permission.PermissionInfo;
@@ -64,7 +65,7 @@ public class PermissionUtil extends PermissionChecker {
             if (ActivityCompat.checkSelfPermission(activity, per) != PackageManager.PERMISSION_GRANTED) {
                 if (!SpUtil.getBoolean(per)) {
                     missPermissionList.add(per);
-                    SpUtil.putValue(per, true);
+                    SpUtil.put(per, true);
                 } else {
                     if (ActivityCompat.shouldShowRequestPermissionRationale(activity, per)) {
                         missPermissionList.add(per);

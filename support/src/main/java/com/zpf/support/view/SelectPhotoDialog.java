@@ -13,7 +13,6 @@ import com.zpf.tool.FileUtil;
 import com.zpf.api.OnItemClickListener;
 import com.zpf.api.ViewContainerInterface;
 import com.zpf.support.util.PhotoUtil;
-import com.zpf.support.util.SpUtil;
 
 import java.io.File;
 

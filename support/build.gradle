@@ -20,7 +20,7 @@ dependencies {
     api rootProject.ext.dependencies.design
     api rootProject.ext.dependencies.permission
     api rootProject.ext.dependencies.gsonParse
-    api rootProject.ext.dependencies.toolExpand
-//    api project(':toolexpand')
+//    api rootProject.ext.dependencies.toolExpand
+    api project(':toolexpand')
 }
 apply from: "../bintrayUpload.gradle"
