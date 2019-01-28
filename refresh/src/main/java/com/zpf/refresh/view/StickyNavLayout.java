@@ -34,7 +34,6 @@ public class StickyNavLayout extends LinearLayout {
     private int mMaximumVelocity;
     private int mMinimumVelocity;
     boolean passChild = false;
-    private int mContentHeight;
 
     private float lastY = -1;
 
@@ -79,7 +78,6 @@ public class StickyNavLayout extends LinearLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         measureChild(mContentView, widthMeasureSpec, MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec) - getNavViewHeight(), MeasureSpec.EXACTLY));
-        mContentHeight = mContentView.getMeasuredHeight();
     }
 
     @Override
@@ -122,6 +120,11 @@ public class StickyNavLayout extends LinearLayout {
         return mHeaderView.getMeasuredHeight() + layoutParams.topMargin + layoutParams.bottomMargin;
     }
 
+    public int getContentViewHeight() {
+        MarginLayoutParams layoutParams = (MarginLayoutParams) mContentView.getLayoutParams();
+        return mContentView.getMeasuredHeight() + layoutParams.topMargin + layoutParams.bottomMargin;
+    }
+
     /**
      * 获取导航视图的高度，包括topMargin和bottomMargin
      */
@@ -131,7 +134,7 @@ public class StickyNavLayout extends LinearLayout {
     }
 
     public int getAllChildHeight() {
-        return mContentHeight + getNavViewHeight() + getHeaderViewHeight();
+        return getContentViewHeight() + getNavViewHeight() + getHeaderViewHeight();
     }
 
     /**
@@ -193,22 +196,26 @@ public class StickyNavLayout extends LinearLayout {
             case MotionEvent.ACTION_MOVE:
                 float currentY = ev.getRawY();
                 dY = currentY - lastY;
-                lastY = currentY;
-                boolean isContentViewToTop = isContentViewToTop();
-                boolean lastPassState = passChild;
-                if (dY > 0) {
-                    passChild = !isContentViewToTop || isHeaderViewCompleteVisible();
-                } else {
-                    passChild = isHeaderViewCompleteInvisible();
-                }
-                if (passChild) {
-                    if (!lastPassState) {
-                        ev.setAction(MotionEvent.ACTION_DOWN);
+                if (Math.abs(dY) > 4) {
+                    lastY = currentY;
+                    boolean isContentViewToTop = isContentViewToTop();
+                    boolean lastPassState = passChild;
+                    if (dY > 0) {
+                        passChild = !isContentViewToTop || isHeaderViewCompleteVisible();
+                    } else {
+                        passChild = isHeaderViewCompleteInvisible();
+                    }
+                    if (passChild) {
+                        if (!lastPassState) {
+                            ev.setAction(MotionEvent.ACTION_DOWN);
+                        }
+                    } else {
+                        scrollBy(0, (int) -dY);
+                        mVelocityTracker.addMovement(ev);
+                        ev.setAction(MotionEvent.ACTION_CANCEL);
                     }
                 } else {
-                    scrollBy(0, (int) -dY);
-                    mVelocityTracker.addMovement(ev);
-                    ev.setAction(MotionEvent.ACTION_CANCEL);
+                    passChild = true;
                 }
                 break;
             case MotionEvent.ACTION_UP:

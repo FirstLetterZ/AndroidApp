@@ -13,6 +13,7 @@ import com.zpf.app.R;
 import com.zpf.refresh.util.OnRefreshListener;
 import com.zpf.refresh.util.RefreshLayoutType;
 import com.zpf.refresh.view.RefreshLayout;
+import com.zpf.tool.ToastUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.List;
 public class MainActivity extends Activity {
     private Handler handler = new Handler();
     private RefreshLayout refreshLayout;
-    private RecyclerView rvTest;
+    private PackedRecyclerView rvTest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +50,23 @@ public class MainActivity extends Activity {
                 }, 1000);
             }
         });
-        rvTest = findViewById(R.id.rv_test);
-        rvTest.setLayoutManager(new LinearLayoutManager(this));
-        rvTest.setAdapter(new TestAdapter());
+        rvTest = findViewById(R.id.prv_test);
+//        rvTest.setLayoutManager(new LinearLayoutManager(this));
+        rvTest.getContentView().setAdapter(new TestAdapter());
+        findViewById(R.id.ll_nav).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                ToastUtil.toast("R.id.ll_nav");
+                startActivity(new Intent(MainActivity.this, Main2Activity.class));
+            }
+        });
+        findViewById(R.id.iv_icon).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ToastUtil.toast("R.id.iv_icon");
+//                startActivity(new Intent(MainActivity.this, Main2Activity.class));
+            }
+        });
     }
 
 }

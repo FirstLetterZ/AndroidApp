@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.AbsListView;
+import android.widget.RelativeLayout;
 
 import com.zpf.api.PackedLayoutInterface;
 import com.zpf.refresh.view.StickyNavLayout;
@@ -49,40 +50,50 @@ public class BaseViewStateCheckImpl implements ViewStateCheckListener {
     }
 
     @Override
-    public void relayout(View view, float pullDownY, float pullUpY) {
+    public void relayout(View view, RelativeLayout.LayoutParams params, float pullDownY, float pullUpY) {
         if (view == null) {
             return;
-        } else if (view instanceof StickyNavLayout) {
+        }
+        float dY = pullDownY + pullUpY;
+        if (view instanceof StickyNavLayout) {
             View contentView = ((StickyNavLayout) view).getChildAt(2);
-            int height = ((StickyNavLayout) view).getAllChildHeight();
-            if ((pullDownY + pullUpY) >= 0) {
-                view.layout(0, (int) (pullDownY + pullUpY), view.getMeasuredWidth(),
-                        (int) (pullDownY + pullUpY) + view.getMeasuredHeight());
-                contentView.layout(0, contentView.getTop(), contentView.getMeasuredWidth(), height);
+            int contentHeight = ((StickyNavLayout) view).getContentViewHeight();
+            int newContentBottom;
+            if (dY >= 0) {
+                newContentBottom = contentView.getTop() + contentHeight;
+            } else {
+                int remainHeaderHeight = ((StickyNavLayout) view).getHeaderViewHeight() - view.getScrollY();
+                if (remainHeaderHeight > 0 && remainHeaderHeight + dY < 0) {
+                    dY = -remainHeaderHeight;
+                } else {
+                    dY = 0;
+                }
+                newContentBottom = (int) (contentView.getTop() + contentHeight + dY);
+            }
+            view.layout(params.leftMargin, (int) dY + params.topMargin,
+                    params.leftMargin + view.getMeasuredWidth(),
+                    (int) dY + params.topMargin + view.getMeasuredHeight() + params.topMargin + params.bottomMargin);
+            contentView.layout(contentView.getLeft(), contentView.getTop(), contentView.getRight(), newContentBottom);
+            if (dY > 0) {
                 if (contentView.getScrollY() != 0) {
                     contentView.scrollTo(0, 0);
                 }
             } else {
-                float dY = pullDownY + pullUpY;
-                int newTop = view.getTop();
-                int remainHeaderHeight = ((StickyNavLayout) view).getHeaderViewHeight()
-                        - view.getScrollY();
-                if (remainHeaderHeight > 0) {
-                    if (remainHeaderHeight + dY < 0) {
-                        dY = remainHeaderHeight + dY;
-                        newTop = -remainHeaderHeight;
+                int scrollY = contentView.getBottom() - newContentBottom;
+                if (scrollY != 0) {
+                    if (dY == 0) {
+                        if (contentView.getScrollY() != 0) {
+                            contentView.scrollBy(0, scrollY);//抵消剩余的滚动
+                        }
                     } else {
-                        newTop = (int) dY;
-                        dY = 0;
+                        contentView.scrollBy(0, scrollY);//滚到到最下面一条
                     }
                 }
-                view.layout(0, newTop, view.getMeasuredWidth(), newTop + view.getMeasuredHeight());
-                contentView.layout(0, contentView.getTop(), contentView.getMeasuredWidth(), (int) (height + dY));
-                contentView.scrollTo(0, (int) (-dY));//滚到到最下面一条
             }
         } else {
-            view.layout(0, (int) (pullDownY + pullUpY), view.getMeasuredWidth(),
-                    (int) (pullDownY + pullUpY) + view.getMeasuredHeight());
+            view.layout(params.leftMargin, (int) dY + params.topMargin,
+                    params.leftMargin + view.getMeasuredWidth(),
+                    params.topMargin + (int) dY + params.bottomMargin + view.getMeasuredHeight());
         }
     }
 }

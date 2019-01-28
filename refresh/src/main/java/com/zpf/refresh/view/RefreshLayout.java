@@ -49,6 +49,7 @@ public class RefreshLayout extends RelativeLayout {
     protected int loadDelayed = 600;//完成后停顿时间
     protected int refreshDelayed = 800;//完成后停顿时间
     private boolean hasWindowFocus = false;
+    private LayoutParams contentParams;
 
     public RefreshLayout(View contentView) {
         this(contentView.getContext(), null, 0);
@@ -70,6 +71,23 @@ public class RefreshLayout extends RelativeLayout {
         loadLayout = new HeadFootLayout(context, true);
         loadLayout.setHeadFootInterface(new HeadFootImpl());
         timer = new MyTimer(updateHandler);
+        super.setPadding(0, 0, 0, 0);
+    }
+
+    /**
+     * 暂不支持padding
+     */
+    @Override
+    public void setPadding(int left, int top, int right, int bottom) {
+//        super.setPadding(left, top, right, bottom);
+    }
+
+    /**
+     * 暂不支持padding
+     */
+    @Override
+    public void setPaddingRelative(int start, int top, int end, int bottom) {
+//        super.setPaddingRelative(start, top, end, bottom);
     }
 
     @Override
@@ -81,8 +99,10 @@ public class RefreshLayout extends RelativeLayout {
             addView(refreshLayout);
             addView(loadLayout);
             addView(contentView);
+            contentParams = (LayoutParams) contentView.getLayoutParams();
         } else if (childCount == 1) {
             contentView = getChildAt(0);
+            contentParams = (LayoutParams) contentView.getLayoutParams();
             addView(refreshLayout);
             addView(loadLayout);
         } else {
@@ -102,11 +122,16 @@ public class RefreshLayout extends RelativeLayout {
             refreshLayout.layout(0, (int) (pullDownY + pullUpY) - refreshLayout.getMeasuredHeight(),
                     refreshLayout.getMeasuredWidth(), (int) (pullDownY + pullUpY));
         }
-        getCheckListener().relayout(contentView, pullDownY, pullUpY);
+        if (contentParams == null) {
+            contentParams = (LayoutParams) contentView.getLayoutParams();
+        }
+        getCheckListener().relayout(contentView, contentParams, pullDownY, pullUpY);
         if (type != RefreshLayoutType.ONLY_PULL_DOWN && loadLayout.getDistHeight() > 0) {
-            loadLayout.layout(0, (int) (pullDownY + pullUpY) + contentView.getMeasuredHeight(),
+            loadLayout.layout(0, (int) (pullDownY + pullUpY) + contentView.getMeasuredHeight()
+                            + contentParams.topMargin + contentParams.bottomMargin,
                     loadLayout.getMeasuredWidth(), (int) (pullDownY + pullUpY)
-                            + contentView.getMeasuredHeight() + loadLayout.getMeasuredHeight());
+                            + contentView.getMeasuredHeight() + loadLayout.getMeasuredHeight()
+                            + contentParams.topMargin + contentParams.bottomMargin);
         }
     }
 
@@ -328,12 +353,12 @@ public class RefreshLayout extends RelativeLayout {
         return canPullUp && state != RefreshLayoutState.REFRESHING && isContentToBottom();
     }
 
-    public boolean isContentToBottom(){
+    public boolean isContentToBottom() {
         return getCheckListener().checkPullUp(contentView);
     }
 
-    public boolean isContentToTop(){
-       return getCheckListener().checkPullDown(contentView);
+    public boolean isContentToTop() {
+        return getCheckListener().checkPullDown(contentView);
     }
 
     public void setType(@RefreshLayoutType int type) {
