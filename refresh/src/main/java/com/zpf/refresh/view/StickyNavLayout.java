@@ -1,6 +1,7 @@
 package com.zpf.refresh.view;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -8,7 +9,6 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -161,7 +161,6 @@ public class StickyNavLayout extends LinearLayout {
         mNavView.getLocationOnScreen(location);
         MarginLayoutParams params = (MarginLayoutParams) mNavView.getLayoutParams();
         int navViewTopOnScreenY = location[1] - params.topMargin;
-        Log.e("ZPF", "contentOnScreenTopY=" + contentOnScreenTopY + " ; navViewTopOnScreenY=" + navViewTopOnScreenY);
         return navViewTopOnScreenY == contentOnScreenTopY;
     }
 
@@ -189,7 +188,6 @@ public class StickyNavLayout extends LinearLayout {
                 if (!mOverScroller.isFinished()) {
                     mOverScroller.abortAnimation();
                 }
-                super.dispatchTouchEvent(ev);
                 passChild = false;
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -197,21 +195,23 @@ public class StickyNavLayout extends LinearLayout {
                 dY = currentY - lastY;
                 lastY = currentY;
                 boolean isContentViewToTop = isContentViewToTop();
+                boolean lastPassState = passChild;
                 if (dY > 0) {
                     passChild = !isContentViewToTop || isHeaderViewCompleteVisible();
                 } else {
                     passChild = isHeaderViewCompleteInvisible();
                 }
-                Log.e("ZPF", "MotionEvent.ACTION_MOVE----passChild=" + passChild + " ; dY=" + dY);
-                if (!passChild) {
+                if (passChild) {
+                    if (!lastPassState) {
+                        ev.setAction(MotionEvent.ACTION_DOWN);
+                    }
+                } else {
                     scrollBy(0, (int) -dY);
                     mVelocityTracker.addMovement(ev);
                     ev.setAction(MotionEvent.ACTION_CANCEL);
                 }
-                super.dispatchTouchEvent(ev);
                 break;
             case MotionEvent.ACTION_UP:
-                Log.e("ZPF", "MotionEvent.ACTION_UP----passChild=" + passChild );
                 lastY = -1;
                 if (!passChild) {
                     mVelocityTracker.addMovement(ev);
@@ -221,11 +221,9 @@ public class StickyNavLayout extends LinearLayout {
                         fling(-initialVelocity);
                     }
                     recycleVelocityTracker();
-                } else {
-                    super.dispatchTouchEvent(ev);
                 }
+                dispatchTouchEventToChild(ev);
             case MotionEvent.ACTION_CANCEL:
-                Log.e("ZPF", "MotionEvent.ACTION_CANCEL----passChild=" + passChild );
                 if (!passChild) {
                     if (mVelocityTracker != null) {
                         mVelocityTracker.addMovement(ev);
@@ -235,13 +233,46 @@ public class StickyNavLayout extends LinearLayout {
                         mOverScroller.abortAnimation();
                     }
                 }
-                super.dispatchTouchEvent(ev);
                 break;
             default:
-                super.dispatchTouchEvent(ev);
                 break;
         }
+        super.dispatchTouchEvent(ev);
         return true;
+    }
+
+    private void dispatchTouchEventToChild(MotionEvent ev) {
+        float yAxis = ev.getRawY();
+        float xAxis = ev.getRawX();
+        Rect rect = getViewRect(mContentView);
+        if (yAxis >= rect.top && yAxis <= rect.bottom && xAxis >= rect.left
+                && xAxis <= rect.right) {
+            mContentView.dispatchTouchEvent(ev);
+            return;
+        }
+        rect = getViewRect(mNavView);
+        if (yAxis >= rect.top && yAxis <= rect.bottom && xAxis >= rect.left
+                && xAxis <= rect.right) {
+            mNavView.dispatchTouchEvent(ev);
+            return;
+        }
+        rect = getViewRect(mHeaderView);
+        if (yAxis >= rect.top && yAxis <= rect.bottom && xAxis >= rect.left
+                && xAxis <= rect.right) {
+            mHeaderView.dispatchTouchEvent(ev);
+        }
+    }
+
+    private Rect getViewRect(View view) {
+        MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
+        int[] location = new int[2];
+        view.getLocationOnScreen(location);
+        Rect rect = new Rect();
+        rect.left = location[0] - params.leftMargin;
+        rect.top = location[1] - params.topMargin;
+        rect.right = rect.left + view.getMeasuredWidth() + params.bottomMargin;
+        rect.bottom = rect.top + view.getMeasuredHeight() + params.rightMargin;
+        return rect;
     }
 
     public boolean isContentViewToTop() {
