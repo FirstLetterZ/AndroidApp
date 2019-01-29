@@ -18,6 +18,7 @@
         android:layout_height="match_parent">
 
         <com.zpf.refresh.view.StickyNavLayout
+            android:background="#ffff3f"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -26,7 +27,6 @@
                 android:id="@+id/iv_icon"
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
-                android:background="#4fa8ff"
                 android:scaleType="fitXY"
                 android:src="@mipmap/ic_launcher"/>
 
@@ -36,7 +36,6 @@
                 android:layout_height="44dp"
                 android:background="#eca9ff"
                 android:gravity="center">
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -45,6 +44,7 @@
             <com.zpf.app.activity.PackedRecyclerView
                 android:id="@+id/prv_test"
                 android:background="#3baaff"
+                android:layout_margin="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
         </com.zpf.refresh.view.StickyNavLayout>

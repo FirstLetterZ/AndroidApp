@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="com.zpf:tool-kit-0.0.3">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/tool-kit-0.0.3.aar/96d96373445384b62ba14f7c5e179bce/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/tool-kit-0.0.3.aar/96d96373445384b62ba14f7c5e179bce/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.zpf/tool-kit/0.0.3/8fbb524f13b4997ae406917e027d90eff5bbba9/tool-kit-0.0.3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

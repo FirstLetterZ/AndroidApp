@@ -5,7 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.AbsListView;
-import android.widget.RelativeLayout;
+import android.widget.FrameLayout;
 
 import com.zpf.api.PackedLayoutInterface;
 import com.zpf.refresh.view.StickyNavLayout;
@@ -50,50 +50,48 @@ public class BaseViewStateCheckImpl implements ViewStateCheckListener {
     }
 
     @Override
-    public void relayout(View view, RelativeLayout.LayoutParams params, float pullDownY, float pullUpY) {
+    public void relayout(View view, FrameLayout.LayoutParams params, float pullDownY, float pullUpY) {
         if (view == null) {
             return;
         }
         float dY = pullDownY + pullUpY;
         if (view instanceof StickyNavLayout) {
             View contentView = ((StickyNavLayout) view).getChildAt(2);
-            int contentHeight = ((StickyNavLayout) view).getContentViewHeight();
+            int newViewTop;
             int newContentBottom;
             if (dY >= 0) {
-                newContentBottom = contentView.getTop() + contentHeight;
+                newViewTop = (int) dY + params.topMargin;
+                newContentBottom = contentView.getTop() + contentView.getMeasuredHeight();
             } else {
-                int remainHeaderHeight = ((StickyNavLayout) view).getHeaderViewHeight() - view.getScrollY();
-                if (remainHeaderHeight > 0 && remainHeaderHeight + dY < 0) {
-                    dY = -remainHeaderHeight;
-                } else {
-                    dY = 0;
-                }
-                newContentBottom = (int) (contentView.getTop() + contentHeight + dY);
-            }
-            view.layout(params.leftMargin, (int) dY + params.topMargin,
-                    params.leftMargin + view.getMeasuredWidth(),
-                    (int) dY + params.topMargin + view.getMeasuredHeight() + params.topMargin + params.bottomMargin);
-            contentView.layout(contentView.getLeft(), contentView.getTop(), contentView.getRight(), newContentBottom);
-            if (dY > 0) {
-                if (contentView.getScrollY() != 0) {
-                    contentView.scrollTo(0, 0);
-                }
-            } else {
-                int scrollY = contentView.getBottom() - newContentBottom;
-                if (scrollY != 0) {
-                    if (dY == 0) {
-                        if (contentView.getScrollY() != 0) {
-                            contentView.scrollBy(0, scrollY);//抵消剩余的滚动
-                        }
+                newViewTop = view.getTop();
+                int remainHeaderHeight = ((StickyNavLayout) view).getHeaderViewHeight()
+                        - view.getScrollY();
+                if (remainHeaderHeight > 0) {
+                    if (remainHeaderHeight + dY < 0) {
+                        dY = remainHeaderHeight + dY;
+                        newViewTop = params.topMargin - remainHeaderHeight;
                     } else {
-                        contentView.scrollBy(0, scrollY);//滚到到最下面一条
+                        newViewTop = (int) (params.topMargin + dY);
+                        dY = 0;
                     }
                 }
+                newContentBottom = (int) (contentView.getTop() + contentView.getMeasuredHeight() + dY);
+            }
+            int scrollY = contentView.getBottom() - newContentBottom;
+            view.layout(params.leftMargin, newViewTop, params.leftMargin + view.getMeasuredWidth(),
+                    newViewTop + view.getMeasuredHeight());
+            contentView.layout(contentView.getLeft(), contentView.getTop(), contentView.getRight(), newContentBottom);
+            if (dY > 0 && contentView.getScrollY() != 0) {
+                contentView.scrollTo(0, 0);//抵消剩余滚动
+            } else if (dY == 0 && scrollY != 0 && contentView.getScrollY() != 0) {
+                contentView.scrollBy(0, scrollY);//抵消剩余滚动
+            } else if (dY < 0 && scrollY != 0) {
+                contentView.scrollBy(0, scrollY);//滚到到最下面一条
             }
         } else {
             view.layout(params.leftMargin, (int) dY + params.topMargin,
                     params.leftMargin + view.getMeasuredWidth(),
-                    params.topMargin + (int) dY + params.bottomMargin + view.getMeasuredHeight());
+                    params.topMargin + (int) dY + view.getMeasuredHeight());
         }
     }
 }

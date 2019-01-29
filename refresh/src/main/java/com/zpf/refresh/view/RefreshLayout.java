@@ -6,7 +6,7 @@ import android.os.Message;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.RelativeLayout;
+import android.widget.FrameLayout;
 
 import com.zpf.api.PackedLayoutInterface;
 import com.zpf.refresh.util.BaseViewStateCheckImpl;
@@ -24,7 +24,7 @@ import java.util.TimerTask;
  * Created by ZPF on 2017/10/26.
  * 彷ios回弹布局，上拉刷新，下拉加载
  */
-public class RefreshLayout extends RelativeLayout {
+public class RefreshLayout extends FrameLayout {
     private int state = RefreshLayoutState.INIT;// 当前状态
     private int type = RefreshLayoutType.ONLY_STRETCHY;//当前类型
     private float lastY;
@@ -49,7 +49,7 @@ public class RefreshLayout extends RelativeLayout {
     protected int loadDelayed = 600;//完成后停顿时间
     protected int refreshDelayed = 800;//完成后停顿时间
     private boolean hasWindowFocus = false;
-    private LayoutParams contentParams;
+    private FrameLayout.LayoutParams contentParams;
 
     public RefreshLayout(View contentView) {
         this(contentView.getContext(), null, 0);

@@ -77,7 +77,10 @@ public class StickyNavLayout extends LinearLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        measureChild(mContentView, widthMeasureSpec, MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec) - getNavViewHeight(), MeasureSpec.EXACTLY));
+        MarginLayoutParams layoutParams = (MarginLayoutParams) mContentView.getLayoutParams();
+        measureChild(mContentView, widthMeasureSpec - layoutParams.leftMargin - layoutParams.rightMargin,
+                MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec) - getNavViewHeight()
+                        - layoutParams.topMargin - layoutParams.bottomMargin, MeasureSpec.EXACTLY));
     }
 
     @Override
@@ -277,8 +280,8 @@ public class StickyNavLayout extends LinearLayout {
         Rect rect = new Rect();
         rect.left = location[0] - params.leftMargin;
         rect.top = location[1] - params.topMargin;
-        rect.right = rect.left + view.getMeasuredWidth() + params.bottomMargin;
-        rect.bottom = rect.top + view.getMeasuredHeight() + params.rightMargin;
+        rect.right = rect.left + view.getMeasuredWidth() + params.rightMargin;
+        rect.bottom = rect.top + view.getMeasuredHeight() + params.bottomMargin;
         return rect;
     }
 

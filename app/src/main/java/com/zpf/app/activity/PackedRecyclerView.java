@@ -1,6 +1,7 @@
 package com.zpf.app.activity;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,6 +31,7 @@ public class PackedRecyclerView extends PackedLayout<RecyclerView> {
     protected RecyclerView createContentView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         RecyclerView recyclerView = new RecyclerView(context);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.setBackgroundColor(Color.GREEN);
         return recyclerView;
     }
 
