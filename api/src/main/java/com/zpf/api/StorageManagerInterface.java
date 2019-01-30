@@ -6,9 +6,9 @@ import android.support.annotation.NonNull;
  * Created by ZPF on 2019/1/24.
  */
 
-public interface LocalStorageInterface<N> {
+public interface StorageManagerInterface<N> {
 
-    LocalStorageInterface save(N name, Object value);
+    StorageManagerInterface save(N name, Object value);
 
     <T> T find(N key, @NonNull Class<T> cls);
 
