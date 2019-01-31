@@ -1,11 +1,12 @@
 package com.zpf.support.network.header;
 
+import com.zpf.api.KVPInterface;
 import com.zpf.api.VariableParameterInterface;
 
 /**
  * Created by ZPF on 2018/9/18.
  */
-public class VolatileHeader implements ClientHeader {
+public class VolatileHeader implements KVPInterface<String,String> {
     private String name;
     private VariableParameterInterface variableParameter;
 
@@ -15,7 +16,7 @@ public class VolatileHeader implements ClientHeader {
     }
 
     @Override
-    public String getName() {
+    public String getKey() {
         return name;
     }
 

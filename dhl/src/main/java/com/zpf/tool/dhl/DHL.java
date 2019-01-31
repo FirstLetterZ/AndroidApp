@@ -6,12 +6,12 @@ import com.zpf.tool.dhl.interfaces.ExpressageInterface;
 import com.zpf.tool.dhl.interfaces.ParcelReceiverInterface;
 
 /**
- * 快递服务商
+ * 数据传递服务商
  * Created by ZPF on 2018/11/9.
  */
 public class DHL {
     private SparseArray<DeliveryLocker> deliveryLockers = new SparseArray<>();
-    private DeliveryLocker defDeliveryLockers = new DeliveryLocker();
+    private DeliveryLocker defDeliveryLocker = new DeliveryLocker();
 
     private DHL() {
     }
@@ -31,12 +31,16 @@ public class DHL {
 
     public boolean put(ExpressageInterface expressageInterface) {
         if (expressageInterface != null) {
-            defDeliveryLockers.put(expressageInterface);
+            defDeliveryLocker.put(expressageInterface);
             return true;
         }
         return false;
     }
 
+    /**
+     * @param lockerId 存储柜id
+     * @param expressageInterface 存储包裹
+     */
     public boolean put(int lockerId, ExpressageInterface expressageInterface) {
         DeliveryLocker deliveryLocker = deliveryLockers.get(lockerId);
         if (expressageInterface != null && deliveryLocker != null) {
@@ -49,10 +53,14 @@ public class DHL {
 
     public void send(ParcelReceiverInterface receiverInterface) {
         if (receiverInterface != null) {
-            defDeliveryLockers.pick(receiverInterface);
+            defDeliveryLocker.pick(receiverInterface);
         }
     }
 
+    /**
+     * @param lockerId 存储柜id
+     * @param receiverInterface 收件人信息
+     */
     public void send(int lockerId, ParcelReceiverInterface receiverInterface) {
         if (receiverInterface != null) {
             DeliveryLocker deliveryLocker = deliveryLockers.get(lockerId);
@@ -64,6 +72,10 @@ public class DHL {
         }
     }
 
+    /**
+     * @param lockerId 分配的id
+     * @param deliveryLocker 数据柜
+     */
     public void addDeliveryLocker(int lockerId, DeliveryLocker deliveryLocker) {
         if (deliveryLocker != null) {
             deliveryLockers.put(lockerId, deliveryLocker);
@@ -75,11 +87,11 @@ public class DHL {
     }
 
     public void clear() {
-        defDeliveryLockers.clear();
+        defDeliveryLocker.clear();
     }
 
     public void clearAll() {
-        defDeliveryLockers.clear();
+        defDeliveryLocker.clear();
         deliveryLockers.clear();
     }
 }

@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * 快递包裹
+ * 数据包裹
  * Created by ZPF on 2018/11/8.
  */
 public class Expressage implements ExpressageInterface {

@@ -1,9 +1,11 @@
 package com.zpf.support.network.header;
 
+import com.zpf.api.KVPInterface;
+
 /**
  * Created by ZPF on 2018/9/18.
  */
-public class ConstantHeader implements ClientHeader {
+public class ConstantHeader implements KVPInterface<String,String> {
     private String name;
     private String value;
 
@@ -13,7 +15,7 @@ public class ConstantHeader implements ClientHeader {
     }
 
     @Override
-    public String getName() {
+    public String getKey() {
         return name;
     }
 

@@ -4,7 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.zpf.api.CallBackManagerInterface;
 import com.zpf.api.SafeWindowInterface;
-import com.zpf.support.network.base.BaseCallBack;
+import com.zpf.util.network.base.BaseCallBack;
 
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;

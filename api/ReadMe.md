@@ -14,6 +14,8 @@
 ---全局配置，目前通过使用application继承此接口，然后获取application强转使用；
 * [IconText](./src/main/java/com/zpf/api/IconText.java)
 ---可使用成文字、图片、IconFont的视图；
+* [KVPInterface](./src/main/java/com/zpf/api/KVPInterface.java)
+---键值对通用接口；
 * [LifecycleInterface](./src/main/java/com/zpf/api/LifecycleInterface.java)
 ---生命周期的对应回调；
 * [LifecycleListenerController](./src/main/java/com/zpf/api/LifecycleListenerController.java)
@@ -62,9 +64,9 @@ com.android.support:support-annotations<br>
 ``````
 allprojects {
     repositories {
-        maven { url 'https://dl.bintray.com/letterz/apiMaven' }
+        maven { url 'https://dl.bintray.com/letterz/AndroidSupportMaven' }
     }
 }
 ``````
 在Module内添加对应引用：
->'com.zpf:api-kit:latest.integration'
+>'com.zpf.android:api-kit:latest.integration'

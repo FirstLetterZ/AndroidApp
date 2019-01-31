@@ -17,5 +17,4 @@ public class AppConst {
 
     public static final String PROGRESS_WAITTING = "请稍候";
 
-    public static String TAG = "AppLog";
 }

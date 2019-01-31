@@ -19,7 +19,7 @@ android {
 dependencies {
     api rootProject.ext.dependencies.retrofitGsonConverter
     api rootProject.ext.dependencies.retrofit
-    api rootProject.ext.dependencies.gson
+    api rootProject.ext.dependencies.gsonParse
     api rootProject.ext.dependencies.api
     api rootProject.ext.dependencies.toolkit
 }

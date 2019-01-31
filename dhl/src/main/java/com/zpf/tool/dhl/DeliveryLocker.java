@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * 快递柜
+ * 数据存储柜
  * Created by ZPF on 2018/11/8.
  */
 public class DeliveryLocker implements DeliveryLockerInterface {

@@ -1,72 +1,60 @@
 package com.zpf.support.base;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
+import android.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.ViewGroup;
 
-import com.zpf.support.constant.AppConst;
-import com.zpf.support.defview.ProgressDialog;
-import com.zpf.support.defview.RootLayout;
-import com.zpf.support.util.ContainerListenerController;
-import com.zpf.tool.MainHandler;
-import com.zpf.tool.PublicUtil;
-import com.zpf.api.TitleBarInterface;
 import com.zpf.api.CallBackManagerInterface;
+import com.zpf.api.ContainerProcessorInterface;
 import com.zpf.api.LifecycleInterface;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.api.ResultCallBackListener;
 import com.zpf.api.RootLayoutInterface;
 import com.zpf.api.SafeWindowInterface;
+import com.zpf.api.TitleBarInterface;
 import com.zpf.api.ViewContainerInterface;
-import com.zpf.api.ContainerProcessorInterface;
 import com.zpf.api.constant.LifecycleState;
+import com.zpf.support.constant.AppConst;
+import com.zpf.support.defview.ProgressDialog;
+import com.zpf.support.defview.RootLayout;
+import com.zpf.support.util.ContainerListenerController;
+import com.zpf.tool.PublicUtil;
 
 import java.lang.reflect.Constructor;
 
 /**
- * 基于AppCompatActivity的视图容器层
+ * 基于android.app.Fragment的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public abstract class CompatActivityContainer<T extends ContainerProcessorInterface> extends AppCompatActivity implements ViewContainerInterface {
+public abstract class FragmentContainer<T extends ContainerProcessorInterface> extends Fragment implements ViewContainerInterface {
     protected T mView;
     private RootLayoutInterface mRootLayout;
-    private final ContainerListenerController mController = new ContainerListenerController();
+    private boolean isVisible;
     private ProgressDialog loadingDialog;
+    private final ContainerListenerController mController = new ContainerListenerController();
 
+    @Nullable
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        //防止初次安装从后台返回的重启问题
-        Intent intent = getIntent();
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
-            String action = intent.getAction();
-            if (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && Intent.ACTION_MAIN.equals(action)) {
-                finish();
-                return;
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        if (mRootLayout == null) {
+            mRootLayout = createRootLayout();
+            View layoutView = getLayoutView();
+            if (layoutView == null) {
+                mRootLayout.setContentView(inflater, getLayoutId());
+            } else {
+                mRootLayout.setContentView(layoutView);
             }
         }
-        initWindow();
-        mRootLayout = createRootLayout();
-        View layoutView = getLayoutView();
-        if (layoutView == null) {
-            mRootLayout.setContentView(getLayoutInflater(), getLayoutId());
-        } else {
-            mRootLayout.setContentView(layoutView);
+        if (mView == null) {
+            mView = createProcessor();
         }
-        setContentView(mRootLayout.getLayout());
-        mView = createProcessor();
         if (mView != null) {
             mController.addLifecycleListener(mView);
             mController.addResultCallBackListener(mView);
@@ -74,14 +62,8 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
         mController.onPreCreate(savedInstanceState);
         initView(savedInstanceState);
         mController.afterCreate(savedInstanceState);
+        return mRootLayout.getLayout();
     }
-
-    @Override
-    public void onRestart() {
-        super.onRestart();
-        mController.onRestart();
-    }
-
 
     @Override
     public void onStart() {
@@ -93,7 +75,7 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
     public void onResume() {
         super.onResume();
         mController.onResume();
-        mController.onVisibleChanged(true);
+        checkVisibleChange();
     }
 
     @Override
@@ -106,36 +88,39 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
     public void onStop() {
         super.onStop();
         mController.onStop();
-        mController.onVisibleChanged(false);
+        checkVisibleChange();
+    }
+
+
+    @Override
+    public void onDestroyView() {
+        if (mController.getState() < LifecycleState.AFTER_DESTROY) {
+            mController.onDestroy();
+        }
+        super.onDestroyView();
     }
 
     @Override
     public void onDestroy() {
-        mController.onDestroy();
+        if (mController.getState() < LifecycleState.AFTER_DESTROY) {
+            mController.onDestroy();
+        }
         super.onDestroy();
         loadingDialog = null;
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        if (outState != null) {
-            mController.onSaveInstanceState(outState);
-        }
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        mController.onSaveInstanceState(outState);
         super.onSaveInstanceState(outState);
     }
 
     @Override
-    public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null) {
             mController.onRestoreInstanceState(savedInstanceState);
         }
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        mController.onNewIntent(intent);
     }
 
     @Override
@@ -148,6 +133,18 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         mController.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        checkVisibleChange();
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        checkVisibleChange();
     }
 
     @Override
@@ -168,17 +165,21 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
 
     @Override
     public Context getContext() {
-        return this;
+        return super.getContext();
     }
 
     @Override
     public Intent getIntent() {
-        return super.getIntent();
+        if (getActivity() != null) {
+            return getActivity().getIntent();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public Activity getCurrentActivity() {
-        return this;
+        return getActivity();
     }
 
     @Override
@@ -207,12 +208,14 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
 
     @Override
     public void startActivities(Intent[] intents) {
-        super.startActivities(intents);
+        this.startActivities(intents, null);
     }
 
     @Override
     public void startActivities(Intent[] intents, @Nullable Bundle options) {
-        super.startActivities(intents, options);
+        if (getActivity() != null) {
+            getActivity().startActivities(intents, options);
+        }
     }
 
     @Override
@@ -220,24 +223,14 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
         super.startActivityForResult(intent, requestCode);
     }
 
-    @SuppressLint("RestrictedApi")
     @Override
     public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
         super.startActivityForResult(intent, requestCode, options);
     }
 
     @Override
-    public void show(final SafeWindowInterface window) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            mController.show(window);
-        } else {
-            MainHandler.get().post(new Runnable() {
-                @Override
-                public void run() {
-                    mController.show(window);
-                }
-            });
-        }
+    public void show(SafeWindowInterface window) {
+        mController.show(window);
     }
 
     @Override
@@ -261,13 +254,17 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
 
     @Override
     public void finishWithResult(int resultCode, Intent data) {
-        setResult(resultCode, data);
-        super.finish();
+        if (getActivity() != null) {
+            getActivity().setResult(resultCode, data);
+            getActivity().finish();
+        }
     }
 
     @Override
     public void finish() {
-        super.finish();
+        if (getActivity() != null) {
+            getActivity().finish();
+        }
     }
 
     @Override
@@ -302,7 +299,10 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
 
     @Override
     public boolean hideLoading() {
-        if (loadingDialog != null && loadingDialog.isShowing()) {
+        Activity activity = getActivity();
+        if (activity != null && activity instanceof ViewContainerInterface) {
+            return ((ViewContainerInterface) activity).hideLoading();
+        } else if (loadingDialog != null && loadingDialog.isShowing()) {
             try {
                 loadingDialog.dismiss();
             } catch (Exception e) {
@@ -316,8 +316,8 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
 
     @Override
     public ProgressDialog getProgressDialog() {
-        if (loadingDialog == null && getState() < LifecycleState.AFTER_DESTROY) {
-            loadingDialog = new ProgressDialog(this);
+        if (loadingDialog == null && getState() < LifecycleState.AFTER_DESTROY && getActivity() != null) {
+            loadingDialog = new ProgressDialog(getActivity());
         }
         return loadingDialog;
     }
@@ -329,35 +329,40 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
 
     @Override
     public void showLoading(String message) {
-        if (isLiving()) {
-            if (loadingDialog != null) {
-                loadingDialog = getProgressDialog();
-            }
-            if (loadingDialog != null && !loadingDialog.isShowing()) {
-                loadingDialog.setText(message);
-                loadingDialog.show();
+        Activity activity = getActivity();
+        if (activity != null) {
+            if (activity instanceof ViewContainerInterface) {
+                ((ViewContainerInterface) activity).showLoading(message);
+            } else if (isLiving()) {
+                if (loadingDialog == null) {
+                    loadingDialog = getProgressDialog();
+                }
+                if (loadingDialog != null && !loadingDialog.isShowing()) {
+                    loadingDialog.setText(message);
+                    loadingDialog.show();
+                }
             }
         }
     }
 
     @Override
     public boolean checkPermissions(String... permissions) {
-        return mController.getActivityPermissionChecker().checkPermissions(this, permissions);
+        return mController.getFragmentPermissionChecker().checkPermissions(this, permissions);
     }
 
     @Override
     public boolean checkPermissions(int requestCode, String... permissions) {
-        return mController.getActivityPermissionChecker().checkPermissions(this, requestCode, permissions);
+        return mController.getFragmentPermissionChecker().checkPermissions(this, requestCode, permissions);
     }
 
     @Override
     public void checkPermissions(Runnable onPermission, Runnable onLock, String... permissions) {
-        mController.getActivityPermissionChecker().checkPermissions(this, onPermission, onLock, permissions);
+        mController.getFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, permissions);
     }
 
     @Override
     public void checkPermissions(Runnable onPermission, Runnable onLock, int requestCode, String... permissions) {
-        mController.getActivityPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
+        mController.getFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
     }
 
     @Override
@@ -365,14 +370,11 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
         return null;
     }
 
-
-    protected void initWindow() {
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setStatusBarTranslucent();
-    }
-
     protected RootLayoutInterface createRootLayout() {
-        return new RootLayout(getContext());
+        RootLayout rootLayout = new RootLayout(getContext());
+        rootLayout.getStatusBar().setVisibility(View.GONE);
+        rootLayout.getTitleBar().getLayout().setVisibility(View.GONE);
+        return rootLayout;
     }
 
     protected T createProcessor() {
@@ -389,19 +391,6 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
         return null;
     }
 
-    protected void setStatusBarTranslucent() {
-        Window window = getWindow();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {//判断版本是5.0以上
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.TRANSPARENT);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {//判断版本是4.4以上
-            window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        }
-    }
-
     public View getLayoutView() {
         return null;
     }
@@ -409,4 +398,13 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
     public abstract int getLayoutId();
 
     public abstract void initView(@Nullable Bundle savedInstanceState);
+
+    private void checkVisibleChange() {
+        boolean newVisible = getState() == LifecycleState.AFTER_RESUME && getUserVisibleHint() && isVisible();
+        if (newVisible != this.isVisible) {
+            this.isVisible = newVisible;
+            mController.onVisibleChanged(newVisible);
+        }
+    }
+
 }

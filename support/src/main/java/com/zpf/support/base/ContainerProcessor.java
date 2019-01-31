@@ -22,6 +22,7 @@ import com.zpf.support.util.PermissionUtil;
 import java.util.List;
 
 /**
+ * 视图处理
  * Created by ZPF on 2018/6/14.
  */
 public abstract class ContainerProcessor implements ContainerProcessorInterface {

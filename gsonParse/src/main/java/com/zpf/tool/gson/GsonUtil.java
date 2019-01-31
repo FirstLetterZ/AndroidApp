@@ -1,4 +1,4 @@
-package com.zpf.tool.gsonparse;
+package com.zpf.tool.gson;
 
 import android.text.TextUtils;
 

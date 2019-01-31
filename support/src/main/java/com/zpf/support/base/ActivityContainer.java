@@ -11,35 +11,34 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.zpf.api.CallBackManagerInterface;
+import com.zpf.api.ContainerProcessorInterface;
+import com.zpf.api.LifecycleInterface;
+import com.zpf.api.OnDestroyListener;
+import com.zpf.api.ResultCallBackListener;
+import com.zpf.api.RootLayoutInterface;
+import com.zpf.api.SafeWindowInterface;
+import com.zpf.api.TitleBarInterface;
+import com.zpf.api.ViewContainerInterface;
+import com.zpf.api.constant.LifecycleState;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.defview.ProgressDialog;
 import com.zpf.support.defview.RootLayout;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.tool.MainHandler;
 import com.zpf.tool.PublicUtil;
-import com.zpf.api.TitleBarInterface;
-import com.zpf.api.CallBackManagerInterface;
-import com.zpf.api.LifecycleInterface;
-import com.zpf.api.OnDestroyListener;
-import com.zpf.api.ResultCallBackListener;
-import com.zpf.api.RootLayoutInterface;
-import com.zpf.api.SafeWindowInterface;
-import com.zpf.api.ViewContainerInterface;
-import com.zpf.api.ContainerProcessorInterface;
-import com.zpf.api.constant.LifecycleState;
 
 import java.lang.reflect.Constructor;
 
 /**
- * 基于AppCompatActivity的视图容器层
+ * 基于Activity的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public abstract class CompatActivityContainer<T extends ContainerProcessorInterface> extends AppCompatActivity implements ViewContainerInterface {
+public abstract class ActivityContainer<T extends ContainerProcessorInterface> extends Activity implements ViewContainerInterface {
     protected T mView;
     private RootLayoutInterface mRootLayout;
     private final ContainerListenerController mController = new ContainerListenerController();

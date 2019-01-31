@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * 单件数据包裹
  * Created by ZPF on 2018/11/9.
  */
 public class SinglePartExpressage<T> implements ExpressageInterface<T> {

@@ -1,4 +1,4 @@
-package com.zpf.tool.glideutil;
+package com.zpf.tool.glide;
 
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.Headers;

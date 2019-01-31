@@ -4,7 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.zpf.api.CallBackManagerInterface;
 import com.zpf.api.SafeWindowInterface;
-import com.zpf.support.network.model.HttpResult;
+import com.zpf.util.network.model.HttpResult;
 
 /**
  * Created by ZPF on 2018/7/26.

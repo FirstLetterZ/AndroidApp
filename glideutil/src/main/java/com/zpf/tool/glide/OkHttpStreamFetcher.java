@@ -1,4 +1,4 @@
-package com.zpf.tool.glideutil;
+package com.zpf.tool.glide;
 
 import android.support.annotation.NonNull;
 

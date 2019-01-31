@@ -5,14 +5,12 @@ buildscript {
     repositories {
         google()
         maven { url "https://jitpack.io" }
-        maven { url 'https://dl.bintray.com/letterz/ToolMaven' }
-        maven { url 'https://dl.bintray.com/letterz/apiMaven' }
-        maven { url 'https://dl.bintray.com/letterz/SupportMaven' }
+        maven { url 'https://dl.bintray.com/letterz/AndroidSupportMaven' }
         jcenter()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.2'
+        classpath 'com.android.tools.build:gradle:3.3.0'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
         // NOTE: Do not place your application dependencies here; they belong
@@ -23,9 +21,7 @@ buildscript {
 allprojects {
     repositories {
         maven { url "https://jitpack.io" }
-        maven { url 'https://dl.bintray.com/letterz/ToolMaven' }
-        maven { url 'https://dl.bintray.com/letterz/apiMaven' }
-        maven { url 'https://dl.bintray.com/letterz/SupportMaven' }
+        maven { url 'https://dl.bintray.com/letterz/AndroidSupportMaven' }
         jcenter()
         mavenCentral()
         google()
@@ -58,19 +54,19 @@ ext {
             design                : 'com.android.support:design:27.1.1',
             multidex              : 'com.android.support:multidex:1.0.2',
             /* ============================== 项目内工具库 ================================ */
-            dataparser            : 'com.zpf:api-parse:0.0.2',
-            api                   : 'com.zpf:api-kit:0.0.6',
-            dhl                   : 'com.zpf:tool-dhl:0.0.2',
-            toolkit               : 'com.zpf:tool-kit:0.0.3',
-            toolExpand            : 'com.zpf:tool-expand:0.0.2',
-            permission            : 'com.zpf:tool-permission:0.0.1',
-            webview               : 'com.zpf:bridgeWebview:0.0.3',
-            refresh               : 'com.zpf:pullRefresh:0.0.2',
-            network               : 'com.zpf:network:0.0.3',
-            rxnetwork             : 'com.zpf:rxNetwork:0.0.2',
-            support               : 'com.zpf:frame:0.0.2',
-            gsonParse             : 'com.zpf:parse-gson:0.0.3',
-            glideutil             : 'com.zpf:util-glide:0.0.1',
+            dataparser            : 'com.zpf.android:api-parse:latest.integration',
+            api                   : 'com.zpf.android:api-kit:latest.integration',
+            dhl                   : 'com.zpf.android:tool-dhl:latest.integration',
+            toolkit               : 'com.zpf.android:tool-kit:latest.integration',
+            toolExpand            : 'com.zpf.android:tool-expand:latest.integration',
+            permission            : 'com.zpf.android:tool-permission:latest.integration',
+            webview               : 'com.zpf.android:bridgeWebview:latest.integration',
+            refresh               : 'com.zpf.android:pullRefresh:latest.integration',
+            network               : 'com.zpf.android:util-retrofit:latest.integration',
+            rxnetwork             : 'com.zpf.android:util-rxNetwork:latest.integration',
+            support               : 'com.zpf.android:frame:latest.integration',
+            gsonParse             : 'com.zpf.android:util-gson:latest.integration',
+            glideutil             : 'com.zpf.android:util-glide:latest.integration',
     ]
 }
 

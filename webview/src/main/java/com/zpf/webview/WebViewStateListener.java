@@ -1,4 +1,4 @@
-package com.zpf.support.webview;
+package com.zpf.webview;
 
 import android.graphics.Bitmap;
 import android.webkit.WebResourceError;

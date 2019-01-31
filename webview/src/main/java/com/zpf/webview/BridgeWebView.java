@@ -1,4 +1,4 @@
-package com.zpf.support.webview;
+package com.zpf.webview;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;

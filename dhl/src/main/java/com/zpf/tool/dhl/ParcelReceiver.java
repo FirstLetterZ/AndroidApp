@@ -8,7 +8,7 @@ import com.zpf.tool.dhl.interfaces.ParcelReceiverInterface;
 import java.util.List;
 
 /**
- * 收件人
+ * 数据收件人
  * Created by ZPF on 2018/11/8.
  */
 public class ParcelReceiver implements ParcelReceiverInterface {

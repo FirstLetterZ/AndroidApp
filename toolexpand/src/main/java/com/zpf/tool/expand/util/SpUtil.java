@@ -4,16 +4,16 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 
+import com.zpf.api.StorageManagerInterface;
 import com.zpf.api.dataparser.JsonParserInterface;
 import com.zpf.tool.AppContext;
 import com.zpf.tool.DataDefault;
-import com.zpf.api.LocalStorageInterface;
 import com.zpf.api.StorageQueueInterface;
 
 /**
  * Created by ZPF on 2017/9/29.
  */
-public class SpUtil implements LocalStorageInterface<String> {
+public class SpUtil implements StorageManagerInterface<String> {
     private static volatile SpUtil mySpUtil;
     private SharedPreferences sp;
     public static final String SP_FILE_NAME = "sp_data_file";
@@ -173,7 +173,7 @@ public class SpUtil implements LocalStorageInterface<String> {
     }
 
     @Override
-    public LocalStorageInterface save(String name, Object value) {
+    public SpUtil save(String name, Object value) {
         put(name, value);
         return this;
     }

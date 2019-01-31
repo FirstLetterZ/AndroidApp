@@ -1,5 +1,6 @@
 package com.zpf.support.util;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.zpf.api.LoggerInterface;
@@ -74,6 +75,9 @@ public class LogUtil implements LoggerInterface {
     public void log(int priority, String tag, String content) {
         if (get().logOut) {
             if (realLoggerList.size() > 0) {
+                if (TextUtils.isEmpty(tag)) {
+                    tag = TAG;
+                }
                 for (LoggerInterface logger : realLoggerList) {
                     logger.log(priority, tag, content);
                 }

@@ -9,13 +9,13 @@ import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.zpf.support.view.CommonDialog;
 import com.zpf.tool.AppContext;
 import com.zpf.tool.expand.util.SpUtil;
 import com.zpf.tool.permission.PermissionChecker;
 import com.zpf.tool.PublicUtil;
 import com.zpf.tool.permission.PermissionInfo;
 import com.zpf.tool.permission.PermissionManager;
-import com.zpf.support.view.CommonDialog;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -14,9 +14,9 @@ com.android.support:support-annotations<br>
 ``````
 allprojects {
     repositories {
-        maven { url 'https://dl.bintray.com/letterz/apiMaven' }
+        maven { url 'https://dl.bintray.com/letterz/AndroidSupportMaven' }
     }
 }
 ``````
 在Module内添加对应引用：
->'com.zpf:api-parse:latest.integration'
+>'com.zpf.android:api-parse:latest.integration'

@@ -1,7 +1,7 @@
 package com.zpf.tool.dhl.interfaces;
 
 /**
- * 包裹检查
+ * 数据包裹检查
  * Created by ZPF on 2018/11/9.
  */
 public interface ParcelInspectorInterface {

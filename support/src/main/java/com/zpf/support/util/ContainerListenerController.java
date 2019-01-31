@@ -220,6 +220,7 @@ public class ContainerListenerController implements LifecycleListenerController,
         if (mPermissionChecker == null) {
             mPermissionChecker = new ActivityPermissionChecker();
         } else if (!(mPermissionChecker instanceof ActivityPermissionChecker)) {
+            mPermissionChecker.onDestroy();
             mPermissionChecker = new ActivityPermissionChecker();
         }
         return (ActivityPermissionChecker) mPermissionChecker;
@@ -230,6 +231,7 @@ public class ContainerListenerController implements LifecycleListenerController,
             mPermissionChecker = new FragmentPermissionChecker();
         } else if (!(mPermissionChecker instanceof FragmentPermissionChecker)) {
             mPermissionChecker.onDestroy();
+            mPermissionChecker = new FragmentPermissionChecker();
         }
         return (FragmentPermissionChecker) mPermissionChecker;
     }
@@ -238,6 +240,7 @@ public class ContainerListenerController implements LifecycleListenerController,
         if (mPermissionChecker == null) {
             mPermissionChecker = new CompatFragmentPermissionChecker();
         } else if (!(mPermissionChecker instanceof CompatFragmentPermissionChecker)) {
+            mPermissionChecker.onDestroy();
             mPermissionChecker = new CompatFragmentPermissionChecker();
         }
         return (CompatFragmentPermissionChecker) mPermissionChecker;
