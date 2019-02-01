@@ -1,24 +1,19 @@
 package com.zpf.support.network.base;
 
 import android.accounts.AccountsException;
-import android.app.Application;
 import android.app.Dialog;
 import android.net.ParseException;
 import android.support.annotation.IntRange;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.stream.MalformedJsonException;
-import com.zpf.tool.AppContext;
 import com.zpf.tool.ToastUtil;
 import com.zpf.api.CallBackInterface;
 import com.zpf.api.CallBackManagerInterface;
-import com.zpf.api.GlobalConfigInterface;
 import com.zpf.api.SafeWindowInterface;
 import com.zpf.support.network.model.CustomException;
 import com.zpf.support.network.model.HttpResult;
+import com.zpf.tool.config.GlobalConfigImpl;
 
 import org.json.JSONException;
 
@@ -114,7 +109,7 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
     protected void handleError(Throwable e) {
         removeObservable();
         e.printStackTrace();
-        String description = e.toString();
+        String description;
         int code;
         if (e instanceof HttpException) {
             HttpException exception = (HttpException) e;
@@ -129,10 +124,8 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
         } else if (e instanceof SSLHandshakeException) {
             code = ErrorCode.SSL_ERROR;
             description = "网络证书验证失败";
-        } else if (e instanceof JsonParseException
-                || e instanceof JSONException
-                || e instanceof ParseException
-                || e instanceof MalformedJsonException) {
+        } else if (e instanceof JSONException
+                || e instanceof ParseException) {
             code = ErrorCode.PARSE_ERROR;
             description = "数据解析异常";
         } else if (e instanceof ConnectException) {
@@ -152,37 +145,33 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
             code = ErrorCode.IO_ERROR;
             description = "数据流异常，解析失败";
         } else {
-            code = ErrorCode.NO_SERVER_CODE;
+            Object result = GlobalConfigImpl.get().invokeMethod(this, "checkNetError", e);
+            if (result != null && result instanceof HttpResult) {
+                code = ((HttpResult) result).getCode();
+                description = ((HttpResult) result).getMessage();
+            } else {
+                code = ErrorCode.NO_SERVER_CODE;
+                description = e.toString();
+            }
         }
-        if (code != ErrorCode.NO_SERVER_CODE) {
-            description = description + "\n" + e.getMessage();
-        }
-        fail(code, description, true);
+        fail(code, description);
     }
 
     /**
      * @param code        错误码
      * @param description 错误描述
-     * @param complete    是否执行complete（）
      */
-    protected void fail(int code, String description, boolean complete) {
-        Application application = AppContext.get();
-        if (application != null && application instanceof GlobalConfigInterface) {
-            //检查登录信息是否失效
-            Object result = ((GlobalConfigInterface) application).invokeMethod(
-                    this, "checkLoginEffective", code);
-            if (result != null && result instanceof Boolean) {
-                if ((boolean) result) {
-                    if (complete) {
-                        complete(false);
-                    }
-                    return;
-                }
+    protected void fail(int code, String description) {
+        Object result = GlobalConfigImpl.get().invokeMethod(this, "checkNetFail", code);
+        if (result != null && result instanceof Boolean) {
+            if ((boolean) result) {
+                complete(false);
+                return;
             }
         }
         boolean showDialog = false;
         if (code > -900) {
-            Dialog dialog = showError(code, description);
+            Dialog dialog = showDialog(code, description);
             showDialog = dialog != null;
             if (showDialog && !dialog.isShowing() && dialog.getWindow() != null) {
                 try {
@@ -198,13 +187,11 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
             }
             ToastUtil.toast(description + "(" + code + ")");
         }
-        if (complete) {
-            complete(false);
-        }
+        complete(false);
     }
 
     //控制弹窗是否弹出
-    protected Dialog showError(int code, String description) {
+    protected Dialog showDialog(int code, String description) {
         return null;
     }
 
@@ -232,12 +219,11 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
             return false;
         } else if (value == null) {
             return true;
-        } else if (value instanceof JsonElement) {
-            return ((JsonElement) value).isJsonNull();
-        } else if (value instanceof HttpResult) {
+        }  else if (value instanceof HttpResult) {
             return ((HttpResult) value).getData() == null;
         } else {
-            return true;
+            Object result = GlobalConfigImpl.get().invokeMethod(this, "checkNetNull", value);
+            return result != null && result instanceof Boolean && (boolean) result;
         }
     }
 
@@ -259,7 +245,7 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
      * 当返回数据为空或者解析为空
      */
     protected void onDataNull() {
-        fail(ErrorCode.DATA_NULL, "返回数据为空", true);
+        fail(ErrorCode.DATA_NULL, "返回数据为空");
     }
 
     /**

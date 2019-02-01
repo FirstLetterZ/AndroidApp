@@ -34,7 +34,7 @@ public abstract class RxResultCallBack<T> extends RxCallBack<HttpResult<T>> {
         if (result == null) {
             onDataNull();
         } else {
-            fail(result.getCode(), result.getMessage(), true);
+            fail(result.getCode(), result.getMessage());
         }
     }
 
@@ -58,7 +58,7 @@ public abstract class RxResultCallBack<T> extends RxCallBack<HttpResult<T>> {
     @Override
     protected void onResultIllegal(@Nullable HttpResult<T> result) {
         if (result != null) {
-            fail(result.getCode(), result.getMessage(), true);
+            fail(result.getCode(), result.getMessage());
         } else {
             onDataNull();
         }

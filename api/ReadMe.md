@@ -10,8 +10,6 @@
 ---视图处理层接口；
 * [CreatorInterface](./src/main/java/com/zpf/api/CreatorInterface.java)
 ---泛型对象创建器；
-* [GlobalConfigInterface](./src/main/java/com/zpf/api/GlobalConfigInterface.java)
----全局配置，目前通过使用application继承此接口，然后获取application强转使用；
 * [IconText](./src/main/java/com/zpf/api/IconText.java)
 ---可使用成文字、图片、IconFont的视图；
 * [KVPInterface](./src/main/java/com/zpf/api/KVPInterface.java)

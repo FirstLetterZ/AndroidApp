@@ -17,10 +17,6 @@ android {
 }
 
 dependencies {
-    api rootProject.ext.dependencies.api
-    api rootProject.ext.dependencies.toolkit
-    api rootProject.ext.dependencies.dataparser
-    api rootProject.ext.dependencies.globalConfig
 }
 
 apply from: "../bintrayUpload.gradle"

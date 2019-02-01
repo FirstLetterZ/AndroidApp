@@ -9,10 +9,10 @@ import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 
 import com.zpf.support.constant.AppConst;
+import com.zpf.support.util.PhotoUtil;
 import com.zpf.tool.FileUtil;
 import com.zpf.api.OnItemClickListener;
 import com.zpf.api.ViewContainerInterface;
-import com.zpf.support.util.PhotoUtil;
 import com.zpf.tool.expand.util.SpUtil;
 
 import java.io.File;

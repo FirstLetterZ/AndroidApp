@@ -15,6 +15,7 @@ Android工具库
 ./gradlew -p dataparser clean install bintrayUpload --info
 ./gradlew -p toolkit clean install bintrayUpload --info
 ./gradlew -p toolexpand clean install bintrayUpload --info
+./gradlew -p globalConfig clean install bintrayUpload --info
 ./gradlew -p dhl clean install bintrayUpload --info
 ./gradlew -p permission clean install bintrayUpload --info
 ./gradlew -p glideutil clean install bintrayUpload --info

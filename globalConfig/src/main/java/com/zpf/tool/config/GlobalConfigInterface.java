@@ -1,16 +1,22 @@
-package com.zpf.api;
+package com.zpf.tool.config;
 
-import android.support.annotation.NonNull;
+
+import android.app.Application;
 
 /**
  * 用于全局执行，需要在应用刚启动时完成初始化
  * Created by ZPF on 2018/7/27.
  */
 public interface GlobalConfigInterface {
+
+    boolean isDebug();
+
+    Application getApplication();
+
     /**
      * @param object 需要处理的对象
      */
-    void objectInit(@NonNull Object object);
+    void onObjectInit(Object object);
 
     /**
      * @param object     调用的对象

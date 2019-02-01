@@ -25,7 +25,7 @@ import com.zpf.api.TitleBarInterface;
 import com.zpf.api.ViewContainerInterface;
 import com.zpf.api.constant.LifecycleState;
 import com.zpf.support.util.LifecycleLogUtil;
-import com.zpf.tool.expand.util.GlobalConfigImpl;
+import com.zpf.tool.config.GlobalConfigImpl;
 
 /**
  * 将普通的activity或fragment打造成ViewContainerInterface

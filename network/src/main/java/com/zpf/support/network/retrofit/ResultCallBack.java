@@ -41,7 +41,7 @@ public abstract class ResultCallBack<T> extends ResponseCallBack<HttpResult<T>> 
             if (httpResult == null) {
                 onDataNull();
             } else {
-                fail(httpResult.getCode(), httpResult.getMessage(), true);
+                fail(httpResult.getCode(), httpResult.getMessage());
             }
         }
     }
@@ -54,7 +54,7 @@ public abstract class ResultCallBack<T> extends ResponseCallBack<HttpResult<T>> 
     @Override
     protected void onResultIllegal(@Nullable HttpResult<T> result) {
         if (result != null) {
-            fail(result.getCode(), result.getMessage(), true);
+            fail(result.getCode(), result.getMessage());
         } else {
             onDataNull();
         }

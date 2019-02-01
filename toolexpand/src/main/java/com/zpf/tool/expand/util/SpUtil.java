@@ -9,6 +9,7 @@ import com.zpf.api.dataparser.JsonParserInterface;
 import com.zpf.tool.AppContext;
 import com.zpf.tool.DataDefault;
 import com.zpf.api.StorageQueueInterface;
+import com.zpf.tool.config.GlobalConfigImpl;
 
 /**
  * Created by ZPF on 2017/9/29.

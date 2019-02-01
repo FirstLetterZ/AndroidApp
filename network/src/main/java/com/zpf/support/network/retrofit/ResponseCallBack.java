@@ -2,10 +2,10 @@ package com.zpf.support.network.retrofit;
 
 import android.support.annotation.Nullable;
 
+import com.zpf.support.network.base.BaseCallBack;
 import com.zpf.tool.MainHandler;
 import com.zpf.api.CallBackManagerInterface;
 import com.zpf.api.SafeWindowInterface;
-import com.zpf.support.network.base.BaseCallBack;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -104,7 +104,7 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
         if (response == null) {
             onDataNull();
         } else {
-            fail(response.code(), response.message(), true);
+            fail(response.code(), response.message());
         }
     }
 

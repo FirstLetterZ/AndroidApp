@@ -5,6 +5,14 @@ public class HttpResult<T> {
     private String message;
     private T data;
 
+    public HttpResult() {
+    }
+
+    public HttpResult(int code, String message) {
+        this.code = code;
+        this.message = message;
+    }
+
     public int getCode() {
         return code;
     }

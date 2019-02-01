@@ -9,15 +9,15 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
+import com.zpf.support.util.PermissionUtil;
 import com.zpf.tool.SafeClickListener;
-import com.zpf.tool.expand.util.GlobalConfigImpl;
+import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.permission.OnLockPermissionRunnable;
 import com.zpf.tool.permission.PermissionInfo;
 import com.zpf.api.ContainerProcessorInterface;
 import com.zpf.api.TitleBarInterface;
 import com.zpf.api.ViewContainerInterface;
 import com.zpf.support.util.LifecycleLogUtil;
-import com.zpf.support.util.PermissionUtil;
 
 import java.util.List;
 

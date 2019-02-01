@@ -22,4 +22,5 @@ dependencies {
     api rootProject.ext.dependencies.retrofitRxjava2Adapter
     api rootProject.ext.dependencies.network
 }
+
 apply from: "../bintrayUpload.gradle"

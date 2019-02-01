@@ -40,7 +40,7 @@
 ---网络响应数据处理窗；
 
 ### 使用方法
-1. 继承BaseCall，在初始化时配请求头信息，完成网络接口的调用，如有需要则复写builder()方法，配置Client拦截器；
+1. 继承BaseCall，在构造方法内传入请求头信息，完成网络接口的调用，通过builder()方法配置Client拦截器、解析器等；
 ````
 HeaderCarrier headerCarrier = new HeaderCarrier();
 headerCarrier.addHeader(new ConstantHeader("key","value"))
@@ -50,16 +50,23 @@ headerCarrier.addHeader(new ConstantHeader("key","value"))
                 return "value for the key";
             }
         }));
+        
+builder.retrofitBuilder().addConverterFactory(GsonConverterFactory.create());
 ````
 2. 根据网络响应选择合适的CallBack及ResponseBody，在CallBack中处理返回数据；
-3. 其余方法见okhttp及retrofit；
+3. 在使用前必须完成GlobalConfigImpl的初始化，实现下面三个方法：
+````
+invokeMethod(BaseCallBack callBack, "checkNetError", Throwable e);
+invokeMethod(BaseCallBack callBack, "checkNetFail", int code);
+invokeMethod(BaseCallBack callBack, "checkNetNull", Object value);
+````
+4. 其余方法见okhttp及retrofit；
+
 ### 依赖
-com.squareup.okhttp3:okhttp<br>
 com.squareup.retrofit2:retrofit<br>
-com.squareup.retrofit2:converter-gson<br>
 com.zpf.android:api-kit<br>
 com.zpf.android:tool-kit<br>
-com.zpf.android:util-gson<br>
+com.zpf.android:tool-config<br>
 ### 引用
 在项目对应build.gradle文件内的allprojects-repositories下添加工具包仓库地址：
 ``````
