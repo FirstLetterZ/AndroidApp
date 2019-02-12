@@ -233,6 +233,7 @@ public class StickyNavLayout extends LinearLayout {
                     recycleVelocityTracker();
                 }
                 dispatchTouchEventToChild(ev);
+                return true;
             case MotionEvent.ACTION_CANCEL:
                 if (!passChild) {
                     if (mVelocityTracker != null) {

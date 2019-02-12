@@ -1,7 +1,9 @@
 package com.zpf.app.activity;
 
 import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
+import android.support.v7.recyclerview.extensions.AsyncDifferConfig;
+import android.support.v7.recyclerview.extensions.ListAdapter;
+import android.support.v7.util.DiffUtil;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -10,7 +12,16 @@ import android.widget.TextView;
  * Created by ZPF on 2018/11/27.
  */
 
-public class TestAdapter extends RecyclerView.Adapter<TestViewHolder> {
+public class TestAdapter extends ListAdapter<String,TestViewHolder> {
+
+    protected TestAdapter(@NonNull DiffUtil.ItemCallback<String> diffCallback) {
+        super(diffCallback);
+    }
+
+    protected TestAdapter(@NonNull AsyncDifferConfig<String> config) {
+        super(config);
+    }
+
     @NonNull
     @Override
     public TestViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -23,11 +34,7 @@ public class TestAdapter extends RecyclerView.Adapter<TestViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull TestViewHolder holder, int position) {
-        ((TextView) holder.itemView).setText(("第" + (position + 1) + "条"));
+        ((TextView) holder.itemView).setText(getItem(position));
     }
 
-    @Override
-    public int getItemCount() {
-        return 14;
-    }
 }
