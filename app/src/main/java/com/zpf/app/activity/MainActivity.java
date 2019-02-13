@@ -6,16 +6,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.SparseArray;
+import android.util.Log;
 import android.view.View;
 
 import com.zpf.app.R;
 import com.zpf.refresh.util.OnRefreshListener;
 import com.zpf.refresh.util.RefreshLayoutType;
 import com.zpf.refresh.view.RefreshLayout;
+import com.zpf.tool.MainHandler;
 import com.zpf.tool.SafeClickListener;
 import com.zpf.tool.ToastUtil;
 import com.zpf.tool.config.GlobalConfigImpl;
@@ -26,7 +25,7 @@ import java.util.List;
 
 public class MainActivity extends Activity {
     private Handler handler = new Handler();
-    private RefreshLayout refreshLayout;
+//    private RefreshLayout refreshLayout;
     private PackedRecyclerView rvTest;
     List<String> testList = new ArrayList<>();
     private TestAdapter adapter;
@@ -61,29 +60,29 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(R.layout.activity_main_re);
-        refreshLayout = findViewById(R.id.rl_test);
-        refreshLayout.setType(RefreshLayoutType.BOTH_UP_DOWN);
-        refreshLayout.setOnRefreshListener(new OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        refreshLayout.setRefreshResult(true);
-                    }
-                }, 1000);
-            }
-
-            @Override
-            public void onLoadMore() {
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        refreshLayout.setRefreshResult(true);
-                    }
-                }, 1000);
-            }
-        });
+//        refreshLayout = findViewById(R.id.rl_test);
+//        refreshLayout.setType(RefreshLayoutType.BOTH_UP_DOWN);
+//        refreshLayout.setOnRefreshListener(new OnRefreshListener() {
+//            @Override
+//            public void onRefresh() {
+//                handler.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        refreshLayout.setRefreshResult(true);
+//                    }
+//                }, 1000);
+//            }
+//
+//            @Override
+//            public void onLoadMore() {
+//                handler.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        refreshLayout.setRefreshResult(true);
+//                    }
+//                }, 1000);
+//            }
+//        });
         rvTest = findViewById(R.id.prv_test);
 //        rvTest.setLayoutManager(new LinearLayoutManager(this));
         int i = 1;
@@ -103,31 +102,21 @@ public class MainActivity extends Activity {
             }
         };
         adapter = new TestAdapter(diffCallback);
-        adapter.submitList(testList);
         rvTest.getContentView().setAdapter(adapter);
 
         findViewById(R.id.ll_nav).setOnClickListener(new SafeClickListener() {
             @Override
             public void click(View v) {
-//                ToastUtil.toast("R.id.ll_nav");
-                ToastUtil.toast("删除第一条");
-                testList.remove(0);
-                adapter.notifyItemRemoved(0);
-                adapter.notifyItemChanged(0);
-//                startActivity(new Intent(MainActivity.this, Main2Activity.class));
+                Log.e("ZPF_DEBUG", "getMeasuredHeight=" + rvTest.getContentView().getMeasuredHeight());
             }
         });
         findViewById(R.id.iv_icon).setOnClickListener(new SafeClickListener() {
             @Override
             public void click(View v) {
-                ToastUtil.toast("新增一条");
-                testList.add(0, "新增一条");
-                adapter.notifyItemInserted(0);
-//                adapter.notifyItemChanged(0);
-                rvTest.getContentView().scrollToPosition(0);
-//                startActivity(new Intent(MainActivity.this, Main2Activity.class));
+                startActivity(new Intent(MainActivity.this, Main2Activity.class));
             }
         });
+        adapter.submitList(testList);
     }
 
 }
