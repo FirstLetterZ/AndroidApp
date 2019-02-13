@@ -1,4 +1,4 @@
-package com.zpf.app.activity.finger;
+package com.zpf.tool.fingerprint;
 
 import android.annotation.TargetApi;
 import android.hardware.fingerprint.FingerprintManager;
