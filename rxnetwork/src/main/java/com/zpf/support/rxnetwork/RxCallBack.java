@@ -1,10 +1,8 @@
 package com.zpf.support.rxnetwork;
 
-import android.support.annotation.Nullable;
-
 import com.zpf.api.CallBackManagerInterface;
 import com.zpf.api.SafeWindowInterface;
-import com.zpf.util.network.base.BaseCallBack;
+import com.zpf.support.network.base.BaseCallBack;
 
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
@@ -44,21 +42,17 @@ public abstract class RxCallBack<T> extends BaseCallBack<T> implements Observer<
             return;
         }
         removeObservable();
-        if (checkSuccessful(t)) {
-            if (checkNull(t)) {
-                onDataNull();
-            } else if (checkResult(t)) {
-                try {
-                    handleResponse(t);
-                    complete(true);
-                } catch (Exception e) {
-                    handleError(e);
-                }
-            } else {
-                onResultIllegal(t);
+        if (checkNull(t)) {
+            onDataNull();
+        } else if (checkResultSuccess(t)) {
+            try {
+                handleResponse(t);
+                complete(true);
+            } catch (Exception e) {
+                handleError(e);
             }
         } else {
-            onUnsuccessful(t);
+            onResultIllegal(t);
         }
     }
 
@@ -72,20 +66,6 @@ public abstract class RxCallBack<T> extends BaseCallBack<T> implements Observer<
 
     @Override
     public void onComplete() {
-
-    }
-
-    /**
-     * 检查是否为成功返回
-     */
-    protected boolean checkSuccessful(@Nullable T result) {
-        return true;
-    }
-
-    /**
-     * 不是成功返回
-     */
-    protected void onUnsuccessful(@Nullable T result) {
 
     }
 

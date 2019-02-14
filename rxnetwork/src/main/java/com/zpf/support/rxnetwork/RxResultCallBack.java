@@ -4,12 +4,11 @@ import android.support.annotation.Nullable;
 
 import com.zpf.api.CallBackManagerInterface;
 import com.zpf.api.SafeWindowInterface;
-import com.zpf.util.network.model.HttpResult;
+import com.zpf.support.network.model.HttpResult;
 
 /**
  * Created by ZPF on 2018/7/26.
  */
-
 public abstract class RxResultCallBack<T> extends RxCallBack<HttpResult<T>> {
     public RxResultCallBack() {
         super();
@@ -25,20 +24,6 @@ public abstract class RxResultCallBack<T> extends RxCallBack<HttpResult<T>> {
     }
 
     @Override
-    protected boolean checkSuccessful(@Nullable HttpResult<T> result) {
-        return result != null && result.isSuccess();
-    }
-
-    @Override
-    protected void onUnsuccessful(@Nullable HttpResult<T> result) {
-        if (result == null) {
-            onDataNull();
-        } else {
-            fail(result.getCode(), result.getMessage());
-        }
-    }
-
-    @Override
     public RxResultCallBack<T> bindToManager(CallBackManagerInterface manager) {
         super.bindToManager(manager);
         return this;
@@ -51,7 +36,7 @@ public abstract class RxResultCallBack<T> extends RxCallBack<HttpResult<T>> {
     }
 
     @Override
-    protected boolean checkResult(@Nullable HttpResult<T> result) {
+    protected boolean checkResultSuccess(HttpResult<T> result) {
         return (result == null || result.isSuccess());
     }
 

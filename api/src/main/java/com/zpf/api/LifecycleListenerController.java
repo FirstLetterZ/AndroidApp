@@ -1,14 +1,11 @@
 package com.zpf.api;
 
-import com.zpf.api.constant.LifecycleState;
-
 /**
  * 常用的有生命周的监听器控制
  * Created by ZPF on 2018/6/28.
  */
 public interface LifecycleListenerController {
     //获取当前状态
-    @LifecycleState
     int getState();
 
     //已创建到销毁之间的状态

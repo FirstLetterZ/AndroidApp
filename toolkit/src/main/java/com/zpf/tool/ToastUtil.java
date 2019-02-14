@@ -10,6 +10,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.zpf.tool.config.AppContext;
+
 import java.lang.ref.SoftReference;
 
 /**

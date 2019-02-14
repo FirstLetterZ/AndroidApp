@@ -11,8 +11,6 @@ public interface GlobalConfigInterface {
 
     boolean isDebug();
 
-    Application getApplication();
-
     /**
      * @param object 需要处理的对象
      */

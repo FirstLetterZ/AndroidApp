@@ -1,4 +1,4 @@
-package com.zpf.tool;
+package com.zpf.tool.config;
 
 import android.annotation.SuppressLint;
 import android.app.Application;

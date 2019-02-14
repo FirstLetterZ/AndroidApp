@@ -24,13 +24,13 @@ import com.zpf.api.RootLayoutInterface;
 import com.zpf.api.SafeWindowInterface;
 import com.zpf.api.TitleBarInterface;
 import com.zpf.api.ViewContainerInterface;
-import com.zpf.api.constant.LifecycleState;
 import com.zpf.support.defview.ProgressDialog;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.defview.RootLayout;
 import com.zpf.support.util.ContainerListenerController;
-import com.zpf.tool.MainHandler;
 import com.zpf.tool.PublicUtil;
+import com.zpf.tool.config.LifecycleState;
+import com.zpf.tool.config.MainHandler;
 
 import java.lang.reflect.Constructor;
 

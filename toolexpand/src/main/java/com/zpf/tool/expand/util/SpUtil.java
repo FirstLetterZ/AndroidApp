@@ -6,9 +6,9 @@ import android.support.annotation.NonNull;
 
 import com.zpf.api.StorageManagerInterface;
 import com.zpf.api.dataparser.JsonParserInterface;
-import com.zpf.tool.AppContext;
-import com.zpf.tool.DataDefault;
 import com.zpf.api.StorageQueueInterface;
+import com.zpf.tool.config.AppContext;
+import com.zpf.tool.config.DataDefault;
 import com.zpf.tool.config.GlobalConfigImpl;
 
 /**

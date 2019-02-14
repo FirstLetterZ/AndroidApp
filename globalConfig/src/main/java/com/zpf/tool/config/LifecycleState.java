@@ -1,4 +1,4 @@
-package com.zpf.api.constant;
+package com.zpf.tool.config;
 
 import android.support.annotation.IntDef;
 

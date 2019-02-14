@@ -26,7 +26,7 @@ import com.zpf.api.RootLayoutInterface;
 import com.zpf.api.SafeWindowInterface;
 import com.zpf.api.ViewContainerInterface;
 import com.zpf.api.ContainerProcessorInterface;
-import com.zpf.api.constant.LifecycleState;
+import com.zpf.tool.config.LifecycleState;
 
 import java.lang.reflect.Constructor;
 

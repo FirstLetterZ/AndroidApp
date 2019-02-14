@@ -10,7 +10,7 @@ import android.text.TextUtils;
 import android.view.View;
 
 import com.zpf.support.view.CommonDialog;
-import com.zpf.tool.AppContext;
+import com.zpf.tool.config.AppContext;
 import com.zpf.tool.expand.util.SpUtil;
 import com.zpf.tool.permission.PermissionChecker;
 import com.zpf.tool.PublicUtil;

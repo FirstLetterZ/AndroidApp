@@ -1,18 +1,16 @@
 package com.zpf.support.network.retrofit;
 
-import android.support.annotation.Nullable;
-
 import com.zpf.support.network.base.BaseCallBack;
-import com.zpf.tool.MainHandler;
 import com.zpf.api.CallBackManagerInterface;
 import com.zpf.api.SafeWindowInterface;
+import com.zpf.tool.config.MainHandler;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Created by ZPF on 2018/7/26.
+ * Created by ZPF on 2019/2/14.
  */
 public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Callback<T> {
     private Call call;
@@ -39,73 +37,57 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
             return;
         }
         removeObservable();
-        if (checkSuccessful(response)) {
+        if (response == null) {
+            onDataNull();
+        } else if (response.isSuccessful()) {
             final T result = response.body();
-            MainHandler.get().post(new Runnable() {
-                @Override
-                public void run() {
-                    if (isCancel()) {
+            if (checkNull(result)) {
+                onDataNull();
+            } else {
+                if (checkResultSuccess(result)) {
+                    try {
+                        preProcessResult(result);
+                    } catch (Exception e) {
+                        handleError(e);
                         return;
                     }
-                    if (checkNull(result)) {
-                        onDataNull();
-                    } else if (checkResult(result)) {
-                        try {
-                            handleResponse(result);
-                            complete(true);
-                        } catch (Exception e) {
-                            handleError(e);
+                    MainHandler.get().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (isCancel()) {
+                                return;
+                            }
+                            try {
+                                handleResponse(result);
+                                complete(true);
+                            } catch (Exception e) {
+                                handleError(e);
+                            }
                         }
-                    } else {
-                        onResultIllegal(result);
-                    }
+                    });
+                } else {
+                    MainHandler.get().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (isCancel()) {
+                                return;
+                            }
+                            onResultIllegal(result);
+                        }
+                    });
                 }
-            });
+            }
         } else {
-            MainHandler.get().post(new Runnable() {
-                @Override
-                public void run() {
-                    if (isCancel()) {
-                        return;
-                    }
-                    onUnsuccessful(response);
-                }
-            });
+            fail(response.code(), response.message());
         }
     }
 
     @Override
-    public void onFailure(Call<T> call, final Throwable t) {
+    public void onFailure(Call<T> call, Throwable t) {
         if (isCancel()) {
             return;
         }
-        MainHandler.get().post(new Runnable() {
-            @Override
-            public void run() {
-                if (isCancel()) {
-                    return;
-                }
-                handleError(t);
-            }
-        });
-    }
-
-    /**
-     * 检查是否为成功返回
-     */
-    protected boolean checkSuccessful(@Nullable Response<T> response) {
-        return response != null && response.isSuccessful();
-    }
-
-    /**
-     * 不是成功返回
-     */
-    protected void onUnsuccessful(@Nullable Response<T> response) {
-        if (response == null) {
-            onDataNull();
-        } else {
-            fail(response.code(), response.message());
-        }
+        handleError(t);
     }
 
     @Override
@@ -141,5 +123,5 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
         }
     }
 
-    protected abstract void handleResponse(T result);
+    protected abstract void handleResponse(T response);
 }

@@ -1,19 +1,18 @@
 package com.zpf.support.network.base;
 
 import android.accounts.AccountsException;
-import android.app.Dialog;
 import android.net.ParseException;
+import android.os.Looper;
 import android.support.annotation.IntRange;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.zpf.tool.ToastUtil;
 import com.zpf.api.CallBackInterface;
 import com.zpf.api.CallBackManagerInterface;
 import com.zpf.api.SafeWindowInterface;
 import com.zpf.support.network.model.CustomException;
 import com.zpf.support.network.model.HttpResult;
 import com.zpf.tool.config.GlobalConfigImpl;
+import com.zpf.tool.config.MainHandler;
 
 import org.json.JSONException;
 
@@ -40,15 +39,17 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
 
     private volatile boolean isCancel = false;
     protected CallBackManagerInterface manager;
-    protected SafeWindowInterface dialog;
+    protected SafeWindowInterface safeWindow;
     protected long bindId;
+    private ResponseHandleInterface responseHandler;
 
     public BaseCallBack() {
-        setType(0);
+        this(0);
     }
 
     public BaseCallBack(int type) {
         setType(type);
+        responseHandler = GlobalConfigImpl.get().getGlobalInstance(ResponseHandleInterface.class);
     }
 
     public void setType(@IntRange(from = 0, to = 16) int type) {
@@ -80,14 +81,14 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
     }
 
     @Override
-    public CallBackInterface bindToManager(CallBackManagerInterface manager, SafeWindowInterface dialog) {
+    public CallBackInterface bindToManager(CallBackManagerInterface manager, SafeWindowInterface safeWindow) {
         if (manager != null) {
             this.manager = manager;
             bindId = manager.addCallBack(this);
         }
-        if (dialog != null && dialog.isShowing()) {
-            this.dialog = dialog;
-            dialog.bindRequest(this);
+        if (safeWindow != null && safeWindow.isShowing()) {
+            this.safeWindow = safeWindow;
+            safeWindow.bindRequest(this);
         }
         return this;
     }
@@ -145,13 +146,16 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
             code = ErrorCode.IO_ERROR;
             description = "数据流异常，解析失败";
         } else {
-            Object result = GlobalConfigImpl.get().invokeMethod(this, "checkNetError", e);
-            if (result != null && result instanceof HttpResult) {
-                code = ((HttpResult) result).getCode();
-                description = ((HttpResult) result).getMessage();
-            } else {
+            HttpResult parseResult = null;
+            if (responseHandler != null) {
+                parseResult = responseHandler.parsingException(e);
+            }
+            if (parseResult == null) {
                 code = ErrorCode.NO_SERVER_CODE;
                 description = e.toString();
+            } else {
+                code = parseResult.getCode();
+                description = parseResult.getMessage();
             }
         }
         fail(code, description);
@@ -161,38 +165,30 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
      * @param code        错误码
      * @param description 错误描述
      */
-    protected void fail(int code, String description) {
-        Object result = GlobalConfigImpl.get().invokeMethod(this, "checkNetFail", code);
-        if (result != null && result instanceof Boolean) {
-            if ((boolean) result) {
-                complete(false);
-                return;
-            }
-        }
-        boolean showDialog = false;
-        if (code > -900) {
-            Dialog dialog = showDialog(code, description);
-            showDialog = dialog != null;
-            if (showDialog && !dialog.isShowing() && dialog.getWindow() != null) {
-                try {
-                    dialog.show();
-                } catch (Exception e) {
-                    e.printStackTrace();
+    protected void fail(final int code, final String description) {
+        if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
+            MainHandler.get().post(new Runnable() {
+                @Override
+                public void run() {
+                    if (!isCancel) {
+                        fail(code, description);
+                    }
                 }
-            }
+            });
+            return;
         }
-        if (!showDialog && autoToast()) {
+        if (responseHandler != null && responseHandler.interceptFailHandle(code)) {
+            complete(false);
+            return;
+        }
+        if (!showDialog(code, description) && responseHandler != null && autoToast()) {
             if (TextUtils.isEmpty(description)) {
-                description = "请求失败，请稍后重试";
+                responseHandler.showToast(code, "请求失败，请稍后重试");
+            } else {
+                responseHandler.showToast(code, description);
             }
-            ToastUtil.toast(description + "(" + code + ")");
         }
         complete(false);
-    }
-
-    //控制弹窗是否弹出
-    protected Dialog showDialog(int code, String description) {
-        return null;
     }
 
     protected void removeObservable() {
@@ -200,14 +196,14 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
             manager.removeCallBack(bindId);
             manager = null;
         }
-        if (dialog != null && dialog.isShowing()) {
-            dialog.bindRequest(null);
+        if (safeWindow != null && safeWindow.isShowing()) {
+            safeWindow.bindRequest(null);
             try {
-                dialog.dismiss();
+                safeWindow.dismiss();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            dialog = null;
+            safeWindow = null;
         }
     }
 
@@ -219,26 +215,40 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
             return false;
         } else if (value == null) {
             return true;
-        }  else if (value instanceof HttpResult) {
+        } else if (value instanceof HttpResult) {
             return ((HttpResult) value).getData() == null;
         } else {
-            Object result = GlobalConfigImpl.get().invokeMethod(this, "checkNetNull", value);
-            return result != null && result instanceof Boolean && (boolean) result;
+            return responseHandler != null && responseHandler.checkDataNull(value);
         }
     }
 
     /**
-     * 检查内容是否满足自定义的条件
+     * 控制弹窗是否弹出
      */
-    protected boolean checkResult(@Nullable T result) {
+    protected boolean showDialog(int code, String description) {
+        return false;
+    }
+
+    /**
+     * 运行在子线程
+     * 返回数据内容预处理
+     */
+    protected void preProcessResult(T result) {
+    }
+
+    /**
+     * 运行在子线程
+     * 返回数据内容是否满足成功条件
+     */
+    protected boolean checkResultSuccess(T result) {
         return true;
     }
 
     /**
-     * 如果不满足自定义的检查条件则执行下面的方法
+     * 运行在主线程
+     * 返回数据内容不满足成功条件的处理
      */
-    protected void onResultIllegal(@Nullable T result) {
-
+    protected void onResultIllegal(T result) {
     }
 
     /**

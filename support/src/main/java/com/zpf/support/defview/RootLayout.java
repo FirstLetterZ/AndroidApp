@@ -14,10 +14,10 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import com.zpf.tool.AppContext;
 import com.zpf.tool.ViewUtil;
 import com.zpf.api.RootLayoutInterface;
 import com.zpf.api.TitleBarInterface;
+import com.zpf.tool.config.AppContext;
 import com.zpf.tool.config.GlobalConfigInterface;
 
 /**

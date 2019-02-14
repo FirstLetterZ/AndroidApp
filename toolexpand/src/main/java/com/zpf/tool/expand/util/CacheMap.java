@@ -6,8 +6,8 @@ import android.util.SparseArray;
 
 import com.zpf.api.StorageManagerInterface;
 import com.zpf.api.dataparser.JsonParserInterface;
-import com.zpf.tool.DataDefault;
 import com.zpf.api.StorageQueueInterface;
+import com.zpf.tool.config.DataDefault;
 import com.zpf.tool.config.GlobalConfigImpl;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.zpf.tool;
+package com.zpf.tool.config;
 
 /**
  * Created by ZPF on 2018/7/26.
