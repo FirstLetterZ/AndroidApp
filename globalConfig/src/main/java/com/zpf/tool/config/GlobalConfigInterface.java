@@ -1,7 +1,6 @@
 package com.zpf.tool.config;
 
-
-import android.app.Application;
+import java.util.UUID;
 
 /**
  * 用于全局执行，需要在应用刚启动时完成初始化
@@ -9,7 +8,7 @@ import android.app.Application;
  */
 public interface GlobalConfigInterface {
 
-    boolean isDebug();
+    UUID getId();
 
     /**
      * @param object 需要处理的对象
