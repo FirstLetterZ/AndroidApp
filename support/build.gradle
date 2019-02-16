@@ -21,4 +21,5 @@ dependencies {
     api rootProject.ext.dependencies.permission
     api rootProject.ext.dependencies.toolExpand
 }
+
 apply from: "../bintrayUpload.gradle"
