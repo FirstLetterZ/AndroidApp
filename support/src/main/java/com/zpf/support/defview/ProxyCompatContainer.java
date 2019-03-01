@@ -13,28 +13,28 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.zpf.support.constant.AppConst;
+import com.zpf.api.ICallback;
+import com.zpf.api.ICustomWindow;
+import com.zpf.api.IManager;
+import com.zpf.api.LifecycleListener;
+import com.zpf.frame.ILoadingManager;
+import com.zpf.frame.IViewProcessor;
+import com.zpf.frame.ResultCallBackListener;
 import com.zpf.support.util.ContainerListenerController;
-import com.zpf.api.CallBackManagerInterface;
-import com.zpf.api.LifecycleInterface;
 import com.zpf.api.OnDestroyListener;
-import com.zpf.api.ResultCallBackListener;
-import com.zpf.api.RootLayoutInterface;
-import com.zpf.api.SafeWindowInterface;
-import com.zpf.api.TitleBarInterface;
-import com.zpf.api.ViewContainerInterface;
+import com.zpf.frame.IViewContainer;
 import com.zpf.support.util.LifecycleLogUtil;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.LifecycleState;
 
 /**
- * 将普通的activity或fragment打造成ViewContainerInterface
+ * 将普通的activity或fragment打造成IViewContainer
  * Created by ZPF on 2018/6/28.
  */
-public class ProxyCompatContainer extends Fragment implements ViewContainerInterface {
+public class ProxyCompatContainer extends Fragment implements IViewContainer {
     private FragmentActivity activity;
     private Fragment fragment;
-    private ProgressDialog loadingDialog;
+    private ILoadingManager loadingDialog;
     private boolean isVisible;
     private final ContainerListenerController mController = new ContainerListenerController();
 
@@ -104,16 +104,6 @@ public class ProxyCompatContainer extends Fragment implements ViewContainerInter
     }
 
     @Override
-    public RootLayoutInterface getRootLayout() {
-        return null;
-    }
-
-    @Override
-    public TitleBarInterface getTitleBar() {
-        return null;
-    }
-
-    @Override
     public void startActivity(Intent intent) {
         if (activity != null) {
             activity.startActivity(intent);
@@ -169,26 +159,17 @@ public class ProxyCompatContainer extends Fragment implements ViewContainerInter
     }
 
     @Override
-    public void show(SafeWindowInterface window) {
+    public void show(ICustomWindow window) {
         mController.show(window);
     }
 
     @Override
     public boolean dismiss() {
-        if (loadingDialog != null && loadingDialog.isShowing()) {
-            try {
-                loadingDialog.dismiss();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return true;
-        } else {
-            return mController.dismiss();
-        }
+        return loadingDialog != null && loadingDialog.hideLoading() || mController.dismiss();
     }
 
     @Override
-    public CallBackManagerInterface getCallBackManager() {
+    public IManager<ICallback> getCallBackManager() {
         return mController.getCallBackManager();
     }
 
@@ -213,12 +194,12 @@ public class ProxyCompatContainer extends Fragment implements ViewContainerInter
     }
 
     @Override
-    public void addLifecycleListener(LifecycleInterface lifecycleListener) {
+    public void addLifecycleListener(LifecycleListener lifecycleListener) {
         mController.addLifecycleListener(lifecycleListener);
     }
 
     @Override
-    public void removeLifecycleListener(LifecycleInterface lifecycleListener) {
+    public void removeLifecycleListener(LifecycleListener lifecycleListener) {
         mController.removeLifecycleListener(lifecycleListener);
     }
 
@@ -243,52 +224,36 @@ public class ProxyCompatContainer extends Fragment implements ViewContainerInter
     }
 
     @Override
-    public ProgressDialog getProgressDialog() {
-        if (loadingDialog == null && getState() < LifecycleState.AFTER_DESTROY && getActivity() != null) {
-            if (activity != null) {
-                loadingDialog = new ProgressDialog(activity);
-            } else if (fragment != null && fragment.getActivity() != null) {
-                loadingDialog = new ProgressDialog(fragment.getActivity());
-            }
+    public boolean hideLoading() {
+        FragmentActivity activity = getActivity();
+        if (activity != null && activity instanceof IViewContainer) {
+            return ((IViewContainer) activity).hideLoading();
         }
-        return loadingDialog;
+        return loadingDialog != null && loadingDialog.hideLoading() || mController.dismiss();
     }
 
     @Override
-    public boolean hideLoading() {
-        FragmentActivity activity = getActivity();
-        if (activity != null && activity instanceof ViewContainerInterface) {
-            return ((ViewContainerInterface) activity).hideLoading();
-        } else if (loadingDialog != null && loadingDialog.isShowing()) {
-            try {
-                loadingDialog.dismiss();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return true;
-        } else {
-            return false;
-        }
+    public View getLoadingView() {
+        return null;
     }
 
     @Override
     public void showLoading() {
-        showLoading(AppConst.PROGRESS_WAITTING);
+        showLoading(null);
     }
 
     @Override
     public void showLoading(String message) {
         FragmentActivity activity = getActivity();
         if (activity != null) {
-            if (activity instanceof ViewContainerInterface) {
-                ((ViewContainerInterface) activity).showLoading(message);
+            if (activity instanceof IViewContainer) {
+                ((IViewContainer) activity).showLoading(message);
             } else if (isLiving()) {
-                if (loadingDialog == null) {
-                    loadingDialog = getProgressDialog();
+                if (loadingDialog != null) {
+                    loadingDialog = createLoadingManager();
                 }
-                if (loadingDialog != null && !loadingDialog.isShowing()) {
-                    loadingDialog.setText(message);
-                    loadingDialog.show();
+                if (loadingDialog != null) {
+                    loadingDialog.showLoading(message);
                 }
             }
         }
@@ -398,6 +363,21 @@ public class ProxyCompatContainer extends Fragment implements ViewContainerInter
     @Override
     public void checkPermissions(Runnable onPermission, Runnable onLock, int requestCode, String... permissions) {
         mController.getSupportFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
+    }
+
+    @Override
+    public void navigate(Class<? extends IViewProcessor> cls) {
+
+    }
+
+    @Override
+    public void navigate(Class<? extends IViewProcessor> cls, Bundle params) {
+
+    }
+
+    @Override
+    public void navigate(Class<? extends IViewProcessor> cls, Bundle params, int requestCode) {
+
     }
 
     @Override

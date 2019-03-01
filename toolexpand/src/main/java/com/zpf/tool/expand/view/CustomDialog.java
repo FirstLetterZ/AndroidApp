@@ -12,21 +12,21 @@ import com.zpf.api.IManager;
 /**
  * Created by ZPF on 2018/3/22.
  */
-public class SafeDialog extends Dialog implements ICustomWindow {
+public class CustomDialog extends Dialog implements ICustomWindow {
     protected IManager<ICustomWindow> listener;
     protected long bindId = -1;
 
-    public SafeDialog(@NonNull Context context) {
+    public CustomDialog(@NonNull Context context) {
         super(context);
         init();
     }
 
-    public SafeDialog(@NonNull Context context, int themeResId) {
+    public CustomDialog(@NonNull Context context, int themeResId) {
         super(context, themeResId);
         init();
     }
 
-    protected SafeDialog(@NonNull Context context, boolean cancelable, @Nullable OnCancelListener cancelListener) {
+    protected CustomDialog(@NonNull Context context, boolean cancelable, @Nullable OnCancelListener cancelListener) {
         super(context, cancelable, cancelListener);
         init();
     }
@@ -68,7 +68,7 @@ public class SafeDialog extends Dialog implements ICustomWindow {
     }
 
     @Override
-    public SafeDialog toBind(IManager<ICustomWindow> manager) {
+    public CustomDialog toBind(IManager<ICustomWindow> manager) {
         bindId = manager.bind(this);
         return this;
     }

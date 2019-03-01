@@ -5,7 +5,7 @@ import android.support.v4.app.FragmentActivity;
 
 import com.zpf.support.defview.ProxyCompatContainer;
 import com.zpf.support.defview.ProxyContainer;
-import com.zpf.api.ViewContainerInterface;
+import com.zpf.frame.IViewContainer;
 
 /**
  * Created by ZPF on 2018/7/25.
@@ -14,7 +14,7 @@ import com.zpf.api.ViewContainerInterface;
 public class ContainerProxyManager {
     private static final String TAG = "Proxy_";
 
-    public static ViewContainerInterface create(Activity activity) {
+    public static IViewContainer create(Activity activity) {
         if (activity instanceof FragmentActivity) {
             ProxyCompatContainer proxyViewContainer;
             android.support.v4.app.FragmentManager manager = ((FragmentActivity) activity).getSupportFragmentManager();
@@ -52,7 +52,7 @@ public class ContainerProxyManager {
         }
     }
 
-    public static ViewContainerInterface create(android.app.Fragment fragment) {
+    public static IViewContainer create(android.app.Fragment fragment) {
         ProxyContainer proxyViewContainer;
         android.app.FragmentManager manager = fragment.getChildFragmentManager();
         android.app.FragmentTransaction transaction = manager.beginTransaction();
@@ -71,7 +71,7 @@ public class ContainerProxyManager {
         return proxyViewContainer;
     }
 
-    public static ViewContainerInterface create(android.support.v4.app.Fragment fragment) {
+    public static IViewContainer create(android.support.v4.app.Fragment fragment) {
         ProxyCompatContainer proxyViewContainer;
         android.support.v4.app.FragmentManager manager = fragment.getChildFragmentManager();
         android.support.v4.app.FragmentTransaction transaction = manager.beginTransaction();

@@ -5,6 +5,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.zpf.api.ICustomWindow;
+import com.zpf.api.LifecycleListener;
+import com.zpf.frame.ILifecycleMonitor;
+import com.zpf.frame.ResultCallBackListener;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.expand.util.CallBackManager;
 import com.zpf.tool.expand.util.DialogController;
@@ -13,11 +17,7 @@ import com.zpf.tool.permission.ActivityPermissionChecker;
 import com.zpf.tool.permission.CompatFragmentPermissionChecker;
 import com.zpf.tool.permission.FragmentPermissionChecker;
 import com.zpf.tool.permission.PermissionChecker;
-import com.zpf.api.LifecycleInterface;
-import com.zpf.api.LifecycleListenerController;
 import com.zpf.api.OnDestroyListener;
-import com.zpf.api.ResultCallBackListener;
-import com.zpf.api.SafeWindowInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +25,9 @@ import java.util.List;
 /**
  * Created by ZPF on 2018/6/28.
  */
-public class ContainerListenerController implements LifecycleListenerController, LifecycleInterface, ResultCallBackListener {
+public class ContainerListenerController implements ILifecycleMonitor, LifecycleListener, ResultCallBackListener {
     private final List<OnDestroyListener> mDestroyListenerList = new ArrayList<>();
-    private final List<LifecycleInterface> mLifecycleList = new ArrayList<>();
+    private final List<LifecycleListener> mLifecycleList = new ArrayList<>();
     private final List<ResultCallBackListener> mCallBackList = new ArrayList<>();
     private final DialogController mDialogController = new DialogController();
     private final CallBackManager mCallBackManager = new CallBackManager();
@@ -70,70 +70,70 @@ public class ContainerListenerController implements LifecycleListenerController,
         mLifecycleList.add(mStateListener);
         mDestroyListenerList.add(mCallBackManager);
         mDestroyListenerList.add(mDialogController);
-        for (LifecycleInterface lifecycle : mLifecycleList) {
+        for (LifecycleListener lifecycle : mLifecycleList) {
             lifecycle.onPreCreate(savedInstanceState);
         }
     }
 
     @Override
     public void afterCreate(@Nullable Bundle savedInstanceState) {
-        for (LifecycleInterface lifecycle : mLifecycleList) {
+        for (LifecycleListener lifecycle : mLifecycleList) {
             lifecycle.afterCreate(savedInstanceState);
         }
     }
 
     @Override
     public void onRestart() {
-        for (LifecycleInterface lifecycle : mLifecycleList) {
+        for (LifecycleListener lifecycle : mLifecycleList) {
             lifecycle.onRestart();
         }
     }
 
     @Override
     public void onStart() {
-        for (LifecycleInterface lifecycle : mLifecycleList) {
+        for (LifecycleListener lifecycle : mLifecycleList) {
             lifecycle.onStart();
         }
     }
 
     @Override
     public void onResume() {
-        for (LifecycleInterface lifecycle : mLifecycleList) {
+        for (LifecycleListener lifecycle : mLifecycleList) {
             lifecycle.onResume();
         }
     }
 
     @Override
     public void onPause() {
-        for (LifecycleInterface lifecycle : mLifecycleList) {
+        for (LifecycleListener lifecycle : mLifecycleList) {
             lifecycle.onPause();
         }
     }
 
     @Override
     public void onStop() {
-        for (LifecycleInterface lifecycle : mLifecycleList) {
+        for (LifecycleListener lifecycle : mLifecycleList) {
             lifecycle.onStop();
         }
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        for (LifecycleInterface lifecycle : mLifecycleList) {
+        for (LifecycleListener lifecycle : mLifecycleList) {
             lifecycle.onSaveInstanceState(outState);
         }
     }
 
     @Override
     public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        for (LifecycleInterface lifecycle : mLifecycleList) {
+        for (LifecycleListener lifecycle : mLifecycleList) {
             lifecycle.onRestoreInstanceState(savedInstanceState);
         }
     }
 
     @Override
     public void onDestroy() {
-        for (LifecycleInterface lifecycle : mLifecycleList) {
+        for (LifecycleListener lifecycle : mLifecycleList) {
             lifecycle.onDestroy();
         }
         for (OnDestroyListener listener : mDestroyListenerList) {
@@ -166,13 +166,14 @@ public class ContainerListenerController implements LifecycleListenerController,
     }
 
     @Override
-    public void show(SafeWindowInterface window) {
-        mDialogController.show(window);
+    public void show(ICustomWindow window) {
+            mDialogController.show(window);
     }
+
 
     @Override
     public boolean dismiss() {
-        return mDialogController.dismiss();
+        return mDialogController.execute(-1);
     }
 
     @Override
@@ -181,14 +182,14 @@ public class ContainerListenerController implements LifecycleListenerController,
     }
 
     @Override
-    public void addLifecycleListener(LifecycleInterface lifecycleListener) {
+    public void addLifecycleListener(LifecycleListener lifecycleListener) {
         if (mLifecycleList.size() == 0 || !mLifecycleList.contains(lifecycleListener)) {
             mLifecycleList.add(lifecycleListener);
         }
     }
 
     @Override
-    public void removeLifecycleListener(LifecycleInterface lifecycleListener) {
+    public void removeLifecycleListener(LifecycleListener lifecycleListener) {
         mLifecycleList.remove(lifecycleListener);
     }
 

@@ -9,15 +9,15 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
+import com.zpf.support.defview.RootLayout;
+import com.zpf.support.defview.TitleBar;
+import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.PermissionUtil;
 import com.zpf.tool.SafeClickListener;
-import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.permission.OnLockPermissionRunnable;
 import com.zpf.tool.permission.PermissionInfo;
-import com.zpf.api.ContainerProcessorInterface;
-import com.zpf.api.TitleBarInterface;
-import com.zpf.api.ViewContainerInterface;
-import com.zpf.support.util.LifecycleLogUtil;
+import com.zpf.frame.IViewProcessor;
+import com.zpf.frame.IViewContainer;
 
 import java.util.List;
 
@@ -25,22 +25,21 @@ import java.util.List;
  * 视图处理
  * Created by ZPF on 2018/6/14.
  */
-public abstract class ContainerProcessor implements ContainerProcessorInterface {
-    protected ViewContainerInterface mContainer;
-    protected TitleBarInterface mTitleBar;
+public abstract class ViewProcessor implements IViewProcessor {
+    protected final IViewContainer mContainer;
+    protected final TitleBar mTitleBar;
+    protected final RootLayout mRootLayout;
     protected final SafeClickListener safeClickListener = new SafeClickListener() {
         @Override
         public void click(View v) {
-            ContainerProcessor.this.onClick(v);
+            ViewProcessor.this.onClick(v);
         }
     };
 
-    public ContainerProcessor(ViewContainerInterface container) {
-        this.mContainer = container;
-        this.mTitleBar = container.getRootLayout().getTitleBar();
-        if (GlobalConfigImpl.get().isDebug()) {
-            new LifecycleLogUtil(container);
-        }
+    public ViewProcessor() {
+        this.mContainer = ContainerController.mInitingViewContainer;
+        mTitleBar = new TitleBar(mContainer.getContext());
+        mRootLayout = new RootLayout(mTitleBar);
     }
 
     @Override
@@ -133,22 +132,15 @@ public abstract class ContainerProcessor implements ContainerProcessorInterface 
 
     @Override
     public <T extends View> T bind(@IdRes int viewId, View.OnClickListener clickListener) {
-        T result = null;
-        if (mContainer != null) {
-            result = mContainer.getRootLayout().getLayout().findViewById(viewId);
-            if (result != null) {
-                result.setOnClickListener(clickListener);
-            }
+        T result = mRootLayout.getLayout().findViewById(viewId);
+        if (result != null) {
+            result.setOnClickListener(clickListener);
         }
         return result;
     }
 
     public <T extends View> T $(int viewId) {
-        if (mContainer != null) {
-            return mContainer.getRootLayout().getLayout().findViewById(viewId);
-        } else {
-            return null;
-        }
+        return mRootLayout.getLayout().findViewById(viewId);
     }
 
     public void setText(int viewId, CharSequence content) {

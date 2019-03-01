@@ -16,20 +16,17 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.zpf.api.ICallback;
+import com.zpf.api.ICustomWindow;
+import com.zpf.api.IManager;
+import com.zpf.api.LifecycleListener;
+import com.zpf.frame.ILoadingManager;
+import com.zpf.frame.IViewProcessor;
+import com.zpf.frame.ResultCallBackListener;
 import com.zpf.support.constant.AppConst;
-import com.zpf.support.defview.ProgressDialog;
-import com.zpf.support.defview.RootLayout;
 import com.zpf.support.util.ContainerListenerController;
-import com.zpf.tool.PublicUtil;
-import com.zpf.api.TitleBarInterface;
-import com.zpf.api.CallBackManagerInterface;
-import com.zpf.api.LifecycleInterface;
 import com.zpf.api.OnDestroyListener;
-import com.zpf.api.ResultCallBackListener;
-import com.zpf.api.RootLayoutInterface;
-import com.zpf.api.SafeWindowInterface;
-import com.zpf.api.ViewContainerInterface;
-import com.zpf.api.ContainerProcessorInterface;
+import com.zpf.frame.IViewContainer;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.MainHandler;
 
@@ -39,11 +36,9 @@ import java.lang.reflect.Constructor;
  * 基于AppCompatActivity的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public abstract class CompatActivityContainer<T extends ContainerProcessorInterface> extends AppCompatActivity implements ViewContainerInterface {
-    protected T mView;
-    private RootLayoutInterface mRootLayout;
+public abstract class CompatActivityContainer extends AppCompatActivity implements IViewContainer {
     private final ContainerListenerController mController = new ContainerListenerController();
-    private ProgressDialog loadingDialog;
+    private ILoadingManager loadingDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,18 +53,18 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
             }
         }
         initWindow();
-        mRootLayout = createRootLayout();
-        View layoutView = getLayoutView();
-        if (layoutView == null) {
-            mRootLayout.setContentView(getLayoutInflater(), getLayoutId());
-        } else {
-            mRootLayout.setContentView(layoutView);
+        Class targetViewClass = null;
+        IViewProcessor viewProcessor = null;
+        try {
+            targetViewClass = (Class) intent.getSerializableExtra(AppConst.TARGET_VIEW_CLASS);
+            Constructor<IViewProcessor> constructor = targetViewClass.getConstructor();
+            viewProcessor = constructor.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        setContentView(mRootLayout.getLayout());
-        mView = createProcessor();
-        if (mView != null) {
-            mController.addLifecycleListener(mView);
-            mController.addResultCallBackListener(mView);
+        if (viewProcessor != null) {
+            mController.addLifecycleListener(viewProcessor);
+            mController.addResultCallBackListener(viewProcessor);
         }
         mController.onPreCreate(savedInstanceState);
         initView(savedInstanceState);
@@ -182,20 +177,6 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
     }
 
     @Override
-    public RootLayoutInterface getRootLayout() {
-        return mRootLayout;
-    }
-
-    @Override
-    public TitleBarInterface getTitleBar() {
-        if (mRootLayout != null) {
-            return mRootLayout.getTitleBar();
-        } else {
-            return null;
-        }
-    }
-
-    @Override
     public void startActivity(Intent intent) {
         super.startActivity(intent);
     }
@@ -227,7 +208,7 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
     }
 
     @Override
-    public void show(final SafeWindowInterface window) {
+    public void show(final ICustomWindow window) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             mController.show(window);
         } else {
@@ -242,20 +223,11 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
 
     @Override
     public boolean dismiss() {
-        if (loadingDialog != null && loadingDialog.isShowing()) {
-            try {
-                loadingDialog.dismiss();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return true;
-        } else {
-            return mController.dismiss();
-        }
+        return loadingDialog != null && loadingDialog.hideLoading() || mController.dismiss();
     }
 
     @Override
-    public CallBackManagerInterface getCallBackManager() {
+    public IManager<ICallback> getCallBackManager() {
         return mController.getCallBackManager();
     }
 
@@ -271,12 +243,12 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
     }
 
     @Override
-    public void addLifecycleListener(LifecycleInterface lifecycleListener) {
+    public void addLifecycleListener(LifecycleListener lifecycleListener) {
         mController.addLifecycleListener(lifecycleListener);
     }
 
     @Override
-    public void removeLifecycleListener(LifecycleInterface lifecycleListener) {
+    public void removeLifecycleListener(LifecycleListener lifecycleListener) {
         mController.removeLifecycleListener(lifecycleListener);
     }
 
@@ -302,40 +274,22 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
 
     @Override
     public boolean hideLoading() {
-        if (loadingDialog != null && loadingDialog.isShowing()) {
-            try {
-                loadingDialog.dismiss();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public ProgressDialog getProgressDialog() {
-        if (loadingDialog == null && getState() < LifecycleState.AFTER_DESTROY) {
-            loadingDialog = new ProgressDialog(this);
-        }
-        return loadingDialog;
+        return loadingDialog != null && loadingDialog.hideLoading();
     }
 
     @Override
     public void showLoading() {
-        showLoading(AppConst.PROGRESS_WAITTING);
+        showLoading(null);
     }
 
     @Override
     public void showLoading(String message) {
         if (isLiving()) {
             if (loadingDialog != null) {
-                loadingDialog = getProgressDialog();
+                loadingDialog = createLoadingManager();
             }
-            if (loadingDialog != null && !loadingDialog.isShowing()) {
-                loadingDialog.setText(message);
-                loadingDialog.show();
+            if (loadingDialog != null) {
+                loadingDialog.showLoading(message);
             }
         }
     }
@@ -371,24 +325,6 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
         setStatusBarTranslucent();
     }
 
-    protected RootLayoutInterface createRootLayout() {
-        return new RootLayout(getContext());
-    }
-
-    protected T createProcessor() {
-        Class<T> cls = PublicUtil.getGenericClass(getClass());
-        if (cls != null) {
-            try {
-                Class[] pType = new Class[]{ViewContainerInterface.class};
-                Constructor<T> constructor = cls.getConstructor(pType);
-                return constructor.newInstance(this);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
-    }
-
     protected void setStatusBarTranslucent() {
         Window window = getWindow();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {//判断版本是5.0以上
@@ -402,11 +338,7 @@ public abstract class CompatActivityContainer<T extends ContainerProcessorInterf
         }
     }
 
-    public View getLayoutView() {
-        return null;
-    }
-
-    public abstract int getLayoutId();
-
     public abstract void initView(@Nullable Bundle savedInstanceState);
+
+    public abstract ILoadingManager createLoadingManager();
 }

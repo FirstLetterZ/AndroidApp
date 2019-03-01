@@ -14,9 +14,9 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import com.zpf.frame.IRootLayout;
+import com.zpf.frame.ITitleBar;
 import com.zpf.tool.ViewUtil;
-import com.zpf.api.RootLayoutInterface;
-import com.zpf.api.TitleBarInterface;
 import com.zpf.tool.config.AppContext;
 import com.zpf.tool.config.GlobalConfigInterface;
 
@@ -24,13 +24,13 @@ import com.zpf.tool.config.GlobalConfigInterface;
  * 带标题栏的默认布局
  * Created by ZPF on 2018/6/14.
  */
-public class RootLayout extends LinearLayout implements RootLayoutInterface {
+public class RootLayout extends LinearLayout implements IRootLayout {
     private StatusBar statusBar;
-    private TitleBarInterface titleBarLayout;
+    private ITitleBar titleBarLayout;
     private FrameLayout contentLayout;
     private boolean hasAddChildren;
 
-    public RootLayout(TitleBarInterface titleBarView) {
+    public RootLayout(ITitleBar titleBarView) {
         this(titleBarView.getLayout().getContext(), null, 0);
         this.titleBarLayout = titleBarView;
     }
@@ -82,7 +82,7 @@ public class RootLayout extends LinearLayout implements RootLayoutInterface {
     }
 
     @Override
-    public void setTitleBar(@NonNull TitleBarInterface titleBar) {
+    public void setTitleBar(@NonNull ITitleBar titleBar) {
         this.titleBarLayout = titleBar;
         if (hasAddChildren) {
             removeViewAt(1);
@@ -91,7 +91,7 @@ public class RootLayout extends LinearLayout implements RootLayoutInterface {
     }
 
     @Override
-    public TitleBarInterface getTitleBar() {
+    public ITitleBar getTitleBar() {
         return titleBarLayout;
     }
 

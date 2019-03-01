@@ -11,14 +11,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.zpf.tool.expand.view.SafeDialog;
+import com.zpf.tool.expand.view.CustomDialog;
 import com.zpf.support.R;
 
 /**
  * @author ZPF
  * 2018/07/10.
  */
-public class CommonDialog extends SafeDialog {
+public class CommonDialog extends CustomDialog {
     private ImageView ivIcon;
     private TextView tvMessage;
     private TextView tvCancel;

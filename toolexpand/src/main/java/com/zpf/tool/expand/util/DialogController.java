@@ -23,15 +23,19 @@ public class DialogController implements IManager<ICustomWindow>, OnDestroyListe
             return 0;
         }
         long id = -1;
-        for (Pair<Long, ICustomWindow> cache : cacheList) {
-            if (cache.second == safeWindow) {
-                id = cache.first;
-                break;
+        if (showingWindow == safeWindow) {
+            id = showingWindowId;
+        }else {
+            for (Pair<Long, ICustomWindow> cache : cacheList) {
+                if (cache.second == safeWindow) {
+                    id = cache.first;
+                    break;
+                }
             }
-        }
-        if (id < 0) {
-            id = System.currentTimeMillis();
-            cacheList.add(new Pair<Long, ICustomWindow>(id, safeWindow));
+            if (id < 0) {
+                id = System.currentTimeMillis();
+                cacheList.add(new Pair<Long, ICustomWindow>(id, safeWindow));
+            }
         }
         show(safeWindow);
         return id;
@@ -94,7 +98,7 @@ public class DialogController implements IManager<ICustomWindow>, OnDestroyListe
         return (showingWindow != null && showingWindow.isShowing());
     }
 
-    private void show(ICustomWindow window) {
+    public void show(ICustomWindow window) {
         if (isDestroy || window == null || checkShowing()) {
             return;
         }

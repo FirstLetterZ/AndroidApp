@@ -11,15 +11,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.zpf.api.CallBackManagerInterface;
-import com.zpf.api.ContainerProcessorInterface;
-import com.zpf.api.LifecycleInterface;
+import com.zpf.api.ICallback;
+import com.zpf.api.ICustomWindow;
+import com.zpf.api.IManager;
+import com.zpf.frame.ILoadingManager;
+import com.zpf.frame.IViewProcessor;
+import com.zpf.api.LifecycleListener;
 import com.zpf.api.OnDestroyListener;
-import com.zpf.api.ResultCallBackListener;
-import com.zpf.api.RootLayoutInterface;
-import com.zpf.api.SafeWindowInterface;
-import com.zpf.api.TitleBarInterface;
-import com.zpf.api.ViewContainerInterface;
+import com.zpf.frame.IViewContainer;
+import com.zpf.frame.ResultCallBackListener;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.defview.ProgressDialog;
 import com.zpf.support.util.ContainerListenerController;
@@ -27,42 +27,43 @@ import com.zpf.support.defview.RootLayout;
 import com.zpf.tool.PublicUtil;
 import com.zpf.tool.config.LifecycleState;
 
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 
 /**
  * 基于android.app.Fragment的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public abstract class FragmentContainer<T extends ContainerProcessorInterface> extends Fragment implements ViewContainerInterface {
-    protected T mView;
-    private RootLayoutInterface mRootLayout;
+public abstract class FragmentContainer<T extends IViewProcessor> extends Fragment implements IViewContainer {
     private boolean isVisible;
-    private ProgressDialog loadingDialog;
+    private View mView;
+    private ILoadingManager loadingDialog;
     private final ContainerListenerController mController = new ContainerListenerController();
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        if (mRootLayout == null) {
-            mRootLayout = createRootLayout();
-            View layoutView = getLayoutView();
-            if (layoutView == null) {
-                mRootLayout.setContentView(inflater, getLayoutId());
-            } else {
-                mRootLayout.setContentView(layoutView);
-            }
-        }
         if (mView == null) {
-            mView = createProcessor();
-        }
-        if (mView != null) {
-            mController.addLifecycleListener(mView);
-            mController.addResultCallBackListener(mView);
+            Class<? extends IViewProcessor> targetViewClass = null;
+            IViewProcessor viewProcessor = null;
+            try {
+                Serializable serializable = getArguments().getSerializable(AppConst.TARGET_VIEW_CLASS);
+                targetViewClass = (Class<? extends IViewProcessor>) serializable;
+                Constructor<? extends IViewProcessor> constructor = targetViewClass.getConstructor();
+                viewProcessor = constructor.newInstance();
+                mView = viewProcessor.getRootLayout().getLayout();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (viewProcessor != null) {
+                mController.addLifecycleListener(viewProcessor);
+                mController.addResultCallBackListener(viewProcessor);
+            }
         }
         mController.onPreCreate(savedInstanceState);
         initView(savedInstanceState);
         mController.afterCreate(savedInstanceState);
-        return mRootLayout.getLayout();
+        return mView;
     }
 
     @Override
@@ -183,20 +184,6 @@ public abstract class FragmentContainer<T extends ContainerProcessorInterface> e
     }
 
     @Override
-    public RootLayoutInterface getRootLayout() {
-        return mRootLayout;
-    }
-
-    @Override
-    public TitleBarInterface getTitleBar() {
-        if (mRootLayout != null) {
-            return mRootLayout.getTitleBar();
-        } else {
-            return null;
-        }
-    }
-
-    @Override
     public void startActivity(Intent intent) {
         super.startActivity(intent);
     }
@@ -229,26 +216,17 @@ public abstract class FragmentContainer<T extends ContainerProcessorInterface> e
     }
 
     @Override
-    public void show(SafeWindowInterface window) {
+    public void show(ICustomWindow window) {
         mController.show(window);
     }
 
     @Override
     public boolean dismiss() {
-        if (loadingDialog != null && loadingDialog.isShowing()) {
-            try {
-                loadingDialog.dismiss();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return true;
-        } else {
-            return mController.dismiss();
-        }
+        return loadingDialog != null && loadingDialog.hideLoading() || mController.dismiss();
     }
 
     @Override
-    public CallBackManagerInterface getCallBackManager() {
+    public IManager<ICallback> getCallBackManager() {
         return mController.getCallBackManager();
     }
 
@@ -268,12 +246,12 @@ public abstract class FragmentContainer<T extends ContainerProcessorInterface> e
     }
 
     @Override
-    public void addLifecycleListener(LifecycleInterface lifecycleListener) {
+    public void addLifecycleListener(LifecycleListener lifecycleListener) {
         mController.addLifecycleListener(lifecycleListener);
     }
 
     @Override
-    public void removeLifecycleListener(LifecycleInterface lifecycleListener) {
+    public void removeLifecycleListener(LifecycleListener lifecycleListener) {
         mController.removeLifecycleListener(lifecycleListener);
     }
 
@@ -300,46 +278,29 @@ public abstract class FragmentContainer<T extends ContainerProcessorInterface> e
     @Override
     public boolean hideLoading() {
         Activity activity = getActivity();
-        if (activity != null && activity instanceof ViewContainerInterface) {
-            return ((ViewContainerInterface) activity).hideLoading();
-        } else if (loadingDialog != null && loadingDialog.isShowing()) {
-            try {
-                loadingDialog.dismiss();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return true;
-        } else {
-            return false;
+        if (activity != null && activity instanceof IViewContainer) {
+            return ((IViewContainer) activity).hideLoading();
         }
-    }
-
-    @Override
-    public ProgressDialog getProgressDialog() {
-        if (loadingDialog == null && getState() < LifecycleState.AFTER_DESTROY && getActivity() != null) {
-            loadingDialog = new ProgressDialog(getActivity());
-        }
-        return loadingDialog;
+        return loadingDialog != null && loadingDialog.hideLoading() || mController.dismiss();
     }
 
     @Override
     public void showLoading() {
-        showLoading(AppConst.PROGRESS_WAITTING);
+        showLoading(null);
     }
 
     @Override
     public void showLoading(String message) {
         Activity activity = getActivity();
         if (activity != null) {
-            if (activity instanceof ViewContainerInterface) {
-                ((ViewContainerInterface) activity).showLoading(message);
+            if (activity instanceof IViewContainer) {
+                ((IViewContainer) activity).showLoading(message);
             } else if (isLiving()) {
-                if (loadingDialog == null) {
-                    loadingDialog = getProgressDialog();
+                if (loadingDialog != null) {
+                    loadingDialog = createLoadingManager();
                 }
-                if (loadingDialog != null && !loadingDialog.isShowing()) {
-                    loadingDialog.setText(message);
-                    loadingDialog.show();
+                if (loadingDialog != null) {
+                    loadingDialog.showLoading(message);
                 }
             }
         }
@@ -370,35 +331,6 @@ public abstract class FragmentContainer<T extends ContainerProcessorInterface> e
         return null;
     }
 
-    protected RootLayoutInterface createRootLayout() {
-        RootLayout rootLayout = new RootLayout(getContext());
-        rootLayout.getStatusBar().setVisibility(View.GONE);
-        rootLayout.getTitleBar().getLayout().setVisibility(View.GONE);
-        return rootLayout;
-    }
-
-    protected T createProcessor() {
-        Class<T> cls = PublicUtil.getGenericClass(getClass());
-        if (cls != null) {
-            try {
-                Class[] pType = new Class[]{ViewContainerInterface.class};
-                Constructor<T> constructor = cls.getConstructor(pType);
-                return constructor.newInstance(this);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
-    }
-
-    public View getLayoutView() {
-        return null;
-    }
-
-    public abstract int getLayoutId();
-
-    public abstract void initView(@Nullable Bundle savedInstanceState);
-
     private void checkVisibleChange() {
         boolean newVisible = getState() == LifecycleState.AFTER_RESUME && getUserVisibleHint() && isVisible();
         if (newVisible != this.isVisible) {
@@ -407,4 +339,7 @@ public abstract class FragmentContainer<T extends ContainerProcessorInterface> e
         }
     }
 
+    public abstract void initView(@Nullable Bundle savedInstanceState);
+
+    public abstract ILoadingManager createLoadingManager();
 }

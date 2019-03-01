@@ -14,7 +14,7 @@ import com.zpf.tool.expand.view.SafeDialog;
  * 默认的等待弹窗
  * Created by ZPF on 2018/6/14.
  */
-public class ProgressDialog extends SafeDialog {
+public class ProgressDialog extends CoDilA {
 
     protected TextView textView;
 

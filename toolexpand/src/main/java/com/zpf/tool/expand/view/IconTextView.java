@@ -13,6 +13,8 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
+import com.zpf.api.IconText;
+
 import java.io.File;
 
 /**
@@ -180,11 +182,8 @@ public class IconTextView extends TextView implements IconText {
 
     @Override
     public void setVisibility(int visibility) {
-        if (autoCheck) {
-            checkViewShow();
-        } else {
-            super.setVisibility(visibility);
-        }
+        autoCheck = false;
+        super.setVisibility(visibility);
     }
 
     @Override

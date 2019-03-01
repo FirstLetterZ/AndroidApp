@@ -13,13 +13,13 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import com.zpf.api.TitleBarInterface;
+import com.zpf.frame.ITitleBar;
 import com.zpf.tool.expand.view.IconTextView;
 
 /**
  * Created by ZPF on 2018/6/14.
  */
-public class TitleBar extends RelativeLayout implements TitleBarInterface {
+public class TitleBar extends RelativeLayout implements ITitleBar {
     private IconTextView tvLeft;
     private IconTextView ivLeft;
     private LinearLayout leftLayout;

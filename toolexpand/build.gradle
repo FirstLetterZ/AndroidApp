@@ -17,7 +17,7 @@ android {
 }
 
 dependencies {
-    api rootProject.ext.dependencies.frame
+    api rootProject.ext.dependencies.api
     api rootProject.ext.dependencies.toolkit
     api rootProject.ext.dependencies.dataparser
 }

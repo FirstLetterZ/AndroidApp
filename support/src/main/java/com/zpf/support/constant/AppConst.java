@@ -14,7 +14,5 @@ public class AppConst {
     public static final String PARAM = "params";
     public static final String TYPE = "type";
     public static final String CALL_BACK = "callback";
-
-    public static final String PROGRESS_WAITTING = "请稍候";
-
+    public   static final String TARGET_VIEW_CLASS = "target_view_class";
 }

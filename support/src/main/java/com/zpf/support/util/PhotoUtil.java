@@ -9,7 +9,7 @@ import android.support.v4.app.Fragment;
 import com.zpf.tool.FileUtil;
 import com.zpf.tool.permission.OnLockPermissionRunnable;
 import com.zpf.tool.permission.PermissionInfo;
-import com.zpf.api.ViewContainerInterface;
+import com.zpf.frame.IViewContainer;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class PhotoUtil {
 
-    public static boolean takePhoto(final ViewContainerInterface viewContainer, final String filePath, final int requestCode) {
+    public static boolean takePhoto(final IViewContainer viewContainer, final String filePath, final int requestCode) {
         if (viewContainer != null) {
             viewContainer.checkPermissions(new Runnable() {
                 @Override
@@ -63,7 +63,7 @@ public class PhotoUtil {
         return false;
     }
 
-    public static boolean selectFromAlbum(final ViewContainerInterface viewContainer, final int requestCode) {
+    public static boolean selectFromAlbum(final IViewContainer viewContainer, final int requestCode) {
         if (viewContainer != null) {
             viewContainer.checkPermissions(new Runnable() {
                 @Override

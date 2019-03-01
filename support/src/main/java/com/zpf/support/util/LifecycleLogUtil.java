@@ -4,19 +4,19 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.zpf.api.LifecycleInterface;
-import com.zpf.api.ViewContainerInterface;
+import com.zpf.api.LifecycleListener;
+import com.zpf.frame.IViewContainer;
 
 /**
  * Created by ZPF on 2018/6/26.
  */
-public class LifecycleLogUtil implements LifecycleInterface {
+public class LifecycleLogUtil implements LifecycleListener {
     private String name;
 
-    public LifecycleLogUtil(ViewContainerInterface viewContainerInterface) {
-        if (viewContainerInterface != null) {
-            viewContainerInterface.addLifecycleListener(this);
-            this.name = viewContainerInterface.getClass().getName();
+    public LifecycleLogUtil(IViewContainer IViewContainer) {
+        if (IViewContainer != null) {
+            IViewContainer.addLifecycleListener(this);
+            this.name = IViewContainer.getClass().getName();
             onLogUtilInit();
         }
     }

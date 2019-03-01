@@ -4,9 +4,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.SparseArray;
 
-import com.zpf.api.StorageManagerInterface;
+import com.zpf.api.IStorageManager;
+import com.zpf.api.IStorageQueue;
 import com.zpf.api.dataparser.JsonParserInterface;
-import com.zpf.api.StorageQueueInterface;
 import com.zpf.tool.config.DataDefault;
 import com.zpf.tool.config.GlobalConfigImpl;
 
@@ -20,7 +20,7 @@ public class CacheMap {
     public static final String CACHE_STORAGE_KEY = "cache_storage_";
     private SparseArray<Object> cacheValue = new SparseArray<>();
     private static volatile CacheMap appCacheUtil;
-    private StorageManagerInterface<String> localStorage;
+    private IStorageManager<String> localStorage;
 
     private static CacheMap get() {
         if (appCacheUtil == null) {
@@ -33,7 +33,7 @@ public class CacheMap {
         return appCacheUtil;
     }
 
-    public synchronized static void setLocalStorage(StorageManagerInterface<String> localStorage) {
+    public synchronized static void setLocalStorage(IStorageManager<String> localStorage) {
         get().localStorage = localStorage;
     }
 
@@ -206,8 +206,8 @@ public class CacheMap {
         return new CacheStorageQueue();
     }
 
-    class CacheStorageQueue implements StorageQueueInterface<Integer> {
-        StorageQueueInterface<String> localStorageQueue;
+    class CacheStorageQueue implements IStorageQueue<Integer> {
+        IStorageQueue<String> localStorageQueue;
 
         CacheStorageQueue() {
             if (get().localStorage != null) {

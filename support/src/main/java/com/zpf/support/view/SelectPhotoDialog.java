@@ -8,11 +8,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 
-import com.zpf.support.constant.AppConst;
+import com.zpf.frame.IViewContainer;
 import com.zpf.support.util.PhotoUtil;
 import com.zpf.tool.FileUtil;
 import com.zpf.api.OnItemClickListener;
-import com.zpf.api.ViewContainerInterface;
 import com.zpf.tool.expand.util.SpUtil;
 
 import java.io.File;
@@ -27,11 +26,11 @@ public class SelectPhotoDialog extends BottomDialog {
     private int type = BOTH;
     public static final int REQ_CAMERA = 6661;
     public static final int REQ_ALBUM = 6662;
-    private ViewContainerInterface viewContainer;
+    private IViewContainer viewContainer;
     private Activity activity;
     private Fragment fragment;
 
-    public SelectPhotoDialog(@NonNull ViewContainerInterface viewContainer) {
+    public SelectPhotoDialog(@NonNull IViewContainer viewContainer) {
         super(viewContainer.getContext());
         this.viewContainer = viewContainer;
     }
@@ -91,7 +90,7 @@ public class SelectPhotoDialog extends BottomDialog {
     }
 
     private void takePhoto() {
-        String name = AppConst.CACHE_FILE_PREFIX + System.currentTimeMillis() + ".jpg";
+        String name = "photoCache" + System.currentTimeMillis() + ".jpg";
         File photoFile = FileUtil.getFileOrCreate(FileUtil.getCameraCachePath(), name);
         SpUtil.put(PHOTO_PATH, photoFile.getAbsolutePath());
         if (viewContainer != null) {
