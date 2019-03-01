@@ -4,9 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 
-import com.zpf.api.StorageManagerInterface;
+import com.zpf.api.IStorageManager;
 import com.zpf.api.dataparser.JsonParserInterface;
-import com.zpf.api.StorageQueueInterface;
+import com.zpf.api.IStorageQueue;
 import com.zpf.tool.config.AppContext;
 import com.zpf.tool.config.DataDefault;
 import com.zpf.tool.config.GlobalConfigImpl;
@@ -14,7 +14,7 @@ import com.zpf.tool.config.GlobalConfigImpl;
 /**
  * Created by ZPF on 2017/9/29.
  */
-public class SpUtil implements StorageManagerInterface<String> {
+public class SpUtil implements IStorageManager<String> {
     private static volatile SpUtil mySpUtil;
     private SharedPreferences sp;
     public static final String SP_FILE_NAME = "sp_data_file";
@@ -195,11 +195,11 @@ public class SpUtil implements StorageManagerInterface<String> {
     }
 
     @Override
-    public StorageQueueInterface<String> createQueue() {
+    public IStorageQueue<String> createQueue() {
         return new SpStorageQueue();
     }
 
-    class SpStorageQueue implements StorageQueueInterface<String> {
+    class SpStorageQueue implements IStorageQueue<String> {
         SharedPreferences.Editor editor;
 
         public SpStorageQueue() {

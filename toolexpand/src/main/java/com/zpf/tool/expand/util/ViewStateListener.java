@@ -4,14 +4,14 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.zpf.api.LifecycleInterface;
+import com.zpf.api.LifecycleListener;
 import com.zpf.tool.config.LifecycleState;
 
 /**
  * Created by ZPF on 2018/6/28.
  */
 
-public class ViewStateListener implements LifecycleInterface {
+public class ViewStateListener implements LifecycleListener {
     private int mViewState = LifecycleState.NOT_INIT;
 
     @Override

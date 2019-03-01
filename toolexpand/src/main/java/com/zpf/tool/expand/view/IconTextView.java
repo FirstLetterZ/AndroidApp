@@ -13,8 +13,6 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
-import com.zpf.api.IconText;
-
 import java.io.File;
 
 /**

@@ -5,7 +5,7 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.view.View;
 
-import com.zpf.api.OnProgressChangedListener;
+import com.zpf.api.OnProgressListener;
 
 import java.io.IOException;
 
@@ -25,9 +25,9 @@ public class ProgressResponseBody extends ResponseBody {
     private ResponseBody responseBody;
     private Handler myHandler;
     private BufferedSource bufferedSource;
-    private OnProgressChangedListener<View> mListener;
+    private OnProgressListener<View> mListener;
 
-    public ProgressResponseBody(ResponseBody responseBody, OnProgressChangedListener<View> listener) {
+    public ProgressResponseBody(ResponseBody responseBody, OnProgressListener<View> listener) {
         this.responseBody = responseBody;
         mListener = listener;
         myHandler = new Handler(Looper.getMainLooper());
@@ -63,7 +63,7 @@ public class ProgressResponseBody extends ResponseBody {
                     @Override
                     public void run() {
                         if (mListener != null) {
-                            mListener.onProgressChanged(null, bytesReaded, contentLength());
+                            mListener.onChanged(null, bytesReaded, contentLength());
                         }
                     }
                 });

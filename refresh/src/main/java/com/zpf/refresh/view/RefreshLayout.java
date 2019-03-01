@@ -8,7 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.zpf.api.PackedLayoutInterface;
+import com.zpf.api.IPackedLayout;
 import com.zpf.refresh.util.BaseViewStateCheckImpl;
 import com.zpf.refresh.util.HeadFootImpl;
 import com.zpf.refresh.util.HeadFootInterface;
@@ -424,8 +424,8 @@ public class RefreshLayout extends FrameLayout {
 
     private void scrollContentTop(View view) {
         if (view != null) {
-            if (view instanceof PackedLayoutInterface) {
-                scrollContentTop(((PackedLayoutInterface) view).getCurrentChild());
+            if (view instanceof IPackedLayout) {
+                scrollContentTop(((IPackedLayout) view).getCurrentChild());
             } else {
                 view.scrollTo(0, 0);
             }

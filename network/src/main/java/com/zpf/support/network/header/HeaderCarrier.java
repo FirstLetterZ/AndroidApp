@@ -2,8 +2,7 @@ package com.zpf.support.network.header;
 
 import android.text.TextUtils;
 
-import com.zpf.api.KVPInterface;
-import com.zpf.api.VariableParameterInterface;
+import com.zpf.api.IKVPair;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +15,7 @@ import okhttp3.Request;
  * Created by ZPF on 2018/9/19.
  */
 public class HeaderCarrier {
-    private Map<String, KVPInterface<String,String>> clientHeaderMap = new HashMap<>();
+    private Map<String, IKVPair<String,String>> clientHeaderMap = new HashMap<>();
 
     public HeaderCarrier reset(HeaderCarrier carrier) {
         if (carrier == null || carrier.getHeaderMap() == null) {
@@ -27,7 +26,7 @@ public class HeaderCarrier {
         return this;
     }
 
-    public HeaderCarrier resetHeaderMap(Map<String, KVPInterface<String,String>> headers) {
+    public HeaderCarrier resetHeaderMap(Map<String, IKVPair<String,String>> headers) {
         if (headers == null) {
             this.clientHeaderMap.clear();
         } else {
@@ -37,11 +36,11 @@ public class HeaderCarrier {
         return this;
     }
 
-    public HeaderCarrier addHeaderMap(Map<String, KVPInterface<String,String>> headers) {
+    public HeaderCarrier addHeaderMap(Map<String, IKVPair<String,String>> headers) {
         if (headers != null) {
             String entryKey;
-            KVPInterface<String,String> entryValue;
-            for (Map.Entry<String, KVPInterface<String,String>> entry : headers.entrySet()) {
+            IKVPair<String,String> entryValue;
+            for (Map.Entry<String, IKVPair<String,String>> entry : headers.entrySet()) {
                 entryKey = entry.getKey();
                 entryValue = entry.getValue();
                 if (!TextUtils.isEmpty(entryKey) && entryValue != null) {
@@ -74,18 +73,11 @@ public class HeaderCarrier {
         return this;
     }
 
-    public HeaderCarrier addHeader(KVPInterface<String,String> header) {
+    public HeaderCarrier addHeader(IKVPair<String,String> header) {
         if (header != null) {
             if (!TextUtils.isEmpty(header.getKey())) {
                 clientHeaderMap.put(header.getKey(), header);
             }
-        }
-        return this;
-    }
-
-    public HeaderCarrier addHeader(String name, VariableParameterInterface parameterInterface) {
-        if (!TextUtils.isEmpty(name) && parameterInterface != null) {
-            clientHeaderMap.put(name, new VolatileHeader(name, parameterInterface));
         }
         return this;
     }
@@ -97,8 +89,8 @@ public class HeaderCarrier {
 
     public Request.Builder addHeaders(Request.Builder builder) {
         if (builder != null) {
-            for (Map.Entry<String, KVPInterface<String,String>> entry : clientHeaderMap.entrySet()) {
-                KVPInterface<String,String> entryValue = entry.getValue();
+            for (Map.Entry<String, IKVPair<String,String>> entry : clientHeaderMap.entrySet()) {
+                IKVPair<String,String> entryValue = entry.getValue();
                 if (entryValue != null && entryValue.getValue() != null) {
                     String value = entryValue.getValue();
                     if (value != null) {
@@ -112,8 +104,8 @@ public class HeaderCarrier {
 
     public Headers makeHeaders() {
         Headers.Builder builder = new Headers.Builder();
-        for (Map.Entry<String, KVPInterface<String,String>> entry : clientHeaderMap.entrySet()) {
-            KVPInterface<String,String> entryValue = entry.getValue();
+        for (Map.Entry<String, IKVPair<String,String>> entry : clientHeaderMap.entrySet()) {
+            IKVPair<String,String> entryValue = entry.getValue();
             if (entryValue != null && entryValue.getValue() != null) {
                 String value = entryValue.getValue();
                 if (value != null) {
@@ -132,7 +124,7 @@ public class HeaderCarrier {
         return clientHeaderMap.size();
     }
 
-    public Map<String, KVPInterface<String,String>> getHeaderMap() {
+    public Map<String, IKVPair<String,String>> getHeaderMap() {
         return clientHeaderMap;
     }
 }

@@ -6,17 +6,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.Window;
 
-import com.zpf.api.CallBackInterface;
-import com.zpf.api.SafeWindowController;
-import com.zpf.api.SafeWindowInterface;
+import com.zpf.api.ICustomWindow;
+import com.zpf.api.IManager;
 
 /**
  * Created by ZPF on 2018/3/22.
  */
-public class SafeDialog extends Dialog implements SafeWindowInterface {
-    protected SafeWindowController listener;
-    protected CallBackInterface callBack;
-    protected volatile boolean waitShow;
+public class SafeDialog extends Dialog implements ICustomWindow {
+    protected IManager<ICustomWindow> listener;
+    protected long bindId = -1;
 
     public SafeDialog(@NonNull Context context) {
         super(context);
@@ -50,20 +48,11 @@ public class SafeDialog extends Dialog implements SafeWindowInterface {
 
     }
 
-    public void showWithController(SafeWindowController listener) {
-        this.listener = listener;
-        if (listener != null) {
-            listener.show(this);
-        }
-    }
-
     @Override
     public void show() {
         if (listener != null) {
-            if (listener.isShowing(this)) {
+            if (listener.execute(bindId)) {
                 super.show();
-            } else {
-                listener.show(this);
             }
         } else {
             super.show();
@@ -71,39 +60,16 @@ public class SafeDialog extends Dialog implements SafeWindowInterface {
     }
 
     @Override
-    public boolean isShowing() {
-        return waitShow || super.isShowing();
-    }
-
-    @Override
-    public void bindController(SafeWindowController controller) {
-        this.listener = controller;
-    }
-
-    @Override
-    public void bindRequest(CallBackInterface callBackInterface) {
-        this.callBack = callBackInterface;
-    }
-
-    @Override
-    public void dismiss() {
-        super.dismiss();
-    }
-
-    @Override
     protected void onStop() {
-        waitShow = false;
         super.onStop();
-        if (this.callBack != null) {
-            try {
-                callBack.cancel();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
         if (listener != null) {
-            listener.showNext();
+            listener.execute(-1);
         }
     }
 
+    @Override
+    public SafeDialog toBind(IManager<ICustomWindow> manager) {
+        bindId = manager.bind(this);
+        return this;
+    }
 }

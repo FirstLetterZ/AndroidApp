@@ -2,18 +2,19 @@ package com.zpf.tool.expand.util;
 
 import android.util.LongSparseArray;
 
-import com.zpf.api.CallBackInterface;
-import com.zpf.api.CallBackManagerInterface;
+import com.zpf.api.ICallback;
+import com.zpf.api.IManager;
+import com.zpf.api.OnDestroyListener;
 
 /**
  * Created by ZPF on 2018/6/13.
  */
-public class CallBackManager implements CallBackManagerInterface {
-    private LongSparseArray<CallBackInterface> callBackList = new LongSparseArray<>();
+public class CallBackManager implements IManager<ICallback>, OnDestroyListener {
+    private LongSparseArray<ICallback> callBackList = new LongSparseArray<>();
     private volatile boolean cancelAll = false;
 
     @Override
-    public long addCallBack(CallBackInterface callBack) {
+    public long bind(ICallback callBack) {
         if (cancelAll) {
             callBack.cancel();
             return -1;
@@ -25,16 +26,21 @@ public class CallBackManager implements CallBackManagerInterface {
     }
 
     @Override
-    public void removeCallBack(long id) {
+    public boolean execute(long id) {
+        return false;
+    }
+
+    @Override
+    public void remove(long id) {
         if (!cancelAll) {
             callBackList.remove(id);
         }
     }
 
     @Override
-    public void cancelCallBack(long id) {
+    public void cancel(long id) {
         if (!cancelAll) {
-            CallBackInterface callBack = callBackList.get(id);
+            ICallback callBack = callBackList.get(id);
             if (callBack != null) {
                 callBack.cancel();
             }
@@ -49,7 +55,7 @@ public class CallBackManager implements CallBackManagerInterface {
             synchronized (this) {
                 if (callBackList.size() > 0) {
                     for (int i = 0; i < callBackList.size(); i++) {
-                        CallBackInterface callBack = callBackList.valueAt(i);
+                        ICallback callBack = callBackList.valueAt(i);
                         if (callBack != null) {
                             callBack.cancel();
                         }

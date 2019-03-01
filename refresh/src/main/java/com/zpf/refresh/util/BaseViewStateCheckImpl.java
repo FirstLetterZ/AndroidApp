@@ -7,7 +7,7 @@ import android.webkit.WebView;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
 
-import com.zpf.api.PackedLayoutInterface;
+import com.zpf.api.IPackedLayout;
 import com.zpf.refresh.view.StickyNavLayout;
 
 /**
@@ -25,8 +25,8 @@ public class BaseViewStateCheckImpl implements ViewStateCheckListener {
             return ViewBorderUtil.isAbsListViewToBottom((AbsListView) view);
         } else if (view instanceof RecyclerView) {
             return ViewBorderUtil.isRecyclerViewToBottom((RecyclerView) view);
-        } else if (view instanceof PackedLayoutInterface) {
-            return checkPullUp(((PackedLayoutInterface) view).getCurrentChild());
+        } else if (view instanceof IPackedLayout) {
+            return checkPullUp(((IPackedLayout) view).getCurrentChild());
         } else if (view instanceof StickyNavLayout) {
             return ((StickyNavLayout) view).isContentViewToBottom();
         } else {
@@ -42,8 +42,8 @@ public class BaseViewStateCheckImpl implements ViewStateCheckListener {
             return ViewBorderUtil.isAbsListViewToTop((AbsListView) view);
         } else if (view instanceof RecyclerView) {
             return ViewBorderUtil.isRecyclerViewToTop((RecyclerView) view);
-        } else if (view instanceof PackedLayoutInterface) {
-            return checkPullDown(((PackedLayoutInterface) view).getCurrentChild());
+        } else if (view instanceof IPackedLayout) {
+            return checkPullDown(((IPackedLayout) view).getCurrentChild());
         } else {
             return ViewBorderUtil.isViewToTop(view);
         }

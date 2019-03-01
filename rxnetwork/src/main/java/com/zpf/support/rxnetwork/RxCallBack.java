@@ -1,7 +1,7 @@
 package com.zpf.support.rxnetwork;
 
-import com.zpf.api.CallBackManagerInterface;
-import com.zpf.api.SafeWindowInterface;
+import com.zpf.api.ICallback;
+import com.zpf.api.IManager;
 import com.zpf.support.network.base.BaseCallBack;
 
 import io.reactivex.Observer;
@@ -70,14 +70,8 @@ public abstract class RxCallBack<T> extends BaseCallBack<T> implements Observer<
     }
 
     @Override
-    public RxCallBack<T> bindToManager(CallBackManagerInterface manager) {
-        super.bindToManager(manager);
-        return this;
-    }
-
-    @Override
-    public RxCallBack<T> bindToManager(CallBackManagerInterface manager, SafeWindowInterface dialog) {
-        super.bindToManager(manager, dialog);
+    public RxCallBack<T> toBind(IManager<ICallback> manager) {
+        super.toBind(manager);
         return this;
     }
 

@@ -1,11 +1,11 @@
 package com.zpf.support.network.header;
 
-import com.zpf.api.KVPInterface;
+import com.zpf.api.IKVPair;
 
 /**
  * Created by ZPF on 2018/9/18.
  */
-public class ConstantHeader implements KVPInterface<String,String> {
+public class ConstantHeader implements IKVPair<String,String> {
     private String name;
     private String value;
 

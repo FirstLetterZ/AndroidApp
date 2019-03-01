@@ -20,7 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.OverScroller;
 import android.widget.ScrollView;
 
-import com.zpf.api.PackedLayoutInterface;
+import com.zpf.api.IPackedLayout;
 import com.zpf.refresh.util.ViewBorderUtil;
 
 public class StickyNavLayout extends LinearLayout {
@@ -331,8 +331,8 @@ public class StickyNavLayout extends LinearLayout {
             return ViewBorderUtil.isAbsListViewToTop((AbsListView) view);
         } else if (view instanceof RecyclerView) {
             return ViewBorderUtil.isRecyclerViewToTop((RecyclerView) view);
-        } else if (view instanceof PackedLayoutInterface) {
-            return checkViewToTop(((PackedLayoutInterface) view).getCurrentChild());
+        } else if (view instanceof IPackedLayout) {
+            return checkViewToTop(((IPackedLayout) view).getCurrentChild());
         } else if (view instanceof RefreshLayout) {
             return ((RefreshLayout) view).checkPullDown();
         } else {
@@ -356,8 +356,8 @@ public class StickyNavLayout extends LinearLayout {
             return ViewBorderUtil.isRecyclerViewToBottom((RecyclerView) view);
         } else if (view instanceof WebView) {
             return ViewBorderUtil.isWebViewToBottom((WebView) view);
-        } else if (view instanceof PackedLayoutInterface) {
-            return checkViewToBottom(((PackedLayoutInterface) view).getCurrentChild());
+        } else if (view instanceof IPackedLayout) {
+            return checkViewToBottom(((IPackedLayout) view).getCurrentChild());
         } else if (view instanceof RefreshLayout) {
             return ((RefreshLayout) view).checkPullUp();
         } else

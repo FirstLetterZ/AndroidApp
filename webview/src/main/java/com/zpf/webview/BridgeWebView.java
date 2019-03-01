@@ -26,8 +26,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.zpf.api.OnProgressChangedListener;
-import com.zpf.api.UrlInterceptor;
+import com.zpf.api.IChecker;
+import com.zpf.api.OnProgressListener;
 import com.zpf.api.dataparser.JsonParserInterface;
 import com.zpf.api.dataparser.StringParseResult;
 import com.zpf.api.dataparser.StringParseType;
@@ -52,8 +52,8 @@ public class BridgeWebView extends WebView {
     private List<WebViewStateListener> stateListenerList = new ArrayList<>();
     private OnReceivedWebPageListener webPageListener;
     private WebViewWindowListener windowListener;
-    private OnProgressChangedListener<WebView> progressChangedListener;
-    private UrlInterceptor urlInterceptor;//url拦截
+    private OnProgressListener<WebView> progressChangedListener;
+    private IChecker<String> urlInterceptor;//url拦截
     private JsCallNativeListener jsCallNativeListener;//js调用native的回调
     private OverrideLoadUrlListener overrideLoadUrlListener;//OverrideLoadUrlListener
     private String TAG = "BridgeWebView";
@@ -248,7 +248,7 @@ public class BridgeWebView extends WebView {
                     waitInit = !initJsBridge();
                 }
                 if (progressChangedListener != null) {
-                    progressChangedListener.onProgressChanged(view, 100, newProgress);
+                    progressChangedListener.onChanged(view, 100, newProgress);
                 }
                 super.onProgressChanged(view, newProgress);
             }
@@ -612,7 +612,7 @@ public class BridgeWebView extends WebView {
         this.realParser = realParser;
     }
 
-    public void setUrlInterceptor(UrlInterceptor urlInterceptor) {
+    public void setUrlInterceptor(IChecker<String> urlInterceptor) {
         this.urlInterceptor = urlInterceptor;
     }
 
@@ -644,7 +644,7 @@ public class BridgeWebView extends WebView {
         this.windowListener = windowListener;
     }
 
-    public void setProgressChangedListener(OnProgressChangedListener<WebView> progressChangedListener) {
+    public void setProgressListener(OnProgressListener<WebView> progressChangedListener) {
         this.progressChangedListener = progressChangedListener;
     }
 

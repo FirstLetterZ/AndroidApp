@@ -1,8 +1,8 @@
 package com.zpf.support.network.retrofit;
 
+import com.zpf.api.ICallback;
+import com.zpf.api.IManager;
 import com.zpf.support.network.base.BaseCallBack;
-import com.zpf.api.CallBackManagerInterface;
-import com.zpf.api.SafeWindowInterface;
 import com.zpf.tool.config.MainHandler;
 
 import retrofit2.Call;
@@ -91,14 +91,8 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
     }
 
     @Override
-    public ResponseCallBack<T> bindToManager(CallBackManagerInterface manager) {
-        super.bindToManager(manager);
-        return this;
-    }
-
-    @Override
-    public ResponseCallBack<T> bindToManager(CallBackManagerInterface manager, SafeWindowInterface dialog) {
-        super.bindToManager(manager, dialog);
+    public ResponseCallBack<T> toBind(IManager<ICallback> manager) {
+        super.toBind(manager);
         return this;
     }
 

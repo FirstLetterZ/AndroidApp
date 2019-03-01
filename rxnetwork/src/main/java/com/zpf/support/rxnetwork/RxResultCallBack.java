@@ -3,7 +3,10 @@ package com.zpf.support.rxnetwork;
 import android.support.annotation.Nullable;
 
 import com.zpf.api.CallBackManagerInterface;
+import com.zpf.api.ICallback;
+import com.zpf.api.IManager;
 import com.zpf.api.SafeWindowInterface;
+import com.zpf.support.network.base.BaseCallBack;
 import com.zpf.support.network.model.HttpResult;
 
 /**
@@ -24,14 +27,8 @@ public abstract class RxResultCallBack<T> extends RxCallBack<HttpResult<T>> {
     }
 
     @Override
-    public RxResultCallBack<T> bindToManager(CallBackManagerInterface manager) {
-        super.bindToManager(manager);
-        return this;
-    }
-
-    @Override
-    public RxResultCallBack<T> bindToManager(CallBackManagerInterface manager, SafeWindowInterface dialog) {
-        super.bindToManager(manager, dialog);
+    public RxResultCallBack<T> toBind(IManager<ICallback> manager) {
+        super.toBind(manager);
         return this;
     }
 

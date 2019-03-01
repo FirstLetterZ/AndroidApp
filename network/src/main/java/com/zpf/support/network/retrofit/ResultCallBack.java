@@ -1,7 +1,7 @@
 package com.zpf.support.network.retrofit;
 
-import com.zpf.api.CallBackManagerInterface;
-import com.zpf.api.SafeWindowInterface;
+import com.zpf.api.ICallback;
+import com.zpf.api.IManager;
 import com.zpf.support.network.model.HttpResult;
 
 /**
@@ -36,14 +36,8 @@ public abstract class ResultCallBack<T> extends ResponseCallBack<HttpResult<T>> 
     }
 
     @Override
-    public ResultCallBack<T> bindToManager(CallBackManagerInterface manager) {
-        super.bindToManager(manager);
-        return this;
-    }
-
-    @Override
-    public ResultCallBack<T> bindToManager(CallBackManagerInterface manager, SafeWindowInterface dialog) {
-        super.bindToManager(manager, dialog);
+    public ResultCallBack<T> toBind(IManager<ICallback> manager) {
+        super.toBind(manager);
         return this;
     }
 

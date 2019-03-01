@@ -6,9 +6,10 @@ import android.os.Looper;
 import android.support.annotation.IntRange;
 import android.text.TextUtils;
 
-import com.zpf.api.CallBackInterface;
-import com.zpf.api.CallBackManagerInterface;
-import com.zpf.api.SafeWindowInterface;
+import com.zpf.api.ICallback;
+import com.zpf.api.ICustomWindow;
+import com.zpf.api.IManager;
+import com.zpf.api.OnDestroyListener;
 import com.zpf.support.network.model.CustomException;
 import com.zpf.support.network.model.HttpResult;
 import com.zpf.tool.config.GlobalConfigImpl;
@@ -30,7 +31,7 @@ import retrofit2.HttpException;
 /**
  * Created by ZPF on 2018/7/26.
  */
-public abstract class BaseCallBack<T> implements CallBackInterface {
+public abstract class BaseCallBack<T> implements ICallback, OnDestroyListener {
     protected int[] type = new int[]{0, 0, 0, 0};//{不弹出错误提示，结果可为空，预留，预留}
 
     public static final int NOTTOAST = 1;
@@ -38,8 +39,8 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
     public static final int NULLABLE_NOTTOAST = 3;
 
     private volatile boolean isCancel = false;
-    protected CallBackManagerInterface manager;
-    protected SafeWindowInterface safeWindow;
+    protected IManager<ICallback> manager;
+    protected ICustomWindow safeWindow;
     protected long bindId;
     private ResponseHandleInterface responseHandler;
 
@@ -72,23 +73,10 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
     }
 
     @Override
-    public CallBackInterface bindToManager(CallBackManagerInterface manager) {
+    public BaseCallBack toBind(IManager<ICallback> manager) {
         if (manager != null) {
             this.manager = manager;
-            bindId = manager.addCallBack(this);
-        }
-        return this;
-    }
-
-    @Override
-    public CallBackInterface bindToManager(CallBackManagerInterface manager, SafeWindowInterface safeWindow) {
-        if (manager != null) {
-            this.manager = manager;
-            bindId = manager.addCallBack(this);
-        }
-        if (safeWindow != null && safeWindow.isShowing()) {
-            this.safeWindow = safeWindow;
-            safeWindow.bindRequest(this);
+            bindId = manager.bind(this);
         }
         return this;
     }
@@ -193,11 +181,10 @@ public abstract class BaseCallBack<T> implements CallBackInterface {
 
     protected void removeObservable() {
         if (manager != null) {
-            manager.removeCallBack(bindId);
+            manager.cancel(bindId);
             manager = null;
         }
         if (safeWindow != null && safeWindow.isShowing()) {
-            safeWindow.bindRequest(null);
             try {
                 safeWindow.dismiss();
             } catch (Exception e) {

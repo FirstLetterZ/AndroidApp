@@ -1,79 +1,120 @@
 package com.zpf.tool.expand.util;
 
-import com.zpf.api.SafeWindowController;
-import com.zpf.api.SafeWindowInterface;
+import android.util.Pair;
+
+import com.zpf.api.ICustomWindow;
+import com.zpf.api.IManager;
+import com.zpf.api.OnDestroyListener;
 
 import java.util.LinkedList;
 
 /**
  * Created by ZPF on 2018/6/5.
  */
-public class DialogController implements SafeWindowController {
-    private LinkedList<SafeWindowInterface> cacheList = new LinkedList<>();
-    private SafeWindowInterface showingWindow;
+public class DialogController implements IManager<ICustomWindow>, OnDestroyListener {
+    private LinkedList<Pair<Long, ICustomWindow>> cacheList = new LinkedList<>();
+    private ICustomWindow showingWindow;
+    private long showingWindowId;
     private volatile boolean isDestroy = false;
 
     @Override
-    public void show(SafeWindowInterface safeWindow) {
+    public long bind(ICustomWindow safeWindow) {
         if (isDestroy || safeWindow == null) {
-            return;
+            return 0;
         }
-        safeWindow.bindController(this);
-        if (showingWindow == null || !showingWindow.isShowing()) {
-            showingWindow = safeWindow;
-            showingWindow.show();
+        long id = -1;
+        for (Pair<Long, ICustomWindow> cache : cacheList) {
+            if (cache.second == safeWindow) {
+                id = cache.first;
+                break;
+            }
+        }
+        if (id < 0) {
+            id = System.currentTimeMillis();
+            cacheList.add(new Pair<Long, ICustomWindow>(id, safeWindow));
+        }
+        show(safeWindow);
+        return id;
+    }
+
+    @Override
+    public boolean execute(long id) {
+        if (isDestroy) {
+            return false;
+        }
+        if (id <= 0) {
+            showNext();
+            return false;
         } else {
-            if (!cacheList.contains(safeWindow)) {
-                cacheList.add(safeWindow);
+            return !checkShowing();
+        }
+    }
+
+    @Override
+    public void remove(long id) {
+        synchronized (DialogController.class) {
+            for (Pair<Long, ICustomWindow> cache : cacheList) {
+                if (id == cache.first) {
+                    cacheList.remove(cache);
+                    break;
+                }
             }
         }
     }
 
     @Override
-    public boolean isShowing(SafeWindowInterface windowInterface) {
-        return windowInterface != null && windowInterface == showingWindow;
+    public void cancel(long id) {
+        if (showingWindowId == id && checkShowing()) {
+            showingWindow.dismiss();
+        }
+        remove(id);
     }
 
+    @Override
+    public void cancelAll() {
+        isDestroy = true;
+        if (showingWindow != null && showingWindow.isShowing()) {
+            showingWindow.dismiss();
+        }
+        showingWindow = null;
+        showingWindowId = -1;
+        cacheList.clear();
+        isDestroy = false;
+    }
 
     @Override
     public void onDestroy() {
         isDestroy = true;
         showingWindow = null;
+        showingWindowId = -1;
         cacheList.clear();
     }
 
-    @Override
-    public boolean showNext() {
-        if (isDestroy) {
-            return false;
+    private boolean checkShowing() {
+        return (showingWindow != null && showingWindow.isShowing());
+    }
+
+    private void show(ICustomWindow window) {
+        if (isDestroy || window == null || checkShowing()) {
+            return;
         }
-        if (cacheList.size() > 0) {
-            showingWindow = cacheList.poll();
-            if (showingWindow == null) {
-                return showNext();
-            } else {
-                showingWindow.show();
-                return true;
-            }
-        } else {
-            showingWindow = null;
-            return false;
+        showingWindow = window;
+        try {
+            showingWindow.show();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    @Override
-    public boolean dismiss() {
-        if (showingWindow != null && showingWindow.isShowing()) {
-            try {
-                showingWindow.dismiss();
-            } catch (Exception e) {
-                e.printStackTrace();
+    private void showNext() {
+        if (cacheList.size() > 0) {
+            Pair<Long, ICustomWindow> pair = cacheList.pollFirst();
+            if (pair == null || pair.second == null) {
+                showNext();
+            } else {
+                show(pair.second);
             }
-            return true;
-        } else {
-            return false;
         }
-
     }
 
 }

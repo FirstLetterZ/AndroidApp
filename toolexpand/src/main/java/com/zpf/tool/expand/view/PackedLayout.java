@@ -10,12 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.zpf.api.PackedLayoutInterface;
+import com.zpf.api.IPackedLayout;
 
 /**
  * Created by ZPF on 2018/7/7.
  */
-public abstract class PackedLayout<T extends View> extends FrameLayout implements PackedLayoutInterface {
+public abstract class PackedLayout<T extends View> extends FrameLayout implements IPackedLayout {
     protected T contentView;
     private final SparseArray<View> childrenArray = new SparseArray<>();
 
