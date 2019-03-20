@@ -115,8 +115,11 @@ public class RootLayout extends LinearLayout implements IRootLayout {
     }
 
     @Override
-    public void setContentView(@NonNull LayoutInflater inflater, int layoutId) {
+    public void setContentView(@Nullable LayoutInflater inflater, int layoutId) {
         contentLayout.removeAllViews();
+        if (inflater == null) {
+            inflater = LayoutInflater.from(getContext());
+        }
         inflater.inflate(layoutId, contentLayout, true);
     }
 

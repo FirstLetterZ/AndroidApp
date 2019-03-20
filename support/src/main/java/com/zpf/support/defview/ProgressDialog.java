@@ -8,13 +8,13 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.zpf.support.R;
-import com.zpf.tool.expand.view.SafeDialog;
+import com.zpf.tool.expand.view.CustomDialog;
 
 /**
  * 默认的等待弹窗
  * Created by ZPF on 2018/6/14.
  */
-public class ProgressDialog extends CoDilA {
+public class ProgressDialog extends CustomDialog {
 
     protected TextView textView;
 

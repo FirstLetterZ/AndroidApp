@@ -27,6 +27,8 @@ import com.zpf.frame.ResultCallBackListener;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
+import com.zpf.support.util.LoadingManagerImpl;
+import com.zpf.support.util.LogUtil;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.MainHandler;
 
@@ -36,9 +38,10 @@ import java.lang.reflect.Constructor;
  * 基于Activity的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public abstract class ActivityContainer extends Activity implements IViewContainer {
+public class ActivityContainer extends Activity implements IViewContainer {
     private final ContainerListenerController mController = new ContainerListenerController();
-    private ILoadingManager loadingDialog;
+    private ILoadingManager loadingManager;
+    private Bundle mParams;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -53,23 +56,7 @@ public abstract class ActivityContainer extends Activity implements IViewContain
             }
         }
         initWindow();
-        Class targetViewClass = null;
-        IViewProcessor viewProcessor = null;
-        synchronized (ContainerController.class) {
-            ContainerController.mInitingViewContainer = this;
-            try {
-                targetViewClass = (Class) intent.getSerializableExtra(AppConst.TARGET_VIEW_CLASS);
-                Constructor<IViewProcessor> constructor = targetViewClass.getConstructor();
-                viewProcessor = constructor.newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            ContainerController.mInitingViewContainer = null;
-        }
-        if (viewProcessor != null) {
-            mController.addLifecycleListener(viewProcessor);
-            mController.addResultCallBackListener(viewProcessor);
-        }
+        initViewProcessor();
         mController.onPreCreate(savedInstanceState);
         initView(savedInstanceState);
         mController.afterCreate(savedInstanceState);
@@ -112,7 +99,7 @@ public abstract class ActivityContainer extends Activity implements IViewContain
     public void onDestroy() {
         mController.onDestroy();
         super.onDestroy();
-        loadingDialog = null;
+        loadingManager = null;
     }
 
     @Override
@@ -227,7 +214,7 @@ public abstract class ActivityContainer extends Activity implements IViewContain
 
     @Override
     public boolean dismiss() {
-        return loadingDialog != null && loadingDialog.hideLoading() || mController.dismiss();
+        return loadingManager != null && loadingManager.hideLoading() || mController.dismiss();
     }
 
     @Override
@@ -278,7 +265,12 @@ public abstract class ActivityContainer extends Activity implements IViewContain
 
     @Override
     public boolean hideLoading() {
-        return loadingDialog != null && loadingDialog.hideLoading();
+        return loadingManager != null && loadingManager.hideLoading();
+    }
+
+    @Override
+    public View getLoadingView() {
+        return loadingManager == null ? null : loadingManager.getLoadingView();
     }
 
     @Override
@@ -289,11 +281,11 @@ public abstract class ActivityContainer extends Activity implements IViewContain
     @Override
     public void showLoading(String message) {
         if (isLiving()) {
-            if (loadingDialog != null) {
-                loadingDialog = createLoadingManager();
+            if (loadingManager != null) {
+                loadingManager = new LoadingManagerImpl(getContext());
             }
-            if (loadingDialog != null) {
-                loadingDialog.showLoading(message);
+            if (loadingManager != null) {
+                loadingManager.showLoading(message);
             }
         }
     }
@@ -323,10 +315,24 @@ public abstract class ActivityContainer extends Activity implements IViewContain
         return null;
     }
 
+    @Override
+    public void setLoadingManager(ILoadingManager loadingManager) {
+        this.loadingManager = loadingManager;
+    }
+
+    @Override
+    public Bundle getParams() {
+        if (mParams == null) {
+            mParams = getIntent().getExtras();
+        }
+        return mParams;
+    }
 
     protected void initWindow() {
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setStatusBarTranslucent();
+        setRequestedOrientation(getParams().getInt(AppConst.TARGET_VIEW_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
+        if (getParams().getBoolean(AppConst.TARGET_STATUS_TRANSLUCENT, true)) {
+            setStatusBarTranslucent();
+        }
     }
 
     protected void setStatusBarTranslucent() {
@@ -342,7 +348,46 @@ public abstract class ActivityContainer extends Activity implements IViewContain
         }
     }
 
-    public abstract void initView(@Nullable Bundle savedInstanceState);
+    protected void initViewProcessor() {
+        IViewProcessor viewProcessor = null;
+        Constructor<IViewProcessor> constructor = null;
+        try {
+            Class targetViewClass = (Class) getParams().getSerializable(AppConst.TARGET_VIEW_CLASS);
+            if (targetViewClass != null) {
+                constructor = targetViewClass.getConstructor();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        synchronized (ContainerController.class) {
+            ContainerController.mInitingViewContainer = this;
+            if (constructor != null) {
+                try {
+                    viewProcessor = constructor.newInstance();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (viewProcessor == null) {
+                viewProcessor = unspecifiedViewProcessor();
+            }
+            ContainerController.mInitingViewContainer = null;
+        }
+        if (viewProcessor != null) {
+            mController.addLifecycleListener(viewProcessor);
+            mController.addResultCallBackListener(viewProcessor);
+            setContentView(viewProcessor.getView());
+        } else {
+            LogUtil.w("IViewProcessor is null!");
+        }
+    }
 
-    public abstract ILoadingManager createLoadingManager();
+    protected void initView(@Nullable Bundle savedInstanceState) {
+
+    }
+
+    protected IViewProcessor unspecifiedViewProcessor() {
+        return null;
+    }
+
 }

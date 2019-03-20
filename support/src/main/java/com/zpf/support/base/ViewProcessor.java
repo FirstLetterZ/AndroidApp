@@ -1,5 +1,6 @@
 package com.zpf.support.base;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
@@ -40,6 +41,12 @@ public abstract class ViewProcessor implements IViewProcessor {
         this.mContainer = ContainerController.mInitingViewContainer;
         mTitleBar = new TitleBar(mContainer.getContext());
         mRootLayout = new RootLayout(mTitleBar);
+        View layoutView = getLayoutView(mContainer.getContext());
+        if (layoutView == null) {
+            mRootLayout.setContentView(null, getLayoutId());
+        } else {
+            mRootLayout.setContentView(layoutView);
+        }
     }
 
     @Override
@@ -139,6 +146,10 @@ public abstract class ViewProcessor implements IViewProcessor {
         return result;
     }
 
+    public View getView() {
+        return mRootLayout.getLayout();
+    }
+
     public <T extends View> T $(int viewId) {
         return mRootLayout.getLayout().findViewById(viewId);
     }
@@ -175,5 +186,11 @@ public abstract class ViewProcessor implements IViewProcessor {
     public void onClick(View view) {
 
     }
+
+    protected View getLayoutView(Context context) {
+        return null;
+    }
+
+    protected abstract int getLayoutId();
 
 }

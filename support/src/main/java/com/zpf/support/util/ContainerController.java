@@ -8,7 +8,6 @@ import com.zpf.frame.IViewContainer;
 
 public class ContainerController {
 
-    public static IViewContainer mInitingViewContainer;
-
+    public static volatile IViewContainer mInitingViewContainer;
 
 }

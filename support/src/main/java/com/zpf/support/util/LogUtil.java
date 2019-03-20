@@ -3,7 +3,7 @@ package com.zpf.support.util;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.zpf.api.LoggerInterface;
+import com.zpf.api.ILogger;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -11,9 +11,9 @@ import java.util.List;
 /**
  * Created by ZPF on 2018/4/16.
  */
-public class LogUtil implements LoggerInterface {
+public class LogUtil implements ILogger {
     private boolean logOut = false;
-    private List<LoggerInterface> realLoggerList = new LinkedList<>();
+    private List<ILogger> realLoggerList = new LinkedList<>();
     private static String TAG = "AppLog";
     private static volatile LogUtil mInstance;
 
@@ -55,11 +55,11 @@ public class LogUtil implements LoggerInterface {
         return get().logOut;
     }
 
-    public static void removeLogger(LoggerInterface realLogger) {
+    public static void removeLogger(ILogger realLogger) {
         get().realLoggerList.remove(realLogger);
     }
 
-    public static void addLogger(LoggerInterface realLogger) {
+    public static void addLogger(ILogger realLogger) {
         get().realLoggerList.add(realLogger);
     }
 
@@ -78,7 +78,7 @@ public class LogUtil implements LoggerInterface {
                 if (TextUtils.isEmpty(tag)) {
                     tag = TAG;
                 }
-                for (LoggerInterface logger : realLoggerList) {
+                for (ILogger logger : realLoggerList) {
                     logger.log(priority, tag, content);
                 }
             } else {

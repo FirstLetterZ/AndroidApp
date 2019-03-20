@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="com.zpf.android:api-parse-1.0.0">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/api-parse-1.0.0.aar/e1517a46270ea54d2c94af0cb08fe5da/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/api-parse-1.0.0.aar/e1517a46270ea54d2c94af0cb08fe5da/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.zpf.android/api-parse/1.0.0/4b96ca665b75543caf828f2afeb475ee40672310/api-parse-1.0.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

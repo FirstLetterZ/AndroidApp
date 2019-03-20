@@ -16,12 +16,12 @@ import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
 import com.zpf.api.LifecycleListener;
 import com.zpf.frame.ILoadingManager;
-import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.ResultCallBackListener;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.util.LifecycleLogUtil;
+import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.LifecycleState;
 
@@ -32,8 +32,9 @@ import com.zpf.tool.config.LifecycleState;
 public class ProxyContainer extends Fragment implements IViewContainer {
     private Activity activity;
     private Fragment fragment;
-    private ILoadingManager loadingDialog;
+    private ILoadingManager loadingManager;
     private boolean isVisible;
+    private Bundle mParams;
     private final ContainerListenerController mController = new ContainerListenerController();
 
     public void onConditionsCompleted(Activity activity) {
@@ -162,7 +163,7 @@ public class ProxyContainer extends Fragment implements IViewContainer {
 
     @Override
     public boolean dismiss() {
-        return loadingDialog != null && loadingDialog.hideLoading() || mController.dismiss();
+        return loadingManager != null && loadingManager.hideLoading() || mController.dismiss();
     }
 
     @Override
@@ -226,7 +227,7 @@ public class ProxyContainer extends Fragment implements IViewContainer {
         if (activity != null && activity instanceof IViewContainer) {
             return ((IViewContainer) activity).hideLoading();
         }
-        return loadingDialog != null && loadingDialog.hideLoading() || mController.dismiss();
+        return loadingManager != null && loadingManager.hideLoading() || mController.dismiss();
     }
 
     @Override
@@ -246,11 +247,11 @@ public class ProxyContainer extends Fragment implements IViewContainer {
             if (activity instanceof IViewContainer) {
                 ((IViewContainer) activity).showLoading(message);
             } else if (isLiving()) {
-                if (loadingDialog != null) {
-                    loadingDialog = createLoadingManager();
+                if (loadingManager != null) {
+                    loadingManager = new LoadingManagerImpl(getContext());
                 }
-                if (loadingDialog != null) {
-                    loadingDialog.showLoading(message);
+                if (loadingManager != null) {
+                    loadingManager.showLoading(message);
                 }
             }
         }
@@ -304,7 +305,7 @@ public class ProxyContainer extends Fragment implements IViewContainer {
     @Override
     public void onDestroy() {
         mController.onDestroy();
-        loadingDialog = null;
+        loadingManager = null;
         activity = null;
         fragment = null;
         super.onDestroy();
@@ -363,22 +364,20 @@ public class ProxyContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public void navigate(Class<? extends IViewProcessor> cls) {
-
-    }
-
-    @Override
-    public void navigate(Class<? extends IViewProcessor> cls, Bundle params) {
-
-    }
-
-    @Override
-    public void navigate(Class<? extends IViewProcessor> cls, Bundle params, int requestCode) {
-
-    }
-
-    @Override
     public Object invoke(String name, Object params) {
         return null;
+    }
+
+    @Override
+    public void setLoadingManager(ILoadingManager loadingManager) {
+        this.loadingManager = loadingManager;
+    }
+
+    @Override
+    public Bundle getParams() {
+        if (mParams == null) {
+            mParams = getIntent().getExtras();
+        }
+        return mParams;
     }
 }

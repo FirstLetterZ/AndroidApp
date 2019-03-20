@@ -14,5 +14,7 @@ public class AppConst {
     public static final String PARAM = "params";
     public static final String TYPE = "type";
     public static final String CALL_BACK = "callback";
-    public   static final String TARGET_VIEW_CLASS = "target_view_class";
+    public static final String TARGET_VIEW_CLASS = "target_view_class";
+    public static final String TARGET_VIEW_ORIENTATION = "target_view_orientation";
+    public static final String TARGET_STATUS_TRANSLUCENT = "target_status_translucent";
 }
