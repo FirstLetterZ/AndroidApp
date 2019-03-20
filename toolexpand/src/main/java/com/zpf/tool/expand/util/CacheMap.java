@@ -73,7 +73,12 @@ public class CacheMap {
 
     @Deprecated
     public synchronized static <T> T getValue(int key, @NonNull Class<T> cls) {
-        Object value = get().cacheValue.get(key);
+        Object value = null;
+        try {
+            value = get().cacheValue.get(key);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         T result = null;
         if (isDefaultValue(value) && get().localStorage != null) {
             value = get().localStorage.find(CACHE_STORAGE_KEY + key, cls);
@@ -109,7 +114,12 @@ public class CacheMap {
      */
     public synchronized static <T> T getValue(int key, @NonNull T defaultValue) {
         T result = defaultValue;
-        Object value = get().cacheValue.get(key);
+        Object value = null;
+        try {
+            value = get().cacheValue.get(key);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if (isDefaultValue(value) && get().localStorage != null) {
             value = get().localStorage.find(CACHE_STORAGE_KEY + key, defaultValue);
             if (value != null) {

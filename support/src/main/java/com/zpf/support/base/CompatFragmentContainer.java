@@ -329,8 +329,28 @@ public abstract class CompatFragmentContainer extends Fragment implements IViewC
         return null;
     }
 
+    private boolean checkParentFragmentVisible() {
+        Fragment parent = getParentFragment();
+        boolean result = true;
+        while (parent != null) {
+            result = checkFragmentShouldVisible(parent);
+            if (result) {
+                parent = parent.getParentFragment();
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
+
+    private boolean checkFragmentShouldVisible(Fragment fragment) {
+        return fragment != null && fragment.getUserVisibleHint() && fragment.isAdded() && !fragment.isHidden();
+    }
+
     private void checkVisibleChange() {
-        boolean newVisible = getState() == LifecycleState.AFTER_RESUME && getUserVisibleHint() && isVisible();
+        boolean newVisible = getState() == LifecycleState.AFTER_RESUME
+                && checkParentFragmentVisible()
+                && checkFragmentShouldVisible(this);
         if (newVisible != this.isVisible) {
             this.isVisible = newVisible;
             mController.onVisibleChanged(newVisible);
