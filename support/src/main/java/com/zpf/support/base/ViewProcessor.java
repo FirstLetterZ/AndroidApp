@@ -10,8 +10,8 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
-import com.zpf.support.defview.RootLayout;
-import com.zpf.support.defview.TitleBar;
+import com.zpf.support.view.RootLayout;
+import com.zpf.support.view.TitleBar;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.PermissionUtil;
 import com.zpf.tool.SafeClickListener;
@@ -26,7 +26,7 @@ import java.util.List;
  * 视图处理
  * Created by ZPF on 2018/6/14.
  */
-public abstract class ViewProcessor implements IViewProcessor {
+public abstract class ViewProcessor<C> implements IViewProcessor<C> {
     protected final IViewContainer mContainer;
     protected final TitleBar mTitleBar;
     protected final RootLayout mRootLayout;
@@ -36,6 +36,7 @@ public abstract class ViewProcessor implements IViewProcessor {
             ViewProcessor.this.onClick(v);
         }
     };
+    protected C mConnector;//
 
     public ViewProcessor() {
         this.mContainer = ContainerController.mInitingViewContainer;
@@ -115,6 +116,11 @@ public abstract class ViewProcessor implements IViewProcessor {
     }
 
     @Override
+    public boolean onInterceptBackPress() {
+        return false;
+    }
+
+    @Override
     public void runWithPermission(Runnable runnable, String... permissions) {
         mContainer.checkPermissions(runnable, new OnLockPermissionRunnable() {
             @Override
@@ -146,12 +152,43 @@ public abstract class ViewProcessor implements IViewProcessor {
         return result;
     }
 
+    public <T extends View> T $(@IdRes int viewId) {
+        return mRootLayout.getLayout().findViewById(viewId);
+    }
+
     public View getView() {
         return mRootLayout.getLayout();
     }
 
-    public <T extends View> T $(int viewId) {
-        return mRootLayout.getLayout().findViewById(viewId);
+    @Override
+    public void onReceiveEvent(String action, Object... params) {
+
+    }
+
+    @Override
+    public void setConnector(C connector) {
+        this.mConnector = connector;
+    }
+
+    @NonNull
+    @Override
+    public Bundle getParams() {
+        return mContainer.getParams();
+    }
+
+    @Override
+    public void navigate(Class cls, Bundle params, int requestCode) {
+
+    }
+
+    @Override
+    public void navigate(Class cls, Bundle params) {
+
+    }
+
+    @Override
+    public void navigate(Class cls) {
+
     }
 
     public void setText(int viewId, CharSequence content) {

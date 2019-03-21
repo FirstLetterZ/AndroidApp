@@ -4,12 +4,13 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
 
 import com.zpf.tool.FileUtil;
+import com.zpf.tool.PublicUtil;
 import com.zpf.tool.permission.OnLockPermissionRunnable;
 import com.zpf.tool.permission.PermissionInfo;
 import com.zpf.frame.IViewContainer;
+import com.zpf.support.R;
 
 import java.util.List;
 
@@ -52,7 +53,18 @@ public class PhotoUtil {
         return false;
     }
 
-    public static boolean takePhoto(Fragment fragment, String filePath, int requestCode) {
+    public static boolean takePhoto(android.support.v4.app.Fragment fragment, String filePath, int requestCode) {
+        if (fragment != null && PermissionUtil.get()
+                .checkPermission(fragment, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)) {
+            Intent capIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            capIntent.putExtra(MediaStore.EXTRA_OUTPUT, FileUtil.getUri(filePath));
+            fragment.startActivityForResult(capIntent, requestCode);
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean takePhoto(android.app.Fragment fragment, String filePath, int requestCode) {
         if (fragment != null && PermissionUtil.get()
                 .checkPermission(fragment, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)) {
             Intent capIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -71,7 +83,7 @@ public class PhotoUtil {
                     try {
                         Intent albumIntent = new Intent(Intent.ACTION_GET_CONTENT);
                         albumIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-                        String title = "选择图片";
+                        String title = PublicUtil.getString(R.string.select_photo);
                         Intent intent = Intent.createChooser(albumIntent, title);
                         viewContainer.startActivityForResult(intent, requestCode);
                     } catch (Exception e) {
@@ -93,7 +105,7 @@ public class PhotoUtil {
                 .checkPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE)) {
             Intent albumIntent = new Intent(Intent.ACTION_GET_CONTENT);
             albumIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-            String title = "选择图片";
+            String title = PublicUtil.getString(R.string.select_photo);
             Intent intent = Intent.createChooser(albumIntent, title);
             activity.startActivityForResult(intent, requestCode);
             return true;
@@ -101,12 +113,12 @@ public class PhotoUtil {
         return false;
     }
 
-    public static boolean selectFromAlbum(Fragment fragment, int requestCode) {
+    public static boolean selectFromAlbum(android.support.v4.app.Fragment fragment, int requestCode) {
         if (fragment != null && PermissionUtil.get()
                 .checkPermission(fragment, Manifest.permission.READ_EXTERNAL_STORAGE)) {
             Intent albumIntent = new Intent(Intent.ACTION_GET_CONTENT);
             albumIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-            String title = "选择图片";
+            String title = PublicUtil.getString(R.string.select_photo);
             Intent intent = Intent.createChooser(albumIntent, title);
             fragment.startActivityForResult(intent, requestCode);
             return true;
@@ -114,4 +126,16 @@ public class PhotoUtil {
         return false;
     }
 
+    public static boolean selectFromAlbum(android.app.Fragment fragment, int requestCode) {
+        if (fragment != null && PermissionUtil.get()
+                .checkPermission(fragment, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            Intent albumIntent = new Intent(Intent.ACTION_GET_CONTENT);
+            albumIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+            String title = PublicUtil.getString(R.string.select_photo);
+            Intent intent = Intent.createChooser(albumIntent, title);
+            fragment.startActivityForResult(intent, requestCode);
+            return true;
+        }
+        return false;
+    }
 }

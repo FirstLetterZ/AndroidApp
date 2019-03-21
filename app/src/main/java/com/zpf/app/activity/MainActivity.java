@@ -11,14 +11,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.zpf.app.R;
-import com.zpf.refresh.util.OnRefreshListener;
-import com.zpf.refresh.util.RefreshLayoutType;
-import com.zpf.refresh.view.RefreshLayout;
-import com.zpf.tool.MainHandler;
 import com.zpf.tool.SafeClickListener;
-import com.zpf.tool.ToastUtil;
-import com.zpf.tool.config.GlobalConfigImpl;
-import com.zpf.tool.config.GlobalConfigInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,32 +26,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        GlobalConfigImpl.get().init(getApplication(), new GlobalConfigInterface() {
-            @Override
-            public boolean isDebug() {
-                return true;
-            }
-
-            @Override
-            public Application getApplication() {
-                return MainActivity.this.getApplication();
-            }
-
-            @Override
-            public void onObjectInit(Object object) {
-
-            }
-
-            @Override
-            public Object invokeMethod(Object object, String methodName, Object... args) {
-                return null;
-            }
-
-            @Override
-            public <T> T getGlobalInstance(Class<T> target) {
-                return null;
-            }
-        });
         setContentView(R.layout.activity_main_re);
 //        refreshLayout = findViewById(R.id.rl_test);
 //        refreshLayout.setType(RefreshLayoutType.BOTH_UP_DOWN);

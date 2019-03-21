@@ -4,7 +4,7 @@ import android.content.Context;
 import android.view.View;
 
 import com.zpf.frame.ILoadingManager;
-import com.zpf.support.defview.ProgressDialog;
+import com.zpf.support.view.ProgressDialog;
 
 /**
  * Created by ZPF on 2019/3/20.

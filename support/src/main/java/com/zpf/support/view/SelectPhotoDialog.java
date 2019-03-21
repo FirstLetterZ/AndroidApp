@@ -4,8 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
+import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 
 import com.zpf.frame.IViewContainer;
@@ -28,7 +29,8 @@ public class SelectPhotoDialog extends BottomDialog {
     public static final int REQ_ALBUM = 6662;
     private IViewContainer viewContainer;
     private Activity activity;
-    private Fragment fragment;
+    private android.app.Fragment fragment;
+    private android.support.v4.app.Fragment compatFragment;
 
     public SelectPhotoDialog(@NonNull IViewContainer viewContainer) {
         super(viewContainer.getContext());
@@ -40,10 +42,17 @@ public class SelectPhotoDialog extends BottomDialog {
         this.activity = activity;
     }
 
-    public SelectPhotoDialog(@NonNull Fragment fragment) {
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public SelectPhotoDialog(@NonNull android.app.Fragment fragment) {
         super(fragment.getContext());
         this.fragment = fragment;
     }
+
+    public SelectPhotoDialog(@NonNull android.support.v4.app.Fragment fragment) {
+        super(fragment.getContext());
+        this.compatFragment = fragment;
+    }
+
 
     @Override
     protected void initView() {
@@ -99,6 +108,8 @@ public class SelectPhotoDialog extends BottomDialog {
             PhotoUtil.takePhoto(activity, photoFile.getAbsolutePath(), REQ_CAMERA);
         } else if (fragment != null) {
             PhotoUtil.takePhoto(fragment, photoFile.getAbsolutePath(), REQ_CAMERA);
+        } else if (compatFragment != null) {
+            PhotoUtil.takePhoto(compatFragment, photoFile.getAbsolutePath(), REQ_CAMERA);
         }
     }
 
@@ -109,6 +120,8 @@ public class SelectPhotoDialog extends BottomDialog {
             PhotoUtil.selectFromAlbum(activity, REQ_ALBUM);
         } else if (fragment != null) {
             PhotoUtil.selectFromAlbum(fragment, REQ_ALBUM);
+        } else if (compatFragment != null) {
+            PhotoUtil.selectFromAlbum(compatFragment, REQ_ALBUM);
         }
     }
 

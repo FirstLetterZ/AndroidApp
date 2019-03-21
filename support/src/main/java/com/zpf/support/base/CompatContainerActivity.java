@@ -1,60 +1,75 @@
 package com.zpf.support.base;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.view.LayoutInflater;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.zpf.api.ICallback;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
 import com.zpf.api.LifecycleListener;
 import com.zpf.frame.ILoadingManager;
+import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.ResultCallBackListener;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.frame.IViewContainer;
-import com.zpf.frame.IViewProcessor;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.LogUtil;
 import com.zpf.tool.config.LifecycleState;
+import com.zpf.tool.config.MainHandler;
 
 import java.lang.reflect.Constructor;
 
 /**
- * 基于android.support.v4.app.Fragment的视图容器层
+ * 基于AppCompatActivity的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public class CompatFragmentContainer extends Fragment implements IViewContainer {
+public class CompatContainerActivity extends AppCompatActivity implements IViewContainer {
     private final ContainerListenerController mController = new ContainerListenerController();
     private ILoadingManager loadingManager;
     private Bundle mParams;
-    private boolean isVisible;
+    private IViewProcessor mViewProcessor;
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View theView = getView();
-        if (theView == null) {
-            IViewProcessor viewProcessor = initViewProcessor();
-            if (viewProcessor != null) {
-                theView = viewProcessor.getView();
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //防止初次安装从后台返回的重启问题
+        Intent intent = getIntent();
+        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
+            String action = intent.getAction();
+            if (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && Intent.ACTION_MAIN.equals(action)) {
+                finish();
+                return;
             }
         }
+        initWindow();
+        initViewProcessor();
         mController.onPreCreate(savedInstanceState);
         initView(savedInstanceState);
         mController.afterCreate(savedInstanceState);
-        return theView;
     }
+
+    @Override
+    public void onRestart() {
+        super.onRestart();
+        mController.onRestart();
+    }
+
 
     @Override
     public void onStart() {
@@ -66,7 +81,7 @@ public class CompatFragmentContainer extends Fragment implements IViewContainer 
     public void onResume() {
         super.onResume();
         mController.onResume();
-        checkVisibleChange();
+        mController.onVisibleChanged(true);
     }
 
     @Override
@@ -79,39 +94,46 @@ public class CompatFragmentContainer extends Fragment implements IViewContainer 
     public void onStop() {
         super.onStop();
         mController.onStop();
-        checkVisibleChange();
-    }
-
-
-    @Override
-    public void onDestroyView() {
-        if (mController.getState() < LifecycleState.AFTER_DESTROY) {
-            mController.onDestroy();
-        }
-        super.onDestroyView();
+        mController.onVisibleChanged(false);
     }
 
     @Override
     public void onDestroy() {
-        if (mController.getState() < LifecycleState.AFTER_DESTROY) {
-            mController.onDestroy();
-        }
+        mController.onDestroy();
         super.onDestroy();
         loadingManager = null;
     }
 
     @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        mController.onSaveInstanceState(outState);
+    public void onBackPressed() {
+        if (mViewProcessor != null && mViewProcessor.onInterceptBackPress()) {
+            return;
+        }
+        if (!dismiss()) {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if (outState != null) {
+            mController.onSaveInstanceState(outState);
+        }
         super.onSaveInstanceState(outState);
     }
 
     @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
+    public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState != null) {
             mController.onRestoreInstanceState(savedInstanceState);
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        mController.onNewIntent(intent);
     }
 
     @Override
@@ -124,18 +146,6 @@ public class CompatFragmentContainer extends Fragment implements IViewContainer 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         mController.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        checkVisibleChange();
-    }
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        checkVisibleChange();
     }
 
     @Override
@@ -156,21 +166,17 @@ public class CompatFragmentContainer extends Fragment implements IViewContainer 
 
     @Override
     public Context getContext() {
-        return super.getContext();
+        return this;
     }
 
     @Override
     public Intent getIntent() {
-        if (getActivity() != null) {
-            return getActivity().getIntent();
-        } else {
-            return null;
-        }
+        return super.getIntent();
     }
 
     @Override
     public Activity getCurrentActivity() {
-        return getActivity();
+        return this;
     }
 
     @Override
@@ -185,14 +191,12 @@ public class CompatFragmentContainer extends Fragment implements IViewContainer 
 
     @Override
     public void startActivities(Intent[] intents) {
-        this.startActivities(intents, null);
+        super.startActivities(intents);
     }
 
     @Override
     public void startActivities(Intent[] intents, @Nullable Bundle options) {
-        if (getActivity() != null) {
-            getActivity().startActivities(intents, options);
-        }
+        super.startActivities(intents, options);
     }
 
     @Override
@@ -200,14 +204,24 @@ public class CompatFragmentContainer extends Fragment implements IViewContainer 
         super.startActivityForResult(intent, requestCode);
     }
 
+    @SuppressLint("RestrictedApi")
     @Override
     public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
         super.startActivityForResult(intent, requestCode, options);
     }
 
     @Override
-    public void show(ICustomWindow window) {
-        mController.show(window);
+    public void show(final ICustomWindow window) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            mController.show(window);
+        } else {
+            MainHandler.get().post(new Runnable() {
+                @Override
+                public void run() {
+                    mController.show(window);
+                }
+            });
+        }
     }
 
     @Override
@@ -222,17 +236,13 @@ public class CompatFragmentContainer extends Fragment implements IViewContainer 
 
     @Override
     public void finishWithResult(int resultCode, Intent data) {
-        if (getActivity() != null) {
-            getActivity().setResult(resultCode, data);
-            getActivity().finish();
-        }
+        setResult(resultCode, data);
+        super.finish();
     }
 
     @Override
     public void finish() {
-        if (getActivity() != null) {
-            getActivity().finish();
-        }
+        super.finish();
     }
 
     @Override
@@ -267,10 +277,6 @@ public class CompatFragmentContainer extends Fragment implements IViewContainer 
 
     @Override
     public boolean hideLoading() {
-        FragmentActivity activity = getActivity();
-        if (activity != null && activity instanceof IViewContainer) {
-            return ((IViewContainer) activity).hideLoading();
-        }
         return loadingManager != null && loadingManager.hideLoading();
     }
 
@@ -286,39 +292,34 @@ public class CompatFragmentContainer extends Fragment implements IViewContainer 
 
     @Override
     public void showLoading(String message) {
-        FragmentActivity activity = getActivity();
-        if (activity != null) {
-            if (activity instanceof IViewContainer) {
-                ((IViewContainer) activity).showLoading(message);
-            } else if (isLiving()) {
-                if (loadingManager != null) {
-                    loadingManager = new LoadingManagerImpl(getContext());
-                }
-                if (loadingManager != null) {
-                    loadingManager.showLoading(message);
-                }
+        if (isLiving()) {
+            if (loadingManager != null) {
+                loadingManager = new LoadingManagerImpl(getContext());
+            }
+            if (loadingManager != null) {
+                loadingManager.showLoading(message);
             }
         }
     }
 
     @Override
     public boolean checkPermissions(String... permissions) {
-        return mController.getSupportFragmentPermissionChecker().checkPermissions(this, permissions);
+        return mController.getActivityPermissionChecker().checkPermissions(this, permissions);
     }
 
     @Override
     public boolean checkPermissions(int requestCode, String... permissions) {
-        return mController.getSupportFragmentPermissionChecker().checkPermissions(this, requestCode, permissions);
+        return mController.getActivityPermissionChecker().checkPermissions(this, requestCode, permissions);
     }
 
     @Override
     public void checkPermissions(Runnable onPermission, Runnable onLock, String... permissions) {
-        mController.getSupportFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, permissions);
+        mController.getActivityPermissionChecker().checkPermissions(this, onPermission, onLock, permissions);
     }
 
     @Override
     public void checkPermissions(Runnable onPermission, Runnable onLock, int requestCode, String... permissions) {
-        mController.getSupportFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
+        mController.getActivityPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
     }
 
     @Override
@@ -339,35 +340,60 @@ public class CompatFragmentContainer extends Fragment implements IViewContainer 
         return mParams;
     }
 
-    private boolean checkParentFragmentVisible() {
-        Fragment parent = getParentFragment();
-        boolean result = true;
-        while (parent != null) {
-            result = checkFragmentShouldVisible(parent);
-            if (result) {
-                parent = parent.getParentFragment();
-            } else {
-                break;
-            }
+    @Override
+    public boolean sendEvenToView(String action, Object... params) {
+        if (mViewProcessor != null) {
+            mViewProcessor.onReceiveEvent(action, params);
+            return true;
         }
-        return result;
+        return false;
     }
 
-    private boolean checkFragmentShouldVisible(Fragment fragment) {
-        return fragment != null && fragment.getUserVisibleHint() && fragment.isAdded() && !fragment.isHidden();
+    @Override
+    public int getContainerType() {
+        return AppConst.CONTAINER_COMPAT_ACTIVITY;
     }
 
-    private void checkVisibleChange() {
-        boolean newVisible = getState() == LifecycleState.AFTER_RESUME
-                && checkParentFragmentVisible()
-                && checkFragmentShouldVisible(this);
-        if (newVisible != this.isVisible) {
-            this.isVisible = newVisible;
-            mController.onVisibleChanged(newVisible);
+    @Override
+    public IViewContainer getParentContainer() {
+        Activity parentActivity = getParent();
+        if (parentActivity != null && parentActivity instanceof IViewContainer) {
+            return ((IViewContainer) parentActivity);
+        }
+        return null;
+    }
+
+    @Override
+    public void bindView(IViewProcessor processor) {
+        mViewProcessor = processor;
+    }
+
+    @Override
+    public void unbindView(IViewProcessor processor) {
+        mViewProcessor = null;
+    }
+
+    protected void initWindow() {
+        setRequestedOrientation(getParams().getInt(AppConst.TARGET_VIEW_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
+        if (getParams().getBoolean(AppConst.TARGET_STATUS_TRANSLUCENT, true)) {
+            setStatusBarTranslucent();
         }
     }
 
-    protected IViewProcessor initViewProcessor() {
+    protected void setStatusBarTranslucent() {
+        Window window = getWindow();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {//判断版本是5.0以上
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.TRANSPARENT);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {//判断版本是4.4以上
+            window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
+    }
+
+    protected void initViewProcessor() {
         IViewProcessor viewProcessor = null;
         Constructor<IViewProcessor> constructor = null;
         try {
@@ -395,10 +421,10 @@ public class CompatFragmentContainer extends Fragment implements IViewContainer 
         if (viewProcessor != null) {
             mController.addLifecycleListener(viewProcessor);
             mController.addResultCallBackListener(viewProcessor);
+            setContentView(viewProcessor.getView());
         } else {
             LogUtil.w("IViewProcessor is null!");
         }
-        return viewProcessor;
     }
 
     protected void initView(@Nullable Bundle savedInstanceState) {

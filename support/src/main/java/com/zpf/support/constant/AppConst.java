@@ -17,4 +17,9 @@ public class AppConst {
     public static final String TARGET_VIEW_CLASS = "target_view_class";
     public static final String TARGET_VIEW_ORIENTATION = "target_view_orientation";
     public static final String TARGET_STATUS_TRANSLUCENT = "target_status_translucent";
+
+    public static final int CONTAINER_ACTIVITY = 1;
+    public static final int CONTAINER_FRAGMENT = 2;
+    public static final int CONTAINER_COMPAT_ACTIVITY = 3;
+    public static final int CONTAINER_COMPAT_FRAGMENT = 4;
 }

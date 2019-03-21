@@ -6,7 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,31 +15,31 @@ import android.view.ViewGroup;
 import com.zpf.api.ICallback;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
-import com.zpf.frame.ILoadingManager;
-import com.zpf.frame.IViewProcessor;
 import com.zpf.api.LifecycleListener;
-import com.zpf.api.OnDestroyListener;
-import com.zpf.frame.IViewContainer;
+import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.ResultCallBackListener;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
+import com.zpf.api.OnDestroyListener;
+import com.zpf.frame.IViewContainer;
+import com.zpf.frame.IViewProcessor;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.LogUtil;
 import com.zpf.tool.config.LifecycleState;
 
 import java.lang.reflect.Constructor;
 
-
 /**
- * 基于android.app.Fragment的视图容器层
+ * 基于android.support.v4.app.Fragment的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public class FragmentContainer<T extends IViewProcessor> extends Fragment implements IViewContainer {
+public class CompatContainerFragment extends Fragment implements IViewContainer {
     private final ContainerListenerController mController = new ContainerListenerController();
     private ILoadingManager loadingManager;
     private Bundle mParams;
     private boolean isVisible;
+    private IViewProcessor mViewProcessor;
 
     @Nullable
     @Override
@@ -99,6 +100,7 @@ public class FragmentContainer<T extends IViewProcessor> extends Fragment implem
         super.onDestroy();
         loadingManager = null;
     }
+
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
@@ -267,11 +269,11 @@ public class FragmentContainer<T extends IViewProcessor> extends Fragment implem
 
     @Override
     public boolean hideLoading() {
-        Activity activity = getActivity();
+        FragmentActivity activity = getActivity();
         if (activity != null && activity instanceof IViewContainer) {
             return ((IViewContainer) activity).hideLoading();
         }
-        return loadingManager != null && loadingManager.hideLoading() || mController.dismiss();
+        return loadingManager != null && loadingManager.hideLoading();
     }
 
     @Override
@@ -286,7 +288,7 @@ public class FragmentContainer<T extends IViewProcessor> extends Fragment implem
 
     @Override
     public void showLoading(String message) {
-        Activity activity = getActivity();
+        FragmentActivity activity = getActivity();
         if (activity != null) {
             if (activity instanceof IViewContainer) {
                 ((IViewContainer) activity).showLoading(message);
@@ -303,22 +305,22 @@ public class FragmentContainer<T extends IViewProcessor> extends Fragment implem
 
     @Override
     public boolean checkPermissions(String... permissions) {
-        return mController.getFragmentPermissionChecker().checkPermissions(this, permissions);
+        return mController.getSupportFragmentPermissionChecker().checkPermissions(this, permissions);
     }
 
     @Override
     public boolean checkPermissions(int requestCode, String... permissions) {
-        return mController.getFragmentPermissionChecker().checkPermissions(this, requestCode, permissions);
+        return mController.getSupportFragmentPermissionChecker().checkPermissions(this, requestCode, permissions);
     }
 
     @Override
     public void checkPermissions(Runnable onPermission, Runnable onLock, String... permissions) {
-        mController.getFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, permissions);
+        mController.getSupportFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, permissions);
     }
 
     @Override
     public void checkPermissions(Runnable onPermission, Runnable onLock, int requestCode, String... permissions) {
-        mController.getFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
+        mController.getSupportFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
     }
 
     @Override
@@ -337,6 +339,43 @@ public class FragmentContainer<T extends IViewProcessor> extends Fragment implem
             mParams = getIntent().getExtras();
         }
         return mParams;
+    }
+
+    @Override
+    public boolean sendEvenToView(String action, Object... params) {
+        if (mViewProcessor != null) {
+            mViewProcessor.onReceiveEvent(action, params);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int getContainerType() {
+        return AppConst.CONTAINER_COMPAT_FRAGMENT;
+    }
+
+    @Override
+    public IViewContainer getParentContainer() {
+        android.support.v4.app.Fragment parentFragment = getParentFragment();
+        if (parentFragment != null && parentFragment instanceof IViewContainer) {
+            return ((IViewContainer) parentFragment);
+        }
+        Activity parentActivity = getActivity();
+        if (parentActivity != null && parentActivity instanceof IViewContainer) {
+            return ((IViewContainer) parentActivity);
+        }
+        return null;
+    }
+
+    @Override
+    public void bindView(IViewProcessor processor) {
+        mViewProcessor = processor;
+    }
+
+    @Override
+    public void unbindView(IViewProcessor processor) {
+        mViewProcessor = null;
     }
 
     private boolean checkParentFragmentVisible() {

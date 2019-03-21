@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -20,14 +19,14 @@ import com.zpf.api.ICallback;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
 import com.zpf.api.LifecycleListener;
+import com.zpf.api.OnDestroyListener;
 import com.zpf.frame.ILoadingManager;
+import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.ResultCallBackListener;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
-import com.zpf.api.OnDestroyListener;
-import com.zpf.frame.IViewContainer;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.LogUtil;
 import com.zpf.tool.config.LifecycleState;
@@ -36,13 +35,14 @@ import com.zpf.tool.config.MainHandler;
 import java.lang.reflect.Constructor;
 
 /**
- * 基于AppCompatActivity的视图容器层
+ * 基于Activity的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public class CompatActivityContainer extends AppCompatActivity implements IViewContainer {
+public class ContainerActivity extends Activity implements IViewContainer {
     private final ContainerListenerController mController = new ContainerListenerController();
     private ILoadingManager loadingManager;
     private Bundle mParams;
+    private IViewProcessor mViewProcessor;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -101,6 +101,16 @@ public class CompatActivityContainer extends AppCompatActivity implements IViewC
         mController.onDestroy();
         super.onDestroy();
         loadingManager = null;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mViewProcessor != null && mViewProcessor.onInterceptBackPress()) {
+            return;
+        }
+        if (!dismiss()) {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -327,6 +337,39 @@ public class CompatActivityContainer extends AppCompatActivity implements IViewC
             mParams = getIntent().getExtras();
         }
         return mParams;
+    }
+
+    @Override
+    public boolean sendEvenToView(String action, Object... params) {
+        if (mViewProcessor != null) {
+            mViewProcessor.onReceiveEvent(action, params);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int getContainerType() {
+        return AppConst.CONTAINER_ACTIVITY;
+    }
+
+    @Override
+    public IViewContainer getParentContainer() {
+        Activity parentActivity = getParent();
+        if (parentActivity != null && parentActivity instanceof IViewContainer) {
+            return ((IViewContainer) parentActivity);
+        }
+        return null;
+    }
+
+    @Override
+    public void bindView(IViewProcessor processor) {
+        mViewProcessor = processor;
+    }
+
+    @Override
+    public void unbindView(IViewProcessor processor) {
+        mViewProcessor = null;
     }
 
     protected void initWindow() {
