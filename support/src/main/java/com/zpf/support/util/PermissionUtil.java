@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Created by ZPF on 2018/7/26.
  */
-public class PermissionUtil {
+public class PermissionUtil extends PermissionChecker<Object>{
     private final String appName = PublicUtil.getAppName(AppContext.get());
     private static volatile PermissionUtil instance;
     private PermissionManager permissionManager = new PermissionManager();
@@ -188,4 +188,18 @@ public class PermissionUtil {
         }
     }
 
+    @Override
+    protected boolean checkEffective(Object target) {
+        return false;
+    }
+
+    @Override
+    protected boolean hasPermission(Object target, String p) {
+        return false;
+    }
+
+    @Override
+    protected void requestPermissions(Object target, String[] p, int code) {
+
+    }
 }
