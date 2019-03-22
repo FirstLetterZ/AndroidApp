@@ -1,9 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.zpf.support">
-
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <application>
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -14,5 +10,44 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_path"/>
         </provider>
+        <activity
+            android:name=".activity.CompatPageActivity"
+            android:configChanges="screenSize|keyboardHidden|orientation"
+            android:launchMode="standard"
+            />
+        <activity
+            android:name=".activity.CompatLaunchActivity"
+            android:configChanges="screenSize|keyboardHidden|orientation"
+            android:launchMode="singleTask"
+            android:enabled="false"
+            android:theme="@style/Transparent">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".activity.PageActivity"
+            android:configChanges="screenSize|keyboardHidden|orientation"
+            android:launchMode="standard"
+            />
+
+        <activity-alias
+            android:name="LaunchActivity"
+            android:configChanges="screenSize|keyboardHidden|orientation"
+            android:launchMode="standard"
+            android:targetActivity=".activity.LaunchActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+
+        <!--<meta-data-->
+            <!--android:name="对应视图层文件名"-->
+            <!--android:value="@string/default_launcher"/>-->
     </application>
 </manifest>

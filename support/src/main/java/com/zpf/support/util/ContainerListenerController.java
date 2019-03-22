@@ -9,14 +9,14 @@ import com.zpf.api.ICustomWindow;
 import com.zpf.api.LifecycleListener;
 import com.zpf.frame.ILifecycleMonitor;
 import com.zpf.frame.ResultCallBackListener;
+import com.zpf.tool.compat.permission.ActivityPermissionChecker;
+import com.zpf.tool.compat.permission.CompatPermissionChecker;
+import com.zpf.tool.compat.permission.FragmentPermissionChecker;
+import com.zpf.tool.compat.permission.PermissionChecker;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.expand.util.CallBackManager;
 import com.zpf.tool.expand.util.DialogController;
 import com.zpf.tool.expand.util.ViewStateListener;
-import com.zpf.tool.permission.ActivityPermissionChecker;
-import com.zpf.tool.permission.CompatFragmentPermissionChecker;
-import com.zpf.tool.permission.FragmentPermissionChecker;
-import com.zpf.tool.permission.PermissionChecker;
 import com.zpf.api.OnDestroyListener;
 
 import java.util.ArrayList;
@@ -63,6 +63,17 @@ public class ContainerListenerController implements ILifecycleMonitor, Lifecycle
         for (ResultCallBackListener listener : mCallBackList) {
             listener.onVisibleChanged(visibility);
         }
+    }
+
+    @Override
+    public boolean onInterceptBackPress() {
+        boolean result = false;
+        for (ResultCallBackListener listener : mCallBackList) {
+            if (listener.onInterceptBackPress()) {
+                result = true;
+            }
+        }
+        return result;
     }
 
     @Override
@@ -167,7 +178,7 @@ public class ContainerListenerController implements ILifecycleMonitor, Lifecycle
 
     @Override
     public void show(ICustomWindow window) {
-            mDialogController.show(window);
+        mDialogController.show(window);
     }
 
 
@@ -237,13 +248,13 @@ public class ContainerListenerController implements ILifecycleMonitor, Lifecycle
         return (FragmentPermissionChecker) mPermissionChecker;
     }
 
-    public CompatFragmentPermissionChecker getSupportFragmentPermissionChecker() {
+    public CompatPermissionChecker getSupportFragmentPermissionChecker() {
         if (mPermissionChecker == null) {
-            mPermissionChecker = new CompatFragmentPermissionChecker();
-        } else if (!(mPermissionChecker instanceof CompatFragmentPermissionChecker)) {
+            mPermissionChecker = new CompatPermissionChecker();
+        } else if (!(mPermissionChecker instanceof CompatPermissionChecker)) {
             mPermissionChecker.onDestroy();
-            mPermissionChecker = new CompatFragmentPermissionChecker();
+            mPermissionChecker = new CompatPermissionChecker();
         }
-        return (CompatFragmentPermissionChecker) mPermissionChecker;
+        return (CompatPermissionChecker) mPermissionChecker;
     }
 }

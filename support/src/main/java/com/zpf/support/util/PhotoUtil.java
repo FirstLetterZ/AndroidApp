@@ -7,10 +7,10 @@ import android.provider.MediaStore;
 
 import com.zpf.tool.FileUtil;
 import com.zpf.tool.PublicUtil;
-import com.zpf.tool.permission.OnLockPermissionRunnable;
-import com.zpf.tool.permission.PermissionInfo;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.R;
+import com.zpf.tool.compat.permission.OnLockPermissionRunnable;
+import com.zpf.tool.compat.permission.PermissionInfo;
 
 import java.util.List;
 

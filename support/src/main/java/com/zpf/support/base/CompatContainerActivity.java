@@ -33,6 +33,7 @@ import com.zpf.support.util.LogUtil;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.MainHandler;
 
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 
 /**
@@ -58,7 +59,14 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
             }
         }
         initWindow();
-        initViewProcessor();
+        IViewProcessor viewProcessor = initViewProcessor();
+        if (viewProcessor != null) {
+            mController.addLifecycleListener(viewProcessor);
+            mController.addResultCallBackListener(viewProcessor);
+            setContentView(viewProcessor.getView());
+        } else {
+            LogUtil.w("IViewProcessor is null!");
+        }
         mController.onPreCreate(savedInstanceState);
         initView(savedInstanceState);
         mController.afterCreate(savedInstanceState);
@@ -374,6 +382,10 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     protected void initWindow() {
+        int themeId = getParams().getInt(AppConst.TARGET_VIEW_THEME, -1);
+        if (themeId > 0) {
+            setTheme(themeId);
+        }
         setRequestedOrientation(getParams().getInt(AppConst.TARGET_VIEW_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
         if (getParams().getBoolean(AppConst.TARGET_STATUS_TRANSLUCENT, true)) {
             setStatusBarTranslucent();
@@ -393,7 +405,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         }
     }
 
-    protected void initViewProcessor() {
+    protected IViewProcessor initViewProcessor() {
         IViewProcessor viewProcessor = null;
         Constructor<IViewProcessor> constructor = null;
         try {
@@ -418,13 +430,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
             }
             ContainerController.mInitingViewContainer = null;
         }
-        if (viewProcessor != null) {
-            mController.addLifecycleListener(viewProcessor);
-            mController.addResultCallBackListener(viewProcessor);
-            setContentView(viewProcessor.getView());
-        } else {
-            LogUtil.w("IViewProcessor is null!");
-        }
+        return viewProcessor;
     }
 
     protected void initView(@Nullable Bundle savedInstanceState) {

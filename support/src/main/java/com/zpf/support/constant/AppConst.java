@@ -16,6 +16,7 @@ public class AppConst {
     public static final String CALL_BACK = "callback";
     public static final String TARGET_VIEW_CLASS = "target_view_class";
     public static final String TARGET_VIEW_ORIENTATION = "target_view_orientation";
+    public static final String TARGET_VIEW_THEME = "target_view_theme";
     public static final String TARGET_STATUS_TRANSLUCENT = "target_status_translucent";
 
     public static final int CONTAINER_ACTIVITY = 1;

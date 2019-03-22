@@ -18,9 +18,8 @@ android {
 
 dependencies {
     api rootProject.ext.dependencies.design
-//    api rootProject.ext.dependencies.frame
-    api 'com.zpf.android:api-frame:0.1.2'
-    api rootProject.ext.dependencies.permission
+    api rootProject.ext.dependencies.frame
+    api rootProject.ext.dependencies.compatPermission
     api rootProject.ext.dependencies.toolExpand
 }
 

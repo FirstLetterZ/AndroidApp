@@ -1,6 +1,7 @@
 package com.zpf.support.util;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -10,12 +11,15 @@ import android.text.TextUtils;
 import android.view.View;
 
 import com.zpf.support.view.CommonDialog;
+import com.zpf.tool.compat.permission.ActivityPermissionChecker;
+import com.zpf.tool.compat.permission.CompatPermissionChecker;
+import com.zpf.tool.compat.permission.FragmentPermissionChecker;
+import com.zpf.tool.compat.permission.PermissionChecker;
+import com.zpf.tool.compat.permission.PermissionInfo;
+import com.zpf.tool.compat.permission.PermissionManager;
 import com.zpf.tool.config.AppContext;
 import com.zpf.tool.expand.util.SpUtil;
-import com.zpf.tool.permission.PermissionChecker;
 import com.zpf.tool.PublicUtil;
-import com.zpf.tool.permission.PermissionInfo;
-import com.zpf.tool.permission.PermissionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +27,11 @@ import java.util.List;
 /**
  * Created by ZPF on 2018/7/26.
  */
-public class PermissionUtil extends PermissionChecker {
+public class PermissionUtil {
     private final String appName = PublicUtil.getAppName(AppContext.get());
-    private final int REQ_PERM = 10022;
     private static volatile PermissionUtil instance;
     private PermissionManager permissionManager = new PermissionManager();
+    private CompatPermissionChecker compatChecker = new CompatPermissionChecker();
 
     public static PermissionUtil get() {
         if (instance == null) {
@@ -76,11 +80,12 @@ public class PermissionUtil extends PermissionChecker {
             }
         }
         if (needRationaleList.size() > 0) {
-            showPermissionRationaleDialog(activity, getMissInfo(needRationaleList));
+            showPermissionRationaleDialog(activity, compatChecker.getMissInfo(needRationaleList));
             return false;
         } else if (missPermissionList.size() > 0) {
             int size = missPermissionList.size();
-            ActivityCompat.requestPermissions(activity, missPermissionList.toArray(new String[size]), REQ_PERM);
+            ActivityCompat.requestPermissions(activity, missPermissionList.toArray(new String[size]),
+                    PermissionChecker.REQ_PERMISSION_CODE);
             return false;
         } else {
             return true;
@@ -88,7 +93,7 @@ public class PermissionUtil extends PermissionChecker {
     }
 
     public boolean checkToastEnabled(@NonNull Activity activity, DialogInterface.OnDismissListener listener) {
-        boolean isOpen = super.checkToastEnabled(activity);
+        boolean isOpen = compatChecker.checkToastEnabled(activity);
         showHintDialog(activity, listener);
         return isOpen;
     }

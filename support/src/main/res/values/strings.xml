@@ -1,4 +1,5 @@
 <resources>
     <string name="select_photo">选择图片</string>
+    <string name="default_launcher">default_launcher</string>
 
 </resources>

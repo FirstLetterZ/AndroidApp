@@ -49,6 +49,10 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
             IViewProcessor viewProcessor = initViewProcessor();
             if (viewProcessor != null) {
                 theView = viewProcessor.getView();
+                mController.addLifecycleListener(viewProcessor);
+                mController.addResultCallBackListener(viewProcessor);
+            } else {
+                LogUtil.w("IViewProcessor is null!");
             }
         }
         mController.onPreCreate(savedInstanceState);
@@ -430,12 +434,6 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
                 viewProcessor = unspecifiedViewProcessor();
             }
             ContainerController.mInitingViewContainer = null;
-        }
-        if (viewProcessor != null) {
-            mController.addLifecycleListener(viewProcessor);
-            mController.addResultCallBackListener(viewProcessor);
-        } else {
-            LogUtil.w("IViewProcessor is null!");
         }
         return viewProcessor;
     }
