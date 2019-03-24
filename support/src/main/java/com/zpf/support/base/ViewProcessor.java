@@ -10,15 +10,17 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
+import com.zpf.support.activity.CompatPageActivity;
+import com.zpf.support.constant.AppConst;
 import com.zpf.support.view.RootLayout;
 import com.zpf.support.view.TitleBar;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.PermissionUtil;
 import com.zpf.tool.SafeClickListener;
-import com.zpf.tool.permission.OnLockPermissionRunnable;
-import com.zpf.tool.permission.PermissionInfo;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
+import com.zpf.tool.compat.permission.OnLockPermissionRunnable;
+import com.zpf.tool.compat.permission.PermissionInfo;
 
 import java.util.List;
 
@@ -26,7 +28,7 @@ import java.util.List;
  * 视图处理
  * Created by ZPF on 2018/6/14.
  */
-public abstract class ViewProcessor<C> implements IViewProcessor<C> {
+public  class ViewProcessor<C> implements IViewProcessor<C> {
     protected final IViewContainer mContainer;
     protected final TitleBar mTitleBar;
     protected final RootLayout mRootLayout;
@@ -36,12 +38,13 @@ public abstract class ViewProcessor<C> implements IViewProcessor<C> {
             ViewProcessor.this.onClick(v);
         }
     };
-    protected C mConnector;//
+    protected C mWorker;//
 
     public ViewProcessor() {
         this.mContainer = ContainerController.mInitingViewContainer;
         mTitleBar = new TitleBar(mContainer.getContext());
         mRootLayout = new RootLayout(mTitleBar);
+
         View layoutView = getLayoutView(mContainer.getContext());
         if (layoutView == null) {
             mRootLayout.setContentView(null, getLayoutId());
@@ -167,7 +170,7 @@ public abstract class ViewProcessor<C> implements IViewProcessor<C> {
 
     @Override
     public void setConnector(C connector) {
-        this.mConnector = connector;
+        this.mWorker = connector;
     }
 
     @NonNull
@@ -178,16 +181,42 @@ public abstract class ViewProcessor<C> implements IViewProcessor<C> {
 
     @Override
     public void navigate(Class cls, Bundle params, int requestCode) {
+        Context context = mContainer.getContext();
+        if (context == null) {
+            return;
+        }
+        Intent intent = new Intent();
+        Class defContainerClass = CompatPageActivity.class;
+        if (params == null) {
+            intent.setClass(context, defContainerClass);
+
+        } else {
+            String containerName = params.getString(AppConst.TARGET_CONTAINER_CLASS, null);
+            if (TextUtils.isEmpty(containerName)) {
+                intent.setClass(context, defContainerClass);
+            } else {
+                intent.setClassName(context, containerName);
+                params.remove(AppConst.TARGET_CONTAINER_CLASS);
+            }
+            String containerAction = params.getString(AppConst.TARGET_CONTAINER_ACTION, null);
+            if (!TextUtils.isEmpty(containerAction)) {
+                intent.setAction(containerAction);
+                params.remove(AppConst.TARGET_CONTAINER_ACTION);
+            }
+            intent.putExtras(params);
+        }
+        mContainer.startActivityForResult(intent, requestCode);
 
     }
 
     @Override
     public void navigate(Class cls, Bundle params) {
-
+        navigate(cls, params, -1);
     }
 
     @Override
     public void navigate(Class cls) {
+        navigate(cls, null, -1);
 
     }
 
@@ -228,6 +257,8 @@ public abstract class ViewProcessor<C> implements IViewProcessor<C> {
         return null;
     }
 
-    protected abstract int getLayoutId();
+    protected int getLayoutId() {
+        return 0;
+    }
 
 }

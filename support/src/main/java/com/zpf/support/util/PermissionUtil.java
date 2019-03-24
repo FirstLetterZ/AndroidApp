@@ -1,7 +1,6 @@
 package com.zpf.support.util;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -11,9 +10,7 @@ import android.text.TextUtils;
 import android.view.View;
 
 import com.zpf.support.view.CommonDialog;
-import com.zpf.tool.compat.permission.ActivityPermissionChecker;
 import com.zpf.tool.compat.permission.CompatPermissionChecker;
-import com.zpf.tool.compat.permission.FragmentPermissionChecker;
 import com.zpf.tool.compat.permission.PermissionChecker;
 import com.zpf.tool.compat.permission.PermissionInfo;
 import com.zpf.tool.compat.permission.PermissionManager;
@@ -27,11 +24,12 @@ import java.util.List;
 /**
  * Created by ZPF on 2018/7/26.
  */
-public class PermissionUtil extends PermissionChecker<Object>{
+public class PermissionUtil {
     private final String appName = PublicUtil.getAppName(AppContext.get());
     private static volatile PermissionUtil instance;
     private PermissionManager permissionManager = new PermissionManager();
     private CompatPermissionChecker compatChecker = new CompatPermissionChecker();
+
 
     public static PermissionUtil get() {
         if (instance == null) {
@@ -44,7 +42,9 @@ public class PermissionUtil extends PermissionChecker<Object>{
         return instance;
     }
 
+
     public boolean checkPermission(@NonNull android.support.v4.app.Fragment fragment, @NonNull String... permission) {
+        compatChecker.checkPermissions(fragment,permission);
         Activity activity = fragment.getActivity();
         if (activity == null) {
             return false;
@@ -188,18 +188,4 @@ public class PermissionUtil extends PermissionChecker<Object>{
         }
     }
 
-    @Override
-    protected boolean checkEffective(Object target) {
-        return false;
-    }
-
-    @Override
-    protected boolean hasPermission(Object target, String p) {
-        return false;
-    }
-
-    @Override
-    protected void requestPermissions(Object target, String[] p, int code) {
-
-    }
 }
