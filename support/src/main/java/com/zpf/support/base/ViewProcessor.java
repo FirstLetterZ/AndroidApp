@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.zpf.frame.ILayoutId;
@@ -160,10 +161,27 @@ public abstract class ViewProcessor<C> implements IViewProcessor<C> {
         return result;
     }
 
+    private void bindAllChildren(ViewGroup viewGroup) {
+        if (viewGroup == null) {
+            return;
+        }
+        View child;
+        for (int i = 0; i < viewGroup.getChildCount(); i++) {
+            child = viewGroup.getChildAt(i);
+            if (child instanceof ViewGroup) {
+                bindAllChildren((ViewGroup) child);
+            } else if (child.isClickable() && child.getId() != View.NO_ID) {
+                child.setOnClickListener(safeClickListener);
+            }
+        }
+    }
+
+    @Override
     public <T extends View> T $(@IdRes int viewId) {
         return mRootLayout.getLayout().findViewById(viewId);
     }
 
+    @Override
     public View getView() {
         return mRootLayout.getLayout();
     }

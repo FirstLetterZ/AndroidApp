@@ -17,6 +17,7 @@
         android:id="@+id/tv_msg"
         android:layout_width="match_parent"
         android:layout_height="200dp"
+        android:clickable="false"
         android:gravity="center"
         android:text="等待命令"
         android:textSize="20dp"/>

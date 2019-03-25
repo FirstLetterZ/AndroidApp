@@ -1,11 +1,10 @@
 package com.zpf.app.activity;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
-import android.widget.Button;
+import android.view.ViewGroup;
 
 import com.zpf.frame.ILayoutId;
 
@@ -18,12 +17,12 @@ import com.zpf.support.util.LogUtil;
  */
 @ILayoutId(R.layout.activity_main)
 public class LoginView extends ViewProcessor {
-    private View btnStart = bind(R.id.btn_start);
 
     @Override
     public void afterCreate(@Nullable Bundle savedInstanceState) {
         mRootLayout.setTopViewBackground(Color.BLUE);
         mTitleBar.getTitle().setText("测试");
+        bindAllChildren(mRootLayout.getContentLayout());
     }
 
     @Override
@@ -31,8 +30,22 @@ public class LoginView extends ViewProcessor {
         LogUtil.e(view.getClass().getName());
         switch (view.getId()) {
             case R.id.btn_start:
-                mContainer.startActivity(new Intent(getContext(), TestActivity.class));
                 break;
+            case R.id.btn_cancel:
+                navigate(TestView.class);
+                break;
+        }
+    }
+
+    private void bindAllChildren(ViewGroup viewGroup) {
+        View child;
+        for (int i = 0; i < viewGroup.getChildCount(); i++) {
+            child = viewGroup.getChildAt(i);
+            if (child instanceof ViewGroup) {
+                bindAllChildren((ViewGroup) child);
+            } else if (child.isClickable() && child.getId() != View.NO_ID) {
+                child.setOnClickListener(safeClickListener);
+            }
         }
     }
 }
