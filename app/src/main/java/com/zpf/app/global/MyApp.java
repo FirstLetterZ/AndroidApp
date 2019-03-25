@@ -7,6 +7,7 @@ import com.zpf.api.dataparser.JsonParserInterface;
 import com.zpf.support.network.base.ResponseHandleInterface;
 import com.zpf.support.view.RootLayout;
 import com.zpf.tool.PublicUtil;
+import com.zpf.tool.config.AppStackUtil;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.GlobalConfigInterface;
 import com.zpf.tool.expand.util.CacheMap;
@@ -24,6 +25,7 @@ public class MyApp extends Application {
     public void onCreate() {
         super.onCreate();
         if (PublicUtil.isPackageProces()) {
+            registerActivityLifecycleCallbacks(AppStackUtil.get());
             CacheMap.setLocalStorage(SpUtil.get());
             GlobalConfigImpl.get().init(this, new GlobalConfigInterface() {
                 @Override
