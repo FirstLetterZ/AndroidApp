@@ -12,9 +12,7 @@ import android.widget.TextView;
 
 import com.zpf.frame.ILayoutId;
 import com.zpf.frame.IRootLayout;
-import com.zpf.frame.ITitleBar;
 import com.zpf.support.constant.AppConst;
-import com.zpf.support.util.LifecycleLogUtil;
 import com.zpf.support.view.RootLayout;
 import com.zpf.support.view.TitleBar;
 import com.zpf.support.util.ContainerController;
@@ -46,7 +44,6 @@ public abstract class ViewProcessor<C> implements IViewProcessor<C> {
     public ViewProcessor() {
         this.mContainer = ContainerController.mInitingViewContainer;
         mTitleBar = new TitleBar(getContext());
-        new LifecycleLogUtil(mContainer);
         mRootLayout = new RootLayout(mTitleBar);
         ILayoutId iLayoutId = getClass().getAnnotation(ILayoutId.class);
         if (iLayoutId != null && iLayoutId.value() > 0) {
