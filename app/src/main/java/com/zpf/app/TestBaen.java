@@ -1,4 +1,4 @@
-package com.zpf.app.activity;
+package com.zpf.app;
 
 import android.os.Parcel;
 import android.os.Parcelable;

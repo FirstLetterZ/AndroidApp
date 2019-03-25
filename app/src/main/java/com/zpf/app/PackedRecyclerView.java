@@ -1,4 +1,4 @@
-package com.zpf.app.activity;
+package com.zpf.app;
 
 import android.content.Context;
 import android.graphics.Color;

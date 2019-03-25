@@ -31,8 +31,11 @@ public class RootLayout extends LinearLayout implements IRootLayout {
     private boolean hasAddChildren;
 
     public RootLayout(ITitleBar titleBarView) {
-        this(titleBarView.getLayout().getContext(), null, 0);
+        super(titleBarView.getLayout().getContext(), null, 0);
         this.titleBarLayout = titleBarView;
+        setOrientation(VERTICAL);
+        setFitsSystemWindows(true);
+        createChildren(titleBarView.getLayout().getContext());
     }
 
     public RootLayout(Context context) {

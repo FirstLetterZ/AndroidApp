@@ -408,7 +408,12 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public void unbindView(IViewProcessor processor) {
+    public void unbindView() {
         this.mViewProcessor = null;
+    }
+
+    @Override
+    public IViewProcessor getViewProcessor() {
+        return mViewProcessor;
     }
 }

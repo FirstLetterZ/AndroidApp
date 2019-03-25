@@ -11,9 +11,9 @@ import android.view.View;
 
 import com.zpf.support.view.CommonDialog;
 import com.zpf.tool.compat.permission.CompatPermissionChecker;
-import com.zpf.tool.compat.permission.PermissionChecker;
-import com.zpf.tool.compat.permission.PermissionInfo;
-import com.zpf.tool.compat.permission.PermissionManager;
+import com.zpf.tool.permission.PermissionChecker;
+import com.zpf.tool.permission.PermissionInfo;
+import com.zpf.tool.permission.PermissionManager;
 import com.zpf.tool.config.AppContext;
 import com.zpf.tool.expand.util.SpUtil;
 import com.zpf.tool.PublicUtil;

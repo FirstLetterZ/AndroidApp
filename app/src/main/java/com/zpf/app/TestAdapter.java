@@ -1,4 +1,4 @@
-package com.zpf.app.activity;
+package com.zpf.app;
 
 import android.support.annotation.NonNull;
 import android.support.v7.recyclerview.extensions.AsyncDifferConfig;

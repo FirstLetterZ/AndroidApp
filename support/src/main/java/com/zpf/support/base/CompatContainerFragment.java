@@ -341,6 +341,9 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     public Bundle getParams() {
         if (mParams == null) {
             mParams = getIntent().getExtras();
+            if (mParams == null) {
+                mParams = new Bundle();
+            }
         }
         return mParams;
     }
@@ -378,8 +381,13 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     }
 
     @Override
-    public void unbindView(IViewProcessor processor) {
+    public void unbindView() {
         mViewProcessor = null;
+    }
+
+    @Override
+    public IViewProcessor getViewProcessor() {
+        return mViewProcessor;
     }
 
     private boolean checkParentFragmentVisible() {

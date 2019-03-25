@@ -16,12 +16,11 @@ import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
 import com.zpf.api.LifecycleListener;
 import com.zpf.frame.ILoadingManager;
+import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.ResultCallBackListener;
-import com.zpf.support.util.ContainerListenerController;
+import com.zpf.support.constant.AppConst;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.frame.IViewContainer;
-import com.zpf.support.util.LifecycleLogUtil;
-import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.LifecycleState;
 
@@ -35,6 +34,7 @@ public class ProxyContainer extends Fragment implements IViewContainer {
     private ILoadingManager loadingManager;
     private boolean isVisible;
     private Bundle mParams;
+    private IViewProcessor mViewProcessor;
     private final ContainerListenerController mController = new ContainerListenerController();
 
     public void onConditionsCompleted(Activity activity) {
@@ -379,5 +379,39 @@ public class ProxyContainer extends Fragment implements IViewContainer {
             mParams = getIntent().getExtras();
         }
         return mParams;
+    }
+
+    @Override
+    public boolean sendEvenToView(String action, Object... params) {
+        if (mViewProcessor != null) {
+            mViewProcessor.onReceiveEvent(action, params);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int getContainerType() {
+        return AppConst.CONTAINER_FRAGMENT;
+    }
+
+    @Override
+    public IViewContainer getParentContainer() {
+        return null;
+    }
+
+    @Override
+    public void bindView(IViewProcessor processor) {
+        this.mViewProcessor = processor;
+    }
+
+    @Override
+    public void unbindView() {
+        this.mViewProcessor = null;
+    }
+
+    @Override
+    public IViewProcessor getViewProcessor() {
+        return mViewProcessor;
     }
 }

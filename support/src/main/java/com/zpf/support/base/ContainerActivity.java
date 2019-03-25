@@ -342,6 +342,9 @@ public class ContainerActivity extends Activity implements IViewContainer {
     public Bundle getParams() {
         if (mParams == null) {
             mParams = getIntent().getExtras();
+            if (mParams == null) {
+                mParams = new Bundle();
+            }
         }
         return mParams;
     }
@@ -375,8 +378,13 @@ public class ContainerActivity extends Activity implements IViewContainer {
     }
 
     @Override
-    public void unbindView(IViewProcessor processor) {
+    public void unbindView() {
         mViewProcessor = null;
+    }
+
+    @Override
+    public IViewProcessor getViewProcessor() {
+        return mViewProcessor;
     }
 
     protected void initWindow() {

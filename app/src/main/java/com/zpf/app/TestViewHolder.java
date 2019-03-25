@@ -1,4 +1,4 @@
-package com.zpf.app.activity;
+package com.zpf.app;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;

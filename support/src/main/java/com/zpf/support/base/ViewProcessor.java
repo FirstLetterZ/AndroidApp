@@ -10,8 +10,11 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
-import com.zpf.support.activity.CompatPageActivity;
+import com.zpf.frame.ILayoutId;
+import com.zpf.frame.IRootLayout;
+import com.zpf.frame.ITitleBar;
 import com.zpf.support.constant.AppConst;
+import com.zpf.support.util.LifecycleLogUtil;
 import com.zpf.support.view.RootLayout;
 import com.zpf.support.view.TitleBar;
 import com.zpf.support.util.ContainerController;
@@ -19,8 +22,8 @@ import com.zpf.support.util.PermissionUtil;
 import com.zpf.tool.SafeClickListener;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
-import com.zpf.tool.compat.permission.OnLockPermissionRunnable;
-import com.zpf.tool.compat.permission.PermissionInfo;
+import com.zpf.tool.permission.OnLockPermissionRunnable;
+import com.zpf.tool.permission.PermissionInfo;
 
 import java.util.List;
 
@@ -28,10 +31,10 @@ import java.util.List;
  * 视图处理
  * Created by ZPF on 2018/6/14.
  */
-public  class ViewProcessor<C> implements IViewProcessor<C> {
+public abstract class ViewProcessor<C> implements IViewProcessor<C> {
     protected final IViewContainer mContainer;
     protected final TitleBar mTitleBar;
-    protected final RootLayout mRootLayout;
+    protected final IRootLayout mRootLayout;
     protected final SafeClickListener safeClickListener = new SafeClickListener() {
         @Override
         public void click(View v) {
@@ -42,20 +45,25 @@ public  class ViewProcessor<C> implements IViewProcessor<C> {
 
     public ViewProcessor() {
         this.mContainer = ContainerController.mInitingViewContainer;
-        mTitleBar = new TitleBar(mContainer.getContext());
+        mTitleBar = new TitleBar(getContext());
+        new LifecycleLogUtil(mContainer);
         mRootLayout = new RootLayout(mTitleBar);
-
-        View layoutView = getLayoutView(mContainer.getContext());
-        if (layoutView == null) {
-            mRootLayout.setContentView(null, getLayoutId());
+        ILayoutId iLayoutId = getClass().getAnnotation(ILayoutId.class);
+        if (iLayoutId != null && iLayoutId.value() > 0) {
+            mRootLayout.setContentView(null, iLayoutId.value());
         } else {
-            mRootLayout.setContentView(layoutView);
+            View layoutView = getLayoutView(mContainer.getContext());
+            if (layoutView == null) {
+                mRootLayout.setContentView(null, getLayoutId());
+            } else {
+                mRootLayout.setContentView(layoutView);
+            }
         }
     }
 
     @Override
     public void onPreCreate(@Nullable Bundle savedInstanceState) {
-
+        mContainer.bindView(this);
     }
 
     @Override
@@ -85,7 +93,7 @@ public  class ViewProcessor<C> implements IViewProcessor<C> {
 
     @Override
     public void onDestroy() {
-
+        mContainer.unbindView();
     }
 
     @Override
@@ -164,6 +172,11 @@ public  class ViewProcessor<C> implements IViewProcessor<C> {
     }
 
     @Override
+    public Context getContext() {
+        return mContainer != null ? mContainer.getContext() : null;
+    }
+
+    @Override
     public void onReceiveEvent(String action, Object... params) {
 
     }
@@ -186,10 +199,9 @@ public  class ViewProcessor<C> implements IViewProcessor<C> {
             return;
         }
         Intent intent = new Intent();
-        Class defContainerClass = CompatPageActivity.class;
+        Class defContainerClass = CompatContainerActivity.class;
         if (params == null) {
             intent.setClass(context, defContainerClass);
-
         } else {
             String containerName = params.getString(AppConst.TARGET_CONTAINER_CLASS, null);
             if (TextUtils.isEmpty(containerName)) {
@@ -205,6 +217,7 @@ public  class ViewProcessor<C> implements IViewProcessor<C> {
             }
             intent.putExtras(params);
         }
+        intent.putExtra(AppConst.TARGET_VIEW_CLASS, cls);
         mContainer.startActivityForResult(intent, requestCode);
 
     }

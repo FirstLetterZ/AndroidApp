@@ -29,7 +29,6 @@ import com.zpf.tool.config.LifecycleState;
 
 import java.lang.reflect.Constructor;
 
-
 /**
  * 基于android.app.Fragment的视图容器层
  * Created by ZPF on 2018/6/14.
@@ -340,6 +339,9 @@ public class ContainerFragment extends Fragment implements IViewContainer {
     public Bundle getParams() {
         if (mParams == null) {
             mParams = getIntent().getExtras();
+            if (mParams == null) {
+                mParams = new Bundle();
+            }
         }
         return mParams;
     }
@@ -377,7 +379,12 @@ public class ContainerFragment extends Fragment implements IViewContainer {
     }
 
     @Override
-    public void unbindView(IViewProcessor processor) {
+    public IViewProcessor getViewProcessor() {
+        return mViewProcessor;
+    }
+
+    @Override
+    public void unbindView() {
         mViewProcessor = null;
     }
 

@@ -33,7 +33,6 @@ import com.zpf.support.util.LogUtil;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.MainHandler;
 
-import java.io.Serializable;
 import java.lang.reflect.Constructor;
 
 /**
@@ -344,6 +343,9 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     public Bundle getParams() {
         if (mParams == null) {
             mParams = getIntent().getExtras();
+            if (mParams == null) {
+                mParams = new Bundle();
+            }
         }
         return mParams;
     }
@@ -377,8 +379,13 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     @Override
-    public void unbindView(IViewProcessor processor) {
+    public void unbindView() {
         mViewProcessor = null;
+    }
+
+    @Override
+    public IViewProcessor getViewProcessor() {
+        return mViewProcessor;
     }
 
     protected void initWindow() {

@@ -41,7 +41,7 @@
                     android:layout_height="wrap_content"
                     android:text="13425463576879"/>
             </LinearLayout>
-            <com.zpf.app.activity.PackedRecyclerView
+            <com.zpf.app.PackedRecyclerView
                 android:id="@+id/prv_test"
                 android:background="#3baaff"
                 android:layout_margin="10dp"
