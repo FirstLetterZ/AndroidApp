@@ -44,6 +44,8 @@ public class BaseViewStateCheckImpl implements ViewStateCheckListener {
             return ViewBorderUtil.isRecyclerViewToTop((RecyclerView) view);
         } else if (view instanceof IPackedLayout) {
             return checkPullDown(((IPackedLayout) view).getCurrentChild());
+        } else if (view instanceof StickyNavLayout) {
+            return view.getScrollY() == 0 && ((StickyNavLayout) view).isContentViewToTop();
         } else {
             return ViewBorderUtil.isViewToTop(view);
         }
