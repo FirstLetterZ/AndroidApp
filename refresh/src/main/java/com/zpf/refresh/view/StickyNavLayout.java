@@ -194,7 +194,7 @@ public class StickyNavLayout extends LinearLayout {
                 if (!mOverScroller.isFinished()) {
                     mOverScroller.abortAnimation();
                 }
-                passChild = false;
+                passChild = true;
                 break;
             case MotionEvent.ACTION_MOVE:
                 float currentY = ev.getRawY();

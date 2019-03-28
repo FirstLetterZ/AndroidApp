@@ -1,26 +1,172 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#2e92f7"
     android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        />
+        android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        />
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        />
-</LinearLayout>
+
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="Hello World!"
+            />
+        <TextView
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2e92f7"
+            android:gravity="center"
+            android:text="The End!"
+            />
+    </LinearLayout>
+</ScrollView>

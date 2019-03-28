@@ -20,7 +20,6 @@ public class LoginView extends ViewProcessor {
 
     @Override
     public void afterCreate(@Nullable Bundle savedInstanceState) {
-        mRootLayout.setTopViewBackground(Color.BLUE);
         mTitleBar.getTitle().setText("测试");
         bindAllChildren(mRootLayout.getContentLayout());
     }

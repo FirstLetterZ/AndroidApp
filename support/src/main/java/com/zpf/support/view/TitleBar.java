@@ -29,6 +29,7 @@ public class TitleBar extends RelativeLayout implements ITitleBar {
     private LinearLayout rightLayout;
     private IconTextView ivRight;
     private IconTextView tvRight;
+    public final int defHeight;
 
     public TitleBar(Context context) {
         this(context, null, 0);
@@ -41,10 +42,7 @@ public class TitleBar extends RelativeLayout implements ITitleBar {
     public TitleBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (44 * metrics.density)));
-        RelativeLayout rootLayout = new RelativeLayout(getContext());
-        rootLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT));
+
         leftLayout = new LinearLayout(context);
         leftLayout.setOrientation(LinearLayout.HORIZONTAL);
         leftLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -130,10 +128,11 @@ public class TitleBar extends RelativeLayout implements ITitleBar {
         rightLayout.addView(tvRight);
         rightLayout.addView(ivRight);
 
-        rootLayout.addView(leftLayout);
-        rootLayout.addView(titleLayout);
-        rootLayout.addView(rightLayout);
-        addView(rootLayout);
+        addView(leftLayout);
+        addView(rightLayout);
+        addView(titleLayout);
+        defHeight=(int) (44 * metrics.density);
+        setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, defHeight));
     }
 
     @Override

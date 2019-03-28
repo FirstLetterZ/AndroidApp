@@ -20,9 +20,9 @@ android {
 }
 
 dependencies {
-    api rootProject.ext.dependencies.support
+//    api rootProject.ext.dependencies.support
     api rootProject.ext.dependencies.gsonParse
     api rootProject.ext.dependencies.network
-//    implementation project(':support')
+    implementation project(':support')
 
 }

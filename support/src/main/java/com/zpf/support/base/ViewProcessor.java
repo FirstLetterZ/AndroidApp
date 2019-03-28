@@ -13,9 +13,9 @@ import android.widget.TextView;
 
 import com.zpf.frame.ILayoutId;
 import com.zpf.frame.IRootLayout;
+import com.zpf.frame.ITitleBar;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.view.RootLayout;
-import com.zpf.support.view.TitleBar;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.PermissionUtil;
 import com.zpf.tool.SafeClickListener;
@@ -32,7 +32,7 @@ import java.util.List;
  */
 public abstract class ViewProcessor<C> implements IViewProcessor<C> {
     protected final IViewContainer mContainer;
-    protected final TitleBar mTitleBar;
+    protected final ITitleBar mTitleBar;
     protected final IRootLayout mRootLayout;
     protected final SafeClickListener safeClickListener = new SafeClickListener() {
         @Override
@@ -44,8 +44,8 @@ public abstract class ViewProcessor<C> implements IViewProcessor<C> {
 
     public ViewProcessor() {
         this.mContainer = ContainerController.mInitingViewContainer;
-        mTitleBar = new TitleBar(getContext());
-        mRootLayout = new RootLayout(mTitleBar);
+        mRootLayout = new RootLayout(getContext());
+        mTitleBar = mRootLayout.getTitleBar();
         ILayoutId iLayoutId = getClass().getAnnotation(ILayoutId.class);
         if (iLayoutId != null && iLayoutId.value() > 0) {
             mRootLayout.setContentView(null, iLayoutId.value());

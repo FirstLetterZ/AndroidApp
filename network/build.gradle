@@ -21,4 +21,5 @@ dependencies {
     api rootProject.ext.dependencies.api
     api rootProject.ext.dependencies.global
 }
+
 apply from: "../bintrayUpload.gradle"

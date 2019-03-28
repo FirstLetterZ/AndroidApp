@@ -37,7 +37,9 @@ public class MyApp extends Application {
                 public void onObjectInit(Object object) {
                     if (object != null) {
                         if (object instanceof RootLayout) {
-                            ((RootLayout) object).setTopViewBackground(Color.BLUE);
+                            ((RootLayout) object).getTopLayout().setBackgroundColor(Color.BLUE);
+                            ((RootLayout) object).getShadowLine().setShadowColor(Color.DKGRAY);
+                            ((RootLayout) object).getShadowLine().setElevation(4);
                         }
                     }
 
