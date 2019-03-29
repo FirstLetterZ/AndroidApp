@@ -61,7 +61,7 @@ ext {
             network               : 'com.zpf.android:util-retrofit:1.1.9',
             rxnetwork             : 'com.zpf.android:util-rxNetwork:1.1.6',
             support               : 'com.zpf.android:tool-support:0.1.0',
-            gsonParse             : 'com.zpf.android:util-gson:1.0.1',
+            gsonParse             : 'com.zpf.android:util-gson:1.0.0',
             glideutil             : 'com.zpf.android:util-glide:1.0.0',
             /* ============================== 项目内依赖工具库 ================================ */
             dataparser            : 'com.zpf.android:api-parse:1.0.0',
