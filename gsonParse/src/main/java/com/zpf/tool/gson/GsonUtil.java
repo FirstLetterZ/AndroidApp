@@ -51,10 +51,14 @@ public class GsonUtil implements JsonParserInterface {
         try {
             if (object == null) {
                 return null;
+            } else if (object.getClass() == classType) {
+                return (T) object;
             } else if (object instanceof JsonElement) {
                 return mGson.fromJson((JsonElement) object, classType);
             } else if (object instanceof Reader) {
                 return mGson.fromJson((Reader) object, classType);
+            } else if (classType == String.class) {
+                return (T) toString(object);
             } else {
                 return mGson.fromJson(toString(object), classType);
             }
