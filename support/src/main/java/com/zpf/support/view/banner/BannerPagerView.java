@@ -144,6 +144,9 @@ public class BannerPagerView extends ViewPager {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
+            case MotionEvent.ACTION_CANCEL:
+                restart();
+                break;
             case MotionEvent.ACTION_UP:
                 restart();
                 if (viewCreator != null && hold < 800 && !isMove) {//按住小于0.8秒，点击事件不为空，不是滑动状态，则出发点击
