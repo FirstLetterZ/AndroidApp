@@ -16,10 +16,25 @@ public class StatusBarTextUtil {
 
     public static boolean setBarStatusTextColorStyle(Window window, boolean darkText) {
         if (Build.MANUFACTURER.equalsIgnoreCase("XiaoMi")) {
-            return (MIUISetStatusBarLightMode(window, darkText));
+            if (MIUISetStatusBarLightMode(window, darkText)) {
+                SetStatusBarLightMode(window, darkText);
+                return true;
+            } else {
+                return false;
+            }
         } else if (Build.MANUFACTURER.equalsIgnoreCase("MeiZu")) {
-            return (FlymeSetStatusBarLightMode(window, darkText));
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (FlymeSetStatusBarLightMode(window, darkText)) {
+                SetStatusBarLightMode(window, darkText);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return SetStatusBarLightMode(window, darkText);
+    }
+
+    public static boolean SetStatusBarLightMode(Window window, boolean darkText) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             int visible = window.getDecorView().getSystemUiVisibility();
             if (darkText) {
                 window.getDecorView().setSystemUiVisibility(visible | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
@@ -31,7 +46,6 @@ public class StatusBarTextUtil {
         }
         return false;
     }
-
     /**
      * 设置状态栏图标为深色和魅族特定的文字风格，Flyme4.0以上
      */
