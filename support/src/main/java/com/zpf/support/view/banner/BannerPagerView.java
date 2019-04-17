@@ -28,6 +28,7 @@ public class BannerPagerView extends ViewPager {
     private long hold;//按住了多久
     private long lastClick;//上次触发点击事件的事件
     private boolean scrollable = true;
+    private boolean isPaused = false;
     /*可设置的参数*/
     private int interval = 4000;//自动滚动间隔时间
     private int restartWait = 2000;//抬手后重新开始轮播的最小等待时间
@@ -37,6 +38,8 @@ public class BannerPagerView extends ViewPager {
     private int pagerSize;
     private BannerViewCreator viewCreator;
     private View[] pagerArray;
+    private PagerAdapter pagerAdapter;
+    private float lastPositionOffset = 0;
 
     public BannerPagerView(@NonNull Context context) {
         this(context, null);
@@ -46,63 +49,24 @@ public class BannerPagerView extends ViewPager {
         super(context, attrs);
         ViewPagerScroller scroller = new ViewPagerScroller(context);
         scroller.initScroller(this);
-        setAdapter(new PagerAdapter() {
-            @NonNull
-            @Override
-            public Object instantiateItem(@NonNull ViewGroup container, final int position) {
-                View v = pagerArray[position];
-                if (v == null) {
-                    int rulePosition;
-                    if (position == 0) {
-                        rulePosition = pagerSize - 1;
-                    } else if (position == pagerSize + 1) {
-                        rulePosition = 0;
-                    } else {
-                        rulePosition = position - 1;
-                    }
-                    v = viewCreator.createView(rulePosition);
-                    pagerArray[position] = v;
-                }
-                if (v.getParent() != null) {
-                    ((ViewGroup) v.getParent()).removeView(v);
-                }
-                container.addView(v);
-                return v;
-            }
-
-            @Override
-            public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-                container.removeView((View) object);
-            }
-
-            @Override
-            public int getCount() {
-                return pagerArray == null ? 0 : pagerArray.length;
-            }
-
-            @Override
-            public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
-                return view == object;
-            }
-        });
+        initAdapter();
+        setAdapter(pagerAdapter);
         addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 if (pagerSize <= 1) {
                     return;
                 }
-                if (positionOffset == 0) {
-                    current = position;
-                    if (position == 0) {
-                        setCurrentItem(pagerSize, false);
-                    } else if (position == pagerSize + 1) {
-                        setCurrentItem(1, false);
-                    } else if (bannerIndicator != null) {
-                        bannerIndicator.onScroll(position - 1, positionOffset);
-                    }
+                if (position == pagerSize && positionOffset >= 0.99 && lastPositionOffset >= 0.9 && lastPositionOffset < positionOffset) {
+                    current = 1;
+                    setCurrentItem(1, false);
+                } else if (position == 0 && positionOffset <= 0.01 && lastPositionOffset <= 0.09 && lastPositionOffset > positionOffset) {
+                    current = pagerSize;
+                    setCurrentItem(pagerSize, false);
                 } else if (bannerIndicator != null) {
                     bannerIndicator.onScroll(position - 1, positionOffset);
                 }
+                lastPositionOffset = positionOffset;
             }
 
             @Override
@@ -112,7 +76,9 @@ public class BannerPagerView extends ViewPager {
 
             @Override
             public void onPageScrollStateChanged(int state) {
-
+                if (state == 0) {
+                    lastPositionOffset = 0;
+                }
             }
         });
     }
@@ -125,7 +91,7 @@ public class BannerPagerView extends ViewPager {
                 setCurrentItem(current, true);
             } else {
                 //应该永远到不了这里
-                current = 0;
+                current = 1;
                 setCurrentItem(current, false);
             }
         }
@@ -144,12 +110,9 @@ public class BannerPagerView extends ViewPager {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
-            case MotionEvent.ACTION_CANCEL:
-                restart();
-                break;
             case MotionEvent.ACTION_UP:
                 restart();
-                if (viewCreator != null && hold < 800 && !isMove) {//按住小于0.8秒，点击事件不为空，不是滑动状态，则出发点击
+                if (viewCreator != null && pagerAdapter != null && pagerAdapter.getCount() > 0 && hold < 800 && !isMove) {//按住小于0.8秒，点击事件不为空，不是滑动状态，则出发点击
                     if (System.currentTimeMillis() - lastClick > 200) {//防抖
                         lastClick = System.currentTimeMillis();
                         viewCreator.onItemClick(getRealPosition());
@@ -162,6 +125,9 @@ public class BannerPagerView extends ViewPager {
                 y = event.getRawY();
                 isMove = false;
                 return true;//返回false则无法监听MotionEvent.ACTION_UP
+            case MotionEvent.ACTION_CANCEL:
+                restart();
+                break;
             case MotionEvent.ACTION_MOVE:
                 if (Math.abs(event.getRawX() - x) > 8 || Math.abs(event.getRawY() - y) > 8) {//水平或竖直方向位移绝对值超过8像素视为滑动
                     isMove = true;
@@ -175,7 +141,7 @@ public class BannerPagerView extends ViewPager {
 
     private int getRealPosition() {
         if (current == 0) {
-            return pagerSize;
+            return pagerSize - 1;
         } else if (current == pagerSize + 1) {
             return 0;
         } else {
@@ -221,6 +187,7 @@ public class BannerPagerView extends ViewPager {
     //初始化
     public void init(BannerViewCreator viewCreator) {
         timeTaskUtil.stopPlay();
+        isPaused = true;
         this.viewCreator = viewCreator;
         if (viewCreator == null) {
             resetSize(0);
@@ -231,6 +198,7 @@ public class BannerPagerView extends ViewPager {
 
     public void resetSize(int newSize) {
         timeTaskUtil.stopPlay();
+        isPaused = true;
         if (bannerIndicator != null) {
             bannerIndicator.setSize(newSize);
         }
@@ -238,24 +206,72 @@ public class BannerPagerView extends ViewPager {
         if (newSize < 1) {
             scrollable = false;
             pagerArray = null;
-            if (getAdapter() != null) {
-                getAdapter().notifyDataSetChanged();
-            }
+            initAdapter();
+            pagerAdapter.notifyDataSetChanged();
         } else if (newSize == 1) {
             pagerArray = new View[1];
             scrollable = false;
-            if (getAdapter() != null) {
-                getAdapter().notifyDataSetChanged();
-            }
+            initAdapter();
+            pagerAdapter.notifyDataSetChanged();
             setCurrentItem(0, false);
         } else {
             pagerArray = new View[pagerSize + 2];
             scrollable = true;
-            if (getAdapter() != null) {
-                getAdapter().notifyDataSetChanged();
-            }
+            initAdapter();
+            pagerAdapter.notifyDataSetChanged();
             setCurrentItem(1, false);
             timeTaskUtil.startPlay(interval, interval);
+            isPaused = false;
+        }
+    }
+
+    private void initAdapter() {
+        if (pagerAdapter == null) {
+            pagerAdapter = new PagerAdapter() {
+                @NonNull
+                @Override
+                public Object instantiateItem(@NonNull ViewGroup container, final int position) {
+                    View v = pagerArray[position];
+                    if (v == null) {
+                        int rulePosition;
+                        if (position == 0) {
+                            rulePosition = pagerSize - 1;
+                        } else if (position == pagerSize + 1) {
+                            rulePosition = 0;
+                        } else {
+                            rulePosition = position - 1;
+                        }
+                        v = viewCreator.createView(rulePosition);
+                        pagerArray[position] = v;
+                    }
+                    if (v.getParent() != null) {
+                        ((ViewGroup) v.getParent()).removeView(v);
+                    }
+                    container.addView(v);
+                    return v;
+                }
+
+                @Override
+                public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
+                    container.removeView((View) object);
+                }
+
+                @Override
+                public int getCount() {
+                    return pagerArray == null ? 0 : pagerArray.length;
+                }
+
+                @Override
+                public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
+                    return view == object;
+                }
+            };
+        }
+    }
+
+    public void notifyDataSetChanged() {
+        if (viewCreator != null) {
+            resetSize(viewCreator.getSize());
         }
     }
 
@@ -264,17 +280,22 @@ public class BannerPagerView extends ViewPager {
     }
 
     public void restart() {
-        hold = System.currentTimeMillis() - pauseTime;
-        long wait;
-        if (interval - hold < restartWait) {
-            wait = restartWait;
-        } else {
-            wait = interval - hold;
+        initAdapter();
+        if (pagerAdapter.getCount() > 1) {
+            hold = System.currentTimeMillis() - pauseTime;
+            long wait;
+            if (interval - hold < restartWait) {
+                wait = restartWait;
+            } else {
+                wait = interval - hold;
+            }
+            timeTaskUtil.startPlay(wait);
+            isPaused = false;
         }
-        timeTaskUtil.startPlay(wait);
     }
 
     public void pause() {
+        isPaused = true;
         timeTaskUtil.stopPlay();
         pauseTime = System.currentTimeMillis();
     }
