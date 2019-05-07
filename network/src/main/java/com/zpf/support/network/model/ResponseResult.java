@@ -1,16 +1,25 @@
 package com.zpf.support.network.model;
 
-public class HttpResult<T> {
+import com.zpf.support.network.base.ErrorCode;
+
+public class ResponseResult<T> implements Cloneable {
     private int code;
     private String message;
     private T data;
+    private boolean success;
 
-    public HttpResult() {
+    public ResponseResult() {
     }
 
-    public HttpResult(int code, String message) {
+    public ResponseResult(int code, String message) {
         this.code = code;
         this.message = message;
+    }
+
+    public ResponseResult(int code, String message, T data) {
+        this.code = code;
+        this.message = message;
+        this.data = data;
     }
 
     public int getCode() {
@@ -37,7 +46,11 @@ public class HttpResult<T> {
         this.data = data;
     }
 
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
     public boolean isSuccess() {
-        return code == 200;
+        return code == ErrorCode.RESPONSE_SUCCESS || success;
     }
 }

@@ -1,6 +1,7 @@
 package com.zpf.webview;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -18,6 +19,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.SslErrorHandler;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -52,6 +54,7 @@ public class BridgeWebView extends WebView {
     private List<WebViewStateListener> stateListenerList = new ArrayList<>();
     private OnReceivedWebPageListener webPageListener;
     private WebViewWindowListener windowListener;
+    private WebViewFileChooserListener fileChooserListener;
     private OnProgressListener<WebView> progressChangedListener;
     private IChecker<String> urlInterceptor;//url拦截
     private JsCallNativeListener jsCallNativeListener;//js调用native的回调
@@ -79,7 +82,7 @@ public class BridgeWebView extends WebView {
         init();
     }
 
-    private void init(){
+    private void init() {
         initSetting();
         setWebChromeClient(initWebChromeClient());
         setWebViewClient(initWebViewClient());
@@ -284,6 +287,37 @@ public class BridgeWebView extends WebView {
                 }
                 super.onCloseWindow(window);
             }
+
+            @Override
+            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+                if (fileChooserListener != null) {
+                    return fileChooserListener.onShowFileChooser(webView, filePathCallback,
+                            fileChooserParams.getAcceptTypes());
+                }
+                return super.onShowFileChooser(webView, filePathCallback, fileChooserParams);
+            }
+
+            @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+            public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
+                if (fileChooserListener != null) {
+                    final ValueCallback<Uri> valueCallback = uploadMsg;
+                    ValueCallback<Uri[]> filePathCallback = new ValueCallback<Uri[]>() {
+                        @Override
+                        public void onReceiveValue(Uri[] value) {
+                            if (value != null && value.length > 0) {
+                                for (Uri uri : value) {
+                                    valueCallback.onReceiveValue(uri);
+                                }
+                            }
+                        }
+                    };
+                    fileChooserListener.onShowFileChooser(BridgeWebView.this,
+                            filePathCallback, new String[]{acceptType});
+                }
+            }
+
+
         };
     }
 

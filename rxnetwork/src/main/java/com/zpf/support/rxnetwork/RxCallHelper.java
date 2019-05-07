@@ -1,8 +1,5 @@
 package com.zpf.support.rxnetwork;
-
-import com.zpf.support.network.base.BaseCall;
-import com.zpf.support.network.header.HeaderCarrier;
-import com.zpf.support.network.model.ClientBuilder;
+import com.zpf.support.network.model.RequestHelper;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -14,32 +11,21 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
 /**
  * Created by ZPF on 2018/7/26.
  */
-public class RxCall extends BaseCall {
+public class RxCallHelper extends RequestHelper {
 
-    public RxCall(HeaderCarrier headerCarrier) {
-        super(headerCarrier);
-    }
-
-    @Override
-    public ClientBuilder builder() {
-        ClientBuilder builder = super.builder();
-        builder.retrofitBuilder().addCallAdapterFactory(RxJava2CallAdapterFactory.create());
-        return builder;
-    }
-
-    public <T> void toSubscribe(Observable<T> o, Observer<T> s) {
+    public static <T> Observer toSubscribe(Observable<T> o, Observer<T> s) {
         o.subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(s);
+        return s;
     }
 
-    public void forDownLoad(Observable<ResponseBody> o, Observer<Boolean> s, final String filePath) {
+    public static Observer forDownLoad(Observable<ResponseBody> o, Observer<Boolean> s, final String filePath) {
         o.subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())
                 .map(new Function<ResponseBody, Boolean>() {
@@ -71,6 +57,7 @@ public class RxCall extends BaseCall {
                 })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(s);
+        return s;
     }
 
 }

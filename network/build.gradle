@@ -17,9 +17,9 @@ android {
 }
 
 dependencies {
-    api rootProject.ext.dependencies.retrofit
-    api rootProject.ext.dependencies.api
-    api rootProject.ext.dependencies.global
+    provided rootProject.ext.dependencies.retrofit
+    provided rootProject.ext.dependencies.api
+    provided rootProject.ext.dependencies.global
 }
 
 apply from: "../bintrayUpload.gradle"

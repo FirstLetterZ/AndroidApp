@@ -4,16 +4,16 @@ import android.accounts.AccountsException;
 import android.net.ParseException;
 import android.os.Looper;
 import android.support.annotation.IntRange;
-import android.text.TextUtils;
 
 import com.zpf.api.ICallback;
-import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.support.network.model.CustomException;
-import com.zpf.support.network.model.HttpResult;
+import com.zpf.support.network.model.ResponseResult;
+import com.zpf.tool.config.AppContext;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.MainHandler;
+import com.zpf.util.network.R;
 
 import org.json.JSONException;
 
@@ -40,9 +40,9 @@ public abstract class BaseCallBack<T> implements ICallback, OnDestroyListener {
 
     private volatile boolean isCancel = false;
     protected IManager<ICallback> manager;
-    protected ICustomWindow safeWindow;
     protected long bindId;
-    private ResponseHandleInterface responseHandler;
+    private IResponseHandler responseHandler = GlobalConfigImpl.get().getGlobalInstance(IResponseHandler.class);
+    protected ResponseResult<T> responseResult = new ResponseResult<>();
 
     public BaseCallBack() {
         this(0);
@@ -50,7 +50,6 @@ public abstract class BaseCallBack<T> implements ICallback, OnDestroyListener {
 
     public BaseCallBack(int type) {
         setType(type);
-        responseHandler = GlobalConfigImpl.get().getGlobalInstance(ResponseHandleInterface.class);
     }
 
     public void setType(@IntRange(from = 0, to = 16) int type) {
@@ -109,32 +108,32 @@ public abstract class BaseCallBack<T> implements ICallback, OnDestroyListener {
             description = e.getMessage();
         } else if (e instanceof AccountsException) {
             code = ErrorCode.ACCOUNT_ERROR;
-            description = "账号验证失败";
+            description = getString(R.string.network_account_error);
         } else if (e instanceof SSLHandshakeException) {
             code = ErrorCode.SSL_ERROR;
-            description = "网络证书验证失败";
+            description = getString(R.string.network_ssl_error);
         } else if (e instanceof JSONException
                 || e instanceof ParseException) {
             code = ErrorCode.PARSE_ERROR;
-            description = "数据解析异常";
+            description = getString(R.string.network_parse_error);
         } else if (e instanceof ConnectException) {
             code = ErrorCode.CONNECT_ERROR;
-            description = "连接服务器失败";
+            description = getString(R.string.network_connect_error);
         } else if (e instanceof TimeoutException
                 || e instanceof SocketTimeoutException) {
             code = ErrorCode.TIMEOUT_ERROR;
-            description = "连接超时，请稍后再试";
+            description = getString(R.string.network_timeout_error);
         } else if (e instanceof InterruptedIOException) {
             code = ErrorCode.INTERRUPTED_ERROR;
-            description = "连接中断，请稍后再试";
+            description = getString(R.string.network_interrupted_error);
         } else if (e instanceof SocketException) {
-            code = ErrorCode.NETWORK_ERROR;
-            description = "网络连接异常";
+            code = ErrorCode.SOCKET_ERROR;
+            description = getString(R.string.network_socket_error);
         } else if (e instanceof IOException) {
             code = ErrorCode.IO_ERROR;
-            description = "数据流异常，解析失败";
+            description = getString(R.string.network_io_error);
         } else {
-            HttpResult parseResult = null;
+            ResponseResult parseResult = null;
             if (responseHandler != null) {
                 parseResult = responseHandler.parsingException(e);
             }
@@ -150,33 +149,26 @@ public abstract class BaseCallBack<T> implements ICallback, OnDestroyListener {
     }
 
     /**
-     * @param code        错误码
-     * @param description 错误描述
+     * 要在主线程运行
      */
-    protected void fail(final int code, final String description) {
-        if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
-            MainHandler.get().post(new Runnable() {
-                @Override
-                public void run() {
-                    if (!isCancel) {
-                        fail(code, description);
-                    }
+    protected void fail(final int code, final String message) {
+        runInMain(new Runnable() {
+            @Override
+            public void run() {
+                if (isCancel) {
+                    return;
                 }
-            });
-            return;
-        }
-        if (responseHandler != null && responseHandler.interceptFailHandle(code)) {
-            complete(false);
-            return;
-        }
-        if (!showDialog(code, description) && responseHandler != null && autoToast()) {
-            if (TextUtils.isEmpty(description)) {
-                responseHandler.showToast(code, "请求失败，请稍后重试");
-            } else {
-                responseHandler.showToast(code, description);
+                responseResult.setCode(code);
+                responseResult.setMessage(message);
+                if (responseHandler != null && responseHandler.interceptFailHandle(responseResult)) {
+                    return;
+                }
+                if (!showHint(code, message) && responseHandler != null && showHint()) {
+                    responseHandler.showHint(code, message);
+                }
+                complete(false, responseResult);
             }
-        }
-        complete(false);
+        });
     }
 
     protected void removeObservable() {
@@ -184,35 +176,12 @@ public abstract class BaseCallBack<T> implements ICallback, OnDestroyListener {
             manager.cancel(bindId);
             manager = null;
         }
-        if (safeWindow != null && safeWindow.isShowing()) {
-            try {
-                safeWindow.dismiss();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            safeWindow = null;
-        }
-    }
-
-    /**
-     * 检查数据视为null或JsonNull
-     */
-    protected final boolean checkNull(Object value) {
-        if (type[1] == 1) {
-            return false;
-        } else if (value == null) {
-            return true;
-        } else if (value instanceof HttpResult) {
-            return ((HttpResult) value).getData() == null;
-        } else {
-            return responseHandler != null && responseHandler.checkDataNull(value);
-        }
     }
 
     /**
      * 控制弹窗是否弹出
      */
-    protected boolean showDialog(int code, String description) {
+    protected boolean showHint(int code, String message) {
         return false;
     }
 
@@ -220,36 +189,65 @@ public abstract class BaseCallBack<T> implements ICallback, OnDestroyListener {
      * 运行在子线程
      * 返回数据内容预处理
      */
-    protected void preProcessResult(T result) {
-    }
-
-    /**
-     * 运行在子线程
-     * 返回数据内容是否满足成功条件
-     */
-    protected boolean checkResultSuccess(T result) {
+    protected boolean checkResponse(T result) {
+        if (checkDataNull(result)) {
+            responseResult.setCode(ErrorCode.DATA_NULL);
+            responseResult.setMessage(getString(R.string.network_data_null));
+            return isNullable();
+        }
         return true;
     }
 
-    /**
-     * 运行在主线程
-     * 返回数据内容不满足成功条件的处理
-     */
-    protected void onResultIllegal(T result) {
+    protected boolean checkDataNull(T result) {
+        if (result == null) {
+            return true;
+        } else if (result instanceof ResponseResult) {
+            return ((ResponseResult) result).getData() == null;
+        } else {
+            return responseHandler != null && responseHandler.checkDataNull(result);
+        }
     }
+
 
     /**
      * 当返回数据为空或者解析为空
      */
-    protected void onDataNull() {
-        fail(ErrorCode.DATA_NULL, "返回数据为空");
+
+    protected final void onDataNull() {
+        fail(ErrorCode.DATA_NULL, getString(R.string.network_data_null));
+    }
+
+    protected final void runInMain(Runnable runnable) {
+        if (runnable == null || isCancel) {
+            return;
+        }
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            runnable.run();
+        } else {
+            MainHandler.get().post(runnable);
+        }
+    }
+
+    protected final String getString(int id) {
+        try {
+            return AppContext.get().getString(id);
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     /**
      * 检查是否弹窗
      */
-    private boolean autoToast() {
+    protected final boolean showHint() {
         return type[0] == 0;
+    }
+
+    /**
+     * 检查是否数据内容可为空
+     */
+    protected final boolean isNullable() {
+        return type[1] == 1;
     }
 
     public boolean isCancel() {
@@ -258,6 +256,6 @@ public abstract class BaseCallBack<T> implements ICallback, OnDestroyListener {
 
     protected abstract void doCancel();
 
-    protected abstract void complete(boolean success);
+    protected abstract void complete(boolean success, ResponseResult<T> responseResult);
 
 }

@@ -1,0 +1,13 @@
+<resources>
+    <string name="network_data_null">返回数据为空</string>
+    <string name="network_common_error">网络请求失败</string>
+    <string name="network_ssl_error">网络证书验证失败</string>
+    <string name="network_parse_error">数据解析异常</string>
+    <string name="network_account_error">账号验证失败</string>
+    <string name="network_connect_error">连接服务器失败</string>
+    <string name="network_interrupted_error">连接中断，请稍后再试</string>
+    <string name="network_timeout_error">连接超时，请稍后再试</string>
+    <string name="network_socket_error">连接异常</string>
+    <string name="network_io_error">数据流异常，解析失败</string>
+    <string name="network_illegal_error">返回数据不合规</string>
+</resources>

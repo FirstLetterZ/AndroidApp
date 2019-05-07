@@ -3,6 +3,7 @@ package com.zpf.support.rxnetwork;
 import com.zpf.api.ICallback;
 import com.zpf.api.IManager;
 import com.zpf.support.network.base.BaseCallBack;
+import com.zpf.support.network.base.ErrorCode;
 
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
@@ -37,22 +38,29 @@ public abstract class RxCallBack<T> extends BaseCallBack<T> implements Observer<
     }
 
     @Override
-    public void onNext(T t) {
+    public void onNext(final T t) {
         if (isCancel()) {
             return;
         }
         removeObservable();
-        if (checkNull(t)) {
-            onDataNull();
-        } else if (checkResultSuccess(t)) {
-            try {
-                handleResponse(t);
-                complete(true);
-            } catch (Exception e) {
-                handleError(e);
-            }
+        if (checkResponse(t)) {
+            runInMain(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        handleResponse(t);
+                        complete(true, responseResult);
+                    } catch (Exception e) {
+                        handleError(e);
+                    }
+                }
+            });
         } else {
-            onResultIllegal(t);
+            if (responseResult.getCode() == ErrorCode.RESPONSE_SUCCESS) {
+                responseResult.setCode(ErrorCode.RESPONSE_ILLEGAL);
+                responseResult.setMessage(getString(com.zpf.util.network.R.string.network_illegal_error));
+            }
+            fail(responseResult.getCode(), responseResult.getMessage());
         }
     }
 

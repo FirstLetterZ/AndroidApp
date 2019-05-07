@@ -16,11 +16,6 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-
-/*
- *创建人：bin.zhou
- *创建时间：2018/7/17 11:43
- */
 public class TLSSocketFactory extends SSLSocketFactory {
     private SSLSocketFactory delegate;
 

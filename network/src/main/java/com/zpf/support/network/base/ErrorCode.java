@@ -5,14 +5,16 @@ package com.zpf.support.network.base;
  */
 
 public @interface ErrorCode {
-    int DATA_NULL = -900;
-    int NO_SERVER_CODE = -901;
-    int SSL_ERROR = -902;
-    int PARSE_ERROR = -903;
-    int ACCOUNT_ERROR = -904;
-    int NETWORK_ERROR = -910;
-    int CONNECT_ERROR = -911;
-    int TIMEOUT_ERROR = -912;
-    int INTERRUPTED_ERROR = -913;
-    int IO_ERROR = -920;
+    int RESPONSE_SUCCESS = 200;
+    int DATA_NULL = 700;
+    int NO_SERVER_CODE = 701;
+    int SSL_ERROR = 702;
+    int PARSE_ERROR = 703;
+    int ACCOUNT_ERROR = 704;
+    int SOCKET_ERROR = 710;
+    int CONNECT_ERROR = 711;
+    int TIMEOUT_ERROR = 712;
+    int INTERRUPTED_ERROR = 713;
+    int IO_ERROR = 720;
+    int RESPONSE_ILLEGAL = 730;
 }

@@ -17,8 +17,17 @@ import okhttp3.RequestBody;
  */
 public class RequestHelper {
 
-    public static RequestBody createJsonRequest() {
-        return createJsonRequest(null);
+    public static RequestBody createJsonRequest(Map<String, Object> map) {
+        if (map == null) {
+            return createEmptyJsonRequest();
+        } else {
+            JSONObject jsonObject = new JSONObject(map);
+            return createJsonRequest(jsonObject.toString());
+        }
+    }
+
+    public static RequestBody createEmptyJsonRequest() {
+        return createJsonRequest("");
     }
 
     public static RequestBody createJsonRequest(String jsonString) {

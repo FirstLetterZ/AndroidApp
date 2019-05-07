@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="com.zpf.android:util-retrofit-1.1.9">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/util-retrofit-1.1.9.aar/70cf1eaadeef3e32b186570174c18339/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/util-retrofit-1.1.9.aar/70cf1eaadeef3e32b186570174c18339/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.zpf.android/util-retrofit/1.1.9/599b389b607adea4a716213c5d733f0f3bd5dabe/util-retrofit-1.1.9-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

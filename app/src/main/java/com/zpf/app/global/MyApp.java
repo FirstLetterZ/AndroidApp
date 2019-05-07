@@ -4,7 +4,7 @@ import android.app.Application;
 import android.graphics.Color;
 
 import com.zpf.api.dataparser.JsonParserInterface;
-import com.zpf.support.network.base.ResponseHandleInterface;
+import com.zpf.support.network.base.IResponseHandler;
 import com.zpf.support.view.RootLayout;
 import com.zpf.tool.PublicUtil;
 import com.zpf.tool.config.AppStackUtil;
@@ -54,7 +54,7 @@ public class MyApp extends Application {
                 public <T> T getGlobalInstance(Class<T> target) {
                     if (target == JsonParserInterface.class) {
                         return (T) GsonUtil.get();
-                    } else if (target == ResponseHandleInterface.class) {
+                    } else if (target == IResponseHandler.class) {
                         return (T) ResponseHandleImpl.get();
                     }
                     return null;

@@ -3,7 +3,8 @@ package com.zpf.support.network.retrofit;
 import com.zpf.api.ICallback;
 import com.zpf.api.IManager;
 import com.zpf.support.network.base.BaseCallBack;
-import com.zpf.tool.config.MainHandler;
+import com.zpf.support.network.base.ErrorCode;
+import com.zpf.util.network.R;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -41,41 +42,24 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
             onDataNull();
         } else if (response.isSuccessful()) {
             final T result = response.body();
-            if (checkNull(result)) {
-                onDataNull();
-            } else {
-                if (checkResultSuccess(result)) {
-                    try {
-                        preProcessResult(result);
-                    } catch (Exception e) {
-                        handleError(e);
-                        return;
+            if (checkResponse(result)) {
+                runInMain(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            handleResponse(result);
+                            complete(true, responseResult);
+                        } catch (Exception e) {
+                            handleError(e);
+                        }
                     }
-                    MainHandler.get().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (isCancel()) {
-                                return;
-                            }
-                            try {
-                                handleResponse(result);
-                                complete(true);
-                            } catch (Exception e) {
-                                handleError(e);
-                            }
-                        }
-                    });
-                } else {
-                    MainHandler.get().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (isCancel()) {
-                                return;
-                            }
-                            onResultIllegal(result);
-                        }
-                    });
+                });
+            } else {
+                if (responseResult.getCode() == ErrorCode.RESPONSE_SUCCESS) {
+                    responseResult.setCode(ErrorCode.RESPONSE_ILLEGAL);
+                    responseResult.setMessage(getString(R.string.network_illegal_error));
                 }
+                fail(responseResult.getCode(), responseResult.getMessage());
             }
         } else {
             fail(response.code(), response.message());

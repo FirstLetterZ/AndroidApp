@@ -17,7 +17,7 @@ public class ClientBuilder {
     private Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
     private HeaderInterceptor headerInterceptor = new HeaderInterceptor();
 
-    public static ClientBuilder createDefBuilder() {
+    public static ClientBuilder createDefBuilder(HeaderCarrier headerCarrier) {
         ClientBuilder clientBuilder = new ClientBuilder();
         clientBuilder.httpClientBuilder.retryOnConnectionFailure(true);
         clientBuilder.httpClientBuilder.connectTimeout(clientBuilder.timeOutInSeconds, TimeUnit.SECONDS)
@@ -30,6 +30,7 @@ public class ClientBuilder {
             e.printStackTrace();
         }
         clientBuilder.httpClientBuilder.addNetworkInterceptor(clientBuilder.headerInterceptor);
+        clientBuilder.headerInterceptor.getHeaderCarrier().reset(headerCarrier);
         return clientBuilder;
     }
 
