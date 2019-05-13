@@ -31,7 +31,7 @@ import java.util.List;
  * 视图处理
  * Created by ZPF on 2018/6/14.
  */
-public abstract class ViewProcessor<C> implements IViewProcessor<C> ,OnActivityResultListener{
+public abstract class ViewProcessor<C> implements IViewProcessor<C>, OnActivityResultListener {
     protected final IViewContainer mContainer;
     protected final ITitleBar mTitleBar;
     protected final IRootLayout mRootLayout;
