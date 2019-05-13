@@ -67,7 +67,13 @@ public class CallBackManager implements IManager<ICallback>, OnDestroyListener {
     }
 
     @Override
-    public void onDestroy() {
+    public void reset() {
         cancelAll();
+        cancelAll = false;
+    }
+
+    @Override
+    public void onDestroy() {
+        reset();
     }
 }

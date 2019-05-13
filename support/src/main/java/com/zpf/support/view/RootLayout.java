@@ -81,8 +81,8 @@ public class RootLayout extends LinearLayout implements IRootLayout {
     }
 
     @Override
-    public ViewGroup getTopLayout() {
-        return topView.getLayout();
+    public ITopLayout getTopLayout() {
+        return topView;
     }
 
     @Override

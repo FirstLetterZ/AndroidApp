@@ -25,7 +25,7 @@ public class DialogController implements IManager<ICustomWindow>, OnDestroyListe
         long id = -1;
         if (showingWindow == safeWindow) {
             id = showingWindowId;
-        }else {
+        } else {
             for (Pair<Long, ICustomWindow> cache : cacheList) {
                 if (cache.second == safeWindow) {
                     id = cache.first;
@@ -84,6 +84,11 @@ public class DialogController implements IManager<ICustomWindow>, OnDestroyListe
         showingWindowId = -1;
         cacheList.clear();
         isDestroy = false;
+    }
+
+    @Override
+    public void reset() {
+        cancelAll();
     }
 
     @Override

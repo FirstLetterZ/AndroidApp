@@ -4,8 +4,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
+import com.zpf.api.ILayoutId;
 import com.zpf.app.activity.LoginView;
-import com.zpf.frame.ILayoutId;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.app.R;
 import com.zpf.tool.config.MainHandler;

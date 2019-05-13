@@ -4,23 +4,18 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.zpf.api.LifecycleListener;
+import com.zpf.api.IFullLifecycle;
 import com.zpf.tool.config.LifecycleState;
 
 /**
  * Created by ZPF on 2018/6/28.
  */
 
-public class ViewStateListener implements LifecycleListener {
-    private int mViewState = LifecycleState.NOT_INIT;
+public class ViewStateListener implements IFullLifecycle {
+    private int mViewState = LifecycleState.BEFORE_CREATE;
 
     @Override
-    public void onPreCreate(@Nullable Bundle savedInstanceState) {
-        mViewState = LifecycleState.BEFORE_CREATE;
-    }
-
-    @Override
-    public void afterCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         mViewState = LifecycleState.AFTER_CREATE;
     }
 

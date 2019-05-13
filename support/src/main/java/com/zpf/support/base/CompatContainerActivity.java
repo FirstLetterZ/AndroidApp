@@ -16,13 +16,15 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.zpf.api.IBackPressInterceptor;
 import com.zpf.api.ICallback;
 import com.zpf.api.ICustomWindow;
+import com.zpf.api.IFullLifecycle;
 import com.zpf.api.IManager;
-import com.zpf.api.LifecycleListener;
+import com.zpf.api.OnActivityResultListener;
+import com.zpf.api.OnPermissionResultListener;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.IViewProcessor;
-import com.zpf.frame.ResultCallBackListener;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
@@ -107,6 +109,9 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     @Override
     public void onDestroy() {
         mController.onDestroy();
+        if (mViewProcessor != null) {
+            mViewProcessor.onDestroy();
+        }
         super.onDestroy();
         loadingManager = null;
     }
@@ -253,12 +258,12 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     @Override
-    public void addLifecycleListener(LifecycleListener lifecycleListener) {
+    public void addLifecycleListener(IFullLifecycle lifecycleListener) {
         mController.addLifecycleListener(lifecycleListener);
     }
 
     @Override
-    public void removeLifecycleListener(LifecycleListener lifecycleListener) {
+    public void removeLifecycleListener(IFullLifecycle lifecycleListener) {
         mController.removeLifecycleListener(lifecycleListener);
     }
 
@@ -273,14 +278,35 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     @Override
-    public void addResultCallBackListener(ResultCallBackListener callBackListener) {
-        mController.addResultCallBackListener(callBackListener);
+    public void addActivityResultListener(OnActivityResultListener listener) {
+        mController.addActivityResultListener(listener);
     }
 
     @Override
-    public void removeResultCallBackListener(ResultCallBackListener callBackListener) {
-        mController.removeResultCallBackListener(callBackListener);
+    public void removeActivityResultListener(OnActivityResultListener listener) {
+        mController.removeActivityResultListener(listener);
     }
+
+    @Override
+    public void addPermissionsResultListener(OnPermissionResultListener listener) {
+        mController.addPermissionsResultListener(listener);
+    }
+
+    @Override
+    public void removePermissionsResultListener(OnPermissionResultListener listener) {
+        mController.removePermissionsResultListener(listener);
+    }
+
+    @Override
+    public void addBackPressInterceptor(IBackPressInterceptor interceptor) {
+        mController.addBackPressInterceptor(interceptor);
+    }
+
+    @Override
+    public void removeBackPressInterceptor(IBackPressInterceptor interceptor) {
+        mController.removeBackPressInterceptor(interceptor);
+    }
+
 
     @Override
     public boolean hideLoading() {

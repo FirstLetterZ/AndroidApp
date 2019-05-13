@@ -11,7 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.zpf.frame.ILayoutId;
+import com.zpf.api.ILayoutId;
+import com.zpf.api.OnActivityResultListener;
 import com.zpf.frame.IRootLayout;
 import com.zpf.frame.ITitleBar;
 import com.zpf.support.constant.AppConst;
@@ -30,7 +31,7 @@ import java.util.List;
  * 视图处理
  * Created by ZPF on 2018/6/14.
  */
-public abstract class ViewProcessor<C> implements IViewProcessor<C> {
+public abstract class ViewProcessor<C> implements IViewProcessor<C> ,OnActivityResultListener{
     protected final IViewContainer mContainer;
     protected final ITitleBar mTitleBar;
     protected final IRootLayout mRootLayout;
@@ -57,36 +58,6 @@ public abstract class ViewProcessor<C> implements IViewProcessor<C> {
                 mRootLayout.setContentView(layoutView);
             }
         }
-    }
-
-    @Override
-    public void onPreCreate(@Nullable Bundle savedInstanceState) {
-        mContainer.bindView(this);
-    }
-
-    @Override
-    public void onRestart() {
-
-    }
-
-    @Override
-    public void onStart() {
-
-    }
-
-    @Override
-    public void onResume() {
-
-    }
-
-    @Override
-    public void onPause() {
-
-    }
-
-    @Override
-    public void onStop() {
-
     }
 
     @Override
