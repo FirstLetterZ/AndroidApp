@@ -18,7 +18,7 @@ public class ContainerProxyManager {
             android.support.v4.app.FragmentManager manager = ((FragmentActivity) activity).getSupportFragmentManager();
             android.support.v4.app.FragmentTransaction transaction = manager.beginTransaction();
             android.support.v4.app.Fragment fragment = manager.findFragmentByTag(TAG + activity.getClass().getName());
-            if (fragment != null && fragment instanceof ProxyCompatContainer) {
+            if (fragment instanceof ProxyCompatContainer) {
                 proxyViewContainer = (ProxyCompatContainer) fragment;
                 if (proxyViewContainer.isHidden()) {
                     transaction.show(fragment);

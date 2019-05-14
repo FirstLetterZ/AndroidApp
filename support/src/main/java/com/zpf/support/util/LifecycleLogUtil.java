@@ -4,13 +4,13 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.zpf.api.LifecycleListener;
+import com.zpf.api.IFullLifecycle;
 import com.zpf.frame.IViewContainer;
 
 /**
  * Created by ZPF on 2018/6/26.
  */
-public class LifecycleLogUtil implements LifecycleListener {
+public class LifecycleLogUtil implements IFullLifecycle {
     private String name;
 
     public LifecycleLogUtil(IViewContainer IViewContainer) {
@@ -35,13 +35,8 @@ public class LifecycleLogUtil implements LifecycleListener {
     }
 
     @Override
-    public void onPreCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         log("onPreCreate");
-    }
-
-    @Override
-    public void afterCreate(@Nullable Bundle savedInstanceState) {
-        log("afterCreate");
     }
 
     @Override

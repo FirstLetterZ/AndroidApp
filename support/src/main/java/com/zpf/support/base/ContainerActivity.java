@@ -15,15 +15,18 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.zpf.api.IBackPressInterceptor;
 import com.zpf.api.ICallback;
 import com.zpf.api.ICustomWindow;
+import com.zpf.api.IFullLifecycle;
 import com.zpf.api.IManager;
-import com.zpf.api.LifecycleListener;
+import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnDestroyListener;
+import com.zpf.api.OnPermissionResultListener;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
-import com.zpf.frame.ResultCallBackListener;
+import com.zpf.frame.IViewStateListener;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
@@ -59,21 +62,19 @@ public class ContainerActivity extends Activity implements IViewContainer {
         initWindow();
         IViewProcessor viewProcessor = initViewProcessor();
         if (viewProcessor != null) {
-            mController.addLifecycleListener(viewProcessor);
-            mController.addResultCallBackListener(viewProcessor);
             setContentView(viewProcessor.getView());
         } else {
             LogUtil.w("IViewProcessor is null!");
         }
-        mController.onPreCreate(savedInstanceState);
         initView(savedInstanceState);
-        mController.afterCreate(savedInstanceState);
+        mController.onCreate(savedInstanceState);
     }
 
     @Override
     public void onRestart() {
         super.onRestart();
         mController.onRestart();
+        mController.onVisibleChanged(true);
     }
 
 
@@ -81,19 +82,21 @@ public class ContainerActivity extends Activity implements IViewContainer {
     public void onStart() {
         super.onStart();
         mController.onStart();
+        mController.onVisibleChanged(true);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mController.onResume();
-        mController.onVisibleChanged(true);
+        mController.onActiviityChanged(true);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mController.onPause();
+        mController.onActiviityChanged(false);
     }
 
     @Override
@@ -112,10 +115,7 @@ public class ContainerActivity extends Activity implements IViewContainer {
 
     @Override
     public void onBackPressed() {
-        if (mViewProcessor != null && mViewProcessor.onInterceptBackPress()) {
-            return;
-        }
-        if (!dismiss()) {
+        if (!mController.onInterceptBackPress() && !dismiss()) {
             super.onBackPressed();
         }
     }
@@ -139,7 +139,7 @@ public class ContainerActivity extends Activity implements IViewContainer {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        mController.onNewIntent(intent);
+        mController.onParamChanged(intent.getExtras());
     }
 
     @Override
@@ -241,6 +241,16 @@ public class ContainerActivity extends Activity implements IViewContainer {
     }
 
     @Override
+    public void addViewStateListener(IViewStateListener listener) {
+        mController.addViewStateListener(listener);
+    }
+
+    @Override
+    public void removeViewStateListener(IViewStateListener listener) {
+        mController.removeViewStateListener(listener);
+    }
+
+    @Override
     public void finishWithResult(int resultCode, Intent data) {
         setResult(resultCode, data);
         super.finish();
@@ -252,12 +262,12 @@ public class ContainerActivity extends Activity implements IViewContainer {
     }
 
     @Override
-    public void addLifecycleListener(LifecycleListener lifecycleListener) {
+    public void addLifecycleListener(IFullLifecycle lifecycleListener) {
         mController.addLifecycleListener(lifecycleListener);
     }
 
     @Override
-    public void removeLifecycleListener(LifecycleListener lifecycleListener) {
+    public void removeLifecycleListener(IFullLifecycle lifecycleListener) {
         mController.removeLifecycleListener(lifecycleListener);
     }
 
@@ -272,14 +282,35 @@ public class ContainerActivity extends Activity implements IViewContainer {
     }
 
     @Override
-    public void addResultCallBackListener(ResultCallBackListener callBackListener) {
-        mController.addResultCallBackListener(callBackListener);
+    public void addActivityResultListener(OnActivityResultListener listener) {
+        mController.addActivityResultListener(listener);
     }
 
     @Override
-    public void removeResultCallBackListener(ResultCallBackListener callBackListener) {
-        mController.removeResultCallBackListener(callBackListener);
+    public void removeActivityResultListener(OnActivityResultListener listener) {
+        mController.removeActivityResultListener(listener);
     }
+
+    @Override
+    public void addPermissionsResultListener(OnPermissionResultListener listener) {
+        mController.addPermissionsResultListener(listener);
+    }
+
+    @Override
+    public void removePermissionsResultListener(OnPermissionResultListener listener) {
+        mController.removePermissionsResultListener(listener);
+    }
+
+    @Override
+    public void addBackPressInterceptor(IBackPressInterceptor interceptor) {
+        mController.addBackPressInterceptor(interceptor);
+    }
+
+    @Override
+    public void removeBackPressInterceptor(IBackPressInterceptor interceptor) {
+        mController.removeBackPressInterceptor(interceptor);
+    }
+
 
     @Override
     public boolean hideLoading() {
@@ -360,13 +391,13 @@ public class ContainerActivity extends Activity implements IViewContainer {
 
     @Override
     public int getContainerType() {
-        return AppConst.CONTAINER_ACTIVITY;
+        return AppConst.CONTAINER_COMPAT_ACTIVITY;
     }
 
     @Override
     public IViewContainer getParentContainer() {
         Activity parentActivity = getParent();
-        if (parentActivity != null && parentActivity instanceof IViewContainer) {
+        if (parentActivity instanceof IViewContainer) {
             return ((IViewContainer) parentActivity);
         }
         return null;

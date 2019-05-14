@@ -25,6 +25,7 @@ import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnPermissionResultListener;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.IViewProcessor;
+import com.zpf.frame.IViewStateListener;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
@@ -62,21 +63,19 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         initWindow();
         IViewProcessor viewProcessor = initViewProcessor();
         if (viewProcessor != null) {
-            mController.addLifecycleListener(viewProcessor);
-            mController.addResultCallBackListener(viewProcessor);
             setContentView(viewProcessor.getView());
         } else {
             LogUtil.w("IViewProcessor is null!");
         }
-        mController.onPreCreate(savedInstanceState);
         initView(savedInstanceState);
-        mController.afterCreate(savedInstanceState);
+        mController.onCreate(savedInstanceState);
     }
 
     @Override
     public void onRestart() {
         super.onRestart();
         mController.onRestart();
+        mController.onVisibleChanged(true);
     }
 
 
@@ -84,19 +83,21 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     public void onStart() {
         super.onStart();
         mController.onStart();
+        mController.onVisibleChanged(true);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mController.onResume();
-        mController.onVisibleChanged(true);
+        mController.onActiviityChanged(true);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mController.onPause();
+        mController.onActiviityChanged(false);
     }
 
     @Override
@@ -109,21 +110,16 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     @Override
     public void onDestroy() {
         mController.onDestroy();
-        if (mViewProcessor != null) {
-            mViewProcessor.onDestroy();
-        }
         super.onDestroy();
         loadingManager = null;
     }
 
     @Override
     public void onBackPressed() {
-        if (mViewProcessor != null && mViewProcessor.onInterceptBackPress()) {
-            return;
-        }
-        if (!dismiss()) {
+        if (!mController.onInterceptBackPress() && !dismiss()) {
             super.onBackPressed();
         }
+
     }
 
     @Override
@@ -145,7 +141,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        mController.onNewIntent(intent);
+        mController.onParamChanged(intent.getExtras());
     }
 
     @Override
@@ -244,6 +240,16 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     @Override
     public IManager<ICallback> getCallBackManager() {
         return mController.getCallBackManager();
+    }
+
+    @Override
+    public void addViewStateListener(IViewStateListener listener) {
+        mController.addViewStateListener(listener);
+    }
+
+    @Override
+    public void removeViewStateListener(IViewStateListener listener) {
+        mController.removeViewStateListener(listener);
     }
 
     @Override
@@ -393,7 +399,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     @Override
     public IViewContainer getParentContainer() {
         Activity parentActivity = getParent();
-        if (parentActivity != null && parentActivity instanceof IViewContainer) {
+        if (parentActivity instanceof IViewContainer) {
             return ((IViewContainer) parentActivity);
         }
         return null;

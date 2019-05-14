@@ -11,18 +11,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.zpf.api.IBackPressInterceptor;
 import com.zpf.api.ICallback;
 import com.zpf.api.ICustomWindow;
+import com.zpf.api.IFullLifecycle;
 import com.zpf.api.IManager;
+import com.zpf.api.OnActivityResultListener;
+import com.zpf.api.OnPermissionResultListener;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.IViewProcessor;
-import com.zpf.api.LifecycleListener;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.frame.IViewContainer;
-import com.zpf.frame.ResultCallBackListener;
+import com.zpf.frame.IViewStateListener;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
+import com.zpf.support.util.FragmentHelper;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.LogUtil;
 import com.zpf.tool.config.LifecycleState;
@@ -38,6 +42,7 @@ public class ContainerFragment extends Fragment implements IViewContainer {
     private ILoadingManager loadingManager;
     private Bundle mParams;
     private boolean isVisible;
+    private boolean isActivity;
     private IViewProcessor mViewProcessor;
 
     @Nullable
@@ -48,15 +53,12 @@ public class ContainerFragment extends Fragment implements IViewContainer {
             IViewProcessor viewProcessor = initViewProcessor();
             if (viewProcessor != null) {
                 theView = viewProcessor.getView();
-                mController.addLifecycleListener(viewProcessor);
-                mController.addResultCallBackListener(viewProcessor);
             } else {
                 LogUtil.w("IViewProcessor is null!");
             }
         }
-        mController.onPreCreate(savedInstanceState);
         initView(savedInstanceState);
-        mController.afterCreate(savedInstanceState);
+        mController.onCreate(savedInstanceState);
         return theView;
     }
 
@@ -64,26 +66,28 @@ public class ContainerFragment extends Fragment implements IViewContainer {
     public void onStart() {
         super.onStart();
         mController.onStart();
+        checkVisibleChange(true);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mController.onResume();
-        checkVisibleChange();
+        checkActivity(true);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mController.onPause();
+        checkActivity(false);
     }
 
     @Override
     public void onStop() {
         super.onStop();
         mController.onStop();
-        checkVisibleChange();
+        checkVisibleChange(false);
     }
 
 
@@ -104,9 +108,12 @@ public class ContainerFragment extends Fragment implements IViewContainer {
         loadingManager = null;
     }
 
+
     @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        mController.onSaveInstanceState(outState);
+    public void onSaveInstanceState(Bundle outState) {
+        if (outState != null) {
+            mController.onSaveInstanceState(outState);
+        }
         super.onSaveInstanceState(outState);
     }
 
@@ -133,13 +140,13 @@ public class ContainerFragment extends Fragment implements IViewContainer {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        checkVisibleChange();
+        checkVisibleChange(!hidden);
     }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        checkVisibleChange();
+        checkVisibleChange(isVisibleToUser);
     }
 
     @Override
@@ -225,6 +232,56 @@ public class ContainerFragment extends Fragment implements IViewContainer {
     }
 
     @Override
+    public void addViewStateListener(IViewStateListener listener) {
+        mController.addViewStateListener(listener);
+    }
+
+    @Override
+    public void removeViewStateListener(IViewStateListener listener) {
+        mController.removeViewStateListener(listener);
+    }
+
+    @Override
+    public void addLifecycleListener(IFullLifecycle listener) {
+        mController.addLifecycleListener(listener);
+    }
+
+    @Override
+    public void removeLifecycleListener(IFullLifecycle listener) {
+        mController.removeLifecycleListener(listener);
+    }
+
+    @Override
+    public void addActivityResultListener(OnActivityResultListener listener) {
+        mController.addActivityResultListener(listener);
+    }
+
+    @Override
+    public void removeActivityResultListener(OnActivityResultListener listener) {
+        mController.removeActivityResultListener(listener);
+    }
+
+    @Override
+    public void addPermissionsResultListener(OnPermissionResultListener listener) {
+        mController.addPermissionsResultListener(listener);
+    }
+
+    @Override
+    public void removePermissionsResultListener(OnPermissionResultListener listener) {
+        mController.removePermissionsResultListener(listener);
+    }
+
+    @Override
+    public void addBackPressInterceptor(IBackPressInterceptor interceptor) {
+        mController.addBackPressInterceptor(interceptor);
+    }
+
+    @Override
+    public void removeBackPressInterceptor(IBackPressInterceptor interceptor) {
+        mController.removeBackPressInterceptor(interceptor);
+    }
+
+    @Override
     public void finishWithResult(int resultCode, Intent data) {
         if (getActivity() != null) {
             getActivity().setResult(resultCode, data);
@@ -239,15 +296,6 @@ public class ContainerFragment extends Fragment implements IViewContainer {
         }
     }
 
-    @Override
-    public void addLifecycleListener(LifecycleListener lifecycleListener) {
-        mController.addLifecycleListener(lifecycleListener);
-    }
-
-    @Override
-    public void removeLifecycleListener(LifecycleListener lifecycleListener) {
-        mController.removeLifecycleListener(lifecycleListener);
-    }
 
     @Override
     public void addOnDestroyListener(OnDestroyListener listener) {
@@ -260,22 +308,12 @@ public class ContainerFragment extends Fragment implements IViewContainer {
     }
 
     @Override
-    public void addResultCallBackListener(ResultCallBackListener callBackListener) {
-        mController.addResultCallBackListener(callBackListener);
-    }
-
-    @Override
-    public void removeResultCallBackListener(ResultCallBackListener callBackListener) {
-        mController.removeResultCallBackListener(callBackListener);
-    }
-
-    @Override
     public boolean hideLoading() {
         Activity activity = getActivity();
-        if (activity != null && activity instanceof IViewContainer) {
+        if (activity instanceof IViewContainer) {
             return ((IViewContainer) activity).hideLoading();
         }
-        return loadingManager != null && loadingManager.hideLoading() || mController.dismiss();
+        return loadingManager != null && loadingManager.hideLoading();
     }
 
     @Override
@@ -336,9 +374,18 @@ public class ContainerFragment extends Fragment implements IViewContainer {
     }
 
     @Override
+    public void setArguments(@Nullable Bundle args) {
+        if (isAdded() && args != getArguments()) {
+            mController.onParamChanged(args);
+        }
+        mParams = args;
+    }
+
+    @NonNull
+    @Override
     public Bundle getParams() {
         if (mParams == null) {
-            mParams = getIntent().getExtras();
+            mParams = getArguments();
             if (mParams == null) {
                 mParams = new Bundle();
             }
@@ -357,17 +404,17 @@ public class ContainerFragment extends Fragment implements IViewContainer {
 
     @Override
     public int getContainerType() {
-        return AppConst.CONTAINER_FRAGMENT;
+        return AppConst.CONTAINER_COMPAT_FRAGMENT;
     }
 
     @Override
     public IViewContainer getParentContainer() {
         Fragment parentFragment = getParentFragment();
-        if (parentFragment != null && parentFragment instanceof IViewContainer) {
+        if (parentFragment instanceof IViewContainer) {
             return ((IViewContainer) parentFragment);
         }
         Activity parentActivity = getActivity();
-        if (parentActivity != null && parentActivity instanceof IViewContainer) {
+        if (parentActivity instanceof IViewContainer) {
             return ((IViewContainer) parentActivity);
         }
         return null;
@@ -379,40 +426,37 @@ public class ContainerFragment extends Fragment implements IViewContainer {
     }
 
     @Override
-    public IViewProcessor getViewProcessor() {
-        return mViewProcessor;
-    }
-
-    @Override
     public void unbindView() {
         mViewProcessor = null;
     }
 
-    private boolean checkParentFragmentVisible() {
-        Fragment parent = getParentFragment();
-        boolean result = true;
-        while (parent != null) {
-            result = checkFragmentShouldVisible(parent);
-            if (result) {
-                parent = parent.getParentFragment();
-            } else {
-                break;
-            }
-        }
-        return result;
+    @Override
+    public IViewProcessor getViewProcessor() {
+        return mViewProcessor;
     }
 
-    private boolean checkFragmentShouldVisible(Fragment fragment) {
-        return fragment != null && fragment.getUserVisibleHint() && fragment.isAdded() && !fragment.isHidden();
-    }
 
-    private void checkVisibleChange() {
-        boolean newVisible = getState() == LifecycleState.AFTER_RESUME
-                && checkParentFragmentVisible()
-                && checkFragmentShouldVisible(this);
+    private void checkVisibleChange(boolean changeTo) {
+        boolean newVisible = changeTo
+                && FragmentHelper.checkFragmentVisible(this)
+                && FragmentHelper.checkParentFragmentVisible(this);
         if (newVisible != this.isVisible) {
             this.isVisible = newVisible;
             mController.onVisibleChanged(newVisible);
+            if (!isVisible && isActivity) {
+                isActivity = false;
+                mController.onActiviityChanged(false);
+            }
+        }
+    }
+
+    private void checkActivity(boolean changeTo) {
+        if (!isVisible) {
+            changeTo = false;
+        }
+        if (isActivity != changeTo) {
+            isActivity = changeTo;
+            mController.onActiviityChanged(changeTo);
         }
     }
 

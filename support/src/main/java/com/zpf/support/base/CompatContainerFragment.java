@@ -27,6 +27,7 @@ import com.zpf.support.util.ContainerListenerController;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
+import com.zpf.support.util.FragmentHelper;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.LogUtil;
 import com.zpf.tool.config.LifecycleState;
@@ -42,6 +43,7 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     private ILoadingManager loadingManager;
     private Bundle mParams;
     private boolean isVisible;
+    private boolean isActivity;
     private IViewProcessor mViewProcessor;
 
     @Nullable
@@ -65,26 +67,28 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     public void onStart() {
         super.onStart();
         mController.onStart();
+        checkVisibleChange(true);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mController.onResume();
-        checkVisibleChange();
+        checkActivity(true);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mController.onPause();
+        checkActivity(false);
     }
 
     @Override
     public void onStop() {
         super.onStop();
         mController.onStop();
-        checkVisibleChange();
+        checkVisibleChange(false);
     }
 
 
@@ -135,13 +139,13 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        checkVisibleChange();
+        checkVisibleChange(!hidden);
     }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        checkVisibleChange();
+        checkVisibleChange(isVisibleToUser);
     }
 
     @Override
@@ -305,7 +309,7 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     @Override
     public boolean hideLoading() {
         FragmentActivity activity = getActivity();
-        if (activity != null && activity instanceof IViewContainer) {
+        if (activity instanceof IViewContainer) {
             return ((IViewContainer) activity).hideLoading();
         }
         return loadingManager != null && loadingManager.hideLoading();
@@ -373,7 +377,7 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
         if (isAdded() && args != getArguments()) {
             mController.onParamChanged(args);
         }
-        super.setArguments(args);
+        mParams = args;
     }
 
     @NonNull
@@ -405,11 +409,11 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     @Override
     public IViewContainer getParentContainer() {
         android.support.v4.app.Fragment parentFragment = getParentFragment();
-        if (parentFragment != null && parentFragment instanceof IViewContainer) {
+        if (parentFragment instanceof IViewContainer) {
             return ((IViewContainer) parentFragment);
         }
         Activity parentActivity = getActivity();
-        if (parentActivity != null && parentActivity instanceof IViewContainer) {
+        if (parentActivity instanceof IViewContainer) {
             return ((IViewContainer) parentActivity);
         }
         return null;
@@ -430,31 +434,28 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
         return mViewProcessor;
     }
 
-    private boolean checkParentFragmentVisible() {
-        Fragment parent = getParentFragment();
-        boolean result = true;
-        while (parent != null) {
-            result = checkFragmentShouldVisible(parent);
-            if (result) {
-                parent = parent.getParentFragment();
-            } else {
-                break;
-            }
-        }
-        return result;
-    }
 
-    private boolean checkFragmentShouldVisible(Fragment fragment) {
-        return fragment != null && fragment.getUserVisibleHint() && fragment.isAdded() && !fragment.isHidden();
-    }
-
-    private void checkVisibleChange() {
-        boolean newVisible = getState() == LifecycleState.AFTER_RESUME
-                && checkParentFragmentVisible()
-                && checkFragmentShouldVisible(this);
+    private void checkVisibleChange(boolean changeTo) {
+        boolean newVisible = changeTo
+                && FragmentHelper.checkFragmentVisible(this)
+                && FragmentHelper.checkParentFragmentVisible(this);
         if (newVisible != this.isVisible) {
             this.isVisible = newVisible;
             mController.onVisibleChanged(newVisible);
+            if (!isVisible && isActivity) {
+                isActivity = false;
+                mController.onActiviityChanged(false);
+            }
+        }
+    }
+
+    private void checkActivity(boolean changeTo) {
+        if (!isVisible) {
+            changeTo = false;
+        }
+        if (isActivity != changeTo) {
+            isActivity = changeTo;
+            mController.onActiviityChanged(changeTo);
         }
     }
 

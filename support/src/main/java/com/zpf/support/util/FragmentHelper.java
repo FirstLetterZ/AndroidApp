@@ -2,6 +2,7 @@ package com.zpf.support.util;
 
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
@@ -60,5 +61,43 @@ public class FragmentHelper {
             return ((FragmentActivity) container).getSupportFragmentManager();
         }
         return null;
+    }
+
+    public static boolean checkFragmentVisible(android.app.Fragment fragment) {
+        return fragment != null && fragment.getUserVisibleHint() && fragment.isAdded() && !fragment.isHidden();
+    }
+
+
+    public static boolean checkFragmentVisible(android.support.v4.app.Fragment fragment) {
+        return fragment != null && fragment.getUserVisibleHint() && fragment.isAdded() && !fragment.isHidden();
+    }
+
+    public static boolean checkParentFragmentVisible(android.app.Fragment fragment) {
+        android.app.Fragment parent = fragment.getParentFragment();
+        boolean result = true;
+        while (parent != null) {
+            result = checkFragmentVisible(parent);
+            if (result) {
+                parent = parent.getParentFragment();
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
+
+
+    public static boolean checkParentFragmentVisible(android.support.v4.app.Fragment fragment) {
+        android.support.v4.app.Fragment parent = fragment.getParentFragment();
+        boolean result = true;
+        while (parent != null) {
+            result = checkFragmentVisible(parent);
+            if (result) {
+                parent = parent.getParentFragment();
+            } else {
+                break;
+            }
+        }
+        return result;
     }
 }

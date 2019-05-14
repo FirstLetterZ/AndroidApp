@@ -13,13 +13,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.zpf.api.IBackPressInterceptor;
 import com.zpf.api.ICallback;
 import com.zpf.api.ICustomWindow;
+import com.zpf.api.IFullLifecycle;
 import com.zpf.api.IManager;
-import com.zpf.api.LifecycleListener;
+import com.zpf.api.OnActivityResultListener;
+import com.zpf.api.OnPermissionResultListener;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.IViewProcessor;
-import com.zpf.frame.ResultCallBackListener;
+import com.zpf.frame.IViewStateListener;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.constant.AppConst;
@@ -35,6 +38,7 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     private Fragment fragment;
     private ILoadingManager loadingManager;
     private boolean isVisible;
+    private boolean isActivity;
     private Bundle mParams;
     private IViewProcessor mViewProcessor;
     private final ContainerListenerController mController = new ContainerListenerController();
@@ -175,6 +179,16 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
+    public void addViewStateListener(IViewStateListener listener) {
+        mController.addViewStateListener(listener);
+    }
+
+    @Override
+    public void removeViewStateListener(IViewStateListener listener) {
+        mController.removeViewStateListener(listener);
+    }
+
+    @Override
     public void finishWithResult(int resultCode, Intent data) {
         if (activity != null) {
             activity.setResult(resultCode, data);
@@ -195,13 +209,13 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public void addLifecycleListener(LifecycleListener lifecycleListener) {
-        mController.addLifecycleListener(lifecycleListener);
+    public void addLifecycleListener(IFullLifecycle listener) {
+        mController.addLifecycleListener(listener);
     }
 
     @Override
-    public void removeLifecycleListener(LifecycleListener lifecycleListener) {
-        mController.removeLifecycleListener(lifecycleListener);
+    public void removeLifecycleListener(IFullLifecycle listener) {
+        mController.removeLifecycleListener(listener);
     }
 
     @Override
@@ -215,19 +229,39 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public void addResultCallBackListener(ResultCallBackListener callBackListener) {
-        mController.addResultCallBackListener(callBackListener);
+    public void addActivityResultListener(OnActivityResultListener listener) {
+        mController.addActivityResultListener(listener);
     }
 
     @Override
-    public void removeResultCallBackListener(ResultCallBackListener callBackListener) {
-        mController.removeResultCallBackListener(callBackListener);
+    public void removeActivityResultListener(OnActivityResultListener listener) {
+        mController.removeActivityResultListener(listener);
+    }
+
+    @Override
+    public void addPermissionsResultListener(OnPermissionResultListener listener) {
+        mController.addPermissionsResultListener(listener);
+    }
+
+    @Override
+    public void removePermissionsResultListener(OnPermissionResultListener listener) {
+        mController.removePermissionsResultListener(listener);
+    }
+
+    @Override
+    public void addBackPressInterceptor(IBackPressInterceptor interceptor) {
+        mController.addBackPressInterceptor(interceptor);
+    }
+
+    @Override
+    public void removeBackPressInterceptor(IBackPressInterceptor interceptor) {
+        mController.removeBackPressInterceptor(interceptor);
     }
 
     @Override
     public boolean hideLoading() {
         FragmentActivity activity = getActivity();
-        if (activity != null && activity instanceof IViewContainer) {
+        if (activity instanceof IViewContainer) {
             return ((IViewContainer) activity).hideLoading();
         }
         return loadingManager != null && loadingManager.hideLoading() || mController.dismiss();
@@ -263,7 +297,7 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mController.afterCreate(savedInstanceState);
+        mController.onCreate(savedInstanceState);
         return null;
     }
 
@@ -271,24 +305,28 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     public void onStart() {
         super.onStart();
         mController.onStart();
+        checkVisibleChange(true);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mController.onResume();
+        checkActivity(true);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mController.onPause();
+        checkActivity(false);
     }
 
     @Override
     public void onStop() {
         super.onStop();
         mController.onStop();
+        checkVisibleChange(false);
     }
 
     @Override
@@ -329,22 +367,15 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        checkVisibleChange();
+        checkVisibleChange(!hidden);
     }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        checkVisibleChange();
+        checkVisibleChange(isVisibleToUser);
     }
 
-    private void checkVisibleChange() {
-        boolean newVisible = getState() == LifecycleState.AFTER_RESUME && getUserVisibleHint() && isVisible();
-        if (newVisible != this.isVisible) {
-            this.isVisible = newVisible;
-            mController.onVisibleChanged(newVisible);
-        }
-    }
 
     @Override
     public boolean checkPermissions(String... permissions) {
@@ -375,10 +406,14 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
         this.loadingManager = loadingManager;
     }
 
+    @NonNull
     @Override
     public Bundle getParams() {
         if (mParams == null) {
-            mParams = getIntent().getExtras();
+            mParams = getArguments();
+        }
+        if (mParams == null) {
+            mParams = new Bundle();
         }
         return mParams;
     }
@@ -416,4 +451,30 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     public IViewProcessor getViewProcessor() {
         return mViewProcessor;
     }
+
+    private void checkVisibleChange(boolean changeTo) {
+        boolean newVisible = changeTo
+                && FragmentHelper.checkFragmentVisible(this)
+                && FragmentHelper.checkParentFragmentVisible(this);
+        if (newVisible != this.isVisible) {
+            this.isVisible = newVisible;
+            mController.onVisibleChanged(newVisible);
+            if (!isVisible && isActivity) {
+                isActivity = false;
+                mController.onActiviityChanged(false);
+            }
+        }
+    }
+
+    private void checkActivity(boolean changeTo) {
+        if (!isVisible) {
+            changeTo = false;
+        }
+        if (isActivity != changeTo) {
+            isActivity = changeTo;
+            mController.onActiviityChanged(changeTo);
+        }
+    }
+
+
 }
