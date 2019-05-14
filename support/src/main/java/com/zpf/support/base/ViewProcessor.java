@@ -48,7 +48,7 @@ public abstract class ViewProcessor<C> implements IViewProcessor<C>, OnActivityR
         mRootLayout = new RootLayout(getContext());
         mTitleBar = mRootLayout.getTitleBar();
         ILayoutId iLayoutId = getClass().getAnnotation(ILayoutId.class);
-        if (iLayoutId != null && iLayoutId.value() > 0) {
+        if (iLayoutId != null && iLayoutId.value() != 0) {
             mRootLayout.setContentView(null, iLayoutId.value());
         } else {
             View layoutView = getLayoutView(mContainer.getContext());
