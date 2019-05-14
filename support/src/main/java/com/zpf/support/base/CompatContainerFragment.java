@@ -12,12 +12,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.zpf.api.IBackPressInterceptor;
 import com.zpf.api.ICallback;
 import com.zpf.api.ICustomWindow;
+import com.zpf.api.IFullLifecycle;
 import com.zpf.api.IManager;
-import com.zpf.api.LifecycleListener;
+import com.zpf.api.OnActivityResultListener;
+import com.zpf.api.OnPermissionResultListener;
 import com.zpf.frame.ILoadingManager;
-import com.zpf.frame.ResultCallBackListener;
+import com.zpf.frame.IViewStateListener;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
@@ -49,15 +52,12 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
             IViewProcessor viewProcessor = initViewProcessor();
             if (viewProcessor != null) {
                 theView = viewProcessor.getView();
-                mController.addLifecycleListener(viewProcessor);
-                mController.addResultCallBackListener(viewProcessor);
             } else {
                 LogUtil.w("IViewProcessor is null!");
             }
         }
-        mController.onPreCreate(savedInstanceState);
         initView(savedInstanceState);
-        mController.afterCreate(savedInstanceState);
+        mController.onCreate(savedInstanceState);
         return theView;
     }
 
@@ -227,6 +227,56 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     }
 
     @Override
+    public void addViewStateListener(IViewStateListener listener) {
+        mController.addViewStateListener(listener);
+    }
+
+    @Override
+    public void removeViewStateListener(IViewStateListener listener) {
+        mController.removeViewStateListener(listener);
+    }
+
+    @Override
+    public void addLifecycleListener(IFullLifecycle listener) {
+        mController.addLifecycleListener(listener);
+    }
+
+    @Override
+    public void removeLifecycleListener(IFullLifecycle listener) {
+        mController.removeLifecycleListener(listener);
+    }
+
+    @Override
+    public void addActivityResultListener(OnActivityResultListener listener) {
+        mController.addActivityResultListener(listener);
+    }
+
+    @Override
+    public void removeActivityResultListener(OnActivityResultListener listener) {
+        mController.removeActivityResultListener(listener);
+    }
+
+    @Override
+    public void addPermissionsResultListener(OnPermissionResultListener listener) {
+        mController.addPermissionsResultListener(listener);
+    }
+
+    @Override
+    public void removePermissionsResultListener(OnPermissionResultListener listener) {
+        mController.removePermissionsResultListener(listener);
+    }
+
+    @Override
+    public void addBackPressInterceptor(IBackPressInterceptor interceptor) {
+        mController.addBackPressInterceptor(interceptor);
+    }
+
+    @Override
+    public void removeBackPressInterceptor(IBackPressInterceptor interceptor) {
+        mController.removeBackPressInterceptor(interceptor);
+    }
+
+    @Override
     public void finishWithResult(int resultCode, Intent data) {
         if (getActivity() != null) {
             getActivity().setResult(resultCode, data);
@@ -241,15 +291,6 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
         }
     }
 
-    @Override
-    public void addLifecycleListener(LifecycleListener lifecycleListener) {
-        mController.addLifecycleListener(lifecycleListener);
-    }
-
-    @Override
-    public void removeLifecycleListener(LifecycleListener lifecycleListener) {
-        mController.removeLifecycleListener(lifecycleListener);
-    }
 
     @Override
     public void addOnDestroyListener(OnDestroyListener listener) {
@@ -259,16 +300,6 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     @Override
     public void removeOnDestroyListener(OnDestroyListener listener) {
         mController.removeOnDestroyListener(listener);
-    }
-
-    @Override
-    public void addResultCallBackListener(ResultCallBackListener callBackListener) {
-        mController.addResultCallBackListener(callBackListener);
-    }
-
-    @Override
-    public void removeResultCallBackListener(ResultCallBackListener callBackListener) {
-        mController.removeResultCallBackListener(callBackListener);
     }
 
     @Override
@@ -338,9 +369,18 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     }
 
     @Override
+    public void setArguments(@Nullable Bundle args) {
+        if (isAdded() && args != getArguments()) {
+            mController.onParamChanged(args);
+        }
+        super.setArguments(args);
+    }
+
+    @NonNull
+    @Override
     public Bundle getParams() {
         if (mParams == null) {
-            mParams = getIntent().getExtras();
+            mParams = getArguments();
             if (mParams == null) {
                 mParams = new Bundle();
             }

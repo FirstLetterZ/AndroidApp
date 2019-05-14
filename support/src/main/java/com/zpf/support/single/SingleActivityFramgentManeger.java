@@ -7,8 +7,10 @@ import android.support.v4.app.FragmentTransaction;
 
 import com.zpf.api.IBackPressInterceptor;
 import com.zpf.frame.INavigator;
+import com.zpf.frame.IViewContainer;
 import com.zpf.support.base.CompatContainerFragment;
 import com.zpf.support.base.ViewProcessor;
+import com.zpf.support.constant.AppConst;
 import com.zpf.support.util.FragmentHelper;
 
 import java.util.LinkedList;
@@ -27,7 +29,7 @@ public class SingleActivityFramgentManeger implements INavigator<Class<? extends
         this.fragmentManager = fragmentManager;
     }
 
-    public void pushNewActivity(Class target) {
+    public void pushNewActivity(IViewContainer container,Class target) {
 
     }
 
@@ -37,12 +39,12 @@ public class SingleActivityFramgentManeger implements INavigator<Class<? extends
 
     @Override
     public void navigate(Class<? extends ViewProcessor> target) {
-
+        navigate(target, null, -1);
     }
 
     @Override
     public void navigate(Class<? extends ViewProcessor> target, Bundle params) {
-
+        navigate(target, params, -1);
     }
 
     @Override
@@ -50,6 +52,10 @@ public class SingleActivityFramgentManeger implements INavigator<Class<? extends
         String tag = target.getName();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         Fragment targetFragment = null;
+        if (params == null) {
+            params = new Bundle();
+        }
+        params.putInt(AppConst.REQUEST_CODE, requestCode);
         List<Fragment> fragmentList = fragmentManager.getFragments();
         if (fragmentList != null && fragmentList.size() > 0) {
             for (Fragment f : fragmentList) {
@@ -63,20 +69,16 @@ public class SingleActivityFramgentManeger implements INavigator<Class<? extends
                 } else {
                     transaction.show(targetFragment);
                 }
-
             }
         }
         if (targetFragment == null) {
             targetFragment = FragmentHelper.createCompatFragment(params);
             transaction.add(viewid, targetFragment, tag);
             fragmentStack.add(tag);
-        }else {
+        } else {
             targetFragment.setArguments(params);
-            targetFragment.setTargetFragment();
-
         }
         transaction.commitNowAllowingStateLoss();
-
     }
 
 
