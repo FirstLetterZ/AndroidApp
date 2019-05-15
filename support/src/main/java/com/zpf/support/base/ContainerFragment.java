@@ -24,6 +24,7 @@ import com.zpf.api.OnDestroyListener;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewStateListener;
 import com.zpf.support.constant.AppConst;
+import com.zpf.support.constant.ContainerType;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.support.util.FragmentHelper;
@@ -404,7 +405,7 @@ public class ContainerFragment extends Fragment implements IViewContainer {
 
     @Override
     public int getContainerType() {
-        return AppConst.CONTAINER_COMPAT_FRAGMENT;
+        return ContainerType.CONTAINER_FRAGMENT;
     }
 
     @Override

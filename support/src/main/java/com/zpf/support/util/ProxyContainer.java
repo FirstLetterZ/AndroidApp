@@ -25,6 +25,7 @@ import com.zpf.frame.IViewStateListener;
 import com.zpf.support.constant.AppConst;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.frame.IViewContainer;
+import com.zpf.support.constant.ContainerType;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.LifecycleState;
 
@@ -429,7 +430,7 @@ public class ProxyContainer extends Fragment implements IViewContainer {
 
     @Override
     public int getContainerType() {
-        return AppConst.CONTAINER_FRAGMENT;
+        return ContainerType.CONTAINER_FRAGMENT;
     }
 
     @Override

@@ -86,7 +86,6 @@ public class FragmentHelper {
         return result;
     }
 
-
     public static boolean checkParentFragmentVisible(android.support.v4.app.Fragment fragment) {
         android.support.v4.app.Fragment parent = fragment.getParentFragment();
         boolean result = true;

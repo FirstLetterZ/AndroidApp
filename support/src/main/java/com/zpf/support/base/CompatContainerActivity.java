@@ -27,6 +27,7 @@ import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewStateListener;
 import com.zpf.support.constant.AppConst;
+import com.zpf.support.constant.ContainerType;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.api.OnDestroyListener;
@@ -393,7 +394,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     @Override
     public int getContainerType() {
-        return AppConst.CONTAINER_COMPAT_ACTIVITY;
+        return ContainerType.CONTAINER_COMPAT_ACTIVITY;
     }
 
     @Override
