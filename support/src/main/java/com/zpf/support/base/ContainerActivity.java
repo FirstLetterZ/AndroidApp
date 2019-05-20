@@ -407,10 +407,26 @@ public class ContainerActivity extends Activity implements IViewContainer {
     @Override
     public void bindView(IViewProcessor processor) {
         mViewProcessor = processor;
+        if (mViewProcessor != null) {
+            mController.addLifecycleListener(mViewProcessor);
+            mController.addActivityResultListener(mViewProcessor);
+            mController.addBackPressInterceptor(mViewProcessor);
+            mController.addPermissionsResultListener(mViewProcessor);
+            mController.addViewStateListener(mViewProcessor);
+            mController.addPermissionsResultListener(mViewProcessor);
+        }
     }
 
     @Override
     public void unbindView() {
+        if (mViewProcessor != null) {
+            mController.removeLifecycleListener(mViewProcessor);
+            mController.removeActivityResultListener(mViewProcessor);
+            mController.removeBackPressInterceptor(mViewProcessor);
+            mController.removePermissionsResultListener(mViewProcessor);
+            mController.removeViewStateListener(mViewProcessor);
+            mController.removePermissionsResultListener(mViewProcessor);
+        }
         mViewProcessor = null;
     }
 

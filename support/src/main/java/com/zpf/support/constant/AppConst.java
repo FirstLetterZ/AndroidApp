@@ -17,8 +17,12 @@ public class AppConst {
     public static final String REQUEST_CODE = "request_code";
     public static final String TARGET_CONTAINER_CLASS = "target_container_class";
     public static final String TARGET_CONTAINER_ACTION = "target_container_action";
+    public static final String TARGET_VIEW_EXPANSION = "target_view_expansion";
     public static final String TARGET_VIEW_CLASS = "target_view_class";
     public static final String TARGET_VIEW_ORIENTATION = "target_view_orientation";
     public static final String TARGET_VIEW_THEME = "target_view_theme";
     public static final String TARGET_STATUS_TRANSLUCENT = "target_status_translucent";
+    public static final String TARGET_ALIAS = "target_alias";
+    public static final int DEF_REQUEST_CODE = -1;
+    public static final int DEF_RESULT_CODE = 0;
 }

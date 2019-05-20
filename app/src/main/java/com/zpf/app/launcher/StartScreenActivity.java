@@ -12,7 +12,7 @@ import com.zpf.support.util.LogUtil;
 
 public class StartScreenActivity extends CompatContainerActivity {
     @Override
-    protected IViewProcessor unspecifiedViewProcessor() {
+    protected IViewProcessor defViewProcessor() {
         LogUtil.setLogOut(true);
         return new StartScreenView();
     }

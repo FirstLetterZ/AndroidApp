@@ -39,7 +39,7 @@ import java.lang.reflect.Constructor;
  * 基于android.support.v4.app.Fragment的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public class CompatContainerFragment extends Fragment implements IViewContainer {
+public class CompatContainerFragment extends Fragment implements IViewContainer, IBackPressInterceptor {
     private final ContainerListenerController mController = new ContainerListenerController();
     private ILoadingManager loadingManager;
     private Bundle mParams;
@@ -60,8 +60,16 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
             }
         }
         initView(savedInstanceState);
-        mController.onCreate(savedInstanceState);
         return theView;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        IViewContainer parentContainer = getParentContainer();
+        if (parentContainer != null) {
+            parentContainer.addBackPressInterceptor(this);
+        }
+        mController.onCreate(savedInstanceState);
     }
 
     @Override
@@ -91,7 +99,6 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
         mController.onStop();
         checkVisibleChange(false);
     }
-
 
     @Override
     public void onDestroyView() {
@@ -364,6 +371,11 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     }
 
     @Override
+    public boolean onInterceptBackPress() {
+        return mController.onInterceptBackPress();
+    }
+
+    @Override
     public Object invoke(String name, Object params) {
         return null;
     }
@@ -423,10 +435,26 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     @Override
     public void bindView(IViewProcessor processor) {
         mViewProcessor = processor;
+        if (mViewProcessor != null) {
+            mController.addLifecycleListener(mViewProcessor);
+            mController.addActivityResultListener(mViewProcessor);
+            mController.addBackPressInterceptor(mViewProcessor);
+            mController.addPermissionsResultListener(mViewProcessor);
+            mController.addViewStateListener(mViewProcessor);
+            mController.addPermissionsResultListener(mViewProcessor);
+        }
     }
 
     @Override
     public void unbindView() {
+        if (mViewProcessor != null) {
+            mController.removeLifecycleListener(mViewProcessor);
+            mController.removeActivityResultListener(mViewProcessor);
+            mController.removeBackPressInterceptor(mViewProcessor);
+            mController.removePermissionsResultListener(mViewProcessor);
+            mController.removeViewStateListener(mViewProcessor);
+            mController.removePermissionsResultListener(mViewProcessor);
+        }
         mViewProcessor = null;
     }
 
@@ -495,5 +523,6 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     protected IViewProcessor unspecifiedViewProcessor() {
         return null;
     }
+
 
 }

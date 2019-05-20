@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -120,7 +121,6 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         if (!mController.onInterceptBackPress() && !dismiss()) {
             super.onBackPressed();
         }
-
     }
 
     @Override
@@ -409,10 +409,26 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     @Override
     public void bindView(IViewProcessor processor) {
         mViewProcessor = processor;
+        if (mViewProcessor != null) {
+            mController.addLifecycleListener(mViewProcessor);
+            mController.addActivityResultListener(mViewProcessor);
+            mController.addBackPressInterceptor(mViewProcessor);
+            mController.addPermissionsResultListener(mViewProcessor);
+            mController.addViewStateListener(mViewProcessor);
+            mController.addPermissionsResultListener(mViewProcessor);
+        }
     }
 
     @Override
     public void unbindView() {
+        if (mViewProcessor != null) {
+            mController.removeLifecycleListener(mViewProcessor);
+            mController.removeActivityResultListener(mViewProcessor);
+            mController.removeBackPressInterceptor(mViewProcessor);
+            mController.removePermissionsResultListener(mViewProcessor);
+            mController.removeViewStateListener(mViewProcessor);
+            mController.removePermissionsResultListener(mViewProcessor);
+        }
         mViewProcessor = null;
     }
 
@@ -466,7 +482,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
                 }
             }
             if (viewProcessor == null) {
-                viewProcessor = unspecifiedViewProcessor();
+                viewProcessor = defViewProcessor();
             }
             ContainerController.mInitingViewContainer = null;
         }
@@ -477,7 +493,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     }
 
-    protected IViewProcessor unspecifiedViewProcessor() {
+    protected IViewProcessor defViewProcessor() {
         return null;
     }
 
