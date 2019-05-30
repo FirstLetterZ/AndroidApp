@@ -40,6 +40,7 @@ public class BannerPagerView extends ViewPager {
     private View[] pagerArray;
     private PagerAdapter pagerAdapter;
     private float lastPositionOffset = 0;
+    private int cacheSize = 0;
 
     public BannerPagerView(@NonNull Context context) {
         this(context, null);
@@ -203,21 +204,19 @@ public class BannerPagerView extends ViewPager {
             bannerIndicator.setSize(newSize);
         }
         pagerSize = newSize;
+        initAdapter();
         if (newSize < 1) {
             scrollable = false;
             pagerArray = null;
-            initAdapter();
             pagerAdapter.notifyDataSetChanged();
         } else if (newSize == 1) {
             pagerArray = new View[1];
             scrollable = false;
-            initAdapter();
             pagerAdapter.notifyDataSetChanged();
             setCurrentItem(0, false);
         } else {
             pagerArray = new View[pagerSize + 2];
             scrollable = true;
-            initAdapter();
             pagerAdapter.notifyDataSetChanged();
             setCurrentItem(1, false);
             timeTaskUtil.startPlay(interval, interval);
@@ -243,6 +242,9 @@ public class BannerPagerView extends ViewPager {
                         }
                         v = viewCreator.createView(rulePosition);
                         pagerArray[position] = v;
+                        if (cacheSize > 1 && getOffscreenPageLimit() != cacheSize) {
+                            setOffscreenPageLimit(cacheSize);
+                        }
                     }
                     if (v.getParent() != null) {
                         ((ViewGroup) v.getParent()).removeView(v);
@@ -266,6 +268,9 @@ public class BannerPagerView extends ViewPager {
                     return view == object;
                 }
             };
+        } else {
+            cacheSize = getOffscreenPageLimit();
+            setOffscreenPageLimit(1);
         }
     }
 
