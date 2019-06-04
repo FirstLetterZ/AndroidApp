@@ -1,6 +1,6 @@
 package com.zpf.support.network.retrofit;
 
-import com.zpf.api.ICallback;
+import com.zpf.api.ICancelable;
 import com.zpf.api.IManager;
 import com.zpf.support.network.base.BaseCallBack;
 import com.zpf.support.network.base.ErrorCode;
@@ -75,7 +75,7 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
     }
 
     @Override
-    public ResponseCallBack<T> toBind(IManager<ICallback> manager) {
+    public ResponseCallBack<T> toBind(IManager<ICancelable> manager) {
         super.toBind(manager);
         return this;
     }

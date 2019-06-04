@@ -2,19 +2,19 @@ package com.zpf.tool.expand.util;
 
 import android.util.LongSparseArray;
 
-import com.zpf.api.ICallback;
+import com.zpf.api.ICancelable;
 import com.zpf.api.IManager;
 import com.zpf.api.OnDestroyListener;
 
 /**
  * Created by ZPF on 2018/6/13.
  */
-public class CallBackManager implements IManager<ICallback>, OnDestroyListener {
-    private LongSparseArray<ICallback> callBackList = new LongSparseArray<>();
+public class CancelableManager implements IManager<ICancelable>{
+    private LongSparseArray<ICancelable> callBackList = new LongSparseArray<>();
     private volatile boolean cancelAll = false;
 
     @Override
-    public long bind(ICallback callBack) {
+    public long bind(ICancelable callBack) {
         if (cancelAll) {
             callBack.cancel();
             return -1;
@@ -40,7 +40,7 @@ public class CallBackManager implements IManager<ICallback>, OnDestroyListener {
     @Override
     public void cancel(long id) {
         if (!cancelAll) {
-            ICallback callBack = callBackList.get(id);
+            ICancelable callBack = callBackList.get(id);
             if (callBack != null) {
                 callBack.cancel();
             }
@@ -55,7 +55,7 @@ public class CallBackManager implements IManager<ICallback>, OnDestroyListener {
             synchronized (this) {
                 if (callBackList.size() > 0) {
                     for (int i = 0; i < callBackList.size(); i++) {
-                        ICallback callBack = callBackList.valueAt(i);
+                        ICancelable callBack = callBackList.valueAt(i);
                         if (callBack != null) {
                             callBack.cancel();
                         }

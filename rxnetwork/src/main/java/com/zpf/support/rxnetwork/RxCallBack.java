@@ -1,6 +1,6 @@
 package com.zpf.support.rxnetwork;
 
-import com.zpf.api.ICallback;
+import com.zpf.api.ICancelable;
 import com.zpf.api.IManager;
 import com.zpf.support.network.base.BaseCallBack;
 import com.zpf.support.network.base.ErrorCode;
@@ -78,7 +78,7 @@ public abstract class RxCallBack<T> extends BaseCallBack<T> implements Observer<
     }
 
     @Override
-    public RxCallBack<T> toBind(IManager<ICallback> manager) {
+    public RxCallBack<T> toBind(IManager<ICancelable> manager) {
         super.toBind(manager);
         return this;
     }

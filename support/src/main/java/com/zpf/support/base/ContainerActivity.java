@@ -15,18 +15,12 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.zpf.api.IBackPressInterceptor;
-import com.zpf.api.ICallback;
+import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
-import com.zpf.api.IFullLifecycle;
 import com.zpf.api.IManager;
-import com.zpf.api.OnActivityResultListener;
-import com.zpf.api.OnDestroyListener;
-import com.zpf.api.OnPermissionResultListener;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
-import com.zpf.frame.IViewStateListener;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
 import com.zpf.support.util.ContainerController;
@@ -237,18 +231,18 @@ public class ContainerActivity extends Activity implements IViewContainer {
     }
 
     @Override
-    public IManager<ICallback> getCallBackManager() {
-        return mController.getCallBackManager();
+    public IManager<ICancelable> getCancelableManager() {
+        return null;
     }
 
     @Override
-    public void addViewStateListener(IViewStateListener listener) {
-        mController.addViewStateListener(listener);
+    public boolean addListener(Object listener) {
+        return mController.addListener(listener);
     }
 
     @Override
-    public void removeViewStateListener(IViewStateListener listener) {
-        mController.removeViewStateListener(listener);
+    public boolean removeListener(Object listener) {
+        return  mController.removeListener(listener);
     }
 
     @Override
@@ -260,56 +254,6 @@ public class ContainerActivity extends Activity implements IViewContainer {
     @Override
     public void finish() {
         super.finish();
-    }
-
-    @Override
-    public void addLifecycleListener(IFullLifecycle lifecycleListener) {
-        mController.addLifecycleListener(lifecycleListener);
-    }
-
-    @Override
-    public void removeLifecycleListener(IFullLifecycle lifecycleListener) {
-        mController.removeLifecycleListener(lifecycleListener);
-    }
-
-    @Override
-    public void addOnDestroyListener(OnDestroyListener listener) {
-        mController.addOnDestroyListener(listener);
-    }
-
-    @Override
-    public void removeOnDestroyListener(OnDestroyListener listener) {
-        mController.removeOnDestroyListener(listener);
-    }
-
-    @Override
-    public void addActivityResultListener(OnActivityResultListener listener) {
-        mController.addActivityResultListener(listener);
-    }
-
-    @Override
-    public void removeActivityResultListener(OnActivityResultListener listener) {
-        mController.removeActivityResultListener(listener);
-    }
-
-    @Override
-    public void addPermissionsResultListener(OnPermissionResultListener listener) {
-        mController.addPermissionsResultListener(listener);
-    }
-
-    @Override
-    public void removePermissionsResultListener(OnPermissionResultListener listener) {
-        mController.removePermissionsResultListener(listener);
-    }
-
-    @Override
-    public void addBackPressInterceptor(IBackPressInterceptor interceptor) {
-        mController.addBackPressInterceptor(interceptor);
-    }
-
-    @Override
-    public void removeBackPressInterceptor(IBackPressInterceptor interceptor) {
-        mController.removeBackPressInterceptor(interceptor);
     }
 
 
@@ -329,13 +273,13 @@ public class ContainerActivity extends Activity implements IViewContainer {
     }
 
     @Override
-    public void showLoading(String message) {
+    public void showLoading(Object msg) {
         if (isLiving()) {
             if (loadingManager != null) {
                 loadingManager = new LoadingManagerImpl(getContext());
             }
             if (loadingManager != null) {
-                loadingManager.showLoading(message);
+                loadingManager.showLoading(msg);
             }
         }
     }
@@ -408,24 +352,14 @@ public class ContainerActivity extends Activity implements IViewContainer {
     public void bindView(IViewProcessor processor) {
         mViewProcessor = processor;
         if (mViewProcessor != null) {
-            mController.addLifecycleListener(mViewProcessor);
-            mController.addActivityResultListener(mViewProcessor);
-            mController.addBackPressInterceptor(mViewProcessor);
-            mController.addPermissionsResultListener(mViewProcessor);
-            mController.addViewStateListener(mViewProcessor);
-            mController.addPermissionsResultListener(mViewProcessor);
+            mController.addListener(mViewProcessor);
         }
     }
 
     @Override
     public void unbindView() {
         if (mViewProcessor != null) {
-            mController.removeLifecycleListener(mViewProcessor);
-            mController.removeActivityResultListener(mViewProcessor);
-            mController.removeBackPressInterceptor(mViewProcessor);
-            mController.removePermissionsResultListener(mViewProcessor);
-            mController.removeViewStateListener(mViewProcessor);
-            mController.removePermissionsResultListener(mViewProcessor);
+            mController.removeListener(mViewProcessor);
         }
         mViewProcessor = null;
     }

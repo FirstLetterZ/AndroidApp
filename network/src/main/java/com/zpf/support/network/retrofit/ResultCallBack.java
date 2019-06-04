@@ -1,6 +1,6 @@
 package com.zpf.support.network.retrofit;
 
-import com.zpf.api.ICallback;
+import com.zpf.api.ICancelable;
 import com.zpf.api.IManager;
 import com.zpf.support.network.model.ResponseResult;
 
@@ -22,7 +22,7 @@ public abstract class ResultCallBack<T> extends ResponseCallBack<ResponseResult<
     }
 
     @Override
-    public ResultCallBack<T> toBind(IManager<ICallback> manager) {
+    public ResultCallBack<T> toBind(IManager<ICancelable> manager) {
         super.toBind(manager);
         return this;
     }

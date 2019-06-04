@@ -5,9 +5,9 @@ import android.net.ParseException;
 import android.os.Looper;
 import android.support.annotation.IntRange;
 
-import com.zpf.api.ICallback;
+import com.zpf.api.ICancelable;
 import com.zpf.api.IManager;
-import com.zpf.api.OnDestroyListener;
+import com.zpf.api.INeedManage;
 import com.zpf.support.network.model.CustomException;
 import com.zpf.support.network.model.ResponseResult;
 import com.zpf.tool.config.AppContext;
@@ -31,7 +31,7 @@ import retrofit2.HttpException;
 /**
  * Created by ZPF on 2018/7/26.
  */
-public abstract class BaseCallBack<T> implements ICallback, OnDestroyListener {
+public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICancelable> {
     protected int[] type = new int[]{0, 0, 0, 0};//{不弹出错误提示，结果可为空，预留，预留}
 
     public static final int NOTTOAST = 1;
@@ -39,7 +39,7 @@ public abstract class BaseCallBack<T> implements ICallback, OnDestroyListener {
     public static final int NULLABLE_NOTTOAST = 3;
 
     private volatile boolean isCancel = false;
-    protected IManager<ICallback> manager;
+    protected IManager<ICancelable> manager;
     protected long bindId;
     private IResponseHandler responseHandler = GlobalConfigImpl.get().getGlobalInstance(IResponseHandler.class);
     protected ResponseResult<T> responseResult = new ResponseResult<>();
@@ -72,7 +72,7 @@ public abstract class BaseCallBack<T> implements ICallback, OnDestroyListener {
     }
 
     @Override
-    public BaseCallBack toBind(IManager<ICallback> manager) {
+    public BaseCallBack toBind(IManager<ICancelable> manager) {
         if (manager != null) {
             this.manager = manager;
             bindId = manager.bind(this);
@@ -87,11 +87,6 @@ public abstract class BaseCallBack<T> implements ICallback, OnDestroyListener {
             doCancel();
             removeObservable();
         }
-    }
-
-    @Override
-    public void onDestroy() {
-        cancel();
     }
 
     protected void handleError(Throwable e) {

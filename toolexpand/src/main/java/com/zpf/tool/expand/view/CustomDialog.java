@@ -63,13 +63,27 @@ public class CustomDialog extends Dialog implements ICustomWindow {
     protected void onStop() {
         super.onStop();
         if (listener != null) {
-            listener.execute(-1);
+            listener.remove(bindId);
         }
     }
 
     @Override
     public CustomDialog toBind(IManager<ICustomWindow> manager) {
-        bindId = manager.bind(this);
+        this.listener = manager;
+        if (manager != null) {
+            bindId = manager.bind(this);
+        } else {
+            bindId = -1;
+        }
         return this;
+    }
+
+    @Override
+    public boolean unBind(long bindId) {
+        if (listener != null) {
+            listener.remove(bindId);
+            return true;
+        }
+        return false;
     }
 }

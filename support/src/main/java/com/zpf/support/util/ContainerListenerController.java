@@ -12,12 +12,12 @@ import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnPermissionResultListener;
 import com.zpf.frame.ILifecycleMonitor;
 import com.zpf.frame.IViewStateListener;
+import com.zpf.tool.expand.util.CancelableManager;
 import com.zpf.tool.permission.ActivityPermissionChecker;
 import com.zpf.tool.compat.permission.CompatPermissionChecker;
 import com.zpf.tool.permission.FragmentPermissionChecker;
 import com.zpf.tool.permission.PermissionChecker;
 import com.zpf.tool.config.LifecycleState;
-import com.zpf.tool.expand.util.CallBackManager;
 import com.zpf.tool.expand.util.DialogController;
 import com.zpf.tool.expand.util.ViewStateListener;
 import com.zpf.api.OnDestroyListener;
@@ -37,7 +37,7 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
     private final List<IBackPressInterceptor> mBackPressInterceptor = new ArrayList<>();
     private final List<IViewStateListener> mViewStateList = new ArrayList<>();
     private final DialogController mDialogController = new DialogController();
-    private final CallBackManager mCallBackManager = new CallBackManager();
+    private final CancelableManager mCallBackManager = new CancelableManager();
     private final ViewStateListener mStateListener = new ViewStateListener();
     private PermissionChecker mPermissionChecker;
 
@@ -176,80 +176,69 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
     }
 
     @Override
-    public CallBackManager getCallBackManager() {
+    public CancelableManager getCancelableManager() {
         return mCallBackManager;
     }
 
     @Override
-    public void addViewStateListener(IViewStateListener listener) {
-        if (mViewStateList.size() == 0 || !mViewStateList.contains(listener)) {
-            mViewStateList.add(listener);
+    public boolean addListener(Object listener) {
+        if (listener != null) {
+            if (listener instanceof IFullLifecycle) {
+                if (mLifecycleList.size() == 0 || !mLifecycleList.contains(listener)) {
+                    mLifecycleList.add((IFullLifecycle) listener);
+                }
+            } else if (listener instanceof OnDestroyListener) {
+                if (mDestroyListenerList.size() == 0 || !mDestroyListenerList.contains(listener)) {
+                    mDestroyListenerList.add((OnDestroyListener) listener);
+                }
+            }
+            if (listener instanceof OnActivityResultListener) {
+                if (mActivityResultCallBackList.size() == 0 || !mActivityResultCallBackList.contains(listener)) {
+                    mActivityResultCallBackList.add((OnActivityResultListener) listener);
+                }
+            }
+            if (listener instanceof OnPermissionResultListener) {
+                if (mPermissionCallBackList.size() == 0 || !mPermissionCallBackList.contains(listener)) {
+                    mPermissionCallBackList.add((OnPermissionResultListener) listener);
+                }
+            }
+            if (listener instanceof IBackPressInterceptor) {
+                if (mBackPressInterceptor.size() == 0 || !mBackPressInterceptor.contains(listener)) {
+                    mBackPressInterceptor.add((IBackPressInterceptor) listener);
+                }
+            }
+            if (listener instanceof IViewStateListener) {
+                if (mViewStateList.size() == 0 || !mViewStateList.contains(listener)) {
+                    mViewStateList.add((IViewStateListener) listener);
+                }
+            }
         }
+        return false;
     }
 
     @Override
-    public void removeViewStateListener(IViewStateListener listener) {
-        mViewStateList.remove(listener);
-    }
-
-    @Override
-    public void addLifecycleListener(IFullLifecycle listener) {
-        if (mLifecycleList.size() == 0 || !mLifecycleList.contains(listener)) {
-            mLifecycleList.add(listener);
+    public boolean removeListener(Object listener) {
+        boolean result = false;
+        if (listener != null) {
+            if (listener instanceof IFullLifecycle) {
+                result = mLifecycleList.remove(listener);
+            } else if (listener instanceof OnDestroyListener) {
+                result = mDestroyListenerList.remove(listener);
+            }
+            if (listener instanceof OnActivityResultListener) {
+                result = mActivityResultCallBackList.remove(listener) || result;
+            }
+            if (listener instanceof OnPermissionResultListener) {
+                result = mPermissionCallBackList.remove(listener) || result;
+            }
+            if (listener instanceof IBackPressInterceptor) {
+                result = mBackPressInterceptor.remove(listener) || result;
+            }
+            if (listener instanceof IViewStateListener) {
+                result = mViewStateList.remove(listener) || result;
+            }
         }
-    }
-
-    @Override
-    public void removeLifecycleListener(IFullLifecycle listener) {
-        mLifecycleList.remove(listener);
-    }
-
-    @Override
-    public void addOnDestroyListener(OnDestroyListener listener) {
-        if (mDestroyListenerList.size() == 0 || !mDestroyListenerList.contains(listener)) {
-            mDestroyListenerList.add(listener);
-        }
-    }
-
-    @Override
-    public void removeOnDestroyListener(OnDestroyListener listener) {
-        mDestroyListenerList.remove(listener);
-    }
-
-    @Override
-    public void addActivityResultListener(OnActivityResultListener listener) {
-        if (mActivityResultCallBackList.size() == 0 || !mActivityResultCallBackList.contains(listener)) {
-            mActivityResultCallBackList.add(listener);
-        }
-    }
-
-    @Override
-    public void removeActivityResultListener(OnActivityResultListener listener) {
-        mActivityResultCallBackList.remove(listener);
-    }
-
-    @Override
-    public void addPermissionsResultListener(OnPermissionResultListener listener) {
-        if (mPermissionCallBackList.size() == 0 || !mPermissionCallBackList.contains(listener)) {
-            mPermissionCallBackList.add(listener);
-        }
-    }
-
-    @Override
-    public void removePermissionsResultListener(OnPermissionResultListener listener) {
-        mPermissionCallBackList.remove(listener);
-    }
-
-    @Override
-    public void addBackPressInterceptor(IBackPressInterceptor interceptor) {
-        if (mBackPressInterceptor.size() == 0 || !mBackPressInterceptor.contains(interceptor)) {
-            mBackPressInterceptor.add(interceptor);
-        }
-    }
-
-    @Override
-    public void removeBackPressInterceptor(IBackPressInterceptor interceptor) {
-        mBackPressInterceptor.remove(interceptor);
+        return result;
     }
 
     @Override

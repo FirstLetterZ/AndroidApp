@@ -1,7 +1,6 @@
 package com.zpf.support.rxnetwork;
 
-
-import com.zpf.api.ICallback;
+import com.zpf.api.ICancelable;
 import com.zpf.api.IManager;
 import com.zpf.support.network.model.ResponseResult;
 
@@ -23,7 +22,7 @@ public abstract class RxResultCallBack<T> extends RxCallBack<ResponseResult<T>> 
     }
 
     @Override
-    public RxResultCallBack<T> toBind(IManager<ICallback> manager) {
+    public RxResultCallBack<T> toBind(IManager<ICancelable> manager) {
         super.toBind(manager);
         return this;
     }

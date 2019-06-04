@@ -4,21 +4,20 @@ import android.util.Pair;
 
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
-import com.zpf.api.OnDestroyListener;
 
 import java.util.LinkedList;
 
 /**
  * Created by ZPF on 2018/6/5.
  */
-public class DialogController implements IManager<ICustomWindow>, OnDestroyListener {
+public class DialogController implements IManager<ICustomWindow> {
     private LinkedList<Pair<Long, ICustomWindow>> cacheList = new LinkedList<>();
     private ICustomWindow showingWindow;
     private long showingWindowId;
     private volatile boolean isDestroy = false;
 
     @Override
-    public long bind(ICustomWindow safeWindow) {
+    public long bind(final ICustomWindow safeWindow) {
         if (isDestroy || safeWindow == null) {
             return 0;
         }

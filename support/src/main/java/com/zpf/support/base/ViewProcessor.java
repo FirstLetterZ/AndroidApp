@@ -11,18 +11,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.zpf.api.IBackPressInterceptor;
-import com.zpf.api.ICallback;
+import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
-import com.zpf.api.IFullLifecycle;
 import com.zpf.api.ILayoutId;
 import com.zpf.api.IManager;
 import com.zpf.api.OnActivityResultListener;
-import com.zpf.api.OnDestroyListener;
-import com.zpf.api.OnPermissionResultListener;
 import com.zpf.frame.IRootLayout;
 import com.zpf.frame.ITitleBar;
-import com.zpf.frame.IViewStateListener;
 import com.zpf.support.view.RootLayout;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.PermissionUtil;
@@ -328,67 +323,17 @@ public class ViewProcessor<C> implements IViewProcessor<C>, OnActivityResultList
     }
 
     @Override
-    public IManager<ICallback> getCallBackManager() {
-        return mContainer.getCallBackManager();
+    public IManager<ICancelable> getCancelableManager() {
+        return mContainer.getCancelableManager();
     }
 
     @Override
-    public void addViewStateListener(IViewStateListener listener) {
-        mContainer.addViewStateListener(listener);
+    public boolean addListener(Object listener) {
+        return mContainer.addListener(listener);
     }
 
     @Override
-    public void removeViewStateListener(IViewStateListener listener) {
-        mContainer.addViewStateListener(listener);
-    }
-
-    @Override
-    public void addLifecycleListener(IFullLifecycle listener) {
-        mContainer.addLifecycleListener(listener);
-    }
-
-    @Override
-    public void removeLifecycleListener(IFullLifecycle listener) {
-        mContainer.removeLifecycleListener(listener);
-    }
-
-    @Override
-    public void addOnDestroyListener(OnDestroyListener listener) {
-        mContainer.addOnDestroyListener(listener);
-    }
-
-    @Override
-    public void removeOnDestroyListener(OnDestroyListener listener) {
-        mContainer.removeOnDestroyListener(listener);
-    }
-
-    @Override
-    public void addActivityResultListener(OnActivityResultListener listener) {
-        mContainer.addActivityResultListener(listener);
-    }
-
-    @Override
-    public void removeActivityResultListener(OnActivityResultListener listener) {
-        mContainer.removeActivityResultListener(listener);
-    }
-
-    @Override
-    public void addPermissionsResultListener(OnPermissionResultListener listener) {
-        mContainer.addPermissionsResultListener(listener);
-    }
-
-    @Override
-    public void removePermissionsResultListener(OnPermissionResultListener listener) {
-        mContainer.removePermissionsResultListener(listener);
-    }
-
-    @Override
-    public void addBackPressInterceptor(IBackPressInterceptor interceptor) {
-        mContainer.addBackPressInterceptor(interceptor);
-    }
-
-    @Override
-    public void removeBackPressInterceptor(IBackPressInterceptor interceptor) {
-        mContainer.removeBackPressInterceptor(interceptor);
+    public boolean removeListener(Object listener) {
+        return mContainer.removeListener(listener);
     }
 }

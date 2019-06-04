@@ -20,7 +20,10 @@ dependencies {
     api rootProject.ext.dependencies.design
     api rootProject.ext.dependencies.frame
     api rootProject.ext.dependencies.compatPermission
+    api rootProject.ext.dependencies.permission
     api rootProject.ext.dependencies.toolExpand
+    api rootProject.ext.dependencies.dataparser
+    api rootProject.ext.dependencies.global
 }
 
 apply from: "../bintrayUpload.gradle"

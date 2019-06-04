@@ -17,8 +17,8 @@ android {
 }
 
 dependencies {
-    api rootProject.ext.dependencies.glide
-    api rootProject.ext.dependencies.okhttp
+    provided rootProject.ext.dependencies.glide
+    provided rootProject.ext.dependencies.okhttp
 }
 apply from: "../bintrayUpload.gradle"
 

@@ -13,19 +13,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.zpf.api.IBackPressInterceptor;
-import com.zpf.api.ICallback;
+import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
-import com.zpf.api.IFullLifecycle;
 import com.zpf.api.IManager;
-import com.zpf.api.OnActivityResultListener;
-import com.zpf.api.OnPermissionResultListener;
 import com.zpf.frame.ILoadingManager;
-import com.zpf.frame.IViewStateListener;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
-import com.zpf.api.OnDestroyListener;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.support.util.FragmentHelper;
@@ -67,7 +62,7 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         IViewContainer parentContainer = getParentContainer();
         if (parentContainer != null) {
-            parentContainer.addBackPressInterceptor(this);
+            parentContainer.addListener(this);
         }
         mController.onCreate(savedInstanceState);
     }
@@ -234,59 +229,20 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
     }
 
     @Override
-    public IManager<ICallback> getCallBackManager() {
-        return mController.getCallBackManager();
+    public IManager<ICancelable> getCancelableManager() {
+        return mController.getCancelableManager();
     }
 
     @Override
-    public void addViewStateListener(IViewStateListener listener) {
-        mController.addViewStateListener(listener);
+    public boolean addListener(Object listener) {
+        return false;
     }
 
     @Override
-    public void removeViewStateListener(IViewStateListener listener) {
-        mController.removeViewStateListener(listener);
+    public boolean removeListener(Object listener) {
+        return false;
     }
 
-    @Override
-    public void addLifecycleListener(IFullLifecycle listener) {
-        mController.addLifecycleListener(listener);
-    }
-
-    @Override
-    public void removeLifecycleListener(IFullLifecycle listener) {
-        mController.removeLifecycleListener(listener);
-    }
-
-    @Override
-    public void addActivityResultListener(OnActivityResultListener listener) {
-        mController.addActivityResultListener(listener);
-    }
-
-    @Override
-    public void removeActivityResultListener(OnActivityResultListener listener) {
-        mController.removeActivityResultListener(listener);
-    }
-
-    @Override
-    public void addPermissionsResultListener(OnPermissionResultListener listener) {
-        mController.addPermissionsResultListener(listener);
-    }
-
-    @Override
-    public void removePermissionsResultListener(OnPermissionResultListener listener) {
-        mController.removePermissionsResultListener(listener);
-    }
-
-    @Override
-    public void addBackPressInterceptor(IBackPressInterceptor interceptor) {
-        mController.addBackPressInterceptor(interceptor);
-    }
-
-    @Override
-    public void removeBackPressInterceptor(IBackPressInterceptor interceptor) {
-        mController.removeBackPressInterceptor(interceptor);
-    }
 
     @Override
     public void finishWithResult(int resultCode, Intent data) {
@@ -301,17 +257,6 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
         if (getActivity() != null) {
             getActivity().finish();
         }
-    }
-
-
-    @Override
-    public void addOnDestroyListener(OnDestroyListener listener) {
-        mController.addOnDestroyListener(listener);
-    }
-
-    @Override
-    public void removeOnDestroyListener(OnDestroyListener listener) {
-        mController.removeOnDestroyListener(listener);
     }
 
     @Override
@@ -334,7 +279,7 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
     }
 
     @Override
-    public void showLoading(String message) {
+    public void showLoading(Object message) {
         FragmentActivity activity = getActivity();
         if (activity != null) {
             if (activity instanceof IViewContainer) {
@@ -436,24 +381,14 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
     public void bindView(IViewProcessor processor) {
         mViewProcessor = processor;
         if (mViewProcessor != null) {
-            mController.addLifecycleListener(mViewProcessor);
-            mController.addActivityResultListener(mViewProcessor);
-            mController.addBackPressInterceptor(mViewProcessor);
-            mController.addPermissionsResultListener(mViewProcessor);
-            mController.addViewStateListener(mViewProcessor);
-            mController.addPermissionsResultListener(mViewProcessor);
+            mController.addListener(mViewProcessor);
         }
     }
 
     @Override
     public void unbindView() {
         if (mViewProcessor != null) {
-            mController.removeLifecycleListener(mViewProcessor);
-            mController.removeActivityResultListener(mViewProcessor);
-            mController.removeBackPressInterceptor(mViewProcessor);
-            mController.removePermissionsResultListener(mViewProcessor);
-            mController.removeViewStateListener(mViewProcessor);
-            mController.removePermissionsResultListener(mViewProcessor);
+            mController.removeListener(mViewProcessor);
         }
         mViewProcessor = null;
     }

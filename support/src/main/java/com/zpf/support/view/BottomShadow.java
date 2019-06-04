@@ -2,6 +2,7 @@ package com.zpf.support.view;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
@@ -50,6 +51,11 @@ public class BottomShadow extends View implements IShadowLine {
         GradientDrawable gradientDrawable = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
                 new int[]{startColor, Color.TRANSPARENT});
         setBackground(gradientDrawable);
+    }
+
+    @Override
+    public void setShadowDrwable(Drawable background) {
+        setBackground(background);
     }
 
     @Override

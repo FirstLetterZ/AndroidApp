@@ -7,9 +7,9 @@ import com.zpf.frame.ILoadingManager;
 import com.zpf.support.view.ProgressDialog;
 
 /**
+ * loading弹窗管理
  * Created by ZPF on 2019/3/20.
  */
-
 public class LoadingManagerImpl implements ILoadingManager {
     private ProgressDialog progressDialog;
 
@@ -23,8 +23,12 @@ public class LoadingManagerImpl implements ILoadingManager {
     }
 
     @Override
-    public void showLoading(String msg) {
-        progressDialog.setText(msg);
+    public void showLoading(Object msg) {
+        if(msg!=null){
+            progressDialog.setText(msg.toString());
+        }else {
+            progressDialog.setText(null);
+        }
         if (!progressDialog.isShowing()) {
             progressDialog.show();
         }

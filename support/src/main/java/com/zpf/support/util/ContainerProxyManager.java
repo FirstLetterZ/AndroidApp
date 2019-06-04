@@ -8,7 +8,6 @@ import com.zpf.frame.IViewContainer;
 /**
  * Created by ZPF on 2018/7/25.
  */
-
 public class ContainerProxyManager {
     private static final String TAG = "Proxy_";
 
