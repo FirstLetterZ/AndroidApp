@@ -1,32 +1,28 @@
 package com.zpf.app.global;
 
-import com.zpf.support.network.base.ResponseHandleInterface;
-import com.zpf.support.network.model.HttpResult;
+import com.zpf.support.network.base.IResponseHandler;
+import com.zpf.support.network.model.ResponseResult;
 import com.zpf.tool.ToastUtil;
 
 /**
  * Created by ZPF on 2019/3/25.
  */
 
-public class ResponseHandleImpl implements ResponseHandleInterface {
-    private static volatile ResponseHandleImpl mInstance;
+public class ResponseHandleImpl implements IResponseHandler {
+
+    private static class Instance {
+        private static ResponseHandleImpl mInstance = new ResponseHandleImpl();
+    }
 
     private ResponseHandleImpl() {
     }
 
     public static ResponseHandleImpl get() {
-        if (mInstance == null) {
-            synchronized (ResponseHandleImpl.class) {
-                if (mInstance == null) {
-                    mInstance = new ResponseHandleImpl();
-                }
-            }
-        }
-        return mInstance;
+        return Instance.mInstance;
     }
 
     @Override
-    public HttpResult parsingException(Throwable e) {
+    public ResponseResult parsingException(Throwable e) {
         return null;
     }
 
@@ -36,12 +32,12 @@ public class ResponseHandleImpl implements ResponseHandleInterface {
     }
 
     @Override
-    public boolean interceptFailHandle(int code) {
+    public boolean interceptFailHandle(ResponseResult result) {
         return false;
     }
 
     @Override
-    public void showToast(int code, String msg) {
-        ToastUtil.toast(msg + "(" + code + ")");
+    public void showHint(int code, String message) {
+        ToastUtil.toast(message + "(" + code + ")");
     }
 }

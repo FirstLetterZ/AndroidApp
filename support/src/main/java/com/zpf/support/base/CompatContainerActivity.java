@@ -19,7 +19,9 @@ import android.view.WindowManager;
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
+import com.zpf.frame.IContainerHelper;
 import com.zpf.frame.ILoadingManager;
+import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
@@ -28,32 +30,31 @@ import com.zpf.support.util.ContainerListenerController;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.LogUtil;
+import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.MainHandler;
-
-import java.lang.reflect.Constructor;
 
 /**
  * 基于AppCompatActivity的视图容器层
  * Created by ZPF on 2018/6/14.
  */
 public class CompatContainerActivity extends AppCompatActivity implements IViewContainer {
-    private final ContainerListenerController mController = new ContainerListenerController();
+    protected final ContainerListenerController mController = new ContainerListenerController();
     private ILoadingManager loadingManager;
     private Bundle mParams;
     private IViewProcessor mViewProcessor;
+    private boolean isLauncher;
+    private IContainerHelper mHelper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //防止初次安装从后台返回的重启问题
         Intent intent = getIntent();
-        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
-            String action = intent.getAction();
-            if (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && Intent.ACTION_MAIN.equals(action)) {
-                finish();
-                return;
-            }
+        isLauncher = (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && Intent.ACTION_MAIN.equals(intent.getAction()));
+        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0 && isLauncher) {
+            finish();
+            return;
         }
         initWindow();
         IViewProcessor viewProcessor = initViewProcessor();
@@ -314,12 +315,28 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         this.loadingManager = loadingManager;
     }
 
+    @NonNull
     @Override
     public Bundle getParams() {
         if (mParams == null) {
             mParams = getIntent().getExtras();
             if (mParams == null) {
                 mParams = new Bundle();
+            }
+        }
+        if (isLauncher) {
+            Class launcherClass = null;
+            if (mHelper != null) {
+                launcherClass = mHelper.getLaunchProcessorClass(null);
+            }
+            if (launcherClass == null) {
+                launcherClass = defViewProcessorClass();
+            }
+            if (launcherClass == null && mHelper != null) {
+                launcherClass = mHelper.getErrorProcessorClass(null);
+            }
+            if (launcherClass != null) {
+                mParams.putSerializable(AppConst.TARGET_VIEW_CLASS, launcherClass);
             }
         }
         return mParams;
@@ -369,6 +386,11 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         return mViewProcessor;
     }
 
+    @Override
+    public INavigator<Class<? extends IViewProcessor>> getNavigator() {
+        return null;
+    }
+
     protected void initWindow() {
         int themeId = getParams().getInt(AppConst.TARGET_VIEW_THEME, -1);
         if (themeId > 0) {
@@ -394,29 +416,36 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     protected IViewProcessor initViewProcessor() {
+        Class<? extends IViewProcessor> targetViewClass = null;
         IViewProcessor viewProcessor = null;
-        Constructor<IViewProcessor> constructor = null;
         try {
-            Class targetViewClass = (Class) getParams().getSerializable(AppConst.TARGET_VIEW_CLASS);
-            if (targetViewClass != null) {
-                constructor = targetViewClass.getConstructor();
-            }
+            targetViewClass = (Class<? extends IViewProcessor>) getParams().getSerializable(AppConst.TARGET_VIEW_CLASS);
         } catch (Exception e) {
             e.printStackTrace();
+            if (mHelper != null) {
+                targetViewClass = mHelper.getErrorProcessorClass(null);
+            }
         }
-        synchronized (ContainerController.class) {
-            ContainerController.mInitingViewContainer = this;
-            if (constructor != null) {
+        if (targetViewClass != null) {
+            synchronized (ContainerController.class) {
+                ContainerController.mInitingViewContainer = this;
                 try {
-                    viewProcessor = constructor.newInstance();
+                    viewProcessor = targetViewClass.newInstance();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                if (mHelper != null) {
+                    targetViewClass = mHelper.getErrorProcessorClass(targetViewClass);
+                }
+                if (targetViewClass != null) {
+                    try {
+                        viewProcessor = targetViewClass.newInstance();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                ContainerController.mInitingViewContainer = null;
             }
-            if (viewProcessor == null) {
-                viewProcessor = defViewProcessor();
-            }
-            ContainerController.mInitingViewContainer = null;
         }
         return viewProcessor;
     }
@@ -425,7 +454,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     }
 
-    protected IViewProcessor defViewProcessor() {
+    protected Class<? extends IViewProcessor> defViewProcessorClass() {
         return null;
     }
 

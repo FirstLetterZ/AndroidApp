@@ -1,4 +1,4 @@
-package com.zpf.support.single;
+package com.zpf.support.single.base;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -6,13 +6,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.support.base.CompatContainerActivity;
+import com.zpf.support.base.ViewProcessor;
+import com.zpf.support.constant.AppConst;
+import com.zpf.support.constant.ContainerType;
+import com.zpf.support.single.stack.CompatFragmentStackManager;
+import com.zpf.support.single.OnStackEmptyListener;
 
 /**
  * Created by ZPF on 2019/5/20.
  */
-public abstract class CompatSinglePageActivity extends CompatContainerActivity {
+public class CompatSinglePageActivity extends CompatContainerActivity {
     private CompatFragmentStackManager fragmentStackManager;
 
     @Override
@@ -29,21 +35,38 @@ public abstract class CompatSinglePageActivity extends CompatContainerActivity {
         frameLayout.setId(viewId);
         setContentView(frameLayout);
         fragmentStackManager = new CompatFragmentStackManager(getSupportFragmentManager(), viewId);
-        ShareBox.putRealNavigator("" + viewId, fragmentStackManager);
         fragmentStackManager.setEmptyListener(new OnStackEmptyListener() {
             @Override
             public void onEmpty() {
                 finish();
             }
         });
-        fragmentStackManager.push(launcher());
+        Class<? extends ViewProcessor> targetViewClass = null;
+        try {
+            targetViewClass = (Class<? extends ViewProcessor>) getParams().getSerializable(AppConst.TARGET_VIEW_CLASS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (targetViewClass != null) {
+            fragmentStackManager.push(targetViewClass);
+        }
     }
 
     @Override
     public void onBackPressed() {
-        fragmentStackManager.poll();
-        super.onBackPressed();
+        if (!mController.onInterceptBackPress() && !dismiss()) {
+            fragmentStackManager.poll();
+        }
     }
 
-    public abstract Class<? extends FragmentViewProcessor> launcher();
+    @Override
+    public int getContainerType() {
+        return ContainerType.CONTAINER_SINGLE_COMPAT_ACTIVITY;
+    }
+
+    @Override
+    public INavigator<Class<? extends IViewProcessor>> getNavigator() {
+        return fragmentStackManager;
+    }
+
 }

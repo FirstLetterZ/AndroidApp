@@ -50,7 +50,7 @@ public class RootLayout extends LinearLayout implements IRootLayout {
         return super.fitSystemWindows(insets);
     }
 
-    private void createChildren(Context context) {
+    protected void createChildren(Context context) {
         topView = new TopLayout(context);
         statusBar = topView.getStatusBar();
         titleBar = topView.getTitleBar();

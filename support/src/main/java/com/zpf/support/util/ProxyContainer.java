@@ -16,6 +16,7 @@ import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
 import com.zpf.frame.ILoadingManager;
+import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.constant.ContainerType;
@@ -392,6 +393,11 @@ public class ProxyContainer extends Fragment implements IViewContainer {
     @Override
     public IViewProcessor getViewProcessor() {
         return mViewProcessor;
+    }
+
+    @Override
+    public INavigator<Class<? extends IViewProcessor>> getNavigator() {
+        return null;
     }
 
     private void checkVisibleChange(boolean changeTo) {

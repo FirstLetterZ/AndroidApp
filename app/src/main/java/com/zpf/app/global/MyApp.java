@@ -37,7 +37,7 @@ public class MyApp extends Application {
                 public void onObjectInit(Object object) {
                     if (object != null) {
                         if (object instanceof RootLayout) {
-                            ((RootLayout) object).getTopLayout().setBackgroundColor(Color.BLUE);
+                            ((RootLayout) object).getTopLayout().getLayout().setBackgroundColor(Color.BLUE);
                             ((RootLayout) object).getShadowLine().setShadowColor(Color.DKGRAY);
                             ((RootLayout) object).getShadowLine().setElevation(4);
                         }
@@ -53,7 +53,7 @@ public class MyApp extends Application {
                 @Override
                 public <T> T getGlobalInstance(Class<T> target) {
                     if (target == JsonParserInterface.class) {
-                        return (T) GsonUtil.get();
+                        return (T) GsonUtil.mInstance;
                     } else if (target == IResponseHandler.class) {
                         return (T) ResponseHandleImpl.get();
                     }

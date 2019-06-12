@@ -5,21 +5,37 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 
+import com.zpf.frame.IContainerHelper;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.base.CompatContainerFragment;
 import com.zpf.support.base.ContainerFragment;
+import com.zpf.tool.config.GlobalConfigImpl;
 
 /**
  * Created by ZPF on 2019/3/21.
  */
 public class FragmentHelper {
     public static CompatContainerFragment createCompatFragment(@Nullable Bundle args) {
+        IContainerHelper helper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
+        if (helper != null) {
+            IViewContainer container = helper.createFragmentContainer(args);
+            if (container instanceof CompatContainerFragment) {
+                return ((CompatContainerFragment) container);
+            }
+        }
         CompatContainerFragment containerFragment = new CompatContainerFragment();
         containerFragment.setArguments(args);
         return containerFragment;
     }
 
     public static ContainerFragment createFragment(@Nullable Bundle args) {
+        IContainerHelper helper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
+        if (helper != null) {
+            IViewContainer container = helper.createFragmentContainer(args);
+            if (container instanceof ContainerFragment) {
+                return ((ContainerFragment) container);
+            }
+        }
         ContainerFragment containerFragment = new ContainerFragment();
         containerFragment.setArguments(args);
         return containerFragment;

@@ -25,25 +25,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * gson解析
  * Created by ZPF on 2018/7/21.
  */
 public class GsonUtil implements JsonParserInterface {
     private final Gson mGson = new Gson();
     private final JsonParser mJsonParser = new JsonParser();
-    private static volatile GsonUtil mInstance;
+    public static GsonUtil mInstance = Instance.mInstance;
 
     private GsonUtil() {
     }
 
-    public static GsonUtil get() {
-        if (mInstance == null) {
-            synchronized (GsonUtil.class) {
-                if (mInstance == null) {
-                    mInstance = new GsonUtil();
-                }
-            }
-        }
-        return mInstance;
+    private static class Instance {
+        private static GsonUtil mInstance = new GsonUtil();
     }
 
     @Override
@@ -57,6 +51,8 @@ public class GsonUtil implements JsonParserInterface {
                 return mGson.fromJson((JsonElement) object, classType);
             } else if (object instanceof Reader) {
                 return mGson.fromJson((Reader) object, classType);
+            } else if (object instanceof JsonReader) {
+                return mGson.fromJson((JsonReader) object, classType);
             } else if (classType == String.class) {
                 return (T) toString(object);
             } else {
@@ -83,13 +79,28 @@ public class GsonUtil implements JsonParserInterface {
                 } else {
                     jsonElement = mJsonParser.parse(toString(object));
                 }
-                if (jsonElement != null && jsonElement.isJsonArray()) {
-                    JsonArray array = jsonElement.getAsJsonArray();
-                    for (final JsonElement elem : array) {
-                        T result = mGson.fromJson(elem, classType);
-                        if (result != null) {
-                            list.add(result);
+                if (jsonElement != null && !jsonElement.isJsonNull()) {
+                    T eleResult = null;
+                    if (jsonElement.isJsonArray()) {
+                        JsonArray array = jsonElement.getAsJsonArray();
+                        for (final JsonElement elem : array) {
+                            eleResult = null;
+                            if (elem == null || elem.isJsonNull()) {
+                                continue;
+                            } else if (elem.isJsonArray()) {
+                                eleResult = (T) fromJsonList(elem, classType);
+                            } else if (jsonElement.isJsonObject() || jsonElement.isJsonPrimitive()) {
+                                eleResult = mGson.fromJson(jsonElement, classType);
+                            }
+                            if (eleResult != null) {
+                                list.add(eleResult);
+                            }
                         }
+                    } else if (jsonElement.isJsonObject() || jsonElement.isJsonPrimitive()) {
+                        eleResult = mGson.fromJson(jsonElement, classType);
+                    }
+                    if (eleResult != null) {
+                        list.add(eleResult);
                     }
                 }
             } catch (Exception e) {

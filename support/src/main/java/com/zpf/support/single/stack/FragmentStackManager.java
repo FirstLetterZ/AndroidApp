@@ -1,31 +1,32 @@
-package com.zpf.support.single;
+package com.zpf.support.single.stack;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.text.TextUtils;
 
 import com.zpf.frame.INavigator;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.support.constant.AppConst;
+import com.zpf.support.single.OnStackEmptyListener;
+import com.zpf.support.single.StackElementState;
 import com.zpf.support.util.FragmentHelper;
 import com.zpf.tool.config.MainHandler;
 
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Created by ZPF on 2019/5/20.
  */
-public class CompatFragmentStackManager implements INavigator<Class<? extends ViewProcessor>> {
+public class FragmentStackManager implements INavigator<Class<? extends ViewProcessor>> {
     private final LinkedList<FragmentElementInfo> stackList = new LinkedList<>();
     private OnStackEmptyListener emptyListener;
     private FragmentManager fragmentManager;
     private int viewId;
 
-    public CompatFragmentStackManager(FragmentManager fragmentManager, int viewId) {
+    public FragmentStackManager(FragmentManager fragmentManager, int viewId) {
         this.fragmentManager = fragmentManager;
         this.viewId = viewId;
     }
@@ -38,32 +39,10 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends Vi
     public void push(Class<? extends ViewProcessor> target, Bundle params, int requestCode) {
         String tag = target.getName();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        Fragment targetFragment = null;
         if (params == null) {
             params = new Bundle();
         }
         params.putInt(AppConst.REQUEST_CODE, requestCode);
-        params.putString(AppConst.TARGET_VIEW_EXPANSION, ""+viewId);
-        List<Fragment> fragmentList = fragmentManager.getFragments();
-        if (fragmentList != null && fragmentList.size() > 0) {
-            for (Fragment f : fragmentList) {
-                transaction.hide(f);
-            }
-            targetFragment = fragmentManager.findFragmentByTag(tag);
-            if (targetFragment != null) {
-                if (!targetFragment.isAdded()) {
-                    transaction.add(viewId, targetFragment, tag);
-                } else {
-                    transaction.show(targetFragment);
-                }
-            }
-        }
-        if (targetFragment == null) {
-            targetFragment = FragmentHelper.createCompatFragment(params);
-            transaction.add(viewId, targetFragment, tag);
-        } else {
-            targetFragment.setArguments(params);
-        }
         synchronized (stackList) {
             boolean contain = false;
             for (FragmentElementInfo elementInfo : stackList) {
@@ -72,24 +51,33 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends Vi
                     stackList.remove(elementInfo);
                     elementInfo.requestCode = requestCode;
                     elementInfo.tag = tag;
-                    elementInfo.instance = targetFragment;
                     elementInfo.params = params;
                     elementInfo.state = StackElementState.STACK_TOP;
                     stackList.add(elementInfo);
-                    break;
+                    if (elementInfo.instance.isAdded()) {
+                        transaction.show(elementInfo.instance);
+                    } else {
+                        transaction.add(viewId, elementInfo.instance, tag);
+                    }
+                } else {
+                    if (elementInfo.state == StackElementState.STACK_TOP) {
+                        elementInfo.state = StackElementState.STACK_INSIDE;
+                    }
+                    transaction.hide(elementInfo.instance);
                 }
             }
             if (!contain) {
                 FragmentElementInfo newElementInfo = new FragmentElementInfo();
+                newElementInfo.instance = FragmentHelper.createFragment(params);
+                transaction.add(viewId, newElementInfo.instance, tag);
                 newElementInfo.requestCode = requestCode;
                 newElementInfo.tag = tag;
-                newElementInfo.instance = targetFragment;
                 newElementInfo.params = params;
                 newElementInfo.state = StackElementState.STACK_TOP;
                 stackList.add(newElementInfo);
             }
         }
-        transaction.commitNowAllowingStateLoss();
+        transaction.commitAllowingStateLoss();
     }
 
     @Override

@@ -4,7 +4,7 @@
     <application>
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="com.zpf.util.fileprovider"
+            android:authorities="com.zpf.util.deffileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -19,6 +19,18 @@
             />
         <activity
             android:name="com.zpf.support.base.ContainerActivity"
+            android:configChanges="screenSize|keyboardHidden|orientation"
+            android:launchMode="standard"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar"
+            />
+        <activity
+            android:name="com.zpf.support.single.base.CompatSinglePageActivity"
+            android:configChanges="screenSize|keyboardHidden|orientation"
+            android:launchMode="standard"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            />
+        <activity
+            android:name="com.zpf.support.single.base.SinglePageActivity"
             android:configChanges="screenSize|keyboardHidden|orientation"
             android:launchMode="standard"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar"

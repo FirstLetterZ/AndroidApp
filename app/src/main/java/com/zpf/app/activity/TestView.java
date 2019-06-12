@@ -3,8 +3,8 @@ package com.zpf.app.activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
+import com.zpf.api.ILayoutId;
 import com.zpf.app.R;
-import com.zpf.frame.ILayoutId;
 import com.zpf.support.base.ViewProcessor;
 
 /**
@@ -13,7 +13,7 @@ import com.zpf.support.base.ViewProcessor;
 @ILayoutId(R.layout.activity_test)
 public class TestView extends ViewProcessor {
     @Override
-    public void afterCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
 
     }
 }

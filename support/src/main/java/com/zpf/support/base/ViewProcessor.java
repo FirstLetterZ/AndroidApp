@@ -15,15 +15,18 @@ import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.ILayoutId;
 import com.zpf.api.IManager;
-import com.zpf.api.OnActivityResultListener;
+import com.zpf.frame.IContainerHelper;
+import com.zpf.frame.INavigator;
 import com.zpf.frame.IRootLayout;
 import com.zpf.frame.ITitleBar;
+import com.zpf.support.constant.AppConst;
 import com.zpf.support.view.RootLayout;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.PermissionUtil;
 import com.zpf.tool.SafeClickListener;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
+import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.permission.OnLockPermissionRunnable;
 import com.zpf.tool.permission.PermissionInfo;
 
@@ -33,7 +36,7 @@ import java.util.List;
  * 视图处理
  * Created by ZPF on 2018/6/14.
  */
-public class ViewProcessor<C> implements IViewProcessor<C>, OnActivityResultListener {
+public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? extends IViewProcessor>> {
     protected final IViewContainer mContainer;
     protected final ITitleBar mTitleBar;
     protected final IRootLayout mRootLayout;
@@ -43,7 +46,7 @@ public class ViewProcessor<C> implements IViewProcessor<C>, OnActivityResultList
             ViewProcessor.this.onClick(v);
         }
     };
-    protected C mWorker;//
+    protected C mLinker;//
 
     public ViewProcessor() {
         this.mContainer = ContainerController.mInitingViewContainer;
@@ -205,8 +208,8 @@ public class ViewProcessor<C> implements IViewProcessor<C>, OnActivityResultList
     }
 
     @Override
-    public void setLinker(C worker) {
-        this.mWorker = worker;
+    public void setLinker(C linker) {
+        this.mLinker = linker;
     }
 
     @NonNull
@@ -214,47 +217,6 @@ public class ViewProcessor<C> implements IViewProcessor<C>, OnActivityResultList
     public Bundle getParams() {
         return mContainer.getParams();
     }
-
-//    @Override
-//    public void navigate(Class cls, Bundle params, int requestCode) {
-//        Context context = mContainer.getContext();
-//        if (context == null) {
-//            return;
-//        }
-//        Intent intent = new Intent();
-//        Class defContainerClass = CompatContainerActivity.class;
-//        if (params == null) {
-//            intent.setClass(context, defContainerClass);
-//        } else {
-//            String containerName = params.getString(AppConst.TARGET_CONTAINER_CLASS, null);
-//            if (TextUtils.isEmpty(containerName)) {
-//                intent.setClass(context, defContainerClass);
-//            } else {
-//                intent.setClassName(context, containerName);
-//                params.remove(AppConst.TARGET_CONTAINER_CLASS);
-//            }
-//            String containerAction = params.getString(AppConst.TARGET_CONTAINER_ACTION, null);
-//            if (!TextUtils.isEmpty(containerAction)) {
-//                intent.setAction(containerAction);
-//                params.remove(AppConst.TARGET_CONTAINER_ACTION);
-//            }
-//            intent.putExtras(params);
-//        }
-//        intent.putExtra(AppConst.TARGET_VIEW_CLASS, cls);
-//        mContainer.startActivityForResult(intent, requestCode);
-//
-//    }
-//
-//    @Override
-//    public void navigate(Class cls, Bundle params) {
-//        navigate(cls, params, -1);
-//    }
-//
-//    @Override
-//    public void navigate(Class cls) {
-//        navigate(cls, null, -1);
-//
-//    }
 
     public void setText(int viewId, CharSequence content) {
         TextView textView = $(viewId);
@@ -335,5 +297,110 @@ public class ViewProcessor<C> implements IViewProcessor<C>, OnActivityResultList
     @Override
     public boolean removeListener(Object listener) {
         return mContainer.removeListener(listener);
+    }
+
+    @Override
+    public void push(Class<? extends IViewProcessor> target, Bundle params, int requestCode) {
+        if (isLiving() && mContainer != null && getContext() != null) {
+            if (mContainer.getNavigator() != null) {
+                mContainer.getNavigator().push(target, params, requestCode);
+            } else {
+                Intent intent = new Intent();
+                Context context = getContext();
+                Class defContainerClass = null;
+                IContainerHelper helper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
+                if (helper != null) {
+                    defContainerClass = helper.getDefContainerClassByType(mContainer.getContainerType());
+                }
+                if (defContainerClass == null) {
+                    defContainerClass = CompatContainerActivity.class;
+                }
+                if (params == null) {
+                    intent.setClass(context, defContainerClass);
+                } else {
+                    Class containerClass = null;
+                    try {
+                        containerClass = (Class) params.getSerializable(AppConst.TARGET_CONTAINER_CLASS);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    if (containerClass == null) {
+                        intent.setClass(context, defContainerClass);
+                    } else {
+                        intent.setClass(context, containerClass);
+                    }
+                    String containerAction = params.getString(AppConst.TARGET_CONTAINER_ACTION, null);
+                    if (!TextUtils.isEmpty(containerAction)) {
+                        intent.setAction(containerAction);
+
+                    }
+                    params.remove(AppConst.TARGET_CONTAINER_CLASS);
+                    params.remove(AppConst.TARGET_CONTAINER_ACTION);
+                    intent.putExtras(params);
+                }
+                intent.putExtra(AppConst.TARGET_VIEW_CLASS, target);
+                mContainer.startActivityForResult(intent, requestCode);
+            }
+        }
+    }
+
+    @Override
+    public void push(Class<? extends IViewProcessor> target, Bundle params) {
+        this.push(target, params, AppConst.DEF_REQUEST_CODE);
+    }
+
+    @Override
+    public void push(Class<? extends IViewProcessor> target) {
+        this.push(target, null, AppConst.DEF_REQUEST_CODE);
+    }
+
+    @Override
+    public void poll(int resultCode, Intent data) {
+        if (isLiving() && mContainer != null && getContext() != null) {
+            if (mContainer.getNavigator() != null) {
+                mContainer.getNavigator().poll(resultCode, data);
+            } else {
+                mContainer.finishWithResult(resultCode, data);
+            }
+        }
+    }
+
+    @Override
+    public void poll() {
+        this.poll(AppConst.DEF_RESULT_CODE, null);
+    }
+
+    @Override
+    public void pollUntil(Class<? extends IViewProcessor> target, int resultCode, Intent data) {
+        if (isLiving() && mContainer != null && getContext() != null) {
+            if (mContainer.getNavigator() != null) {
+                mContainer.getNavigator().pollUntil(target, resultCode, data);
+            } else {
+                //TODO
+                mContainer.finishWithResult(resultCode, data);
+            }
+        }
+    }
+
+    @Override
+    public void pollUntil(Class<? extends IViewProcessor> target) {
+        this.pollUntil(target, AppConst.DEF_RESULT_CODE, null);
+    }
+
+    @Override
+    public void remove(Class<? extends IViewProcessor> target, int resultCode, Intent data) {
+        if (isLiving() && mContainer != null && getContext() != null) {
+            if (mContainer.getNavigator() != null) {
+                mContainer.getNavigator().remove(target, resultCode, data);
+            } else {
+                //TODO
+                mContainer.finishWithResult(resultCode, data);
+            }
+        }
+    }
+
+    @Override
+    public void remove(Class<? extends IViewProcessor> target) {
+        this.remove(target, AppConst.DEF_RESULT_CODE, null);
     }
 }

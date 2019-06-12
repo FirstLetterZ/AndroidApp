@@ -13,7 +13,7 @@ import com.zpf.tool.config.MainHandler;
 @ILayoutId(R.layout.layout_start)
 public class StartScreenView extends ViewProcessor {
     @Override
-    public void afterCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         mRootLayout.getStatusBar().setVisibility(View.GONE);
         mTitleBar.getLayout().setVisibility(View.GONE);
     }
@@ -24,7 +24,7 @@ public class StartScreenView extends ViewProcessor {
         MainHandler.get().postDelayed(new Runnable() {
             @Override
             public void run() {
-                navigate(LoginView.class);
+//                navigate(LoginView.class);
                 mContainer.finish();
             }
         }, 2000);

@@ -1,13 +1,12 @@
 package com.zpf.app.activity;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.zpf.frame.ILayoutId;
 
+import com.zpf.api.ILayoutId;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.app.R;
 import com.zpf.support.util.LogUtil;
@@ -19,7 +18,7 @@ import com.zpf.support.util.LogUtil;
 public class LoginView extends ViewProcessor {
 
     @Override
-    public void afterCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         mTitleBar.getTitle().setText("测试");
         bindAllChildren(mRootLayout.getContentLayout());
     }
@@ -31,20 +30,8 @@ public class LoginView extends ViewProcessor {
             case R.id.btn_start:
                 break;
             case R.id.btn_cancel:
-                navigate(TestView.class);
+//                navigate(TestView.class);
                 break;
-        }
-    }
-
-    private void bindAllChildren(ViewGroup viewGroup) {
-        View child;
-        for (int i = 0; i < viewGroup.getChildCount(); i++) {
-            child = viewGroup.getChildAt(i);
-            if (child instanceof ViewGroup) {
-                bindAllChildren((ViewGroup) child);
-            } else if (child.isClickable() && child.getId() != View.NO_ID) {
-                child.setOnClickListener(safeClickListener);
-            }
         }
     }
 }

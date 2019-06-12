@@ -1,7 +1,5 @@
 package com.zpf.app.launcher;
 
-import android.content.res.Configuration;
-
 import com.zpf.frame.IViewProcessor;
 import com.zpf.support.base.CompatContainerActivity;
 import com.zpf.support.util.LogUtil;
@@ -15,20 +13,5 @@ public class StartScreenActivity extends CompatContainerActivity {
     protected IViewProcessor defViewProcessor() {
         LogUtil.setLogOut(true);
         return new StartScreenView();
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-    }
-
-    @Override
-    public void onAttachedToWindow() {
-        super.onAttachedToWindow();
     }
 }

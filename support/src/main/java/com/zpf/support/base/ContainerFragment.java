@@ -15,31 +15,40 @@ import com.zpf.api.IBackPressInterceptor;
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
+import com.zpf.frame.IContainerHelper;
 import com.zpf.frame.ILoadingManager;
+import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
+import com.zpf.support.single.base.CompatSinglePageActivity;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.support.util.FragmentHelper;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.LogUtil;
+import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.LifecycleState;
 
-import java.lang.reflect.Constructor;
 
 /**
  * 基于android.app.Fragment的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public class ContainerFragment extends Fragment implements IViewContainer, IBackPressInterceptor {
-    private final ContainerListenerController mController = new ContainerListenerController();
+public class ContainerFragment extends Fragment implements IViewContainer {
+    protected final ContainerListenerController mController = new ContainerListenerController();
     private ILoadingManager loadingManager;
     private Bundle mParams;
     private boolean isVisible;
     private boolean isActivity;
     private IViewProcessor mViewProcessor;
+    private IBackPressInterceptor backPressInterceptor = new IBackPressInterceptor() {
+        @Override
+        public boolean onInterceptBackPress() {
+            return isVisible && (dismiss() || mController.onInterceptBackPress());
+        }
+    };
 
     @Nullable
     @Override
@@ -52,6 +61,10 @@ public class ContainerFragment extends Fragment implements IViewContainer, IBack
             } else {
                 LogUtil.w("IViewProcessor is null!");
             }
+        }
+        Activity activity = getActivity();
+        if (activity instanceof IViewContainer) {
+            ((IViewContainer) activity).addListener(backPressInterceptor);
         }
         initView(savedInstanceState);
         return theView;
@@ -99,6 +112,10 @@ public class ContainerFragment extends Fragment implements IViewContainer, IBack
     public void onDestroyView() {
         if (mController.getState() < LifecycleState.AFTER_DESTROY) {
             mController.onDestroy();
+        }
+        Activity activity = getActivity();
+        if (activity instanceof IViewContainer) {
+            ((IViewContainer) activity).removeListener(backPressInterceptor);
         }
         super.onDestroyView();
     }
@@ -317,11 +334,6 @@ public class ContainerFragment extends Fragment implements IViewContainer, IBack
     }
 
     @Override
-    public boolean onInterceptBackPress() {
-        return mController.onInterceptBackPress();
-    }
-
-    @Override
     public Object invoke(String name, Object params) {
         return null;
     }
@@ -362,6 +374,9 @@ public class ContainerFragment extends Fragment implements IViewContainer, IBack
 
     @Override
     public int getContainerType() {
+        if (getActivity() instanceof CompatSinglePageActivity) {
+            return ContainerType.CONTAINER_SINGLE_FRAGMENT;
+        }
         return ContainerType.CONTAINER_FRAGMENT;
     }
 
@@ -399,6 +414,11 @@ public class ContainerFragment extends Fragment implements IViewContainer, IBack
         return mViewProcessor;
     }
 
+    @Override
+    public INavigator<Class<? extends IViewProcessor>> getNavigator() {
+        return null;
+    }
+
 
     private void checkVisibleChange(boolean changeTo) {
         boolean newVisible = changeTo
@@ -425,39 +445,43 @@ public class ContainerFragment extends Fragment implements IViewContainer, IBack
     }
 
     protected IViewProcessor initViewProcessor() {
+        Class<? extends IViewProcessor> targetViewClass = null;
         IViewProcessor viewProcessor = null;
-        Constructor<IViewProcessor> constructor = null;
+        IContainerHelper mHelper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
         try {
-            Class targetViewClass = (Class) getParams().getSerializable(AppConst.TARGET_VIEW_CLASS);
-            if (targetViewClass != null) {
-                constructor = targetViewClass.getConstructor();
-            }
+            targetViewClass = (Class<? extends IViewProcessor>) getParams().getSerializable(AppConst.TARGET_VIEW_CLASS);
         } catch (Exception e) {
             e.printStackTrace();
+            if (mHelper != null) {
+                targetViewClass = mHelper.getErrorProcessorClass(null);
+            }
         }
-        synchronized (ContainerController.class) {
-            ContainerController.mInitingViewContainer = this;
-            if (constructor != null) {
+        if (targetViewClass != null) {
+            synchronized (ContainerController.class) {
+                ContainerController.mInitingViewContainer = this;
                 try {
-                    viewProcessor = constructor.newInstance();
+                    viewProcessor = targetViewClass.newInstance();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                if (mHelper != null) {
+                    targetViewClass = mHelper.getErrorProcessorClass(targetViewClass);
+                }
+                if (targetViewClass != null) {
+                    try {
+                        viewProcessor = targetViewClass.newInstance();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                ContainerController.mInitingViewContainer = null;
             }
-            if (viewProcessor == null) {
-                viewProcessor = unspecifiedViewProcessor();
-            }
-            ContainerController.mInitingViewContainer = null;
         }
         return viewProcessor;
     }
 
     protected void initView(@Nullable Bundle savedInstanceState) {
 
-    }
-
-    protected IViewProcessor unspecifiedViewProcessor() {
-        return null;
     }
 
 }
