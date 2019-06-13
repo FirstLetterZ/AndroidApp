@@ -33,7 +33,6 @@ public class SinglePageActivity extends ContainerActivity {
                 ViewGroup.LayoutParams.MATCH_PARENT));
         int viewId = View.generateViewId();
         frameLayout.setId(viewId);
-        frameLayout.setBackgroundColor(Color.WHITE);
         setContentView(frameLayout);
         fragmentStackManager = new FragmentStackManager(getFragmentManager(), viewId);
         fragmentStackManager.setEmptyListener(new OnStackEmptyListener() {

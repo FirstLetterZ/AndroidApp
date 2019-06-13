@@ -31,13 +31,16 @@ import java.util.Map;
 public class GsonUtil implements JsonParserInterface {
     private final Gson mGson = new Gson();
     private final JsonParser mJsonParser = new JsonParser();
-    public static GsonUtil mInstance = Instance.mInstance;
 
     private GsonUtil() {
     }
 
     private static class Instance {
         private static GsonUtil mInstance = new GsonUtil();
+    }
+
+    public static GsonUtil get() {
+        return Instance.mInstance;
     }
 
     @Override

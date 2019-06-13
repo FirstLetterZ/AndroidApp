@@ -34,7 +34,6 @@ public class CompatSinglePageActivity extends CompatContainerActivity {
                 ViewGroup.LayoutParams.MATCH_PARENT));
         int viewId = View.generateViewId();
         frameLayout.setId(viewId);
-        frameLayout.setBackgroundColor(Color.WHITE);
         setContentView(frameLayout);
         fragmentStackManager = new CompatFragmentStackManager(getSupportFragmentManager(), viewId);
         fragmentStackManager.setEmptyListener(new OnStackEmptyListener() {
