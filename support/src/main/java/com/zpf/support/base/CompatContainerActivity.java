@@ -59,6 +59,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         initWindow();
         IViewProcessor viewProcessor = initViewProcessor();
         if (viewProcessor != null) {
+            mController.addListener(viewProcessor);
             setContentView(viewProcessor.getView());
         } else {
             LogUtil.w("IViewProcessor is null!");

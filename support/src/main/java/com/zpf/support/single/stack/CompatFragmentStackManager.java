@@ -43,6 +43,7 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
         Fragment targetFragment = null;
         if (params == null) {
             params = new Bundle();
+            params.putSerializable(AppConst.TARGET_VIEW_CLASS, target);
         }
         params.putInt(AppConst.REQUEST_CODE, requestCode);
         List<Fragment> fragmentList = fragmentManager.getFragments();
@@ -72,12 +73,14 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
                     contain = true;
                     stackList.remove(elementInfo);
                     elementInfo.requestCode = requestCode;
-                    elementInfo.tag = tag;
                     elementInfo.instance = targetFragment;
                     elementInfo.params = params;
                     elementInfo.state = StackElementState.STACK_TOP;
                     stackList.add(elementInfo);
-                    break;
+                } else {
+                    if (elementInfo.state == StackElementState.STACK_TOP) {
+                        elementInfo.state = StackElementState.STACK_INSIDE;
+                    }
                 }
             }
             if (!contain) {

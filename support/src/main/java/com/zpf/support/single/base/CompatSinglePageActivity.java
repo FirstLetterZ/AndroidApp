@@ -1,5 +1,6 @@
 package com.zpf.support.single.base;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -33,6 +34,7 @@ public class CompatSinglePageActivity extends CompatContainerActivity {
                 ViewGroup.LayoutParams.MATCH_PARENT));
         int viewId = View.generateViewId();
         frameLayout.setId(viewId);
+        frameLayout.setBackgroundColor(Color.WHITE);
         setContentView(frameLayout);
         fragmentStackManager = new CompatFragmentStackManager(getSupportFragmentManager(), viewId);
         fragmentStackManager.setEmptyListener(new OnStackEmptyListener() {

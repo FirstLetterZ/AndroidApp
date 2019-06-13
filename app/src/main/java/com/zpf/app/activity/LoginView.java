@@ -1,10 +1,9 @@
 package com.zpf.app.activity;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
-import android.view.ViewGroup;
-
 
 import com.zpf.api.ILayoutId;
 import com.zpf.support.base.ViewProcessor;
@@ -30,7 +29,7 @@ public class LoginView extends ViewProcessor {
             case R.id.btn_start:
                 break;
             case R.id.btn_cancel:
-//                navigate(TestView.class);
+                push(TestView.class);
                 break;
         }
     }

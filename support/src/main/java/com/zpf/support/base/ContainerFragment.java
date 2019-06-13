@@ -57,6 +57,7 @@ public class ContainerFragment extends Fragment implements IViewContainer {
         if (theView == null) {
             IViewProcessor viewProcessor = initViewProcessor();
             if (viewProcessor != null) {
+                mController.addListener(viewProcessor);
                 theView = viewProcessor.getView();
             } else {
                 LogUtil.w("IViewProcessor is null!");
@@ -416,6 +417,10 @@ public class ContainerFragment extends Fragment implements IViewContainer {
 
     @Override
     public INavigator<Class<? extends IViewProcessor>> getNavigator() {
+        Activity parentActivity = getActivity();
+        if (parentActivity instanceof IViewContainer) {
+            return ((IViewContainer) parentActivity).getNavigator();
+        }
         return null;
     }
 

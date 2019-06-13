@@ -7,20 +7,37 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        applicationId "com.zpf.app"
-        versionCode rootProject.ext.versionCode
-        versionName rootProject.ext.versionName
+        def date = new Date()
+        def formattedDate = date.format('yyMMddHHmm')
+        def code = formattedDate.toInteger()
+        versionCode code
+        versionName '0.0.1'
+    }
+    signingConfigs {
+        release {
+            keyAlias 'key0'
+            keyPassword '123456'
+            storeFile file('../app_debug.jks')
+            storePassword '123456'
+        }
+        debug {
+            keyAlias 'key0'
+            keyPassword '123456'
+            storeFile file('../app_debug.jks')
+            storePassword '123456'
+        }
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
 
 dependencies {
-    api rootProject.ext.dependencies.support
+    api project(':support')
+//    api rootProject.ext.dependencies.support
     api rootProject.ext.dependencies.gsonParse
     api rootProject.ext.dependencies.network
 }
