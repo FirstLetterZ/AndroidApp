@@ -17,18 +17,22 @@ android {
         release {
             keyAlias 'key0'
             keyPassword '123456'
-            storeFile file('../app_debug.jks')
+            storeFile file('./app_debug.jks')
             storePassword '123456'
         }
         debug {
             keyAlias 'key0'
             keyPassword '123456'
-            storeFile file('../app_debug.jks')
+            storeFile file('./app_debug.jks')
             storePassword '123456'
         }
     }
     buildTypes {
         release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
