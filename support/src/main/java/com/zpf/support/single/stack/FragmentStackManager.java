@@ -150,11 +150,14 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
         if (lastElementInfo != null) {
             lastElementInfo.instance.onActivityResult(requestCode, resultCode, data);
         } else {
+            final int a = requestCode;
+            final int b = resultCode;
+            final Intent c = data;
             MainHandler.get().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     if (stackList.size() == 0 && emptyListener != null) {
-                        emptyListener.onEmpty();
+                        emptyListener.onEmpty(a, b, c);
                     }
                 }
             }, 16);
@@ -193,11 +196,14 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
         if (lastElementInfo != null) {
             lastElementInfo.instance.onActivityResult(requestCode, resultCode, data);
         } else {
+            final int a = requestCode;
+            final int b = resultCode;
+            final Intent c = data;
             MainHandler.get().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     if (stackList.size() == 0 && emptyListener != null) {
-                        emptyListener.onEmpty();
+                        emptyListener.onEmpty(a, b, c);
                     }
                 }
             }, 16);

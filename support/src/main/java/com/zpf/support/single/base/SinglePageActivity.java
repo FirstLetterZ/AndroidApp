@@ -1,6 +1,6 @@
 package com.zpf.support.single.base;
 
-import android.graphics.Color;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -37,8 +37,8 @@ public class SinglePageActivity extends ContainerActivity {
         fragmentStackManager = new FragmentStackManager(getFragmentManager(), viewId);
         fragmentStackManager.setEmptyListener(new OnStackEmptyListener() {
             @Override
-            public void onEmpty() {
-                finish();
+            public void onEmpty(int requestCode, int resultCode, Intent data) {
+                finishWithResult(resultCode, data);
             }
         });
         Class<? extends ViewProcessor> targetViewClass = null;

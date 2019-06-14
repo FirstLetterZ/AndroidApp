@@ -22,6 +22,6 @@ public class AppConst {
     public static final String TARGET_VIEW_THEME = "target_view_theme";
     public static final String TARGET_STATUS_TRANSLUCENT = "target_status_translucent";
     public static final String TARGET_ALIAS = "target_alias";
-    public static final int DEF_REQUEST_CODE = -1;
+    public static final int DEF_REQUEST_CODE = 65535;
     public static final int DEF_RESULT_CODE = 0;
 }

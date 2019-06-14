@@ -16,6 +16,7 @@ import com.zpf.tool.config.MainHandler;
 public class StartScreenView extends ViewProcessor {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         mRootLayout.getStatusBar().setVisibility(View.GONE);
         mTitleBar.getLayout().setVisibility(View.GONE);
     }
@@ -27,7 +28,7 @@ public class StartScreenView extends ViewProcessor {
             @Override
             public void run() {
                 Bundle params = new Bundle();
-                params.putSerializable(AppConst.TARGET_CONTAINER_CLASS, CompatSinglePageActivity.class);
+//                params.putSerializable(AppConst.TARGET_CONTAINER_CLASS, CompatSinglePageActivity.class);
                 push(LoginView.class, params);
                 remove(StartScreenView.class);
             }
