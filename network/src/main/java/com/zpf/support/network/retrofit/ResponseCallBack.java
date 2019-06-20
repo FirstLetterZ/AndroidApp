@@ -34,7 +34,7 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
 
     @Override
     public void onResponse(Call<T> call, final Response<T> response) {
-        if (isCancel()) {
+        if (isCancelled()) {
             return;
         }
         removeObservable();
@@ -68,7 +68,7 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
 
     @Override
     public void onFailure(Call<T> call, Throwable t) {
-        if (isCancel()) {
+        if (isCancelled()) {
             return;
         }
         handleError(t);
@@ -87,7 +87,7 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
 
     public void requestCall(Call<T> call, boolean async) {
         this.call = call;
-        if (call != null && !isCancel()) {
+        if (call != null && !isCancelled()) {
             if (async) {
                 call.enqueue(this);
             } else {
@@ -102,4 +102,6 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
     }
 
     protected abstract void handleResponse(T response);
+
+
 }

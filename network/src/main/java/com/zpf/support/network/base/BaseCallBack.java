@@ -81,6 +81,15 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
     }
 
     @Override
+    public boolean unBind(long bindId) {
+        if (manager != null) {
+            manager.remove(bindId);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public void cancel() {
         if (!isCancel) {
             isCancel = true;
@@ -245,7 +254,9 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
         return type[1] == 1;
     }
 
-    public boolean isCancel() {
+
+    @Override
+    public boolean isCancelled() {
         return isCancel;
     }
 
