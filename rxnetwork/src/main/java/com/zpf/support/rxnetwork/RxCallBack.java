@@ -24,7 +24,7 @@ public abstract class RxCallBack<T> extends BaseCallBack<T> implements Observer<
 
     @Override
     protected void doCancel() {
-        if (!isCancel() && disposable != null && !disposable.isDisposed()) {
+        if (!isCancelled() && disposable != null && !disposable.isDisposed()) {
             disposable.dispose();
         }
     }
@@ -32,14 +32,14 @@ public abstract class RxCallBack<T> extends BaseCallBack<T> implements Observer<
     @Override
     public void onSubscribe(Disposable d) {
         this.disposable = d;
-        if (isCancel()) {
+        if (isCancelled()) {
             d.dispose();
         }
     }
 
     @Override
     public void onNext(final T t) {
-        if (isCancel()) {
+        if (isCancelled()) {
             return;
         }
         removeObservable();
@@ -56,7 +56,8 @@ public abstract class RxCallBack<T> extends BaseCallBack<T> implements Observer<
                 }
             });
         } else {
-            if (responseResult.getCode() == ErrorCode.RESPONSE_SUCCESS) {
+            if (responseResult.getCode() == ErrorCode.RESPONSE_SUCCESS
+                    || responseResult.getCode() == 0) {
                 responseResult.setCode(ErrorCode.RESPONSE_ILLEGAL);
                 responseResult.setMessage(getString(com.zpf.util.network.R.string.network_illegal_error));
             }
@@ -66,7 +67,7 @@ public abstract class RxCallBack<T> extends BaseCallBack<T> implements Observer<
 
     @Override
     public void onError(Throwable e) {
-        if (isCancel()) {
+        if (isCancelled()) {
             return;
         }
         handleError(e);

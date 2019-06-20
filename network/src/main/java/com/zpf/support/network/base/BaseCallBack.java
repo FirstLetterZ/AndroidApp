@@ -4,6 +4,7 @@ import android.accounts.AccountsException;
 import android.net.ParseException;
 import android.os.Looper;
 import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
 
 import com.zpf.api.ICancelable;
 import com.zpf.api.IManager;
@@ -194,19 +195,26 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
      * 返回数据内容预处理
      */
     protected boolean checkResponse(T result) {
+        boolean check = true;
         if (checkDataNull(result)) {
             responseResult.setCode(ErrorCode.DATA_NULL);
             responseResult.setMessage(getString(R.string.network_data_null));
-            return isNullable();
+            check = isNullable();
         }
-        return true;
+        if (check && (result instanceof IResponseBean)) {
+            check = ((IResponseBean) result).isSuccess();
+            responseResult.setCode(((ResponseResult) result).getCode());
+            responseResult.setMessage(((ResponseResult) result).getMessage());
+        }
+        responseResult.setData(result);
+        return check;
     }
 
     protected boolean checkDataNull(T result) {
         if (result == null) {
             return true;
-        } else if (result instanceof ResponseResult) {
-            return ((ResponseResult) result).getData() == null;
+        } else if (result instanceof IResponseBean) {
+            return ((IResponseBean) result).getData() == null;
         } else {
             return responseHandler != null && responseHandler.checkDataNull(result);
         }
@@ -262,6 +270,6 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
 
     protected abstract void doCancel();
 
-    protected abstract void complete(boolean success, ResponseResult<T> responseResult);
+    protected abstract void complete(boolean success, @NonNull ResponseResult<T> responseResult);
 
 }

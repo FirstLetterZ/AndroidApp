@@ -1,8 +1,9 @@
 package com.zpf.support.network.model;
 
 import com.zpf.support.network.base.ErrorCode;
+import com.zpf.support.network.base.IResponseBean;
 
-public class ResponseResult<T> implements Cloneable {
+public class ResponseResult<T> implements Cloneable, IResponseBean {
     private int code;
     private String message;
     private T data;
@@ -22,6 +23,7 @@ public class ResponseResult<T> implements Cloneable {
         this.data = data;
     }
 
+    @Override
     public int getCode() {
         return code;
     }
@@ -30,6 +32,7 @@ public class ResponseResult<T> implements Cloneable {
         this.code = code;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
@@ -38,6 +41,7 @@ public class ResponseResult<T> implements Cloneable {
         this.message = message;
     }
 
+    @Override
     public T getData() {
         return data;
     }
@@ -50,6 +54,7 @@ public class ResponseResult<T> implements Cloneable {
         this.success = success;
     }
 
+    @Override
     public boolean isSuccess() {
         return code == ErrorCode.RESPONSE_SUCCESS || success;
     }
