@@ -56,7 +56,7 @@ public class RootLayout extends LinearLayout implements IRootLayout {
         titleBar = topView.getTitleBar();
         bottomShadow = new BottomShadow(context);
         bottomShadow.setElevation(2);
-        bottomShadow.setShadowColor(Color.DKGRAY);
+        bottomShadow.setShadowColor(Color.parseColor("#80111111"));
         addView(topView.getLayout());
         contentLayout = new FrameLayout(context);
         contentLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,

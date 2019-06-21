@@ -18,53 +18,49 @@ public class CacheKey {
         return MODULE_BASE + INT + key;
     }
 
-    public static int getModuleIntKey(@IntRange(from = 1, to = TYPE_BASE) int key) {
-        return MODULE_BASE * moduleId() + INT + key;
+    public static int getModuleIntKey(@IntRange(from = 1, to = TYPE_BASE) int key, int moduleId) {
+        return MODULE_BASE * moduleId(moduleId) + INT + key;
     }
 
     public static int getBaseBooleanKey(@IntRange(from = 1, to = TYPE_BASE) int key) {
         return MODULE_BASE + BOOLEAN + key;
     }
 
-    public static int getModuleBooleanKey(@IntRange(from = 1, to = TYPE_BASE) int key) {
-        return MODULE_BASE * moduleId() + BOOLEAN + key;
+    public static int getModuleBooleanKey(@IntRange(from = 1, to = TYPE_BASE) int key, int moduleId) {
+        return MODULE_BASE * moduleId(moduleId) + BOOLEAN + key;
     }
 
     public static int getBaseStringKey(@IntRange(from = 1, to = TYPE_BASE) int key) {
         return MODULE_BASE + STRING + key;
     }
 
-    public static int getModuleStringKey(@IntRange(from = 1, to = TYPE_BASE) int key) {
-        return MODULE_BASE * moduleId() + STRING + key;
+    public static int getModuleStringKey(@IntRange(from = 1, to = TYPE_BASE) int key, int moduleId) {
+        return MODULE_BASE * moduleId(moduleId) + STRING + key;
     }
 
     public static int getBaseLongKey(@IntRange(from = 1, to = TYPE_BASE) int key) {
         return MODULE_BASE + LONG + key;
     }
 
-    public static int getModuleLongKey(@IntRange(from = 1, to = TYPE_BASE) int key) {
-        return MODULE_BASE * moduleId() + LONG + key;
+    public static int getModuleLongKey(@IntRange(from = 1, to = TYPE_BASE) int key, int moduleId) {
+        return MODULE_BASE * moduleId(moduleId) + LONG + key;
     }
 
     public static int getBaseFloatKey(@IntRange(from = 1, to = TYPE_BASE) int key) {
         return MODULE_BASE + FLOAT + key;
     }
 
-    public static int getModuleFloatKey(@IntRange(from = 1, to = TYPE_BASE) int key) {
-        return MODULE_BASE * moduleId() + FLOAT + key;
+    public static int getModuleFloatKey(@IntRange(from = 1, to = TYPE_BASE) int key, int moduleId) {
+        return MODULE_BASE * moduleId(moduleId) + FLOAT + key;
     }
 
-    private static int moduleId() {
-        int id = getModuleId();
-        if (id < 1) {
-            id = 1;
-        } else if (id > 21473) {
-            id = 21473;
+    private static int moduleId(int moduleId) {
+        if (moduleId < 1) {
+            moduleId = 1;
+        } else if (moduleId > 21473) {
+            moduleId = 21473;
         }
-        return id;
+        return moduleId;
     }
 
-    protected static int getModuleId() {
-        return 1;
-    }
 }

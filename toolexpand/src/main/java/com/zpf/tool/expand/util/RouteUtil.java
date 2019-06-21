@@ -13,7 +13,7 @@ import com.zpf.api.IRouter;
  * Created by ZPF on 2018/8/26.
  */
 public class RouteUtil implements IRouter {
-    private volatile RouteUtil realRoute;
+    private volatile IRouter realRoute;
     private static volatile RouteUtil routeUtil;
 
     private RouteUtil() {
@@ -30,7 +30,7 @@ public class RouteUtil implements IRouter {
         return routeUtil;
     }
 
-    public void init(RouteUtil routeUtil) {
+    public void init(IRouter routeUtil) {
         this.realRoute = routeUtil;
     }
 
