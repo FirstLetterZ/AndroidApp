@@ -3,7 +3,7 @@ package com.zpf.support.network.model;
 import com.zpf.support.network.base.ErrorCode;
 import com.zpf.support.network.base.IResponseBean;
 
-public class ResponseResult<T> implements Cloneable, IResponseBean {
+public class ResponseResult<T> implements Cloneable, IResponseBean<T> {
     private int code;
     private String message;
     private T data;

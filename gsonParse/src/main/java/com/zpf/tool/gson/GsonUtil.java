@@ -29,7 +29,8 @@ import java.util.Map;
  * Created by ZPF on 2018/7/21.
  */
 public class GsonUtil implements JsonParserInterface {
-    private final Gson mGson = new Gson();
+    private final Gson defGson = new Gson();
+    private Gson mGson;
     private final JsonParser mJsonParser = new JsonParser();
 
     private GsonUtil() {
@@ -51,15 +52,15 @@ public class GsonUtil implements JsonParserInterface {
             } else if (object.getClass() == classType) {
                 return (T) object;
             } else if (object instanceof JsonElement) {
-                return mGson.fromJson((JsonElement) object, classType);
+                return getGson().fromJson((JsonElement) object, classType);
             } else if (object instanceof Reader) {
-                return mGson.fromJson((Reader) object, classType);
+                return getGson().fromJson((Reader) object, classType);
             } else if (object instanceof JsonReader) {
-                return mGson.fromJson((JsonReader) object, classType);
+                return getGson().fromJson((JsonReader) object, classType);
             } else if (classType == String.class) {
                 return (T) toString(object);
             } else {
-                return mGson.fromJson(toString(object), classType);
+                return getGson().fromJson(toString(object), classType);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -93,14 +94,14 @@ public class GsonUtil implements JsonParserInterface {
                             } else if (elem.isJsonArray()) {
                                 eleResult = (T) fromJsonList(elem, classType);
                             } else if (jsonElement.isJsonObject() || jsonElement.isJsonPrimitive()) {
-                                eleResult = mGson.fromJson(jsonElement, classType);
+                                eleResult = getGson().fromJson(jsonElement, classType);
                             }
                             if (eleResult != null) {
                                 list.add(eleResult);
                             }
                         }
                     } else if (jsonElement.isJsonObject() || jsonElement.isJsonPrimitive()) {
-                        eleResult = mGson.fromJson(jsonElement, classType);
+                        eleResult = getGson().fromJson(jsonElement, classType);
                     }
                     if (eleResult != null) {
                         list.add(eleResult);
@@ -128,10 +129,10 @@ public class GsonUtil implements JsonParserInterface {
                 } else if (((JsonElement) object).isJsonPrimitive()) {
                     result = ((JsonElement) object).getAsJsonPrimitive().getAsString();
                 } else {
-                    result = mGson.toJson((JsonElement) object);
+                    result = getGson().toJson((JsonElement) object);
                 }
             } else {
-                result = mGson.toJson(object);
+                result = getGson().toJson(object);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -251,5 +252,17 @@ public class GsonUtil implements JsonParserInterface {
             }
         }
         return result;
+    }
+
+    public void setGson(Gson gson) {
+        mGson = gson;
+    }
+
+    public Gson getGson() {
+        if (mGson == null) {
+            return defGson;
+        } else {
+            return mGson;
+        }
     }
 }

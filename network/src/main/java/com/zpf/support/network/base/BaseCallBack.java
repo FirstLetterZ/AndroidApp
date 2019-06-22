@@ -138,7 +138,7 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
             code = ErrorCode.IO_ERROR;
             description = getString(R.string.network_io_error);
         } else {
-            ResponseResult parseResult = null;
+            IResponseBean parseResult = null;
             if (responseHandler != null) {
                 parseResult = responseHandler.parsingException(e);
             }
@@ -203,8 +203,8 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
         }
         if (check && (result instanceof IResponseBean)) {
             check = ((IResponseBean) result).isSuccess();
-            responseResult.setCode(((ResponseResult) result).getCode());
-            responseResult.setMessage(((ResponseResult) result).getMessage());
+            responseResult.setCode(((IResponseBean) result).getCode());
+            responseResult.setMessage(((IResponseBean) result).getMessage());
         }
         responseResult.setData(result);
         return check;
@@ -270,6 +270,6 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
 
     protected abstract void doCancel();
 
-    protected abstract void complete(boolean success, @NonNull ResponseResult<T> responseResult);
+    protected abstract void complete(boolean success, @NonNull IResponseBean<T> responseResult);
 
 }
