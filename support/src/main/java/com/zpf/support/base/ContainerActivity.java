@@ -277,12 +277,12 @@ public class ContainerActivity extends Activity implements IViewContainer {
     @Override
     public void showLoading(Object msg) {
         if (isLiving()) {
-            if (loadingManager != null) {
+            if (loadingManager == null) {
                 loadingManager = new LoadingManagerImpl(getContext());
             }
-            if (loadingManager != null) {
-                loadingManager.showLoading(msg);
-            }
+
+            loadingManager.showLoading(msg);
+
         }
     }
 
@@ -331,6 +331,9 @@ public class ContainerActivity extends Activity implements IViewContainer {
                 launcherClass = mHelper.getLaunchProcessorClass(null);
             }
             if (launcherClass == null) {
+                launcherClass = launcherViewProcessorClass();
+            }
+            if (launcherClass == null) {
                 launcherClass = defViewProcessorClass();
             }
             if (launcherClass == null && mHelper != null) {
@@ -339,6 +342,9 @@ public class ContainerActivity extends Activity implements IViewContainer {
             if (launcherClass != null) {
                 mParams.putSerializable(AppConst.TARGET_VIEW_CLASS, launcherClass);
             }
+        }
+        if (mParams.getSerializable(AppConst.TARGET_VIEW_CLASS) == null) {
+            mParams.putSerializable(AppConst.TARGET_VIEW_CLASS, defViewProcessorClass());
         }
         return mParams;
     }
@@ -456,6 +462,10 @@ public class ContainerActivity extends Activity implements IViewContainer {
     }
 
     protected Class<? extends IViewProcessor> defViewProcessorClass() {
+        return null;
+    }
+
+    protected Class<? extends IViewProcessor> launcherViewProcessorClass() {
         return null;
     }
 

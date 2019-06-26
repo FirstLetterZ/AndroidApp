@@ -302,12 +302,10 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
             if (activity instanceof IViewContainer) {
                 ((IViewContainer) activity).showLoading(message);
             } else if (isLiving()) {
-                if (loadingManager != null) {
+                if (loadingManager == null) {
                     loadingManager = new LoadingManagerImpl(getContext());
                 }
-                if (loadingManager != null) {
-                    loadingManager.showLoading(message);
-                }
+                loadingManager.showLoading(message);
             }
         }
     }
