@@ -19,6 +19,7 @@ import com.zpf.api.IManager;
 import com.zpf.frame.IContainerHelper;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.INavigator;
+import com.zpf.support.R;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
 import com.zpf.support.single.base.CompatSinglePageActivity;
@@ -292,7 +293,7 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
 
     @Override
     public void showLoading() {
-        showLoading(null);
+        showLoading(getString(R.string.default_request_loading));
     }
 
     @Override
@@ -342,10 +343,23 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
 
     @Override
     public void setArguments(@Nullable Bundle args) {
-        if (isAdded() && args != getArguments()) {
-            mController.onParamChanged(args);
+        Bundle oldParams = getArguments();
+        if (oldParams != null) {
+            if (args != null) {
+                oldParams.putAll(args);
+            }
+            mParams = oldParams;
+        } else {
+            mParams = args;
         }
-        mParams = args;
+        try {
+            super.setArguments(mParams);
+        } catch (Exception e) {
+            //
+        }
+        if (isAdded()) {
+            mController.onParamChanged(mParams);
+        }
     }
 
     @NonNull

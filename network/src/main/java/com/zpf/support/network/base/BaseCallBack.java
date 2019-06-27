@@ -166,6 +166,7 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
                 responseResult.setCode(code);
                 responseResult.setMessage(message);
                 if (responseHandler != null && responseHandler.interceptFailHandle(responseResult)) {
+                    complete(false, responseResult);
                     return;
                 }
                 if (!showHint(code, message) && responseHandler != null && showHint()) {
@@ -178,7 +179,7 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
 
     protected void removeObservable() {
         if (manager != null) {
-            manager.cancel(bindId);
+            manager.remove(bindId);
             manager = null;
         }
     }

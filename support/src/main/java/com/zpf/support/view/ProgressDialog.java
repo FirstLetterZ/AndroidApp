@@ -2,7 +2,9 @@ package com.zpf.support.view;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -47,6 +49,11 @@ public class ProgressDialog extends CustomDialog {
     public void setText(String content) {
         if (textView != null) {
             textView.setText(content);
+            if (TextUtils.isEmpty(content)) {
+                textView.setVisibility(View.GONE);
+            } else {
+                textView.setVisibility(View.VISIBLE);
+            }
         }
     }
 

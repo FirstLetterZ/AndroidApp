@@ -23,6 +23,7 @@ import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
+import com.zpf.support.R;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
 import com.zpf.support.util.ContainerController;
@@ -135,8 +136,22 @@ public class ContainerActivity extends Activity implements IViewContainer {
 
     @Override
     protected void onNewIntent(Intent intent) {
+        Bundle oldParams = getIntent().getExtras();
+        Bundle newParams = intent.getExtras();
+        if (oldParams != null) {
+            if (newParams != null) {
+                oldParams.putAll(newParams);
+            }
+            mParams = oldParams;
+        } else {
+            mParams = newParams;
+        }
+        if (mParams != null) {
+            intent.putExtras(mParams);
+        }
         super.onNewIntent(intent);
-        mController.onParamChanged(intent.getExtras());
+        setIntent(intent);
+        mController.onParamChanged(mParams);
     }
 
     @Override
@@ -271,7 +286,7 @@ public class ContainerActivity extends Activity implements IViewContainer {
 
     @Override
     public void showLoading() {
-        showLoading(null);
+        showLoading(getString(R.string.default_request_loading));
     }
 
     @Override

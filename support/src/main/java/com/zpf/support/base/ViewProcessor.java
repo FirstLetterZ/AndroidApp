@@ -181,10 +181,11 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
         View child;
         for (int i = 0; i < viewGroup.getChildCount(); i++) {
             child = viewGroup.getChildAt(i);
+            if (child.isClickable() && child.getId() != View.NO_ID) {
+                child.setOnClickListener(safeClickListener);
+            }
             if (child instanceof ViewGroup) {
                 bindAllChildren((ViewGroup) child);
-            } else if (child.isClickable() && child.getId() != View.NO_ID) {
-                child.setOnClickListener(safeClickListener);
             }
         }
     }

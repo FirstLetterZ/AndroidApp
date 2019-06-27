@@ -20,6 +20,7 @@ import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
+import com.zpf.support.R;
 import com.zpf.support.constant.ContainerType;
 import com.zpf.tool.config.LifecycleState;
 
@@ -210,7 +211,7 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
 
     @Override
     public void showLoading() {
-        showLoading(null);
+        showLoading(getString(R.string.default_request_loading));
     }
 
     @Override

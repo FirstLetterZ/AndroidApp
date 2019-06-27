@@ -73,7 +73,7 @@ public class BottomDialog extends CustomDialog {
         rvContent.setAdapter(menuAdapter);
         tvBottom = new TextView(getContext());
         tvBottom.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-        tvBottom.setText("取消");
+        tvBottom.setText(R.string.bottom_button_cancel);
         tvBottom.setGravity(Gravity.CENTER);
         tvBottom.setTextColor(Color.RED);
         tvBottom.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) (44 * density)));
