@@ -44,7 +44,7 @@ public class PermissionUtil {
 
 
     public boolean checkPermission(@NonNull android.support.v4.app.Fragment fragment, @NonNull String... permission) {
-        compatChecker.checkPermissions(fragment,permission);
+        compatChecker.checkPermissions(fragment, permission);
         Activity activity = fragment.getActivity();
         if (activity == null) {
             return false;
@@ -90,6 +90,10 @@ public class PermissionUtil {
         } else {
             return true;
         }
+    }
+
+    public CompatPermissionChecker getCompatChecker() {
+        return compatChecker;
     }
 
     public boolean checkToastEnabled(@NonNull Activity activity, DialogInterface.OnDismissListener listener) {

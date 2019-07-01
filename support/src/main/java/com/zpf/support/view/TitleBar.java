@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,9 +58,7 @@ public class TitleBar extends RelativeLayout implements ITitleBar {
         ivLeft.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (v.getContext() instanceof Activity) {
-                    ((Activity) v.getContext()).finish();
-                }
+                finishActivity(v.getContext());
             }
         });
 
@@ -131,7 +130,7 @@ public class TitleBar extends RelativeLayout implements ITitleBar {
         addView(leftLayout);
         addView(rightLayout);
         addView(titleLayout);
-        defHeight=(int) (44 * metrics.density);
+        defHeight = (int) (44 * metrics.density);
         setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, defHeight));
     }
 
@@ -192,5 +191,13 @@ public class TitleBar extends RelativeLayout implements ITitleBar {
     @Override
     public ViewGroup getLayout() {
         return this;
+    }
+
+    private void finishActivity(Context context) {
+        if (context instanceof Activity) {
+            ((Activity) context).finish();
+        } else if (context instanceof ContextThemeWrapper) {
+            finishActivity(((ContextThemeWrapper) context).getBaseContext());
+        }
     }
 }
