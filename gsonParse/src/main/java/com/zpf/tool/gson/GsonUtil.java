@@ -93,8 +93,8 @@ public class GsonUtil implements JsonParserInterface {
                                 continue;
                             } else if (elem.isJsonArray()) {
                                 eleResult = (T) fromJsonList(elem, classType);
-                            } else if (jsonElement.isJsonObject() || jsonElement.isJsonPrimitive()) {
-                                eleResult = getGson().fromJson(jsonElement, classType);
+                            } else if (elem.isJsonObject() || elem.isJsonPrimitive()) {
+                                eleResult = getGson().fromJson(elem, classType);
                             }
                             if (eleResult != null) {
                                 list.add(eleResult);
@@ -102,10 +102,11 @@ public class GsonUtil implements JsonParserInterface {
                         }
                     } else if (jsonElement.isJsonObject() || jsonElement.isJsonPrimitive()) {
                         eleResult = getGson().fromJson(jsonElement, classType);
+                        if (eleResult != null) {
+                            list.add(eleResult);
+                        }
                     }
-                    if (eleResult != null) {
-                        list.add(eleResult);
-                    }
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
