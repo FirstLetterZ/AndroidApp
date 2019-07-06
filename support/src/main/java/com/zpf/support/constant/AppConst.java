@@ -12,10 +12,11 @@ public class AppConst {
     public static final String BUNDLE_KEY = "bundle_key";
     public static final String ACTION = "action";
     public static final String PARAM = "params";
-    public static final String TYPE = "type";
+    public static final String TYPE = "ype";
     public static final String URL = "url";
-    public static final String CODE = "type";
+    public static final String CODE = "code";
     public static final String NAME = "name";
+    public static final String MESSAGE = "message";
     public static final String CALL_BACK = "callback";
     public static final String REQUEST_CODE = "request_code";
     public static final String TARGET_CONTAINER_CLASS = "target_container_class";

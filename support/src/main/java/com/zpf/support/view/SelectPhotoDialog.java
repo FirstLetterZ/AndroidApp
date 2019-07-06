@@ -10,9 +10,11 @@ import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 
 import com.zpf.frame.IViewContainer;
+import com.zpf.support.R;
 import com.zpf.support.util.PhotoUtil;
 import com.zpf.tool.FileUtil;
 import com.zpf.api.OnItemClickListener;
+import com.zpf.tool.PublicUtil;
 import com.zpf.tool.expand.util.SpUtil;
 
 import java.io.File;
@@ -58,8 +60,9 @@ public class SelectPhotoDialog extends BottomDialog {
     protected void initView() {
         super.initView();
         getTvBottom().setTextColor(Color.RED);
-        getTvBottom().setText("取消");
-        setStringMenuList(new String[]{"拍照", "相册"});
+        getTvBottom().setText(R.string.bottom_button_cancel);
+        setStringMenuList(new String[]{PublicUtil.getString(R.string.option_take_photo),
+                PublicUtil.getString(R.string.option_photo_album)});
         setListTextColor(Color.BLACK);
         setItemClickListener(new OnItemClickListener() {
             @Override

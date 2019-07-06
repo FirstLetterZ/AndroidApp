@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.zpf.frame.ITitleBar;
+import com.zpf.support.R;
 import com.zpf.tool.expand.view.IconTextView;
 
 /**
@@ -42,6 +43,7 @@ public class TitleBar extends RelativeLayout implements ITitleBar {
 
     public TitleBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        int space = (int) (context.getResources().getDimension(R.dimen.support_space_normal));
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 
         leftLayout = new LinearLayout(context);
@@ -52,7 +54,7 @@ public class TitleBar extends RelativeLayout implements ITitleBar {
         ivLeft = new IconTextView(context);
         ivLeft.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
-        ivLeft.setPadding((int) (10 * metrics.density), 0, 0, 0);
+        ivLeft.setPadding(space, 0, 0, 0);
         ivLeft.setMinWidth((int) (30 * metrics.density));
         ivLeft.setGravity(Gravity.CENTER);
         ivLeft.setOnClickListener(new OnClickListener() {
@@ -67,7 +69,7 @@ public class TitleBar extends RelativeLayout implements ITitleBar {
         tvLeft.setGravity(Gravity.CENTER);
         tvLeft.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
-        tvLeft.setPadding((int) (10 * metrics.density), 0, 0, 0);
+        tvLeft.setPadding(space, 0, 0, 0);
 
         leftLayout.addView(ivLeft);
         leftLayout.addView(tvLeft);
@@ -115,14 +117,14 @@ public class TitleBar extends RelativeLayout implements ITitleBar {
                 ViewGroup.LayoutParams.MATCH_PARENT));
         ivRight.setMinWidth((int) (30 * metrics.density));
         ivRight.setGravity(Gravity.CENTER);
-        ivRight.setPadding(0, 0, (int) (10 * metrics.density), 0);
+        ivRight.setPadding(0, 0, space, 0);
 
         tvRight = new IconTextView(context);
         tvRight.setTextColor(Color.WHITE);
         tvRight.setGravity(Gravity.CENTER);
         tvRight.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
-        tvRight.setPadding(0, 0, (int) (10 * metrics.density), 0);
+        tvRight.setPadding(0, 0, space, 0);
 
         rightLayout.addView(tvRight);
         rightLayout.addView(ivRight);

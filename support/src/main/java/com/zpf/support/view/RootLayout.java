@@ -1,7 +1,6 @@
 package com.zpf.support.view;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,6 +15,8 @@ import com.zpf.frame.IRootLayout;
 import com.zpf.frame.IShadowLine;
 import com.zpf.frame.ITitleBar;
 import com.zpf.frame.ITopLayout;
+import com.zpf.support.R;
+import com.zpf.tool.PublicUtil;
 import com.zpf.tool.config.GlobalConfigImpl;
 
 /**
@@ -56,7 +57,7 @@ public class RootLayout extends LinearLayout implements IRootLayout {
         titleBar = topView.getTitleBar();
         bottomShadow = new BottomShadow(context);
         bottomShadow.setElevation(2);
-        bottomShadow.setShadowColor(Color.parseColor("#80111111"));
+        bottomShadow.setShadowColor(PublicUtil.getColor(R.color.bottom_shadow));
         addView(topView.getLayout());
         contentLayout = new FrameLayout(context);
         contentLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,

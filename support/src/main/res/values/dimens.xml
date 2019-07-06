@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="support_space_max">20dp</dimen>
+    <dimen name="support_space_normal">16dp</dimen>
+    <dimen name="support_space_half_max">10dp</dimen>
+    <dimen name="support_space_half_normal">8dp</dimen>
+    <dimen name="support_space_small">5dp</dimen>
+    <dimen name="support_space_min">2dp</dimen>
+
+</resources>

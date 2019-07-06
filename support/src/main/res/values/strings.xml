@@ -3,5 +3,7 @@
     <string name="default_launcher">default_launcher</string>
     <string name="default_request_loading">&#160;&#160;请求中…</string>
     <string name="bottom_button_cancel">取消</string>
+    <string name="option_take_photo">拍照</string>
+    <string name="option_photo_album">相册</string>
 
 </resources>
