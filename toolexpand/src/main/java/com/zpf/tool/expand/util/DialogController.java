@@ -24,6 +24,7 @@ public class DialogController implements IManager<ICustomWindow> {
         long id = -1;
         if (showingWindow == safeWindow) {
             id = showingWindowId;
+
         } else {
             for (Pair<Long, ICustomWindow> cache : cacheList) {
                 if (cache.second == safeWindow) {
@@ -33,10 +34,20 @@ public class DialogController implements IManager<ICustomWindow> {
             }
             if (id < 0) {
                 id = System.currentTimeMillis();
-                cacheList.add(new Pair<Long, ICustomWindow>(id, safeWindow));
+                if (checkShowing()) {
+                    cacheList.add(new Pair<Long, ICustomWindow>(id, safeWindow));
+                } else {
+                    showingWindow = safeWindow;
+                }
             }
         }
-        show(safeWindow);
+        if (!checkShowing()) {
+            try {
+                showingWindow.show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         return id;
     }
 
@@ -46,8 +57,7 @@ public class DialogController implements IManager<ICustomWindow> {
             return false;
         }
         if (id <= 0) {
-            showNext();
-            return false;
+            return showNext();
         } else {
             return !checkShowing();
         }
@@ -103,26 +113,26 @@ public class DialogController implements IManager<ICustomWindow> {
     }
 
     public void show(ICustomWindow window) {
-        if (isDestroy || window == null || checkShowing()) {
-            return;
-        }
-        showingWindow = window;
-        try {
-            showingWindow.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        bind(window);
     }
 
-    private void showNext() {
+    private boolean showNext() {
+        boolean handled = false;
+        if (showingWindow != null) {
+            showingWindow.dismiss();
+            showingWindow = null;
+            handled = true;
+        }
         if (cacheList.size() > 0) {
             Pair<Long, ICustomWindow> pair = cacheList.pollFirst();
             if (pair == null || pair.second == null) {
-                showNext();
+                return showNext();
             } else {
                 show(pair.second);
+                handled = true;
             }
         }
+        return handled;
     }
 
 }

@@ -16,11 +16,14 @@ import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.ILayoutId;
 import com.zpf.api.IManager;
+import com.zpf.api.IconText;
 import com.zpf.frame.IContainerHelper;
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IRootLayout;
 import com.zpf.frame.ITitleBar;
 import com.zpf.support.constant.AppConst;
+import com.zpf.support.model.IconTextEntry;
+import com.zpf.support.model.TitleBarEntry;
 import com.zpf.support.view.RootLayout;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.PermissionUtil;
@@ -53,6 +56,7 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
         this.mContainer = ContainerController.mInitingViewContainer;
         mRootLayout = new RootLayout(getContext());
         mTitleBar = mRootLayout.getTitleBar();
+        bindTitleBar(mRootLayout);
         ILayoutId iLayoutId = getClass().getAnnotation(ILayoutId.class);
         if (iLayoutId != null && iLayoutId.value() != 0) {
             mRootLayout.setContentView(null, iLayoutId.value());
@@ -219,6 +223,90 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
     @Override
     public Bundle getParams() {
         return mContainer.getParams();
+    }
+
+    protected void bindTitleBar(IRootLayout rootLayout) {
+        if (rootLayout == null) {
+            return;
+        }
+        final TitleBarEntry titleBarEntry = getParams().getParcelable(AppConst.TITLE_ENTRY);
+        if (titleBarEntry != null) {
+            if (titleBarEntry.isShowBottomShadow()) {
+                rootLayout.getShadowLine().getView().setVisibility(View.VISIBLE);
+            } else {
+                rootLayout.getShadowLine().getView().setVisibility(View.GONE);
+            }
+
+            if (!titleBarEntry.isShowStatusBar() && !titleBarEntry.isShowTitleBar()) {
+                rootLayout.getTopLayout().getLayout().setVisibility(View.GONE);
+            } else {
+                if (!TextUtils.isEmpty(titleBarEntry.getLeftLayoutAction())) {
+                    rootLayout.getTitleBar().getLeftLayout().setOnClickListener(new SafeClickListener() {
+                        @Override
+                        public void click(View v) {
+                            onReceiveEvent(titleBarEntry.getLeftLayoutAction());
+                        }
+                    });
+                }
+                if (!TextUtils.isEmpty(titleBarEntry.getRightLayoutAction())) {
+                    rootLayout.getTitleBar().getRightLayout().setOnClickListener(new SafeClickListener() {
+                        @Override
+                        public void click(View v) {
+                            onReceiveEvent(titleBarEntry.getRightLayoutAction());
+                        }
+                    });
+                }
+                if (titleBarEntry.isShowStatusBar()) {
+                    rootLayout.getShadowLine().getView().setVisibility(View.VISIBLE);
+                } else {
+                    rootLayout.getShadowLine().getView().setVisibility(View.GONE);
+                }
+                if (titleBarEntry.isShowTitleBar()) {
+                    rootLayout.getTitleBar().getLayout().setVisibility(View.VISIBLE);
+                    if (titleBarEntry.getLeftIconEntry() != null) {
+                        bindIconText(rootLayout.getTitleBar().getLeftImage(), titleBarEntry.getLeftIconEntry());
+                    }
+                    if (titleBarEntry.getLeftIconEntry() != null) {
+                        bindIconText(rootLayout.getTitleBar().getLeftText(), titleBarEntry.getLeftIconEntry());
+                    }
+                    if (titleBarEntry.getLeftIconEntry() != null) {
+                        bindIconText(rootLayout.getTitleBar().getLeftImage(), titleBarEntry.getLeftIconEntry());
+                    }
+                    if (titleBarEntry.getLeftIconEntry() != null) {
+                        bindIconText(rootLayout.getTitleBar().getLeftImage(), titleBarEntry.getLeftIconEntry());
+                    }
+                    if (titleBarEntry.getLeftIconEntry() != null) {
+                        bindIconText(rootLayout.getTitleBar().getLeftImage(), titleBarEntry.getLeftIconEntry());
+                    }
+                    if (titleBarEntry.getLeftIconEntry() != null) {
+                        bindIconText(rootLayout.getTitleBar().getLeftImage(), titleBarEntry.getLeftIconEntry());
+                    }
+                } else {
+                    rootLayout.getTitleBar().getLayout().setVisibility(View.GONE);
+                }
+            }
+        }
+    }
+
+    protected void bindIconText(IconText iconText, IconTextEntry entry) {
+        if (iconText == null || entry == null) {
+            return;
+        }
+        if (entry.getTextSize() != 0) {
+            iconText.setTextSize(entry.getTextSize());
+        }
+        if (entry.getTextColor() != 0) {
+            iconText.setTextColor(entry.getTextColor());
+        }
+        if (entry.getIconResId() != 0) {
+            iconText.setIconFont(entry.getIconResId());
+        } else if (entry.getImageResId() != 0) {
+            iconText.setImageOnly(entry.getImageResId());
+        } else if (entry.getTextResId() != 0) {
+            iconText.setText(entry.getTextResId());
+        } else if (!TextUtils.isEmpty(entry.getTextString())) {
+            iconText.setText(entry.getTextString());
+        }
     }
 
     public void setText(int viewId, CharSequence content) {

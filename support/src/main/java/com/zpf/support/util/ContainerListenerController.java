@@ -166,7 +166,7 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
 
     @Override
     public void show(ICustomWindow window) {
-        mDialogController.show(window);
+        mDialogController.bind(window);
     }
 
 
