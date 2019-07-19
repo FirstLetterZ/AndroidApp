@@ -13,8 +13,12 @@ public class AppConst {
     public static final String TITLE_ENTRY = "title_entry";
     public static final String ACTION = "action";
     public static final String PARAM = "params";
-    public static final String TYPE = "ype";
+    public static final String TYPE = "type";
     public static final String URL = "url";
+    public static final String ID = "id";
+    public static final String ID01 = "id_01";
+    public static final String ID02 = "id_02";
+    public static final String ID03 = "id_03";
     public static final String CODE = "code";
     public static final String NAME = "name";
     public static final String MESSAGE = "message";

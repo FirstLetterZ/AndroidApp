@@ -58,7 +58,7 @@ ext {
             toolExpand            : 'com.zpf.android:tool-expand:0.1.6',
             webview               : 'com.zpf.android:bridgeWebview:1.0.7',
             refresh               : 'com.zpf.android:pullRefresh:1.0.7',
-            network               : 'com.zpf.android:util-retrofit:1.2.6',
+            network               : 'com.zpf.android:util-retrofit:1.2.7',
             rxnetwork             : 'com.zpf.android:util-rxNetwork:1.2.4',
             support               : 'com.zpf.android:tool-support:0.2.18',
             gsonParse             : 'com.zpf.android:util-gson:1.0.7',
