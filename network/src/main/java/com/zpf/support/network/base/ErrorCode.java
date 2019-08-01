@@ -11,6 +11,8 @@ public @interface ErrorCode {
     int SSL_ERROR = 702;
     int PARSE_ERROR = 703;
     int ACCOUNT_ERROR = 704;
+    int HSOT_ERROR = 705;
+    int SERVICE_ERROR = 705;
     int SOCKET_ERROR = 710;
     int CONNECT_ERROR = 711;
     int TIMEOUT_ERROR = 712;

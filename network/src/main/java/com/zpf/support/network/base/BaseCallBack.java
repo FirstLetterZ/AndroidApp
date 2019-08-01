@@ -5,6 +5,7 @@ import android.net.ParseException;
 import android.os.Looper;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import com.zpf.api.ICancelable;
 import com.zpf.api.IManager;
@@ -23,6 +24,8 @@ import java.io.InterruptedIOException;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+import java.net.UnknownServiceException;
 import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -111,6 +114,9 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
         } else if (e instanceof CustomException) {
             code = ((CustomException) e).getCode();
             description = e.getMessage();
+        } else if (e instanceof UnknownHostException) {
+            code = ErrorCode.HSOT_ERROR;
+            description = getString(R.string.network_host_error);
         } else if (e instanceof AccountsException) {
             code = ErrorCode.ACCOUNT_ERROR;
             description = getString(R.string.network_account_error);
@@ -144,7 +150,10 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
             }
             if (parseResult == null) {
                 code = ErrorCode.NO_SERVER_CODE;
-                description = e.toString();
+                description = e.getMessage();
+                if (TextUtils.isEmpty(description)) {
+                    description = e.toString();
+                }
             } else {
                 code = parseResult.getCode();
                 description = parseResult.getMessage();

@@ -18,13 +18,13 @@ android {
 
 dependencies {
     api rootProject.ext.dependencies.network
-    provided rootProject.ext.dependencies.retrofit
-    provided rootProject.ext.dependencies.api
-    provided rootProject.ext.dependencies.global
-    provided rootProject.ext.dependencies.annotations
-    provided rootProject.ext.dependencies.rxandroid
-    provided rootProject.ext.dependencies.rxjava
-    provided rootProject.ext.dependencies.retrofitRxjava2Adapter
+    compileOnly rootProject.ext.dependencies.retrofit
+    compileOnly rootProject.ext.dependencies.api
+    compileOnly rootProject.ext.dependencies.global
+    compileOnly rootProject.ext.dependencies.annotations
+    compileOnly rootProject.ext.dependencies.rxandroid
+    compileOnly rootProject.ext.dependencies.rxjava
+    compileOnly rootProject.ext.dependencies.retrofitRxjava2Adapter
 }
 
 apply from: "../bintrayUpload.gradle"

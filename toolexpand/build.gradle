@@ -18,11 +18,11 @@ android {
 
 dependencies {
     api rootProject.ext.dependencies.toolkit
-    provided rootProject.ext.dependencies.api
-    provided rootProject.ext.dependencies.dataparser
-    provided rootProject.ext.dependencies.recyclerview
-    provided rootProject.ext.dependencies.global
-    provided rootProject.ext.dependencies.annotations
+    compileOnly rootProject.ext.dependencies.api
+    compileOnly rootProject.ext.dependencies.dataparser
+    compileOnly rootProject.ext.dependencies.recyclerview
+    compileOnly rootProject.ext.dependencies.global
+    compileOnly rootProject.ext.dependencies.annotations
 }
 
 apply from: "../bintrayUpload.gradle"
