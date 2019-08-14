@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
+import com.zpf.api.IEvent;
 import com.zpf.api.IManager;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.INavigator;
@@ -354,9 +355,9 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public boolean sendEvenToView(String action, Object... params) {
+    public boolean sendEvenToView(@NonNull IEvent<Object> event) {
         if (mViewProcessor != null) {
-            mViewProcessor.onReceiveEvent(action, params);
+            mViewProcessor.onReceiveEvent(event);
             return true;
         }
         return false;

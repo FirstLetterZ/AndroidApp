@@ -24,6 +24,7 @@ public class AppConst {
     public static final String MESSAGE = "message";
     public static final String CALL_BACK = "callback";
     public static final String REQUEST_CODE = "request_code";
+    public static final String LAUNCH_MODE = "launch_mode";
     public static final String TARGET_CONTAINER_CLASS = "target_container_class";
     public static final String TARGET_CONTAINER_ACTION = "target_container_action";
     public static final String TARGET_VIEW_CLASS = "target_view_class";

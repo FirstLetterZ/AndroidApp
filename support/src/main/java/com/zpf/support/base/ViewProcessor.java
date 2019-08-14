@@ -1,5 +1,6 @@
 package com.zpf.support.base;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
+import com.zpf.api.IEvent;
 import com.zpf.api.ILayoutId;
 import com.zpf.api.IManager;
 import com.zpf.api.IconText;
@@ -22,6 +24,7 @@ import com.zpf.frame.INavigator;
 import com.zpf.frame.IRootLayout;
 import com.zpf.frame.ITitleBar;
 import com.zpf.support.constant.AppConst;
+import com.zpf.support.model.SimpleEvent;
 import com.zpf.support.model.IconTextEntry;
 import com.zpf.support.model.TitleBarEntry;
 import com.zpf.support.view.RootLayout;
@@ -206,12 +209,17 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
 
     @Override
     public Context getContext() {
-        return mContainer != null ? mContainer.getContext() : null;
+        return mContainer.getContext();
     }
 
     @Override
-    public void onReceiveEvent(String action, Object... params) {
+    public void onReceiveEvent(IEvent<Object> event) {
 
+    }
+
+    @Override
+    public Activity getCurrentActivity() {
+        return mContainer.getCurrentActivity();
     }
 
     @Override
@@ -243,7 +251,7 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
                     rootLayout.getTitleBar().getLeftLayout().setOnClickListener(new SafeClickListener() {
                         @Override
                         public void click(View v) {
-                            onReceiveEvent(titleBarEntry.leftLayoutAction);
+                            onReceiveEvent(new SimpleEvent<>(titleBarEntry.leftLayoutAction));
                         }
                     });
                 }
@@ -251,7 +259,7 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
                     rootLayout.getTitleBar().getRightLayout().setOnClickListener(new SafeClickListener() {
                         @Override
                         public void click(View v) {
-                            onReceiveEvent(titleBarEntry.rightLayoutAction);
+                            onReceiveEvent(new SimpleEvent<>(titleBarEntry.rightLayoutAction));
                         }
                     });
                 }

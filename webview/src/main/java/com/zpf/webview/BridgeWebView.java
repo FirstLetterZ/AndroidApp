@@ -17,6 +17,8 @@ import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
@@ -50,7 +52,6 @@ public class BridgeWebView extends WebView {
     private int logLevel;
     private final String jsFileName = "bridge.js";
     private String jsFileString;
-    private volatile boolean waitInit = false;//页面开始加载结束，等待注入js
     private List<WebViewStateListener> stateListenerList = new ArrayList<>();
     private OnReceivedWebPageListener webPageListener;
     private WebViewWindowListener windowListener;
@@ -62,10 +63,11 @@ public class BridgeWebView extends WebView {
     private String TAG = "BridgeWebView";
     private boolean isTraceless;//无痕浏览
     private boolean useWebTitle = true;//使用浏览器标题
-    private String currentUrl;//当前完成加载的url
-    private long finishTime;//当前完成加载的时间
+    private WebPageInfo webPageInfo = new WebPageInfo();//当前加载页面
     private HashMap<String, Boolean> redirectedUrlMap = new HashMap<>();//重定向原始url集合
     private JsonParserInterface realParser;//json解析
+    private View customView = null;
+    private WebChromeClient.CustomViewCallback customCallback = null;
 
     public BridgeWebView(Context context) {
         super(context);
@@ -195,6 +197,7 @@ public class BridgeWebView extends WebView {
                     "        actions : [],\n" +
                     "        jsCall : CallNative\n" +
                     "    };\n" +
+                    "    window.bridge.connect();\n" +
                     "}";
         }
     }
@@ -206,8 +209,8 @@ public class BridgeWebView extends WebView {
         return new WebChromeClient() {
             @Override
             public void onReceivedTitle(WebView view, String title) {
-                if (waitInit) {
-                    waitInit = !initJsBridge();
+                if (webPageInfo.waitInit) {
+                    webPageInfo.waitInit = !initJsBridge();
                 }
                 if (logLevel >= WebViewLogLevel.LEVEL_MOST) {
                     Log.i(TAG, "========================onReceivedTitle======================");
@@ -222,8 +225,8 @@ public class BridgeWebView extends WebView {
 
             @Override
             public void onReceivedIcon(WebView view, Bitmap icon) {
-                if (waitInit) {
-                    waitInit = !initJsBridge();
+                if (webPageInfo.waitInit) {
+                    webPageInfo.waitInit = !initJsBridge();
                 }
                 if (logLevel >= WebViewLogLevel.LEVEL_ALL) {
                     Log.i(TAG, "========================onReceivedIcon======================");
@@ -247,8 +250,8 @@ public class BridgeWebView extends WebView {
                     Log.i(TAG, "url=" + view.getUrl());
                     Log.i(TAG, "newProgress=" + newProgress);
                 }
-                if (waitInit && newProgress > 10) {
-                    waitInit = !initJsBridge();
+                if (webPageInfo.waitInit && newProgress > 10) {
+                    initJsBridge();
                 }
                 if (progressChangedListener != null) {
                     progressChangedListener.onChanged(view, 100, newProgress);
@@ -289,6 +292,43 @@ public class BridgeWebView extends WebView {
             }
 
             @Override
+            public void onShowCustomView(View view, CustomViewCallback callback) {
+                customView = view;
+                customCallback = callback;
+                ViewGroup parent = (ViewGroup) getParent();
+                parent.removeView(BridgeWebView.this);
+                parent.addView(view);
+            }
+
+            @Override
+            public void onShowCustomView(View view, int requestedOrientation, CustomViewCallback callback) {
+                customView = view;
+                customCallback = callback;
+                ViewGroup parent = (ViewGroup) getParent();
+                parent.removeView(BridgeWebView.this);
+                parent.addView(view);
+            }
+
+            @Override
+            public void onHideCustomView() {
+                if (customView == null) {
+                    return;
+                }
+                // 全屏返回之后，视频状态不能衔接上，因为onCustomViewHidden很多情况下会奔溃
+                //原因： Call back (only in API level <19, because in API level 19+ with chromium webview it crashes)
+                if (customCallback != null) {
+                    if (customCallback.getClass().getName().contains(".chromium.")) {
+                        customCallback.onCustomViewHidden();
+                    }
+                }
+                ViewGroup parent = (ViewGroup) customView.getParent();
+                parent.removeView(customView);
+                parent.addView(BridgeWebView.this);
+                customCallback = null;
+                customView = null;
+            }
+
+            @Override
             @TargetApi(Build.VERSION_CODES.LOLLIPOP)
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
                 if (fileChooserListener != null) {
@@ -316,8 +356,6 @@ public class BridgeWebView extends WebView {
                             filePathCallback, new String[]{acceptType});
                 }
             }
-
-
         };
     }
 
@@ -338,13 +376,14 @@ public class BridgeWebView extends WebView {
                     goBack();
                     return;
                 }
-                currentUrl = url;
+                webPageInfo.finishTime = 0;
+                webPageInfo.webUrl = url;
+                webPageInfo.waitInit = true;
                 if (stateListenerList.size() > 0) {
                     for (WebViewStateListener listener : stateListenerList) {
                         listener.onPageStart(view, url, favicon);
                     }
                 }
-                waitInit = true;
                 super.onPageStarted(view, url, favicon);
             }
 
@@ -363,8 +402,9 @@ public class BridgeWebView extends WebView {
                         listener.onPageFinish(view, url);
                     }
                 }
-                waitInit = false;
-                finishTime = System.currentTimeMillis();
+                webPageInfo.waitInit = false;
+                webPageInfo.loadComplete = true;
+                webPageInfo.finishTime = System.currentTimeMillis();
                 if (webPageListener != null) {
                     runOnUiThread(new Runnable() {
                         @Override
@@ -426,8 +466,9 @@ public class BridgeWebView extends WebView {
                         listener.onPageError(view, request, error);
                     }
                 }
-                waitInit = false;
-                finishTime = System.currentTimeMillis();
+                webPageInfo.waitInit = false;
+                webPageInfo.loadComplete = true;
+                webPageInfo.finishTime = System.currentTimeMillis();
                 super.onReceivedError(view, request, error);
             }
 
@@ -480,6 +521,14 @@ public class BridgeWebView extends WebView {
             });
         }
 
+        @JavascriptInterface
+        public void connect() {
+            webPageInfo.waitInit = false;
+            if (logLevel >= WebViewLogLevel.LEVEL_NORMAL) {
+                Log.i(TAG, "========================jsBridge connect======================");
+            }
+        }
+
         //当前线程为JsBridge
         @JavascriptInterface
         public String callNative(String action, String params, String callBackName) {
@@ -518,8 +567,9 @@ public class BridgeWebView extends WebView {
 
     private boolean checkRedirect(String url) {
         //增加一个时间校验
-        return finishTime == 0 || (System.currentTimeMillis() - finishTime) < 50
-                || !TextUtils.equals(url, currentUrl);
+        webPageInfo.isRedirect = (!webPageInfo.loadComplete || (System.currentTimeMillis() - webPageInfo.finishTime) < 50
+                || !TextUtils.equals(url, webPageInfo.webUrl));
+        return webPageInfo.isRedirect;
     }
 
     private boolean interceptRedirected(String url) {
@@ -582,7 +632,17 @@ public class BridgeWebView extends WebView {
         boolean intercept = urlInterceptor != null && urlInterceptor.check(url);
         if (intercept) {
             return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
-        } else if (webView.getHitTestResult() != null) {
+        } else if (!url.startsWith("http://") && !url.startsWith("https://")
+                && !url.startsWith("file://") && !url.equals("about:blank")) {
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getContext().startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Log.w(TAG, "activity not found to handle uri scheme for: " + url);
+            }
+            return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
+        } else {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -597,18 +657,6 @@ public class BridgeWebView extends WebView {
                 }
             });
             return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
-        } else if (!url.startsWith("http://") && !url.startsWith("https://")
-                && !url.startsWith("file://") && !url.equals("about:blank")) {
-            try {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                getContext().startActivity(intent);
-            } catch (ActivityNotFoundException e) {
-                Log.w(TAG, "activity not found to handle uri scheme for: " + url);
-            }
-            return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
-        } else {
-            return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
         }
     }
 
@@ -648,6 +696,10 @@ public class BridgeWebView extends WebView {
 
     public void setUrlInterceptor(IChecker<String> urlInterceptor) {
         this.urlInterceptor = urlInterceptor;
+    }
+
+    public void setFileChooserListener(WebViewFileChooserListener fileChooserListener) {
+        this.fileChooserListener = fileChooserListener;
     }
 
     public void setWhiteList(@Nullable List<String> whiteList) {
