@@ -364,7 +364,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     @Override
-    public boolean sendEvenToView(@NonNull IEvent<Object> event) {
+    public boolean sendEvenToView(@NonNull IEvent event) {
         if (mViewProcessor != null) {
             mViewProcessor.onReceiveEvent(event);
             return true;

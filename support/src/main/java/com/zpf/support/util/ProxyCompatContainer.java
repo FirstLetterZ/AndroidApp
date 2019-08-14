@@ -355,7 +355,7 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public boolean sendEvenToView(@NonNull IEvent<Object> event) {
+    public boolean sendEvenToView(@NonNull IEvent event) {
         if (mViewProcessor != null) {
             mViewProcessor.onReceiveEvent(event);
             return true;

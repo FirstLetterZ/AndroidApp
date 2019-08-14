@@ -213,7 +213,7 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
     }
 
     @Override
-    public void onReceiveEvent(IEvent<Object> event) {
+    public void onReceiveEvent(IEvent event) {
 
     }
 
@@ -251,7 +251,7 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
                     rootLayout.getTitleBar().getLeftLayout().setOnClickListener(new SafeClickListener() {
                         @Override
                         public void click(View v) {
-                            onReceiveEvent(new SimpleEvent<>(titleBarEntry.leftLayoutAction));
+                            onReceiveEvent(new SimpleEvent(titleBarEntry.leftLayoutAction));
                         }
                     });
                 }
@@ -259,7 +259,7 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
                     rootLayout.getTitleBar().getRightLayout().setOnClickListener(new SafeClickListener() {
                         @Override
                         public void click(View v) {
-                            onReceiveEvent(new SimpleEvent<>(titleBarEntry.rightLayoutAction));
+                            onReceiveEvent(new SimpleEvent(titleBarEntry.rightLayoutAction));
                         }
                     });
                 }
