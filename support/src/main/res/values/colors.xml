@@ -4,5 +4,6 @@
     <color name="dialog_default_message">#333333</color>
     <color name="dialog_default_cancel">#999999</color>
     <color name="dialog_default_confirm">#333333</color>
+    <color name="dialog_default_split_line">#e0e0e0</color>
     <color name="bottom_shadow">#80111111</color>
 </resources>

@@ -4,72 +4,73 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="260dp"
+    <android.support.v7.widget.LinearLayoutCompat
+        android:layout_width="270dp"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:background="@drawable/shape_dialog_ios"
         android:orientation="vertical">
 
-        <LinearLayout
+        <android.support.v7.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:minHeight="110dp"
+            android:minHeight="80dp"
             android:orientation="vertical"
             android:paddingLeft="16dp"
             android:paddingTop="16dp"
-            android:paddingRight="16dp">
+            android:paddingRight="16dp"
+            android:paddingBottom="6dp">
 
-            <ImageView
+            <android.support.v7.widget.AppCompatImageView
                 android:id="@+id/iv_icon"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="10dp"
                 android:visibility="gone" />
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="10dp"
                 android:textColor="@color/dialog_default_title"
                 android:textSize="16dp"
                 tools:text="标题" />
 
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/tv_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="10dp"
                 android:gravity="center"
                 android:textColor="@color/dialog_default_message"
                 android:textSize="14dp"
                 tools:text="消息消息消息消息消息消息消息" />
 
 
-            <EditText
+            <android.support.v7.widget.AppCompatEditText
                 android:id="@+id/et_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/border_gray_style"
                 android:padding="5dp"
                 android:textColor="@color/dialog_default_message"
                 android:textSize="14dp"
                 android:visibility="gone"
                 tools:text="dddddddddddddddddddddnddddddddddddd" />
-        </LinearLayout>
+        </android.support.v7.widget.LinearLayoutCompat>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="0.5dp"
-            android:background="#acacac" />
+            android:background="@color/dialog_default_split_line" />
 
-        <LinearLayout
+        <android.support.v7.widget.LinearLayoutCompat
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="42dp"
             android:orientation="horizontal">
 
             <android.support.v7.widget.AppCompatButton
@@ -87,7 +88,7 @@
                 android:id="@+id/view_line"
                 android:layout_width="0.5dp"
                 android:layout_height="match_parent"
-                android:background="#acacac" />
+                android:background="@color/dialog_default_split_line" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/btn_confirm"
@@ -99,6 +100,6 @@
                 android:text="确认"
                 android:textColor="@color/dialog_default_confirm"
                 android:textSize="15dp" />
-        </LinearLayout>
-    </LinearLayout>
+        </android.support.v7.widget.LinearLayoutCompat>
+    </android.support.v7.widget.LinearLayoutCompat>
 </RelativeLayout>
