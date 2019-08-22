@@ -23,7 +23,11 @@ import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.R;
 import com.zpf.support.constant.ContainerType;
+import com.zpf.support.model.ContainerStackItem;
+import com.zpf.support.model.NameStackItem;
 import com.zpf.tool.config.LifecycleState;
+import com.zpf.tool.config.stack.ActivityStackItem;
+import com.zpf.tool.config.stack.IStackItem;
 
 /**
  * 将普通的activity或fragment打造成IViewContainer
@@ -36,6 +40,7 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     private boolean isVisible;
     private boolean isActivity;
     private Bundle mParams;
+    private IStackItem stackItem;
     private IViewProcessor mViewProcessor;
     private final ContainerListenerController mController = new ContainerListenerController();
 
@@ -298,6 +303,22 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         mController.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @NonNull
+    @Override
+    public IStackItem getStackItem() {
+        if (stackItem == null) {
+            if(activity!=null){
+                stackItem=new NameStackItem(activity.getClass().getName());
+            }else if(fragment!=null){
+                stackItem=new NameStackItem(fragment.getClass().getName());
+            }else {
+                stackItem = new ContainerStackItem(this);
+            }
+        }
+        stackItem.bindActivity(getCurrentActivity());
+        return stackItem;
     }
 
     @Override

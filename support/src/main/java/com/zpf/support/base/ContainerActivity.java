@@ -27,6 +27,7 @@ import com.zpf.frame.IViewProcessor;
 import com.zpf.support.R;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
+import com.zpf.support.model.ContainerStackItem;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.support.util.LoadingManagerImpl;
@@ -34,6 +35,7 @@ import com.zpf.support.util.LogUtil;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.MainHandler;
+import com.zpf.tool.config.stack.IStackItem;
 
 /**
  * 基于Activity的视图容器层
@@ -43,8 +45,9 @@ public class ContainerActivity extends Activity implements IViewContainer {
     protected final ContainerListenerController mController = new ContainerListenerController();
     private ILoadingManager loadingManager;
     private Bundle mParams;
-    private IViewProcessor mViewProcessor;
     private boolean isLauncher;
+    private IStackItem stackItem;
+    private IViewProcessor mViewProcessor;
     private IContainerHelper mHelper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
 
     @Override
@@ -133,6 +136,17 @@ public class ContainerActivity extends Activity implements IViewContainer {
         if (savedInstanceState != null) {
             mController.onRestoreInstanceState(savedInstanceState);
         }
+    }
+
+    @NonNull
+    @Override
+    public IStackItem getStackItem() {
+        if (stackItem == null) {
+            stackItem = new ContainerStackItem(this);
+        } else {
+            stackItem.bindActivity(getCurrentActivity());
+        }
+        return stackItem;
     }
 
     @Override

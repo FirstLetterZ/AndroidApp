@@ -27,14 +27,17 @@ import com.zpf.frame.IViewProcessor;
 import com.zpf.support.R;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
+import com.zpf.support.model.ContainerStackItem;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.LogUtil;
+import com.zpf.support.util.StackAnimUtil;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.MainHandler;
+import com.zpf.tool.config.stack.IStackItem;
 
 /**
  * 基于AppCompatActivity的视图容器层
@@ -44,8 +47,9 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     protected final ContainerListenerController mController = new ContainerListenerController();
     private ILoadingManager loadingManager;
     private Bundle mParams;
-    private IViewProcessor mViewProcessor;
     private boolean isLauncher;
+    private IStackItem stackItem;
+    private IViewProcessor mViewProcessor;
     private IContainerHelper mHelper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
 
     @Override
@@ -168,6 +172,17 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         mController.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+    @NonNull
+    @Override
+    public IStackItem getStackItem() {
+        if (stackItem == null) {
+            stackItem = new ContainerStackItem(this);
+        } else {
+            stackItem.bindActivity(getCurrentActivity());
+        }
+        return stackItem;
+    }
+
     @Override
     @LifecycleState
     public int getState() {
@@ -228,6 +243,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     @Override
     public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
         super.startActivityForResult(intent, requestCode, options);
+        StackAnimUtil.onPush(this, intent.getIntExtra(AppConst.ANIM_TYPE, 0));
     }
 
     @Override
@@ -273,6 +289,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     @Override
     public void finish() {
         super.finish();
+        StackAnimUtil.onPoll(this, getIntent().getIntExtra(AppConst.ANIM_TYPE, 0));
     }
 
     @Override
