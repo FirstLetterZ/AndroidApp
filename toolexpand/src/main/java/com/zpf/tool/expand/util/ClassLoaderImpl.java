@@ -4,10 +4,11 @@ import android.support.annotation.NonNull;
 
 import com.zpf.api.IClassLoader;
 import com.zpf.api.IGroup;
+import com.zpf.api.OnDestroyListener;
 
 import java.util.HashSet;
 
-public class ClassLoaderImpl implements IClassLoader, IGroup<IClassLoader> {
+public class ClassLoaderImpl implements IClassLoader, IGroup<IClassLoader>, OnDestroyListener {
     private ClassLoaderImpl() {
     }
 

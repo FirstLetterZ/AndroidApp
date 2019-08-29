@@ -29,6 +29,7 @@ public class RootLayout extends LinearLayout implements IRootLayout {
     private ITitleBar titleBar;
     private BottomShadow bottomShadow;
     private FrameLayout contentLayout;
+    private View currentContent;
 
     public RootLayout(Context context) {
         this(context, null, 0);
@@ -100,19 +101,27 @@ public class RootLayout extends LinearLayout implements IRootLayout {
 
     @Override
     public void setContentView(@NonNull View view) {
-        contentLayout.removeAllViews();
+        if (view == currentContent) {
+            return;
+        }
+        if (currentContent != null) {
+            contentLayout.removeView(currentContent);
+        }
+        currentContent = view;
         contentLayout.addView(view);
-        contentLayout.addView(bottomShadow);
+        bottomShadow.bringToFront();
     }
 
     @Override
     public void setContentView(@Nullable LayoutInflater inflater, int layoutId) {
-        contentLayout.removeAllViews();
+        if (currentContent != null) {
+            contentLayout.removeView(currentContent);
+        }
         if (inflater == null) {
             inflater = LayoutInflater.from(getContext());
         }
-        inflater.inflate(layoutId, contentLayout, true);
-        contentLayout.addView(bottomShadow);
+        currentContent = inflater.inflate(layoutId, contentLayout, true);
+        bottomShadow.bringToFront();
     }
 
     @Override
