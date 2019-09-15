@@ -25,7 +25,12 @@ public class ContainerStackItem implements IStackItem {
         if (TextUtils.isEmpty(name)) {
             IViewProcessor viewProcessor = viewContainer.getViewProcessor();
             if (viewProcessor == null) {
-                name = viewContainer.getClass().getName();
+                try {
+                    Class cls = (Class) viewContainer.getParams().getSerializable(AppConst.TARGET_VIEW_CLASS);
+                    name = cls.getName();
+                } catch (Exception e) {
+                    name = viewContainer.getClass().getName();
+                }
             } else {
                 name = viewProcessor.getClass().getName();
             }

@@ -54,7 +54,6 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         //防止初次安装从后台返回的重启问题
         Intent intent = getIntent();
         isLauncher = (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && Intent.ACTION_MAIN.equals(intent.getAction()));
@@ -62,7 +61,6 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
             finish();
             return;
         }
-        initWindow();
         IViewProcessor viewProcessor = initViewProcessor();
         if (viewProcessor != null) {
             mController.addListener(viewProcessor);
@@ -70,6 +68,8 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         } else {
             LogUtil.w("IViewProcessor is null!");
         }
+        super.onCreate(savedInstanceState);
+        initWindow();
         initView(savedInstanceState);
         mController.onCreate(savedInstanceState);
     }
@@ -283,7 +283,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     @Override
     public void finishWithResult(int resultCode, Intent data) {
         setResult(resultCode, data);
-        super.finish();
+        this.finish();
     }
 
     @Override

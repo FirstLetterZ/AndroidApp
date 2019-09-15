@@ -52,7 +52,6 @@ public class ContainerActivity extends Activity implements IViewContainer {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         //防止初次安装从后台返回的重启问题
         Intent intent = getIntent();
         isLauncher = (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && Intent.ACTION_MAIN.equals(intent.getAction()));
@@ -60,7 +59,6 @@ public class ContainerActivity extends Activity implements IViewContainer {
             finish();
             return;
         }
-        initWindow();
         IViewProcessor viewProcessor = initViewProcessor();
         if (viewProcessor != null) {
             mController.addListener(viewProcessor);
@@ -68,6 +66,8 @@ public class ContainerActivity extends Activity implements IViewContainer {
         } else {
             LogUtil.w("IViewProcessor is null!");
         }
+        super.onCreate(savedInstanceState);
+        initWindow();
         initView(savedInstanceState);
         mController.onCreate(savedInstanceState);
     }
@@ -280,7 +280,7 @@ public class ContainerActivity extends Activity implements IViewContainer {
     @Override
     public void finishWithResult(int resultCode, Intent data) {
         setResult(resultCode, data);
-        super.finish();
+        this.finish();
     }
 
     @Override

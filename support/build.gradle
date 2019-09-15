@@ -23,6 +23,7 @@ dependencies {
     api rootProject.ext.dependencies.toolExpand
     api rootProject.ext.dependencies.dataparser
     api rootProject.ext.dependencies.global
+    api rootProject.ext.dependencies.toolkit
 }
 
 apply from: "../bintrayUpload.gradle"

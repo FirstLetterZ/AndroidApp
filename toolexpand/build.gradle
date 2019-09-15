@@ -17,7 +17,6 @@ android {
 }
 
 dependencies {
-    api rootProject.ext.dependencies.toolkit
     compileOnly rootProject.ext.dependencies.api
     compileOnly rootProject.ext.dependencies.dataparser
     compileOnly rootProject.ext.dependencies.recyclerview
