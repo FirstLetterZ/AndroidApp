@@ -2,10 +2,12 @@ package com.zpf.app.global;
 
 import android.app.Application;
 
+import com.zpf.app.plugin.MainClassLoader;
 import com.zpf.tool.PublicUtil;
-import com.zpf.tool.config.AppStackUtil;
 import com.zpf.tool.config.GlobalConfigImpl;
+import com.zpf.tool.config.stack.AppStackUtil;
 import com.zpf.tool.expand.util.CacheMap;
+import com.zpf.tool.expand.util.ClassLoaderImpl;
 import com.zpf.tool.expand.util.SpUtil;
 
 /**
@@ -18,6 +20,7 @@ public class MyApp extends Application {
         if (PublicUtil.isPackageProces()) {
             registerActivityLifecycleCallbacks(AppStackUtil.get());
             CacheMap.setLocalStorage(SpUtil.get());
+            ClassLoaderImpl.get().add(new MainClassLoader());
             GlobalConfigImpl.get().init(this, new RealGlobalConfig());
         }
     }

@@ -32,6 +32,7 @@ public class AppConst {
     public static final String TARGET_CONTAINER_CLASS = "target_container_class";
     public static final String TARGET_CONTAINER_ACTION = "target_container_action";
     public static final String TARGET_VIEW_CLASS = "target_view_class";
+    public static final String TARGET_VIEW_CLASS_NAME = "target_class_name";
     public static final String TARGET_VIEW_ORIENTATION = "target_view_orientation";
     public static final String TARGET_VIEW_THEME = "target_view_theme";
     public static final String TARGET_STATUS_TRANSLUCENT = "target_status_translucent";

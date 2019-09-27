@@ -2,10 +2,12 @@ package com.zpf.app.global;
 
 import android.graphics.Color;
 
+import com.zpf.api.IClassLoader;
 import com.zpf.api.dataparser.JsonParserInterface;
 import com.zpf.support.network.base.IResponseHandler;
 import com.zpf.support.view.RootLayout;
 import com.zpf.tool.config.GlobalConfigInterface;
+import com.zpf.tool.expand.util.ClassLoaderImpl;
 import com.zpf.tool.gson.GsonUtil;
 
 import java.util.UUID;
@@ -44,6 +46,8 @@ public class RealGlobalConfig implements GlobalConfigInterface {
             return (T) GsonUtil.get();
         } else if (target == IResponseHandler.class) {
             return (T) ResponseHandleImpl.get();
+        } else if (target == IClassLoader.class) {
+            return (T) ClassLoaderImpl.get();
         }
         return null;
     }

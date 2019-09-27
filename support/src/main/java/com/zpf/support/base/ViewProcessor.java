@@ -37,6 +37,7 @@ import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.permission.OnLockPermissionRunnable;
 import com.zpf.tool.permission.PermissionInfo;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -415,6 +416,7 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
                 }
                 if (params == null) {
                     intent.setClass(context, defContainerClass);
+                    intent.putExtra(AppConst.TARGET_VIEW_CLASS_NAME, target.getName());
                 } else {
                     Class containerClass = null;
                     try {
@@ -435,6 +437,7 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
                     params.remove(AppConst.TARGET_CONTAINER_CLASS);
                     params.remove(AppConst.TARGET_CONTAINER_ACTION);
                     intent.putExtras(params);
+                    intent.setExtrasClassLoader(params.getClassLoader());
                 }
                 intent.putExtra(AppConst.TARGET_VIEW_CLASS, target);
                 mContainer.startActivityForResult(intent, requestCode);

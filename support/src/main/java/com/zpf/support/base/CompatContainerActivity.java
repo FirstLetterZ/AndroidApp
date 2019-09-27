@@ -38,6 +38,7 @@ import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.MainHandler;
 import com.zpf.tool.config.stack.IStackItem;
+import com.zpf.tool.expand.util.ClassLoaderImpl;
 
 /**
  * 基于AppCompatActivity的视图容器层
@@ -374,9 +375,6 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
                 mParams.putSerializable(AppConst.TARGET_VIEW_CLASS, launcherClass);
             }
         }
-        if (mParams.getSerializable(AppConst.TARGET_VIEW_CLASS) == null) {
-            mParams.putSerializable(AppConst.TARGET_VIEW_CLASS, defViewProcessorClass());
-        }
         return mParams;
     }
 
@@ -457,7 +455,24 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         Class<? extends IViewProcessor> targetViewClass = null;
         IViewProcessor viewProcessor = null;
         try {
-            targetViewClass = (Class<? extends IViewProcessor>) getParams().getSerializable(AppConst.TARGET_VIEW_CLASS);
+            Class targetClass = null;
+            try {
+                targetClass = (Class) getParams().getSerializable(AppConst.TARGET_VIEW_CLASS);
+            } catch (Exception e) {
+                //
+            }
+            if (targetClass == null) {
+                String targetClassName = getParams().getString(AppConst.TARGET_VIEW_CLASS_NAME);
+                if (targetClassName != null) {
+                    targetClass = ClassLoaderImpl.get().getClass(targetClassName);
+                }
+                if (targetClass == null) {
+                    targetClass = defViewProcessorClass();
+                }
+                getParams().putSerializable(AppConst.TARGET_VIEW_CLASS, targetClass);
+
+            }
+            targetViewClass = (Class<? extends IViewProcessor>) targetClass;
         } catch (Exception e) {
             e.printStackTrace();
             if (mHelper != null) {
