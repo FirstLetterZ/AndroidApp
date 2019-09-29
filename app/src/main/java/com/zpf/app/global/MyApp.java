@@ -3,6 +3,7 @@ package com.zpf.app.global;
 import android.app.Application;
 
 import com.zpf.app.plugin.MainClassLoader;
+import com.zpf.support.util.LogUtil;
 import com.zpf.tool.PublicUtil;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.stack.AppStackUtil;
@@ -22,6 +23,7 @@ public class MyApp extends Application {
             CacheMap.setLocalStorage(SpUtil.get());
             ClassLoaderImpl.get().add(new MainClassLoader());
             GlobalConfigImpl.get().init(this, new RealGlobalConfig());
+            LogUtil.setLogOut(GlobalConfigImpl.get().isDebug());
         }
     }
 }

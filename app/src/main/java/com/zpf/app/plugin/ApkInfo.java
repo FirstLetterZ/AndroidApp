@@ -1,9 +1,9 @@
 package com.zpf.app.plugin;
 
 public class ApkInfo {
-    String apkName;
-    String assetFullPath;
-    String localFullPath;
-    String downloadUrl;
+    String apkName;//唯一标识
+    String path;
+    String md5String;
     long versionCode;
+    boolean forceUpdate;
 }

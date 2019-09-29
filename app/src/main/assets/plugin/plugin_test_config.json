@@ -1,0 +1,11 @@
+{
+  "localApkInfo": {
+    "apkName": "plugin-test",
+    "path": null,
+    "md5String": null,
+    "versionCode": 0
+  },
+  "versionCode": 0,
+  "loaderName": "com.example.myplugin.PluginClassLoaderImpl",
+  "invokeFunction": "get"
+}

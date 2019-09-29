@@ -4,39 +4,25 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.AssetManager;
 import android.os.Build;
-import android.util.ArrayMap;
 
-import java.io.File;
 import java.lang.reflect.Method;
 
 import dalvik.system.DexClassLoader;
 
 public class PluginUtil {
-    private static ArrayMap<String, DexClassLoader> classLoaderMap = new ArrayMap<>();
 
-    public static ClassLoader getPluginClassLoader(Context context, String pluginFilePath,
-                                                   String optimizedDirectory, ClassLoader parentClassLoader) {
-        DexClassLoader loader = null;
-        File pluginFile = null;
-        if (pluginFilePath != null && pluginFilePath.length() > 0) {
-            pluginFile = new File(pluginFilePath);
-        }
-        if (pluginFile != null && pluginFile.exists()) {
-            loader = classLoaderMap.get(pluginFile.getAbsolutePath());
-            if (loader == null) {
-                try {
-                    loader = new DexClassLoader(pluginFile.getAbsolutePath(), optimizedDirectory,
-                            null, parentClassLoader);
-                    AssetManager manager = getAssetManager(context);
-                    if (addAssetPath(manager, pluginFile.getAbsolutePath()) > 0) {
-                        classLoaderMap.put(pluginFile.getAbsolutePath(), loader);
-                    } else {
-                        loader = null;
-                    }
-                } catch (Exception e) {
-                    loader = null;
-                }
+    public static ClassLoader loadPlugin(Context context, String pluginFilePath,
+                                         String optimizedDirectory, ClassLoader parentClassLoader) {
+        DexClassLoader loader;
+        try {
+            loader = new DexClassLoader(pluginFilePath, optimizedDirectory,
+                    null, parentClassLoader);
+            AssetManager manager = getAssetManager(context);
+            if (addAssetPath(manager, pluginFilePath) <= 0) {
+                loader = null;
             }
+        } catch (Exception e) {
+            loader = null;
         }
         return loader;
     }

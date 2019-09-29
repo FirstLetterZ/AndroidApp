@@ -4,55 +4,78 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
-import android.widget.TextView;
 
 import com.zpf.api.ILayoutId;
-import com.zpf.app.plugin.MainClassLoader;
+import com.zpf.app.plugin.AsyncLoadListener;
+import com.zpf.app.plugin.AsyncLoadState;
+import com.zpf.app.plugin.PluginApkBean;
+import com.zpf.app.plugin.PluginController;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.app.R;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.util.LogUtil;
-import com.zpf.tool.FileUtil;
 import com.zpf.tool.ToastUtil;
-import com.zpf.tool.config.AppContext;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * Created by ZPF on 2019/3/25.
  */
 @ILayoutId(R.layout.activity_main)
 public class LoginView extends ViewProcessor {
-    private MainClassLoader mainClassLoader = new MainClassLoader();
-    private MainClassLoader.AsyncLoadListener loadListener;
+    private AsyncLoadListener loadListener;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mTitleBar.getTitle().setText("测试");
         bindAllChildren(mRootLayout.getContentLayout());
-        loadListener = new MainClassLoader.AsyncLoadListener() {
+        loadListener = new AsyncLoadListener() {
             @Override
-            public void onResult(@Nullable ClassLoader classLoader, @Nullable Class<?> result) {
-                if (result == null) {
-                    ToastUtil.toast("result == null");
-                } else {
-                    try {
-                        Bundle params = new Bundle();
-                        params.setClassLoader(result.getClassLoader());
-                        params.putString(AppConst.INTENT_KEY, "123");
-                        params.putString(AppConst.TARGET_VIEW_CLASS_NAME, "TestMainLayout");
-                        push(result, params);
-                    } catch (Exception e) {
-                        ToastUtil.toast("push fail");
-                    }
+            public void onState(int sateCode, @NonNull String targetName, @Nullable PluginApkBean apkBean) {
+                switch (sateCode) {
+                    case AsyncLoadState.CONFIG_ERROR:
+                        break;
+                    case AsyncLoadState.CONFIG_NULL:
+                        break;
+                    case AsyncLoadState.PARAM_ERROR:
+                        break;
+                    case AsyncLoadState.RESULT_NULL:
+                        break;
+                    case AsyncLoadState.UPDATE_FORCE:
+                        break;
+                    case AsyncLoadState.UPDATE_NEED:
+                    case AsyncLoadState.UPDATE_LOSS:
+                        if (apkBean != null) {
+                            Class<?> cls = PluginController.get().loadClass(apkBean, targetName);
+                            if (cls != null) {
+                                jumpToLayout(targetName, cls);
+                            } else {
+                                this.onState(AsyncLoadState.RESULT_NULL, targetName, apkBean);
+                            }
+                        } else {
+                            this.onState(AsyncLoadState.PARAM_ERROR, targetName, apkBean);
+                        }
+                        break;
+                    case AsyncLoadState.LOADING:
+                        mContainer.showLoading();
+                        break;
                 }
+                LogUtil.w("onState=" + sateCode);
             }
+
+            @Override
+            public void onResult(@NonNull String targetName, @NonNull Class<?> result) {
+                jumpToLayout(targetName, result);
+            }
+
         };
+    }
+
+    private void jumpToLayout(String targetName, Class<?> targetClass) {
+        Bundle params = new Bundle();
+        params.setClassLoader(targetClass.getClassLoader());
+        params.putString(AppConst.INTENT_KEY, "123");
+        params.putString(AppConst.TARGET_VIEW_CLASS_NAME, targetName);
+        push(targetClass, params);
     }
 
     @Override
@@ -66,14 +89,14 @@ public class LoginView extends ViewProcessor {
         LogUtil.e(view.getClass().getName());
         switch (view.getId()) {
             case R.id.btn_copy:
-                if (copyApk("plugin-test.apk", FileUtil.getAppDataPath() + File.separator + "plugin-test.apk")) {
+                if (PluginController.get().copyApk("plugin_test")) {
                     ToastUtil.toast("success");
                 } else {
                     ToastUtil.toast("fail");
                 }
                 break;
             case R.id.btn_start:
-                mainClassLoader.getClassAsync("TestMainLayout", loadListener);
+                PluginController.get().getClassAsync("TestMainLayout", "plugin_test", loadListener);
                 break;
             case R.id.btn_cancel:
                 Bundle params = new Bundle();
@@ -83,30 +106,4 @@ public class LoginView extends ViewProcessor {
         }
     }
 
-    private boolean copyApk(String assetFileName, String targetFilePath) {
-        InputStream in = null;
-        OutputStream out = null;
-        try {
-            in = AppContext.get().getAssets().open(assetFileName);
-            out = new FileOutputStream(targetFilePath);
-            byte[] bytes = new byte[1024];
-            int i;
-            while ((i = in.read(bytes)) != -1)
-                out.write(bytes, 0, i);
-        } catch (IOException e) {
-            LogUtil.e(e.toString());
-            return false;
-        } finally {
-            try {
-                if (in != null)
-                    in.close();
-                if (out != null)
-                    out.close();
-            } catch (IOException e) {
-                LogUtil.e(e.toString());
-            }
-
-        }
-        return true;
-    }
 }
