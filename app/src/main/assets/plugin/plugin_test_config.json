@@ -6,6 +6,6 @@
     "versionCode": 0
   },
   "versionCode": 0,
-  "loaderName": "com.example.myplugin.PluginClassLoaderImpl",
+  "loaderName": "com.example.aplugin.PluginClassLoaderImpl",
   "invokeFunction": "get"
 }

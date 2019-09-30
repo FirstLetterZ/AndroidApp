@@ -40,6 +40,10 @@ android {
     dataBinding {
         enabled = true
     }
+//    修改资源id
+//    aaptOptions {
+//        additionalParameters '--allow-reserved-package-id','--package-id','0x70'
+//    }
 }
 
 dependencies {
