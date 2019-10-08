@@ -28,6 +28,6 @@ android {
 }
 
 dependencies {
-    compileOnly rootProject.ext.dependencies.design
-    compileOnly rootProject.ext.dependencies.support
+    api rootProject.ext.dependencies.design
+    api rootProject.ext.dependencies.support
 }

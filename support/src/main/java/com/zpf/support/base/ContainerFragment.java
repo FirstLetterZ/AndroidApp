@@ -16,13 +16,11 @@ import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IEvent;
 import com.zpf.api.IManager;
-import com.zpf.frame.IContainerHelper;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.R;
-import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
 import com.zpf.support.model.ContainerStackItem;
 import com.zpf.support.single.base.CompatSinglePageActivity;
@@ -31,7 +29,6 @@ import com.zpf.support.util.ContainerListenerController;
 import com.zpf.support.util.FragmentHelper;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.LogUtil;
-import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.stack.IStackItem;
 
@@ -477,39 +474,7 @@ public class ContainerFragment extends Fragment implements IViewContainer {
     }
 
     protected IViewProcessor initViewProcessor() {
-        Class<? extends IViewProcessor> targetViewClass = null;
-        IViewProcessor viewProcessor = null;
-        IContainerHelper mHelper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
-        try {
-            targetViewClass = (Class<? extends IViewProcessor>) getParams().getSerializable(AppConst.TARGET_VIEW_CLASS);
-        } catch (Exception e) {
-            e.printStackTrace();
-            if (mHelper != null) {
-                targetViewClass = mHelper.getErrorProcessorClass(null);
-            }
-        }
-        if (targetViewClass != null) {
-            synchronized (ContainerController.class) {
-                ContainerController.mInitingViewContainer = this;
-                try {
-                    viewProcessor = targetViewClass.newInstance();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if (mHelper != null) {
-                    targetViewClass = mHelper.getErrorProcessorClass(targetViewClass);
-                }
-                if (targetViewClass != null) {
-                    try {
-                        viewProcessor = targetViewClass.newInstance();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                ContainerController.mInitingViewContainer = null;
-            }
-        }
-        return viewProcessor;
+        return ContainerController.createViewProcessor(this, getParams(), null);
     }
 
     protected void initView(@Nullable Bundle savedInstanceState) {

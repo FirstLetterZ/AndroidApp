@@ -5,16 +5,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
@@ -34,11 +30,11 @@ import com.zpf.frame.IViewContainer;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.LogUtil;
 import com.zpf.support.util.StackAnimUtil;
+import com.zpf.tool.ViewUtil;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.MainHandler;
 import com.zpf.tool.config.stack.IStackItem;
-import com.zpf.tool.expand.util.ClassLoaderImpl;
 
 /**
  * 基于AppCompatActivity的视图容器层
@@ -51,7 +47,6 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     private boolean isLauncher;
     private IStackItem stackItem;
     private IViewProcessor mViewProcessor;
-    private IContainerHelper mHelper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -358,9 +353,10 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
             }
         }
         if (isLauncher) {
+            IContainerHelper containerHelper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
             Class launcherClass = null;
-            if (mHelper != null) {
-                launcherClass = mHelper.getLaunchProcessorClass(null);
+            if (containerHelper != null) {
+                launcherClass = containerHelper.getLaunchProcessorClass(null);
             }
             if (launcherClass == null) {
                 launcherClass = launcherViewProcessorClass();
@@ -368,8 +364,8 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
             if (launcherClass == null) {
                 launcherClass = defViewProcessorClass();
             }
-            if (launcherClass == null && mHelper != null) {
-                launcherClass = mHelper.getErrorProcessorClass(null);
+            if (launcherClass == null && containerHelper != null) {
+                launcherClass = containerHelper.getErrorProcessorClass(null);
             }
             if (launcherClass != null) {
                 mParams.putSerializable(AppConst.TARGET_VIEW_CLASS, launcherClass);
@@ -434,73 +430,12 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         }
         setRequestedOrientation(getParams().getInt(AppConst.TARGET_VIEW_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
         if (getParams().getBoolean(AppConst.TARGET_STATUS_TRANSLUCENT, true)) {
-            setStatusBarTranslucent();
-        }
-    }
-
-    protected void setStatusBarTranslucent() {
-        Window window = getWindow();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {//判断版本是5.0以上
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.TRANSPARENT);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {//判断版本是4.4以上
-            window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            ViewUtil.setStatusBarTranslucent(getWindow());
         }
     }
 
     protected IViewProcessor initViewProcessor() {
-        Class<? extends IViewProcessor> targetViewClass = null;
-        IViewProcessor viewProcessor = null;
-        try {
-            Class targetClass = null;
-            try {
-                targetClass = (Class) getParams().getSerializable(AppConst.TARGET_VIEW_CLASS);
-            } catch (Exception e) {
-                //
-            }
-            if (targetClass == null) {
-                String targetClassName = getParams().getString(AppConst.TARGET_VIEW_CLASS_NAME);
-                if (targetClassName != null) {
-                    targetClass = ClassLoaderImpl.get().getClass(targetClassName);
-                }
-                if (targetClass == null) {
-                    targetClass = defViewProcessorClass();
-                }
-                getParams().putSerializable(AppConst.TARGET_VIEW_CLASS, targetClass);
-
-            }
-            targetViewClass = (Class<? extends IViewProcessor>) targetClass;
-        } catch (Exception e) {
-            e.printStackTrace();
-            if (mHelper != null) {
-                targetViewClass = mHelper.getErrorProcessorClass(null);
-            }
-        }
-        if (targetViewClass != null) {
-            synchronized (ContainerController.class) {
-                ContainerController.mInitingViewContainer = this;
-                try {
-                    viewProcessor = targetViewClass.newInstance();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if (mHelper != null) {
-                    targetViewClass = mHelper.getErrorProcessorClass(targetViewClass);
-                }
-                if (targetViewClass != null) {
-                    try {
-                        viewProcessor = targetViewClass.newInstance();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                ContainerController.mInitingViewContainer = null;
-            }
-        }
-        return viewProcessor;
+        return ContainerController.createViewProcessor(this, getParams(), defViewProcessorClass());
     }
 
     protected void initView(@Nullable Bundle savedInstanceState) {
