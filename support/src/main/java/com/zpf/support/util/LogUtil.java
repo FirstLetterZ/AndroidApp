@@ -82,10 +82,11 @@ public class LogUtil implements ILogger {
                     logger.log(priority, tag, content);
                 }
             } else {
-                if (content != null && content.length() > 4000) {
-                    for (int i = 0; i < content.length(); i += 4000) {
-                        if (i + 4000 < content.length())
-                            Log.println(priority, tag, content.substring(i, i + 4000));
+                final int maxLen = 3072;
+                if (content != null && content.length() > maxLen) {
+                    for (int i = 0; i < content.length(); i += maxLen) {
+                        if (i + maxLen < content.length())
+                            Log.println(priority, tag, content.substring(i, i + maxLen));
                         else {
                             Log.println(priority, tag, content.substring(i));
                         }
