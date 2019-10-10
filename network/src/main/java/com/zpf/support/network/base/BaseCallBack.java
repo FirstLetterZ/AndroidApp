@@ -177,7 +177,7 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
                     complete(false, responseResult);
                     return;
                 }
-                if (!showHint(code, message) && responseHandler != null && showHint()) {
+                if (showHint() && showHint(code, message) && responseHandler != null) {
                     responseHandler.showHint(code, message);
                 }
                 complete(false, responseResult);
@@ -196,7 +196,7 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
      * 控制弹窗是否弹出
      */
     protected boolean showHint(int code, String message) {
-        return false;
+        return true;
     }
 
     /**
@@ -205,15 +205,15 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
      */
     protected boolean checkResponse(T result) {
         boolean check = true;
-        if (checkDataNull(result)) {
-            responseResult.setCode(ErrorCode.DATA_NULL);
-            responseResult.setMessage(getString(R.string.network_data_null));
-            check = isNullable();
-        }
-        if (check && (result instanceof IResponseBean)) {
+        if (result instanceof IResponseBean) {
             check = ((IResponseBean) result).isSuccess();
             responseResult.setCode(((IResponseBean) result).getCode());
             responseResult.setMessage(((IResponseBean) result).getMessage());
+        }
+        if (check && checkDataNull(result)) {
+            responseResult.setCode(ErrorCode.DATA_NULL);
+            responseResult.setMessage(getString(R.string.network_data_null));
+            check = isNullable();
         }
         responseResult.setData(result);
         return check;
