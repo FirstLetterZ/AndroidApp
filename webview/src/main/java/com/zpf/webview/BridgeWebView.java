@@ -573,6 +573,9 @@ public class BridgeWebView extends WebView {
     }
 
     private boolean interceptRedirected(String url) {
+        if (TextUtils.equals(url, webPageInfo.webUrl)) {
+            return false;
+        }
         Boolean flag = redirectedUrlMap.get(url);
         if (flag == null) {
             return false;
@@ -647,8 +650,8 @@ public class BridgeWebView extends WebView {
                 @Override
                 public void run() {
                     if (overrideLoadUrlListener == null) {
-                        if (checkRedirect(url)) {
-                            redirectedUrlMap.put(url, true);
+                        if (webPageInfo.webUrl != null && checkRedirect(url)) {
+                            redirectedUrlMap.put(webPageInfo.webUrl, true);
                         }
                         loadUrl(url);
                     } else {
