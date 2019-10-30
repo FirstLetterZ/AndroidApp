@@ -57,10 +57,10 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
             finish();
             return;
         }
-        IViewProcessor viewProcessor = initViewProcessor();
-        if (viewProcessor != null) {
-            mController.addListener(viewProcessor);
-            setContentView(viewProcessor.getView());
+        mViewProcessor = initViewProcessor();
+        if (mViewProcessor != null) {
+            mController.addListener(mViewProcessor);
+            setContentView(mViewProcessor.getView());
         } else {
             LogUtil.w("IViewProcessor is null!");
         }
@@ -399,6 +399,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     @Override
     public void bindView(IViewProcessor processor) {
+        mController.removeListener(mViewProcessor);
         mViewProcessor = processor;
         if (mViewProcessor != null) {
             mController.addListener(mViewProcessor);

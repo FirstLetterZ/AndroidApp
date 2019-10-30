@@ -57,10 +57,10 @@ public class ContainerFragment extends Fragment implements IViewContainer {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View theView = getView();
         if (theView == null) {
-            IViewProcessor viewProcessor = initViewProcessor();
-            if (viewProcessor != null) {
-                mController.addListener(viewProcessor);
-                theView = viewProcessor.getView();
+            mViewProcessor = initViewProcessor();
+            if (mViewProcessor != null) {
+                mController.addListener(mViewProcessor);
+                theView = mViewProcessor.getView();
             } else {
                 LogUtil.w("IViewProcessor is null!");
             }
@@ -420,6 +420,7 @@ public class ContainerFragment extends Fragment implements IViewContainer {
 
     @Override
     public void bindView(IViewProcessor processor) {
+        mController.removeListener(mViewProcessor);
         mViewProcessor = processor;
         if (mViewProcessor != null) {
             mController.addListener(mViewProcessor);

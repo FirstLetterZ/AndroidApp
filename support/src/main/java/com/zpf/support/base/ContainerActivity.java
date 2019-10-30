@@ -56,10 +56,10 @@ public class ContainerActivity extends Activity implements IViewContainer {
             finish();
             return;
         }
-        IViewProcessor viewProcessor = initViewProcessor();
-        if (viewProcessor != null) {
-            mController.addListener(viewProcessor);
-            setContentView(viewProcessor.getView());
+        mViewProcessor = initViewProcessor();
+        if (mViewProcessor != null) {
+            mController.addListener(mViewProcessor);
+            setContentView(mViewProcessor.getView());
         } else {
             LogUtil.w("IViewProcessor is null!");
         }
@@ -401,6 +401,7 @@ public class ContainerActivity extends Activity implements IViewContainer {
 
     @Override
     public void bindView(IViewProcessor processor) {
+        mController.removeListener(mViewProcessor);
         mViewProcessor = processor;
         if (mViewProcessor != null) {
             mController.addListener(mViewProcessor);
