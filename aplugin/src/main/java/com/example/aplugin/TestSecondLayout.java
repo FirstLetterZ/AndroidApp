@@ -11,6 +11,9 @@ import com.zpf.api.ILayoutId;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.support.view.CommonDialog;
 import com.zpf.tool.SafeClickListener;
+import com.zpf.tool.ToastUtil;
+import com.zpf.tool.ToastWindow;
+import com.zpf.tool.config.AppContext;
 
 
 @ILayoutId(R.layout.activity_main)
@@ -47,6 +50,7 @@ public class TestSecondLayout extends ViewProcessor {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ToastUtil.setToaster( new ToastWindow(AppContext.get()));
         button.setText(R.string.test_text01);
         button.setOnClickListener(btnClick);
         CommonDialog dialog = new CommonDialog(getContext());
@@ -66,12 +70,7 @@ public class TestSecondLayout extends ViewProcessor {
         show(dialog);
     }
 
-    private ToastWindow mToast;
-
     private void test(CharSequence text) {
-        if (mToast == null) {
-            mToast=new ToastWindow((Application) getContext().getApplicationContext());
-        }
-        mToast.toast(text);
+        ToastUtil.toast(text);
     }
 }
