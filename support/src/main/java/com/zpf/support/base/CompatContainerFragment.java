@@ -86,7 +86,7 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     public void onStart() {
         super.onStart();
         mController.onStart();
-        checkVisibleChange(true);
+        checkVisibleChange(true, false);
     }
 
     @Override
@@ -107,7 +107,7 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     public void onStop() {
         super.onStop();
         mController.onStop();
-        checkVisibleChange(false);
+        checkVisibleChange(false, false);
     }
 
     @Override
@@ -172,13 +172,13 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        checkVisibleChange(!hidden);
+        checkVisibleChange(!hidden, true);
     }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        checkVisibleChange(isVisibleToUser);
+        checkVisibleChange(isVisibleToUser, true);
     }
 
     @Override
@@ -448,13 +448,16 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     }
 
 
-    private void checkVisibleChange(boolean changeTo) {
+    private void checkVisibleChange(boolean changeTo, boolean notifyChildren) {
         boolean newVisible = changeTo
                 && FragmentHelper.checkFragmentVisible(this)
                 && FragmentHelper.checkParentFragmentVisible(this);
         if (newVisible != this.isVisible) {
             this.isVisible = newVisible;
             mController.onVisibleChanged(newVisible);
+            if (notifyChildren) {
+                FragmentHelper.notifyChildrenFragmentVisible(this, newVisible);
+            }
             if (!isVisible && isActivity) {
                 isActivity = false;
                 mController.onActiviityChanged(false);

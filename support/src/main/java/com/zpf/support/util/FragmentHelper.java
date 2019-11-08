@@ -11,6 +11,8 @@ import com.zpf.support.base.CompatContainerFragment;
 import com.zpf.support.base.ContainerFragment;
 import com.zpf.tool.config.GlobalConfigImpl;
 
+import java.util.List;
+
 /**
  * Created by ZPF on 2019/3/21.
  */
@@ -112,5 +114,28 @@ public class FragmentHelper {
             }
         }
         return result;
+    }
+
+    public static void notifyChildrenFragmentVisible(android.app.Fragment parent, boolean visible) {
+        android.app.FragmentManager manager = parent.getChildFragmentManager();
+        List<android.app.Fragment> list = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            list = manager.getFragments();
+        }
+        if (list != null) {
+            for (android.app.Fragment fragment : list) {
+                fragment.onHiddenChanged(!visible);
+            }
+        }
+    }
+
+    public static void notifyChildrenFragmentVisible(android.support.v4.app.Fragment parent, boolean visible) {
+        android.support.v4.app.FragmentManager manager = parent.getChildFragmentManager();
+        List<android.support.v4.app.Fragment> list = manager.getFragments();
+        if (list != null) {
+            for (android.support.v4.app.Fragment fragment : list) {
+                fragment.onHiddenChanged(!visible);
+            }
+        }
     }
 }
