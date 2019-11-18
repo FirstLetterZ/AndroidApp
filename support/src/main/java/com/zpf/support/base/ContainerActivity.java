@@ -56,6 +56,7 @@ public class ContainerActivity extends Activity implements IViewContainer {
             finish();
             return;
         }
+        initWindow();
         mViewProcessor = initViewProcessor();
         if (mViewProcessor != null) {
             mController.addListener(mViewProcessor);
@@ -64,7 +65,6 @@ public class ContainerActivity extends Activity implements IViewContainer {
             LogUtil.w("IViewProcessor is null!");
         }
         super.onCreate(savedInstanceState);
-        initWindow();
         initView(savedInstanceState);
         mController.onCreate(savedInstanceState);
     }

@@ -23,14 +23,14 @@ public class EventManagerImpl implements IEventManager {
         return Instance.mInstance;
     }
 
-    private final ConcurrentHashMap<String, IFunction1<IEvent<Object>>> receiverMap = new ConcurrentHashMap<>();
-    private final LruCache<String, IEvent<Object>> waitHandlerMap = new LruCache<>(16);
+    private final ConcurrentHashMap<String, IFunction1<IEvent<?>>> receiverMap = new ConcurrentHashMap<>();
+    private final LruCache<String, IEvent<?>> waitHandlerMap = new LruCache<>(16);
 
     @Override
-    public void register(@NonNull String receiverName, @Nullable IFunction1<IEvent<Object>> receiver) {
+    public void register(@NonNull String receiverName, @Nullable IFunction1<IEvent<?>> receiver) {
         if (!TextUtils.isEmpty(receiverName) && receiver != null) {
             receiverMap.put(receiverName, receiver);
-            IEvent<Object> waitHandleEvent = waitHandlerMap.get(receiverName);
+            IEvent<?> waitHandleEvent = waitHandlerMap.get(receiverName);
             if (waitHandleEvent != null) {
                 receiver.func(waitHandleEvent);
             }
@@ -45,26 +45,26 @@ public class EventManagerImpl implements IEventManager {
     }
 
     @Override
-    public void post(@Nullable String receiverName, @Nullable IEvent<Object> event) {
+    public void post(@Nullable String receiverName, @Nullable IEvent<?> event) {
         handleEvent(receiverName, event, false);
     }
 
     @Override
-    public void postInfallible(@Nullable String receiverName, @Nullable IEvent<Object> event) {
+    public void postInfallible(@Nullable String receiverName, @Nullable IEvent<?> event) {
         handleEvent(receiverName, event, true);
     }
 
-    private void handleEvent(@Nullable String receiverName, @Nullable IEvent<Object> event, boolean infallible) {
+    private void handleEvent(@Nullable String receiverName, @Nullable IEvent<?> event, boolean infallible) {
         boolean noHandler = true;
         if (TextUtils.isEmpty(receiverName)) {
-            for (IFunction1<IEvent<Object>> handler : receiverMap.values()) {
+            for (IFunction1<IEvent<?>> handler : receiverMap.values()) {
                 if (handler != null) {
                     handler.func(event);
                     noHandler = false;
                 }
             }
         } else {
-            IFunction1<IEvent<Object>> receiver = receiverMap.get(receiverName);
+            IFunction1<IEvent<?>> receiver = receiverMap.get(receiverName);
             if (receiver != null) {
                 receiver.func(event);
                 noHandler = false;
