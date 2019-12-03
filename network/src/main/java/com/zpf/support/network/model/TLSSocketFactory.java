@@ -1,5 +1,7 @@
 package com.zpf.support.network.model;
 
+import android.support.annotation.Keep;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -17,6 +19,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 public class TLSSocketFactory extends SSLSocketFactory {
+    @Keep
     private SSLSocketFactory delegate;
 
     public TLSSocketFactory() throws KeyManagementException, NoSuchAlgorithmException {

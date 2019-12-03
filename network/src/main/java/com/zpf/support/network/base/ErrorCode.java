@@ -19,4 +19,8 @@ public @interface ErrorCode {
     int INTERRUPTED_ERROR = 713;
     int IO_ERROR = 720;
     int RESPONSE_ILLEGAL = 730;
+
+    int SAVE_LOCAL_FAIL = 801;
+    int LOADING_NETWORK = 802;
+    int LOAD_LOCAL_DATA = 803;
 }
