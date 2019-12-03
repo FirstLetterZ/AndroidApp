@@ -14,12 +14,13 @@ import android.view.View;
 
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
-import com.zpf.api.IEvent;
 import com.zpf.api.IManager;
+import com.zpf.api.OnActivityResultListener;
 import com.zpf.frame.IContainerHelper;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewProcessor;
+import com.zpf.frame.IViewStateListener;
 import com.zpf.support.R;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
@@ -40,7 +41,7 @@ import com.zpf.tool.config.stack.IStackItem;
  * 基于AppCompatActivity的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public class CompatContainerActivity extends AppCompatActivity implements IViewContainer {
+public class CompatContainerActivity extends AppCompatActivity implements IViewContainer, IViewStateListener, OnActivityResultListener {
     protected final ContainerListenerController mController = new ContainerListenerController();
     private ILoadingManager loadingManager;
     private Bundle mParams;
@@ -50,6 +51,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         //防止初次安装从后台返回的重启问题
         Intent intent = getIntent();
         isLauncher = (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && Intent.ACTION_MAIN.equals(intent.getAction()));
@@ -61,6 +63,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         mViewProcessor = initViewProcessor();
         if (mViewProcessor != null) {
             mController.addListener(mViewProcessor);
+            mViewProcessor.initWindow(getWindow());
             setContentView(mViewProcessor.getView());
         } else {
             LogUtil.w("IViewProcessor is null!");
@@ -74,7 +77,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     public void onRestart() {
         super.onRestart();
         mController.onRestart();
-        mController.onVisibleChanged(true);
+        onVisibleChanged(true);
     }
 
 
@@ -82,28 +85,28 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     public void onStart() {
         super.onStart();
         mController.onStart();
-        mController.onVisibleChanged(true);
+        onVisibleChanged(true);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mController.onResume();
-        mController.onActiviityChanged(true);
+        onActivityChanged(true);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mController.onPause();
-        mController.onActiviityChanged(false);
+        onActivityChanged(false);
     }
 
     @Override
     public void onStop() {
         super.onStop();
         mController.onStop();
-        mController.onVisibleChanged(false);
+        onVisibleChanged(false);
     }
 
     @Override
@@ -115,7 +118,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     @Override
     public void onBackPressed() {
-        if (!mController.onInterceptBackPress() && !dismiss()) {
+        if (!mController.onInterceptBackPress() && !close()) {
             super.onBackPressed();
         }
     }
@@ -153,7 +156,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         }
         super.onNewIntent(intent);
         setIntent(intent);
-        mController.onParamChanged(mParams);
+        onParamChanged(mParams);
     }
 
     @Override
@@ -257,8 +260,8 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     @Override
-    public boolean dismiss() {
-        return loadingManager != null && loadingManager.hideLoading() || mController.dismiss();
+    public boolean close() {
+        return loadingManager != null && loadingManager.hideLoading() || mController.close();
     }
 
     @Override
@@ -374,14 +377,6 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         return mParams;
     }
 
-    @Override
-    public boolean sendEvenToView(@NonNull IEvent event) {
-        if (mViewProcessor != null) {
-            mViewProcessor.onReceiveEvent(event);
-            return true;
-        }
-        return false;
-    }
 
     @Override
     public int getContainerType() {
@@ -398,23 +393,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     @Override
-    public void bindView(IViewProcessor processor) {
-        mController.removeListener(mViewProcessor);
-        mViewProcessor = processor;
-        if (mViewProcessor != null) {
-            mController.addListener(mViewProcessor);
-        }
-    }
-
-    @Override
-    public void unbindView() {
-        if (mViewProcessor != null) {
-            mController.removeListener(mViewProcessor);
-        }
-        mViewProcessor = null;
-    }
-
-    @Override
+    @Nullable
     public IViewProcessor getViewProcessor() {
         return mViewProcessor;
     }
@@ -422,6 +401,21 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     @Override
     public INavigator<Class<? extends IViewProcessor>> getNavigator() {
         return null;
+    }
+
+    @Override
+    public void onParamChanged(Bundle newParams) {
+        mController.onParamChanged(newParams);
+    }
+
+    @Override
+    public void onVisibleChanged(boolean visible) {
+        mController.onVisibleChanged(visible);
+    }
+
+    @Override
+    public void onActivityChanged(boolean activity) {
+        mController.onActivityChanged(activity);
     }
 
     protected void initWindow() {
@@ -450,5 +444,6 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     protected Class<? extends IViewProcessor> launcherViewProcessorClass() {
         return null;
     }
+
 
 }

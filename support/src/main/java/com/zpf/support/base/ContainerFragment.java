@@ -14,12 +14,13 @@ import android.view.ViewGroup;
 import com.zpf.api.IBackPressInterceptor;
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
-import com.zpf.api.IEvent;
 import com.zpf.api.IManager;
+import com.zpf.api.OnActivityResultListener;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
+import com.zpf.frame.IViewStateListener;
 import com.zpf.support.R;
 import com.zpf.support.constant.ContainerType;
 import com.zpf.support.model.ContainerStackItem;
@@ -37,7 +38,7 @@ import com.zpf.tool.config.stack.IStackItem;
  * 基于android.app.Fragment的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public class ContainerFragment extends Fragment implements IViewContainer {
+public class ContainerFragment extends Fragment implements IViewContainer, IViewStateListener, OnActivityResultListener {
     protected final ContainerListenerController mController = new ContainerListenerController();
     private ILoadingManager loadingManager;
     private Bundle mParams;
@@ -48,7 +49,7 @@ public class ContainerFragment extends Fragment implements IViewContainer {
     private IBackPressInterceptor backPressInterceptor = new IBackPressInterceptor() {
         @Override
         public boolean onInterceptBackPress() {
-            return isVisible && (dismiss() || mController.onInterceptBackPress());
+            return isVisible && (close() || mController.onInterceptBackPress());
         }
     };
 
@@ -56,7 +57,7 @@ public class ContainerFragment extends Fragment implements IViewContainer {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View theView = getView();
-        if (theView == null) {
+        if (mViewProcessor == null) {
             mViewProcessor = initViewProcessor();
             if (mViewProcessor != null) {
                 mController.addListener(mViewProcessor);
@@ -257,8 +258,8 @@ public class ContainerFragment extends Fragment implements IViewContainer {
     }
 
     @Override
-    public boolean dismiss() {
-        return loadingManager != null && loadingManager.hideLoading() || mController.dismiss();
+    public boolean close() {
+        return loadingManager != null && loadingManager.hideLoading() || mController.close();
     }
 
     @Override
@@ -372,7 +373,7 @@ public class ContainerFragment extends Fragment implements IViewContainer {
             //
         }
         if (isAdded()) {
-            mController.onParamChanged(mParams);
+            onParamChanged(mParams);
         }
     }
 
@@ -386,15 +387,6 @@ public class ContainerFragment extends Fragment implements IViewContainer {
             }
         }
         return mParams;
-    }
-
-    @Override
-    public boolean sendEvenToView(@NonNull IEvent event) {
-        if (mViewProcessor != null) {
-            mViewProcessor.onReceiveEvent(event);
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -419,23 +411,6 @@ public class ContainerFragment extends Fragment implements IViewContainer {
     }
 
     @Override
-    public void bindView(IViewProcessor processor) {
-        mController.removeListener(mViewProcessor);
-        mViewProcessor = processor;
-        if (mViewProcessor != null) {
-            mController.addListener(mViewProcessor);
-        }
-    }
-
-    @Override
-    public void unbindView() {
-        if (mViewProcessor != null) {
-            mController.removeListener(mViewProcessor);
-        }
-        mViewProcessor = null;
-    }
-
-    @Override
     public IViewProcessor getViewProcessor() {
         return mViewProcessor;
     }
@@ -449,6 +424,20 @@ public class ContainerFragment extends Fragment implements IViewContainer {
         return null;
     }
 
+    @Override
+    public void onParamChanged(Bundle newParams) {
+        mController.onParamChanged(newParams);
+    }
+
+    @Override
+    public void onVisibleChanged(boolean visible) {
+        mController.onVisibleChanged(visible);
+    }
+
+    @Override
+    public void onActivityChanged(boolean activity) {
+        mController.onActivityChanged(activity);
+    }
 
     private void checkVisibleChange(boolean changeTo, boolean notifyChildren) {
         boolean newVisible = changeTo
@@ -456,13 +445,13 @@ public class ContainerFragment extends Fragment implements IViewContainer {
                 && FragmentHelper.checkParentFragmentVisible(this);
         if (newVisible != this.isVisible) {
             this.isVisible = newVisible;
-            mController.onVisibleChanged(newVisible);
+            onVisibleChanged(newVisible);
             if (notifyChildren) {
                 FragmentHelper.notifyChildrenFragmentVisible(this, newVisible);
             }
             if (!isVisible && isActivity) {
                 isActivity = false;
-                mController.onActiviityChanged(false);
+                onActivityChanged(false);
             }
         }
     }
@@ -473,7 +462,7 @@ public class ContainerFragment extends Fragment implements IViewContainer {
         }
         if (isActivity != changeTo) {
             isActivity = changeTo;
-            mController.onActiviityChanged(changeTo);
+            onActivityChanged(changeTo);
         }
     }
 

@@ -52,26 +52,33 @@ public class ContainerController {
         //实例化
         IViewProcessor viewProcessor = null;
         if (targetViewClass != null) {
-            synchronized (ContainerController.class) {
-                ContainerController.mInitingViewContainer = viewContainer;
+            viewProcessor = createViewProcessor(viewContainer, targetViewClass);
+        }
+        return viewProcessor;
+    }
+
+    public static IViewProcessor createViewProcessor(@NonNull IViewContainer viewContainer, @NonNull Class<? extends IViewProcessor> targetViewClass) {
+        //实例化
+        IViewProcessor viewProcessor = null;
+        synchronized (ContainerController.class) {
+            ContainerController.mInitingViewContainer = viewContainer;
+            try {
+                viewProcessor = targetViewClass.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            IContainerHelper containerHelper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
+            if (containerHelper != null) {
+                targetViewClass = containerHelper.getErrorProcessorClass(targetViewClass);
+            }
+            if (targetViewClass != null) {
                 try {
                     viewProcessor = targetViewClass.newInstance();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                IContainerHelper containerHelper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
-                if (containerHelper != null) {
-                    targetViewClass = containerHelper.getErrorProcessorClass(targetViewClass);
-                }
-                if (targetViewClass != null) {
-                    try {
-                        viewProcessor = targetViewClass.newInstance();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                ContainerController.mInitingViewContainer = null;
             }
+            ContainerController.mInitingViewContainer = null;
         }
         return viewProcessor;
     }

@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.TextView;
 
 import com.zpf.api.ICancelable;
@@ -37,7 +38,6 @@ import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.permission.OnLockPermissionRunnable;
 import com.zpf.tool.permission.PermissionInfo;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -76,7 +76,6 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
 
     @Override
     public void onDestroy() {
-        mContainer.unbindView();
     }
 
     @Override
@@ -141,7 +140,7 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
     }
 
     @Override
-    public void onActiviityChanged(boolean activity) {
+    public void onActivityChanged(boolean activity) {
 
     }
 
@@ -226,6 +225,11 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
     @Override
     public void setLinker(C linker) {
         this.mLinker = linker;
+    }
+
+    @Override
+    public boolean initWindow(@NonNull Window window) {
+        return false;
     }
 
     @NonNull
@@ -379,8 +383,8 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
     }
 
     @Override
-    public boolean dismiss() {
-        return mContainer.dismiss();
+    public boolean close() {
+        return mContainer.close();
     }
 
     @Override

@@ -36,5 +36,6 @@ public @interface ContainerType {
     int CONTAINER_SINGLE_COMPAT_FRAGMENT = 8;
     int CONTAINER_CUSTOM = 9;
     int CONTAINER_COMPAT_CUSTOM = 10;
-    int CONTAINER_OTHER_CUSTOM = 11;
+    int CONTAINER_DIALOG = 11;
+    int CONTAINER_OTHER_CUSTOM = 12;
 }

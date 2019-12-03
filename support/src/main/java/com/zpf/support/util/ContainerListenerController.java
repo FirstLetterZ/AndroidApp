@@ -171,7 +171,7 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
 
 
     @Override
-    public boolean dismiss() {
+    public boolean close() {
         return mDialogController.execute(-1);
     }
 
@@ -257,9 +257,9 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
     }
 
     @Override
-    public void onActiviityChanged(boolean activity) {
+    public void onActivityChanged(boolean activity) {
         for (IViewStateListener listener : mViewStateList) {
-            listener.onActiviityChanged(activity);
+            listener.onActivityChanged(activity);
         }
     }
 
