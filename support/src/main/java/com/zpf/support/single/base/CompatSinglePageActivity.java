@@ -55,7 +55,7 @@ public class CompatSinglePageActivity extends CompatContainerActivity {
 
     @Override
     public void onBackPressed() {
-        if (!mController.onInterceptBackPress() && !dismiss()) {
+        if (!mController.onInterceptBackPress() && !close()) {
             fragmentStackManager.poll();
         }
     }

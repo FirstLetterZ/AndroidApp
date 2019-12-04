@@ -28,11 +28,11 @@ public class BannerPagerView extends ViewPager {
     private long hold;//按住了多久
     private long lastClick;//上次触发点击事件的事件
     private boolean scrollable = true;
-    private boolean isPaused = false;
+    private volatile boolean isPaused = false;
     /*可设置的参数*/
     private int interval = 4000;//自动滚动间隔时间
     private int restartWait = 2000;//抬手后重新开始轮播的最小等待时间
-    private int scrollTime = 2000;//完成每次滚动的耗时
+    private int scrollTime = 1600;//完成每次滚动的耗时
 
     private BannerIndicator bannerIndicator;
     private int pagerSize;
@@ -40,7 +40,7 @@ public class BannerPagerView extends ViewPager {
     private View[] pagerArray;
     private PagerAdapter pagerAdapter;
     private float lastPositionOffset = 0;
-    private int cacheSize = 0;
+    private boolean rebuildAllView = false;
 
     public BannerPagerView(@NonNull Context context) {
         this(context, null);
@@ -51,7 +51,6 @@ public class BannerPagerView extends ViewPager {
         ViewPagerScroller scroller = new ViewPagerScroller(context);
         scroller.initScroller(this);
         initAdapter();
-        setAdapter(pagerAdapter);
         addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -140,6 +139,18 @@ public class BannerPagerView extends ViewPager {
         return super.onTouchEvent(event);
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        pause();
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        restart();
+    }
+
     private int getRealPosition() {
         if (current == 0) {
             return pagerSize - 1;
@@ -191,20 +202,20 @@ public class BannerPagerView extends ViewPager {
         isPaused = true;
         this.viewCreator = viewCreator;
         if (viewCreator == null) {
-            resetSize(0);
+            resetSize(0, false);
         } else {
-            resetSize(viewCreator.getSize());
+            resetSize(viewCreator.getSize(), false);
         }
     }
 
-    public void resetSize(int newSize) {
+    public void resetSize(int newSize, boolean rebuild) {
         timeTaskUtil.stopPlay();
         isPaused = true;
         if (bannerIndicator != null) {
             bannerIndicator.setSize(newSize);
         }
+        rebuildAllView = rebuild || pagerSize != newSize;
         pagerSize = newSize;
-        initAdapter();
         if (newSize < 1) {
             scrollable = false;
             pagerArray = null;
@@ -225,58 +236,59 @@ public class BannerPagerView extends ViewPager {
     }
 
     private void initAdapter() {
-        if (pagerAdapter == null) {
-            pagerAdapter = new PagerAdapter() {
-                @NonNull
-                @Override
-                public Object instantiateItem(@NonNull ViewGroup container, final int position) {
-                    View v = pagerArray[position];
-                    if (v == null) {
-                        int rulePosition;
-                        if (position == 0) {
-                            rulePosition = pagerSize - 1;
-                        } else if (position == pagerSize + 1) {
-                            rulePosition = 0;
-                        } else {
-                            rulePosition = position - 1;
-                        }
-                        v = viewCreator.createView(rulePosition);
-                        pagerArray[position] = v;
-                        if (cacheSize > 1 && getOffscreenPageLimit() != cacheSize) {
-                            setOffscreenPageLimit(cacheSize);
-                        }
+        pagerAdapter = new PagerAdapter() {
+            @NonNull
+            @Override
+            public Object instantiateItem(@NonNull ViewGroup container, final int position) {
+                View v = pagerArray[position];
+                if (v == null) {
+                    int rulePosition;
+                    if (position == 0) {
+                        rulePosition = pagerSize - 1;
+                    } else if (position == pagerSize + 1) {
+                        rulePosition = 0;
+                    } else {
+                        rulePosition = position - 1;
                     }
-                    if (v.getParent() != null) {
-                        ((ViewGroup) v.getParent()).removeView(v);
-                    }
-                    container.addView(v);
-                    return v;
+                    v = viewCreator.createView(rulePosition);
+                    pagerArray[position] = v;
                 }
+                if (v.getParent() != null) {
+                    ((ViewGroup) v.getParent()).removeView(v);
+                }
+                container.addView(v);
+                return v;
+            }
 
-                @Override
-                public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-                    container.removeView((View) object);
+            @Override
+            public int getItemPosition(@NonNull Object object) {
+                if (rebuildAllView) {
+                    return POSITION_NONE;
                 }
+                return super.getItemPosition(object);
+            }
 
-                @Override
-                public int getCount() {
-                    return pagerArray == null ? 0 : pagerArray.length;
-                }
+            @Override
+            public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
+                container.removeView((View) object);
+            }
 
-                @Override
-                public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
-                    return view == object;
-                }
-            };
-        } else {
-            cacheSize = getOffscreenPageLimit();
-            setOffscreenPageLimit(1);
-        }
+            @Override
+            public int getCount() {
+                return pagerArray == null ? 0 : pagerArray.length;
+            }
+
+            @Override
+            public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
+                return view == object;
+            }
+        };
+        setAdapter(pagerAdapter);
     }
 
-    public void notifyDataSetChanged() {
+    public void notifyDataSetChanged(boolean rebuildAllView) {
         if (viewCreator != null) {
-            resetSize(viewCreator.getSize());
+            resetSize(viewCreator.getSize(), rebuildAllView);
         }
     }
 
@@ -285,8 +297,7 @@ public class BannerPagerView extends ViewPager {
     }
 
     public void restart() {
-        initAdapter();
-        if (pagerAdapter.getCount() > 1) {
+        if (pagerAdapter.getCount() > 1 && isPaused) {
             hold = System.currentTimeMillis() - pauseTime;
             long wait;
             if (interval - hold < restartWait) {
@@ -294,7 +305,7 @@ public class BannerPagerView extends ViewPager {
             } else {
                 wait = interval - hold;
             }
-            timeTaskUtil.startPlay(wait);
+            timeTaskUtil.startPlay(wait, interval);
             isPaused = false;
         }
     }
@@ -327,5 +338,9 @@ public class BannerPagerView extends ViewPager {
 
     public void setRestartWait(int restartWait) {
         this.restartWait = restartWait;
+    }
+
+    public int getCount() {
+        return pagerAdapter.getCount();
     }
 }

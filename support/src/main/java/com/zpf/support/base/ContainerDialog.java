@@ -2,6 +2,7 @@ package com.zpf.support.base;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
@@ -27,28 +28,31 @@ import com.zpf.support.util.LogUtil;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.MainHandler;
 import com.zpf.tool.config.stack.IStackItem;
-import com.zpf.tool.expand.view.CustomDialog;
 
 /**
  * 基于Activity的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public class ContainerDialog extends CustomDialog implements IViewContainer, OnDestroyListener, OnActivityResultListener {
+public class ContainerDialog extends Dialog implements ICustomWindow, IViewContainer, OnDestroyListener, OnActivityResultListener {
     protected final ContainerListenerController mController = new ContainerListenerController();
     private Bundle mParams;
     private IViewProcessor mViewProcessor;
     private IViewContainer mParentContainer;
+    protected IManager<ICustomWindow> listener;
+    protected long bindId = -1;
 
-    public ContainerDialog(@NonNull IViewContainer viewContainer, Class<? extends IViewProcessor> targetClass) {
-        this(viewContainer, 0, targetClass);
+    public ContainerDialog(@NonNull IViewContainer viewContainer, Class<? extends IViewProcessor> targetClass, @Nullable Bundle params) {
+        this(viewContainer, 0, targetClass, params);
     }
 
-    public ContainerDialog(@NonNull IViewContainer viewContainer, int themeResId, Class<? extends IViewProcessor> targetClass) {
+    public ContainerDialog(@NonNull IViewContainer viewContainer, int themeResId,
+                           Class<? extends IViewProcessor> targetClass, @Nullable Bundle params) {
         super(viewContainer.getContext(), themeResId);
-        mParentContainer.addListener(this);
         mParentContainer = viewContainer;
+        mParams = params;
+        mParentContainer.addListener(this);
         if (mViewProcessor == null) {
-            mViewProcessor =  ContainerController.createViewProcessor(this, targetClass);
+            mViewProcessor = ContainerController.createViewProcessor(this, targetClass);
             if (mViewProcessor != null) {
                 mController.addListener(mViewProcessor);
                 setContentView(mViewProcessor.getView());
@@ -57,17 +61,51 @@ public class ContainerDialog extends CustomDialog implements IViewContainer, OnD
             }
         }
         Window window = getWindow();
-        if (window != null && mViewProcessor != null) {
+        if (window != null) {
+            window.requestFeature(Window.FEATURE_NO_TITLE);// 取消标题
+            initWindow(window);
+        }
+        initView();
+    }
+
+    protected void initWindow(@NonNull Window window) {
+        if (mViewProcessor != null) {
             mViewProcessor.initWindow(window);
         }
     }
 
-    @Override
-    protected void initWindow(@NonNull Window window) {
+    protected void initView() {
     }
 
     @Override
-    protected void initView() {
+    public void show() {
+        if (listener != null) {
+            if (listener.execute(bindId)) {
+                super.show();
+            }
+        } else {
+            super.show();
+        }
+    }
+
+    @Override
+    public ContainerDialog toBind(IManager<ICustomWindow> manager) {
+        this.listener = manager;
+        if (manager != null) {
+            bindId = manager.bind(this);
+        } else {
+            bindId = -1;
+        }
+        return this;
+    }
+
+    @Override
+    public boolean unBind(long bindId) {
+        if (listener != null) {
+            listener.remove(bindId);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -85,6 +123,9 @@ public class ContainerDialog extends CustomDialog implements IViewContainer, OnD
 
     @Override
     public void onStop() {
+        if (listener != null) {
+            listener.remove(bindId);
+        }
         super.onStop();
         mController.onStop();
         mController.onVisibleChanged(false);
@@ -285,10 +326,7 @@ public class ContainerDialog extends CustomDialog implements IViewContainer, OnD
     @Override
     public Bundle getParams() {
         if (mParams == null) {
-            mParams = getIntent().getExtras();
-            if (mParams == null) {
-                mParams = new Bundle();
-            }
+            mParams = new Bundle();
         }
         return mParams;
     }
@@ -304,6 +342,7 @@ public class ContainerDialog extends CustomDialog implements IViewContainer, OnD
     }
 
     @Override
+    @Nullable
     public IViewProcessor getViewProcessor() {
         return mViewProcessor;
     }

@@ -54,7 +54,7 @@ public class SinglePageActivity extends ContainerActivity {
 
     @Override
     public void onBackPressed() {
-        if (!mController.onInterceptBackPress() && !dismiss()) {
+        if (!mController.onInterceptBackPress() && !close()) {
             fragmentStackManager.poll();
         }
     }

@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
-import com.zpf.api.IEvent;
 import com.zpf.api.IManager;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.INavigator;
@@ -26,7 +25,6 @@ import com.zpf.support.constant.ContainerType;
 import com.zpf.support.model.ContainerStackItem;
 import com.zpf.support.model.NameStackItem;
 import com.zpf.tool.config.LifecycleState;
-import com.zpf.tool.config.stack.ActivityStackItem;
 import com.zpf.tool.config.stack.IStackItem;
 
 /**
@@ -41,7 +39,6 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     private boolean isActivity;
     private Bundle mParams;
     private IStackItem stackItem;
-    private IViewProcessor mViewProcessor;
     private final ContainerListenerController mController = new ContainerListenerController();
 
     public void onConditionsCompleted(FragmentActivity activity) {
@@ -162,8 +159,8 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public boolean dismiss() {
-        return loadingManager != null && loadingManager.hideLoading() || mController.dismiss();
+    public boolean close() {
+        return loadingManager != null && loadingManager.hideLoading() || mController.close();
     }
 
     @Override
@@ -207,7 +204,7 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
         if (activity instanceof IViewContainer) {
             return ((IViewContainer) activity).hideLoading();
         }
-        return loadingManager != null && loadingManager.hideLoading() || mController.dismiss();
+        return loadingManager != null && loadingManager.hideLoading() || mController.close();
     }
 
     @Override
@@ -376,15 +373,6 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public boolean sendEvenToView(@NonNull IEvent event) {
-        if (mViewProcessor != null) {
-            mViewProcessor.onReceiveEvent(event);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public int getContainerType() {
         return ContainerType.CONTAINER_COMPAT_FRAGMENT;
     }
@@ -395,24 +383,8 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public void bindView(IViewProcessor processor) {
-        this.mViewProcessor = processor;
-        if (mViewProcessor != null) {
-            mController.addListener(mViewProcessor);
-        }
-    }
-
-    @Override
-    public void unbindView() {
-        if (mViewProcessor != null) {
-            mController.removeListener(mViewProcessor);
-        }
-        this.mViewProcessor = null;
-    }
-
-    @Override
     public IViewProcessor getViewProcessor() {
-        return mViewProcessor;
+        return null;
     }
 
     @Override
@@ -429,7 +401,7 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
             mController.onVisibleChanged(newVisible);
             if (!isVisible && isActivity) {
                 isActivity = false;
-                mController.onActiviityChanged(false);
+                mController.onActivityChanged(false);
             }
         }
     }
@@ -440,9 +412,8 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
         }
         if (isActivity != changeTo) {
             isActivity = changeTo;
-            mController.onActiviityChanged(changeTo);
+            mController.onActivityChanged(changeTo);
         }
     }
-
 
 }
