@@ -63,6 +63,7 @@ public class RootLayout extends LinearLayout implements IRootLayout {
         contentLayout = new FrameLayout(context);
         contentLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
+        contentLayout.addView(bottomShadow);
         addView(contentLayout);
         GlobalConfigImpl.get().onObjectInit(this);
     }

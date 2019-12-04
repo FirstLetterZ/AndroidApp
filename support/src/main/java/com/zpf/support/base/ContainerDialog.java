@@ -20,6 +20,7 @@ import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
+import com.zpf.frame.IViewStateListener;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
 import com.zpf.support.util.ContainerController;
@@ -33,7 +34,8 @@ import com.zpf.tool.config.stack.IStackItem;
  * 基于Activity的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public class ContainerDialog extends Dialog implements ICustomWindow, IViewContainer, OnDestroyListener, OnActivityResultListener {
+public class ContainerDialog extends Dialog implements ICustomWindow, IViewContainer, IViewStateListener,
+        OnDestroyListener, OnActivityResultListener {
     protected final ContainerListenerController mController = new ContainerListenerController();
     private Bundle mParams;
     private IViewProcessor mViewProcessor;
@@ -55,7 +57,6 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
             mViewProcessor = ContainerController.createViewProcessor(this, targetClass);
             if (mViewProcessor != null) {
                 mController.addListener(mViewProcessor);
-                setContentView(mViewProcessor.getView());
             } else {
                 LogUtil.w("IViewProcessor is null!");
             }
@@ -75,6 +76,9 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
     }
 
     protected void initView() {
+        if (mViewProcessor != null) {
+            setContentView(mViewProcessor.getView());
+        }
     }
 
     @Override
@@ -118,7 +122,8 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
     public void onStart() {
         super.onStart();
         mController.onStart();
-        mController.onVisibleChanged(true);
+        onVisibleChanged(true);
+        onActivityChanged(true);
     }
 
     @Override
@@ -128,7 +133,8 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
         }
         super.onStop();
         mController.onStop();
-        mController.onVisibleChanged(false);
+        onActivityChanged(false);
+        onVisibleChanged(false);
     }
 
     @Override
@@ -352,4 +358,29 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
         return null;
     }
 
+    @Override
+    public void onParamChanged(Bundle newParams) {
+        mController.onParamChanged(newParams);
+    }
+
+    @Override
+    public void onVisibleChanged(boolean visible) {
+        mController.onVisibleChanged(visible);
+    }
+
+    @Override
+    public void onActivityChanged(boolean activity) {
+        mController.onActivityChanged(activity);
+    }
+
+    public void setArguments(@Nullable Bundle args) {
+        if (mParams != null) {
+            if (args != null) {
+                mParams.putAll(args);
+            }
+        } else {
+            mParams = args;
+        }
+        onParamChanged(mParams);
+    }
 }

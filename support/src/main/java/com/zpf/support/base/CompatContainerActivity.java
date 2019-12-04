@@ -68,7 +68,6 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         } else {
             LogUtil.w("IViewProcessor is null!");
         }
-        super.onCreate(savedInstanceState);
         initView(savedInstanceState);
         mController.onCreate(savedInstanceState);
     }
