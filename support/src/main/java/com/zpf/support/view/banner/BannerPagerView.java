@@ -57,10 +57,10 @@ public class BannerPagerView extends ViewPager {
                 if (pagerSize <= 1) {
                     return;
                 }
-                if (position == pagerSize && positionOffset >= 0.99 && lastPositionOffset >= 0.9 && lastPositionOffset < positionOffset) {
+                if (position > pagerSize || (position == pagerSize && positionOffset >= 0.99 && lastPositionOffset >= 0.9 && lastPositionOffset <= positionOffset)) {
                     current = 1;
                     setCurrentItem(1, false);
-                } else if (position == 0 && positionOffset <= 0.01 && lastPositionOffset <= 0.09 && lastPositionOffset > positionOffset) {
+                } else if (position == 0 && positionOffset <= 0.01 && lastPositionOffset <= 0.09 && lastPositionOffset >= positionOffset) {
                     current = pagerSize;
                     setCurrentItem(pagerSize, false);
                 } else if (bannerIndicator != null) {
@@ -137,6 +137,16 @@ public class BannerPagerView extends ViewPager {
                 break;
         }
         return super.onTouchEvent(event);
+    }
+
+    @Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        if (visibility == View.VISIBLE) {
+            restart();
+        } else {
+            pause();
+        }
     }
 
     @Override
