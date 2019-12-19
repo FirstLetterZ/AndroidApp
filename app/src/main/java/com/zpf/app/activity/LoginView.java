@@ -32,7 +32,7 @@ public class LoginView extends ViewProcessor {
     private AsyncLoadListener loadListener;
     private BannerPagerView bpv = (BannerPagerView) $(R.id.bpv);
     private StretchableIndicator indicator = (StretchableIndicator) $(R.id.indicator);
-    private int pageSize = 3;
+    private int pageSize = 6;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
