@@ -41,6 +41,8 @@ public class BannerPagerView extends ViewPager {
     private PagerAdapter pagerAdapter;
     private float lastPositionOffset = 0;
     private boolean rebuildAllView = false;
+    private boolean hasAttached = false;
+    private boolean windowVisible = false;
 
     public BannerPagerView(@NonNull Context context) {
         this(context, null);
@@ -142,7 +144,8 @@ public class BannerPagerView extends ViewPager {
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
-        if (visibility == View.VISIBLE) {
+        windowVisible = visibility == View.VISIBLE;
+        if (windowVisible) {
             restart();
         } else {
             pause();
@@ -152,12 +155,14 @@ public class BannerPagerView extends ViewPager {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        hasAttached = false;
         pause();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        hasAttached = true;
         restart();
     }
 
@@ -240,8 +245,7 @@ public class BannerPagerView extends ViewPager {
             scrollable = true;
             pagerAdapter.notifyDataSetChanged();
             setCurrentItem(1, false);
-            timeTaskUtil.startPlay(interval, interval);
-            isPaused = false;
+            restart();
         }
     }
 
@@ -307,8 +311,16 @@ public class BannerPagerView extends ViewPager {
     }
 
     public void restart() {
-        if (pagerAdapter.getCount() > 1 && isPaused) {
+        if (pagerAdapter.getCount() > 1 && isPaused && hasAttached && windowVisible) {
             hold = System.currentTimeMillis() - pauseTime;
+            if (lastPositionOffset != 0) {
+                postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        setCurrentItem(getRealPosition(), false);
+                    }
+                }, 16);
+            }
             long wait;
             if (interval - hold < restartWait) {
                 wait = restartWait;
@@ -321,9 +333,11 @@ public class BannerPagerView extends ViewPager {
     }
 
     public void pause() {
-        isPaused = true;
-        timeTaskUtil.stopPlay();
-        pauseTime = System.currentTimeMillis();
+        if (!isPaused) {
+            isPaused = true;
+            timeTaskUtil.stopPlay();
+            pauseTime = System.currentTimeMillis();
+        }
     }
 
     public int getScrollTime() {
