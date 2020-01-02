@@ -43,6 +43,7 @@ public class BannerPagerView extends ViewPager {
     private boolean rebuildAllView = false;
     private boolean hasAttached = false;
     private boolean windowVisible = false;
+    private boolean autoScrollable = true;
 
     public BannerPagerView(@NonNull Context context) {
         this(context, null);
@@ -146,6 +147,7 @@ public class BannerPagerView extends ViewPager {
         super.onWindowVisibilityChanged(visibility);
         windowVisible = visibility == View.VISIBLE;
         if (windowVisible) {
+            adjustPosition();
             restart();
         } else {
             pause();
@@ -163,6 +165,7 @@ public class BannerPagerView extends ViewPager {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         hasAttached = true;
+        adjustPosition();
         restart();
     }
 
@@ -249,6 +252,17 @@ public class BannerPagerView extends ViewPager {
         }
     }
 
+    private void adjustPosition() {
+        if (isPaused && lastPositionOffset != 0) {
+            postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    setCurrentItem(getRealPosition(), false);
+                }
+            }, 10);
+        }
+    }
+
     private void initAdapter() {
         pagerAdapter = new PagerAdapter() {
             @NonNull
@@ -311,16 +325,8 @@ public class BannerPagerView extends ViewPager {
     }
 
     public void restart() {
-        if (pagerAdapter.getCount() > 1 && isPaused && hasAttached && windowVisible) {
+        if (pagerAdapter.getCount() > 1 && autoScrollable && isPaused && hasAttached && windowVisible) {
             hold = System.currentTimeMillis() - pauseTime;
-            if (lastPositionOffset != 0) {
-                postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        setCurrentItem(getRealPosition(), false);
-                    }
-                }, 16);
-            }
             long wait;
             if (interval - hold < restartWait) {
                 wait = restartWait;
@@ -366,5 +372,18 @@ public class BannerPagerView extends ViewPager {
 
     public int getCount() {
         return pagerAdapter.getCount();
+    }
+
+    public boolean isAutoScrollable() {
+        return autoScrollable;
+    }
+
+    public void setAutoScrollable(boolean autoScrollable) {
+        this.autoScrollable = autoScrollable;
+        if (autoScrollable) {
+            restart();
+        } else {
+            pause();
+        }
     }
 }
