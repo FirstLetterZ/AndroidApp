@@ -2,12 +2,12 @@ package com.zpf.support.base;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatDialog;
 import android.view.View;
 import android.view.Window;
 
@@ -31,10 +31,10 @@ import com.zpf.tool.config.MainHandler;
 import com.zpf.tool.config.stack.IStackItem;
 
 /**
- * 基于Dialog的视图容器层
+ * 基于AppCompatDialog的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public class ContainerDialog extends Dialog implements ICustomWindow, IViewContainer, IViewStateListener,
+public class CompatContainerDialog extends AppCompatDialog implements ICustomWindow, IViewContainer, IViewStateListener,
         OnDestroyListener, OnActivityResultListener {
     protected final ContainerListenerController mController = new ContainerListenerController();
     private Bundle mParams;
@@ -43,12 +43,12 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
     protected IManager<ICustomWindow> listener;
     protected long bindId = -1;
 
-    public ContainerDialog(@NonNull IViewContainer viewContainer, Class<? extends IViewProcessor> targetClass, @Nullable Bundle params) {
+    public CompatContainerDialog(@NonNull IViewContainer viewContainer, Class<? extends IViewProcessor> targetClass, @Nullable Bundle params) {
         this(viewContainer, 0, targetClass, params);
     }
 
-    public ContainerDialog(@NonNull IViewContainer viewContainer, int themeResId,
-                           Class<? extends IViewProcessor> targetClass, @Nullable Bundle params) {
+    public CompatContainerDialog(@NonNull IViewContainer viewContainer, int themeResId,
+                                 Class<? extends IViewProcessor> targetClass, @Nullable Bundle params) {
         super(viewContainer.getContext(), themeResId);
         mParentContainer = viewContainer;
         mParams = params;
@@ -93,7 +93,7 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
     }
 
     @Override
-    public ContainerDialog toBind(IManager<ICustomWindow> manager) {
+    public CompatContainerDialog toBind(IManager<ICustomWindow> manager) {
         this.listener = manager;
         if (manager != null) {
             bindId = manager.bind(this);
