@@ -82,7 +82,7 @@ public class LogUtil implements ILogger {
                     logger.log(priority, tag, content);
                 }
             } else {
-                final int maxLen = 3072;
+                final int maxLen = 2000;
                 if (content != null && content.length() > maxLen) {
                     for (int i = 0; i < content.length(); i += maxLen) {
                         if (i + maxLen < content.length())

@@ -84,7 +84,7 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
     @Override
     public void show() {
         if (listener != null) {
-            if (listener.execute(bindId)) {
+            if (listener.execute(1)) {
                 super.show();
             }
         } else {
@@ -239,12 +239,12 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
     @Override
     public void show(final ICustomWindow window) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            mController.show(window);
+            getParentContainer().show(window);
         } else {
             MainHandler.get().post(new Runnable() {
                 @Override
                 public void run() {
-                    mController.show(window);
+                    getParentContainer().show(window);
                 }
             });
         }

@@ -50,11 +50,7 @@ public class CustomDialog extends Dialog implements ICustomWindow {
 
     @Override
     public void show() {
-        if (listener != null) {
-            if (listener.execute(bindId)) {
-                super.show();
-            }
-        } else {
+        if (listener == null || listener.execute(1)) {
             super.show();
         }
     }

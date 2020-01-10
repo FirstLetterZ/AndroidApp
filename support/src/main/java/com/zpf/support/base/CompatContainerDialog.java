@@ -84,7 +84,7 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
     @Override
     public void show() {
         if (listener != null) {
-            if (listener.execute(bindId)) {
+            if (listener.execute(1)) {
                 super.show();
             }
         } else {

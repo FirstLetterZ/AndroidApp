@@ -24,7 +24,13 @@ public class DialogController implements IManager<ICustomWindow> {
         long id = -1;
         if (showingWindow == safeWindow) {
             id = showingWindowId;
-
+            if (!showingWindow.isShowing()) {
+                try {
+                    showingWindow.show();
+                } catch (Exception e) {
+                    //
+                }
+            }
         } else {
             for (Pair<Long, ICustomWindow> cache : cacheList) {
                 if (cache.second == safeWindow) {
@@ -37,15 +43,16 @@ public class DialogController implements IManager<ICustomWindow> {
                 if (checkShowing()) {
                     cacheList.add(new Pair<Long, ICustomWindow>(id, safeWindow));
                 } else {
+                    showingWindowId = id;
                     showingWindow = safeWindow;
                 }
             }
         }
-        if (!checkShowing()) {
+        if (showingWindow != null && !showingWindow.isShowing()) {
             try {
                 showingWindow.show();
             } catch (Exception e) {
-                e.printStackTrace();
+                //
             }
         }
         return id;
@@ -65,6 +72,10 @@ public class DialogController implements IManager<ICustomWindow> {
 
     @Override
     public void remove(long id) {
+        if (showingWindowId == id) {
+            showNext();
+            return;
+        }
         synchronized (DialogController.class) {
             for (Pair<Long, ICustomWindow> cache : cacheList) {
                 if (id == cache.first) {
@@ -77,16 +88,13 @@ public class DialogController implements IManager<ICustomWindow> {
 
     @Override
     public void cancel(long id) {
-        if (showingWindowId == id && checkShowing()) {
-            showingWindow.dismiss();
-        }
         remove(id);
     }
 
     @Override
     public void cancelAll() {
         isDestroy = true;
-        if (showingWindow != null && showingWindow.isShowing()) {
+        if (checkShowing()) {
             showingWindow.dismiss();
         }
         showingWindow = null;
@@ -119,7 +127,11 @@ public class DialogController implements IManager<ICustomWindow> {
     private boolean showNext() {
         boolean handled = false;
         if (showingWindow != null) {
-            showingWindow.dismiss();
+            try {
+                showingWindow.dismiss();
+            } catch (Exception e) {
+                //
+            }
             showingWindow = null;
             handled = true;
         }
@@ -128,7 +140,9 @@ public class DialogController implements IManager<ICustomWindow> {
             if (pair == null || pair.second == null) {
                 return showNext();
             } else {
-                show(pair.second);
+                showingWindowId = pair.first;
+                ICustomWindow window = pair.second;
+                bind(window);
                 handled = true;
             }
         }
