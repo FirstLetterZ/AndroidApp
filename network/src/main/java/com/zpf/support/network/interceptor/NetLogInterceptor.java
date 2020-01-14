@@ -71,7 +71,7 @@ public class NetLogInterceptor implements Interceptor {
                 if (responseMediaType != null && "json".equals(responseMediaType.subtype())) {
                     BufferedSource source = body.source();
                     source.request(Long.MAX_VALUE); // Buffer the entire body.
-                    Buffer buffer = source.buffer();
+                    Buffer buffer = source.getBuffer();
                     Charset charset = checkCharset(responseMediaType);
                     bodyString = buffer.clone().readString(charset);
                 }

@@ -1,6 +1,8 @@
 package com.zpf.support.view.banner;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
@@ -15,12 +17,13 @@ import android.widget.Scroller;
 import com.zpf.tool.TimeTaskUtil;
 
 import java.lang.reflect.Field;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by ZPF on 2018/9/27.
  */
 public class BannerPagerView extends ViewPager {
-    private int current = 1;//当前页码
+    private AtomicInteger current = new AtomicInteger(1);//当前页码
     private float x;//用于判断是否为水平滑动
     private float y;//用于判断是否为竖直滑动
     private boolean isMove;//滑动不触发点击事件
@@ -33,16 +36,20 @@ public class BannerPagerView extends ViewPager {
     private int interval = 4000;//自动滚动间隔时间
     private int restartWait = 2000;//抬手后重新开始轮播的最小等待时间
     private int scrollTime = 1600;//完成每次滚动的耗时
-
+    private Rect rect = new Rect();
     private BannerIndicator bannerIndicator;
-    private int pagerSize;
+    private AtomicInteger pagerSize = new AtomicInteger(0);
     private BannerViewCreator viewCreator;
     private View[] pagerArray;
     private PagerAdapter pagerAdapter;
     private float lastPositionOffset = 0;
     private boolean rebuildAllView = false;
     private boolean hasAttached = false;
+    private boolean parentVisible = true;
     private boolean windowVisible = false;
+    private boolean hasDraw = false;
+
+    private boolean realVisible = false;
     private boolean autoScrollable = true;
 
     public BannerPagerView(@NonNull Context context) {
@@ -57,15 +64,21 @@ public class BannerPagerView extends ViewPager {
         addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                if (pagerSize <= 1) {
+                if (pagerSize.get() <= 1) {
                     return;
                 }
-                if (position > pagerSize || (position == pagerSize && positionOffset >= 0.99 && lastPositionOffset >= 0.9 && lastPositionOffset <= positionOffset)) {
-                    current = 1;
-                    setCurrentItem(1, false);
+                if (position > pagerSize.get() || (position == pagerSize.get() && positionOffset >= 0.99 && lastPositionOffset >= 0.9 && lastPositionOffset <= positionOffset)) {
+                    if (current.get() == 1) {
+                        return;
+                    }
+                    current.set(1);
+                    setCurrentItem(current.get(), false);
                 } else if (position == 0 && positionOffset <= 0.01 && lastPositionOffset <= 0.09 && lastPositionOffset >= positionOffset) {
-                    current = pagerSize;
-                    setCurrentItem(pagerSize, false);
+                    if (current.get() == pagerSize.get()) {
+                        return;
+                    }
+                    current.set(pagerSize.get());
+                    setCurrentItem(current.get(), false);
                 } else if (bannerIndicator != null) {
                     bannerIndicator.onScroll(position - 1, positionOffset);
                 }
@@ -74,7 +87,11 @@ public class BannerPagerView extends ViewPager {
 
             @Override
             public void onPageSelected(int position) {
-                current = position;
+                current.set(position);
+                realVisible = checkVisible();
+                if (!realVisible) {
+                    pause();
+                }
             }
 
             @Override
@@ -89,13 +106,18 @@ public class BannerPagerView extends ViewPager {
     private TimeTaskUtil timeTaskUtil = new TimeTaskUtil() {
         @Override
         protected void doInMainThread() {
-            if (current < pagerSize + 1) {
-                current++;
-                setCurrentItem(current, true);
+            realVisible = checkVisible();
+            if (!realVisible) {
+                pause();
+                return;
+            }
+            if (current.get() < pagerSize.get() + 1) {
+                current.getAndIncrement();
+                setCurrentItem(current.get(), true);
             } else {
                 //应该永远到不了这里
-                current = 1;
-                setCurrentItem(current, false);
+                current.set(1);
+                setCurrentItem(current.get(), false);
             }
         }
 
@@ -104,6 +126,15 @@ public class BannerPagerView extends ViewPager {
 
         }
     };
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if (!hasDraw) {
+            hasDraw = true;
+            checkStateChanged();
+        }
+    }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -136,46 +167,67 @@ public class BannerPagerView extends ViewPager {
                     isMove = true;
                 }
             default://正常不会是running状态
-                timeTaskUtil.stopPlay();
+                pause();
                 break;
         }
         return super.onTouchEvent(event);
+    }
+
+    public void onParentVisibilityChanged(boolean visibility) {
+        parentVisible = visibility;
+        checkStateChanged();
     }
 
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
         windowVisible = visibility == View.VISIBLE;
-        if (windowVisible) {
-            adjustPosition();
-            restart();
-        } else {
-            pause();
-        }
+        checkStateChanged();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         hasAttached = false;
-        pause();
+        checkStateChanged();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         hasAttached = true;
-        adjustPosition();
-        restart();
+        checkStateChanged();
+    }
+
+    private boolean checkVisible() {
+        if (windowVisible && hasAttached && parentVisible && hasDraw) {
+            return getGlobalVisibleRect(rect);
+        } else {
+            return false;
+        }
+    }
+
+    private boolean checkStateChanged() {
+        if (checkVisible() != realVisible) {
+            realVisible = !realVisible;
+            if (realVisible) {
+                adjustPosition();
+                restart();
+            } else {
+                pause();
+            }
+            return true;
+        }
+        return false;
     }
 
     private int getRealPosition() {
-        if (current == 0) {
-            return pagerSize - 1;
-        } else if (current == pagerSize + 1) {
+        if (current.get() == 0) {
+            return pagerSize.get() - 1;
+        } else if (current.get() == pagerSize.get() + 1) {
             return 0;
         } else {
-            return current - 1;
+            return current.addAndGet(-1);
         }
     }
 
@@ -232,8 +284,8 @@ public class BannerPagerView extends ViewPager {
         if (bannerIndicator != null) {
             bannerIndicator.setSize(newSize);
         }
-        rebuildAllView = rebuild || pagerSize != newSize;
-        pagerSize = newSize;
+        rebuildAllView = rebuild || pagerSize.get() != newSize;
+        pagerSize.set(newSize);
         if (newSize < 1) {
             scrollable = false;
             pagerArray = null;
@@ -244,7 +296,7 @@ public class BannerPagerView extends ViewPager {
             pagerAdapter.notifyDataSetChanged();
             setCurrentItem(0, false);
         } else {
-            pagerArray = new View[pagerSize + 2];
+            pagerArray = new View[pagerSize.get() + 2];
             scrollable = true;
             pagerAdapter.notifyDataSetChanged();
             setCurrentItem(1, false);
@@ -254,6 +306,7 @@ public class BannerPagerView extends ViewPager {
 
     private void adjustPosition() {
         if (isPaused && lastPositionOffset != 0) {
+            lastPositionOffset = 0;
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -272,8 +325,8 @@ public class BannerPagerView extends ViewPager {
                 if (v == null) {
                     int rulePosition;
                     if (position == 0) {
-                        rulePosition = pagerSize - 1;
-                    } else if (position == pagerSize + 1) {
+                        rulePosition = pagerSize.get() - 1;
+                    } else if (position == pagerSize.get() + 1) {
                         rulePosition = 0;
                     } else {
                         rulePosition = position - 1;
@@ -325,7 +378,7 @@ public class BannerPagerView extends ViewPager {
     }
 
     public void restart() {
-        if (pagerAdapter.getCount() > 1 && autoScrollable && isPaused && hasAttached && windowVisible) {
+        if (pagerAdapter.getCount() > 1 && autoScrollable && isPaused && realVisible) {
             hold = System.currentTimeMillis() - pauseTime;
             long wait;
             if (interval - hold < restartWait) {

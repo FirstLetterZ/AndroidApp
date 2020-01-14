@@ -23,12 +23,7 @@ public class ClientBuilder {
         clientBuilder.httpClientBuilder.connectTimeout(clientBuilder.timeOutInSeconds, TimeUnit.SECONDS)
                 .writeTimeout(clientBuilder.timeOutInSeconds, TimeUnit.SECONDS)
                 .readTimeout(clientBuilder.timeOutInSeconds, TimeUnit.SECONDS);
-        try {
-            clientBuilder.httpClientBuilder.sslSocketFactory(new TLSSocketFactory())
-                    .hostnameVerifier(org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        TrustAllUtil.setClientTrustAll(clientBuilder.httpClientBuilder);
         clientBuilder.httpClientBuilder.addNetworkInterceptor(clientBuilder.headerInterceptor);
         clientBuilder.headerInterceptor.getHeaderCarrier().reset(headerCarrier);
         return clientBuilder;
