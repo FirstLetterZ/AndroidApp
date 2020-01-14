@@ -38,6 +38,7 @@ import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.permission.OnLockPermissionRunnable;
 import com.zpf.tool.permission.PermissionInfo;
 
+import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -393,13 +394,13 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
     }
 
     @Override
-    public boolean addListener(Object listener) {
-        return mContainer.addListener(listener);
+    public boolean addListener(Object listener, @Nullable Type listenerClass) {
+        return mContainer.addListener(listener,listenerClass);
     }
 
     @Override
-    public boolean removeListener(Object listener) {
-        return mContainer.removeListener(listener);
+    public boolean removeListener(Object listener, @Nullable Type listenerClass) {
+        return mContainer.removeListener(listener,listenerClass);
     }
 
     @Override

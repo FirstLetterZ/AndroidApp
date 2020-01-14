@@ -37,6 +37,8 @@ import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.MainHandler;
 import com.zpf.tool.config.stack.IStackItem;
 
+import java.lang.reflect.Type;
+
 /**
  * 基于AppCompatActivity的视图容器层
  * Created by ZPF on 2018/6/14.
@@ -62,7 +64,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         initWindow();
         mViewProcessor = initViewProcessor();
         if (mViewProcessor != null) {
-            mController.addListener(mViewProcessor);
+            mController.addListener(mViewProcessor, null);
             mViewProcessor.initWindow(getWindow());
             setContentView(mViewProcessor.getView());
         } else {
@@ -269,13 +271,13 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     @Override
-    public boolean addListener(Object listener) {
-        return mController.addListener(listener);
+    public boolean addListener(Object listener, @Nullable Type listenerClass) {
+        return mController.addListener(listener, listenerClass);
     }
 
     @Override
-    public boolean removeListener(Object listener) {
-        return mController.removeListener(listener);
+    public boolean removeListener(Object listener, @Nullable Type listenerClass) {
+        return mController.removeListener(listener, listenerClass);
     }
 
     @Override

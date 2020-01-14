@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.Window;
 
+import com.zpf.api.IBackPressInterceptor;
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
@@ -29,6 +30,8 @@ import com.zpf.support.util.LogUtil;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.MainHandler;
 import com.zpf.tool.config.stack.IStackItem;
+
+import java.lang.reflect.Type;
 
 /**
  * 基于Dialog的视图容器层
@@ -52,11 +55,11 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
         super(viewContainer.getContext(), themeResId);
         mParentContainer = viewContainer;
         mParams = params;
-        mParentContainer.addListener(this);
+        mParentContainer.addListener(this, IBackPressInterceptor.class);
         if (mViewProcessor == null) {
             mViewProcessor = ContainerController.createViewProcessor(this, targetClass);
             if (mViewProcessor != null) {
-                mController.addListener(mViewProcessor);
+                mController.addListener(mViewProcessor, null);
             } else {
                 LogUtil.w("IViewProcessor is null!");
             }
@@ -261,13 +264,13 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
     }
 
     @Override
-    public boolean addListener(Object listener) {
-        return mController.addListener(listener);
+    public boolean addListener(Object listener, @Nullable Type listenerClass) {
+        return mController.addListener(listener, listenerClass);
     }
 
     @Override
-    public boolean removeListener(Object listener) {
-        return mController.removeListener(listener);
+    public boolean removeListener(Object listener, @Nullable Type listenerClass) {
+        return mController.removeListener(listener, listenerClass);
     }
 
     @Override

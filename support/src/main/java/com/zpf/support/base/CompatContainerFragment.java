@@ -34,6 +34,8 @@ import com.zpf.support.util.LogUtil;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.stack.IStackItem;
 
+import java.lang.reflect.Type;
+
 /**
  * 基于android.support.v4.app.Fragment的视图容器层
  * Created by ZPF on 2018/6/14.
@@ -60,15 +62,15 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
         if (mViewProcessor == null) {
             mViewProcessor = initViewProcessor();
             if (mViewProcessor != null) {
-                mController.addListener(mViewProcessor);
+                mController.addListener(mViewProcessor, null);
                 theView = mViewProcessor.getView();
             } else {
                 LogUtil.w("IViewProcessor is null!");
             }
         }
-        FragmentActivity activity = getActivity();
-        if (activity instanceof IViewContainer) {
-            ((IViewContainer) activity).addListener(backPressInterceptor);
+        IViewContainer parentContainer = getParentContainer();
+        if (parentContainer != null) {
+            parentContainer.addListener(backPressInterceptor, IBackPressInterceptor.class);
         }
         initView(savedInstanceState);
         return theView;
@@ -76,10 +78,6 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        IViewContainer parentContainer = getParentContainer();
-        if (parentContainer != null) {
-            parentContainer.addListener(this);
-        }
         mController.onCreate(savedInstanceState);
     }
 
@@ -116,9 +114,9 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
         if (mController.getState() < LifecycleState.AFTER_DESTROY) {
             mController.onDestroy();
         }
-        FragmentActivity activity = getActivity();
-        if (activity instanceof IViewContainer) {
-            ((IViewContainer) activity).removeListener(backPressInterceptor);
+        IViewContainer parentContainer = getParentContainer();
+        if (parentContainer != null) {
+            parentContainer.addListener(backPressInterceptor, IBackPressInterceptor.class);
         }
         super.onDestroyView();
     }
@@ -265,15 +263,14 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
     }
 
     @Override
-    public boolean addListener(Object listener) {
-        return false;
+    public boolean addListener(Object listener, @Nullable Type listenerClass) {
+        return mController.addListener(listener, listenerClass);
     }
 
     @Override
-    public boolean removeListener(Object listener) {
-        return false;
+    public boolean removeListener(Object listener, @Nullable Type listenerClass) {
+        return mController.removeListener(listener, listenerClass);
     }
-
 
     @Override
     public void finishWithResult(int resultCode, Intent data) {

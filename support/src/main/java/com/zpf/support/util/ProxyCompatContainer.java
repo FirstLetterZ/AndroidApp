@@ -27,6 +27,8 @@ import com.zpf.support.model.NameStackItem;
 import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.stack.IStackItem;
 
+import java.lang.reflect.Type;
+
 /**
  * 将普通的activity或fragment打造成IViewContainer
  * Created by ZPF on 2018/6/28.
@@ -169,13 +171,13 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public boolean addListener(Object listener) {
-        return mController.addListener(listener);
+    public boolean addListener(Object listener, @Nullable Type listenerClass) {
+        return mController.addListener(listener, listenerClass);
     }
 
     @Override
-    public boolean removeListener(Object listener) {
-        return mController.removeListener(listener);
+    public boolean removeListener(Object listener, @Nullable Type listenerClass) {
+        return mController.removeListener(listener, listenerClass);
     }
 
     @Override
@@ -306,11 +308,11 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     @Override
     public IStackItem getStackItem() {
         if (stackItem == null) {
-            if(activity!=null){
-                stackItem=new NameStackItem(activity.getClass().getName());
-            }else if(fragment!=null){
-                stackItem=new NameStackItem(fragment.getClass().getName());
-            }else {
+            if (activity != null) {
+                stackItem = new NameStackItem(activity.getClass().getName());
+            } else if (fragment != null) {
+                stackItem = new NameStackItem(fragment.getClass().getName());
+            } else {
                 stackItem = new ContainerStackItem(this);
             }
         }

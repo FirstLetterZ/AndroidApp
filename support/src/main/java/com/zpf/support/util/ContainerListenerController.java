@@ -22,6 +22,7 @@ import com.zpf.tool.expand.util.DialogController;
 import com.zpf.tool.expand.util.ViewStateListener;
 import com.zpf.api.OnDestroyListener;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -181,60 +182,67 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
     }
 
     @Override
-    public boolean addListener(Object listener) {
+    public boolean addListener(Object listener, @Nullable Type listenerClass) {
+        boolean result = false;
         if (listener != null) {
-            if (listener instanceof IFullLifecycle) {
+            if ((listenerClass == null || listenerClass == IFullLifecycle.class) && listener instanceof IFullLifecycle) {
                 if (mLifecycleList.size() == 0 || !mLifecycleList.contains(listener)) {
                     mLifecycleList.add((IFullLifecycle) listener);
                 }
-            } else if (listener instanceof OnDestroyListener) {
+                result = true;
+            } else if ((listenerClass == null || listenerClass == OnDestroyListener.class) && listener instanceof OnDestroyListener) {
                 if (mDestroyListenerList.size() == 0 || !mDestroyListenerList.contains(listener)) {
                     mDestroyListenerList.add((OnDestroyListener) listener);
                 }
+                result = true;
             }
-            if (listener instanceof OnActivityResultListener) {
+            if ((listenerClass == null || listenerClass == OnActivityResultListener.class) && listener instanceof OnActivityResultListener) {
                 if (mActivityResultCallBackList.size() == 0 || !mActivityResultCallBackList.contains(listener)) {
                     mActivityResultCallBackList.add((OnActivityResultListener) listener);
                 }
+                result = true;
             }
-            if (listener instanceof OnPermissionResultListener) {
+            if ((listenerClass == null || listenerClass == OnPermissionResultListener.class) && listener instanceof OnPermissionResultListener) {
                 if (mPermissionCallBackList.size() == 0 || !mPermissionCallBackList.contains(listener)) {
                     mPermissionCallBackList.add((OnPermissionResultListener) listener);
                 }
+                result = true;
             }
-            if (listener instanceof IBackPressInterceptor) {
+            if ((listenerClass == null || listenerClass == IBackPressInterceptor.class) && listener instanceof IBackPressInterceptor) {
                 if (mBackPressInterceptor.size() == 0 || !mBackPressInterceptor.contains(listener)) {
                     mBackPressInterceptor.add((IBackPressInterceptor) listener);
                 }
+                result = true;
             }
-            if (listener instanceof IViewStateListener) {
+            if ((listenerClass == null || listenerClass == IViewStateListener.class) && listener instanceof IViewStateListener) {
                 if (mViewStateList.size() == 0 || !mViewStateList.contains(listener)) {
                     mViewStateList.add((IViewStateListener) listener);
                 }
+                result = true;
             }
         }
-        return false;
+        return result;
     }
 
     @Override
-    public boolean removeListener(Object listener) {
+    public boolean removeListener(Object listener, @Nullable Type listenerClass) {
         boolean result = false;
         if (listener != null) {
-            if (listener instanceof IFullLifecycle) {
+            if ((listenerClass == null || listenerClass == IFullLifecycle.class) && listener instanceof IFullLifecycle) {
                 result = mLifecycleList.remove(listener);
-            } else if (listener instanceof OnDestroyListener) {
+            } else if ((listenerClass == null || listenerClass == OnDestroyListener.class) && listener instanceof OnDestroyListener) {
                 result = mDestroyListenerList.remove(listener);
             }
-            if (listener instanceof OnActivityResultListener) {
+            if ((listenerClass == null || listenerClass == OnActivityResultListener.class) && listener instanceof OnActivityResultListener) {
                 result = mActivityResultCallBackList.remove(listener) || result;
             }
-            if (listener instanceof OnPermissionResultListener) {
+            if ((listenerClass == null || listenerClass == OnPermissionResultListener.class) && listener instanceof OnPermissionResultListener) {
                 result = mPermissionCallBackList.remove(listener) || result;
             }
-            if (listener instanceof IBackPressInterceptor) {
+            if ((listenerClass == null || listenerClass == IBackPressInterceptor.class) && listener instanceof IBackPressInterceptor) {
                 result = mBackPressInterceptor.remove(listener) || result;
             }
-            if (listener instanceof IViewStateListener) {
+            if ((listenerClass == null || listenerClass == IViewStateListener.class) && listener instanceof IViewStateListener) {
                 result = mViewStateList.remove(listener) || result;
             }
         }
