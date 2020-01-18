@@ -14,8 +14,6 @@ import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.widget.Scroller;
 
-import com.zpf.tool.TimeTaskUtil;
-
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,7 +28,6 @@ public class BannerPagerView extends ViewPager {
     private long pauseTime; //按下的时间
     private long hold;//按住了多久
     private long lastClick;//上次触发点击事件的事件
-    private boolean scrollable = true;
     private volatile boolean isPaused = false;
     /*可设置的参数*/
     private int interval = 4000;//自动滚动间隔时间
@@ -88,10 +85,6 @@ public class BannerPagerView extends ViewPager {
             @Override
             public void onPageSelected(int position) {
                 current.set(position);
-                realVisible = checkVisible();
-                if (!realVisible) {
-                    pause();
-                }
             }
 
             @Override
@@ -103,29 +96,25 @@ public class BannerPagerView extends ViewPager {
         });
     }
 
-    private TimeTaskUtil timeTaskUtil = new TimeTaskUtil() {
+    private Runnable circulationRunnable = new Runnable() {
         @Override
-        protected void doInMainThread() {
-            realVisible = checkVisible();
-            if (!realVisible) {
-                pause();
-                return;
-            }
-            if (current.get() < pagerSize.get() + 1) {
-                current.getAndIncrement();
-                setCurrentItem(current.get(), true);
+        public void run() {
+            if (isRecyclable()) {
+                if (current.get() < pagerSize.get() + 1) {
+                    current.getAndIncrement();
+                    setCurrentItem(current.get(), true);
+                } else {
+                    //应该永远到不了这里
+                    current.set(1);
+                    setCurrentItem(current.get(), false);
+                }
+                postDelayed(circulationRunnable, interval);
             } else {
-                //应该永远到不了这里
-                current.set(1);
-                setCurrentItem(current.get(), false);
+                removeCallbacks(circulationRunnable);
             }
-        }
-
-        @Override
-        protected void doInChildThread() {
-
         }
     };
+
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -138,7 +127,7 @@ public class BannerPagerView extends ViewPager {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return scrollable && super.onInterceptTouchEvent(ev);
+        return pagerSize.get() > 1 && super.onInterceptTouchEvent(ev);
     }
 
     @Override
@@ -207,6 +196,15 @@ public class BannerPagerView extends ViewPager {
         }
     }
 
+    private boolean isRecyclable() {
+        if (autoScrollable && pagerSize.get() > 1) {
+            realVisible = checkVisible();
+            return realVisible;
+        } else {
+            return false;
+        }
+    }
+
     private boolean checkStateChanged() {
         if (checkVisible() != realVisible) {
             realVisible = !realVisible;
@@ -268,8 +266,7 @@ public class BannerPagerView extends ViewPager {
 
     //初始化
     public void init(BannerViewCreator viewCreator) {
-        timeTaskUtil.stopPlay();
-        isPaused = true;
+        pause();
         this.viewCreator = viewCreator;
         if (viewCreator == null) {
             resetSize(0, false);
@@ -279,25 +276,21 @@ public class BannerPagerView extends ViewPager {
     }
 
     public void resetSize(int newSize, boolean rebuild) {
-        timeTaskUtil.stopPlay();
-        isPaused = true;
+        pause();
         if (bannerIndicator != null) {
             bannerIndicator.setSize(newSize);
         }
         rebuildAllView = rebuild || pagerSize.get() != newSize;
         pagerSize.set(newSize);
         if (newSize < 1) {
-            scrollable = false;
             pagerArray = null;
             pagerAdapter.notifyDataSetChanged();
         } else if (newSize == 1) {
             pagerArray = new View[1];
-            scrollable = false;
             pagerAdapter.notifyDataSetChanged();
             setCurrentItem(0, false);
         } else {
             pagerArray = new View[pagerSize.get() + 2];
-            scrollable = true;
             pagerAdapter.notifyDataSetChanged();
             setCurrentItem(1, false);
             restart();
@@ -378,7 +371,10 @@ public class BannerPagerView extends ViewPager {
     }
 
     public void restart() {
-        if (pagerAdapter.getCount() > 1 && autoScrollable && isPaused && realVisible) {
+        if (!isPaused) {
+            return;
+        }
+        if (isRecyclable()) {
             hold = System.currentTimeMillis() - pauseTime;
             long wait;
             if (interval - hold < restartWait) {
@@ -386,15 +382,17 @@ public class BannerPagerView extends ViewPager {
             } else {
                 wait = interval - hold;
             }
-            timeTaskUtil.startPlay(wait, interval);
             isPaused = false;
+            postDelayed(circulationRunnable, wait);
+        } else {
+            pause();
         }
     }
 
     public void pause() {
         if (!isPaused) {
             isPaused = true;
-            timeTaskUtil.stopPlay();
+            removeCallbacks(circulationRunnable);
             pauseTime = System.currentTimeMillis();
         }
     }

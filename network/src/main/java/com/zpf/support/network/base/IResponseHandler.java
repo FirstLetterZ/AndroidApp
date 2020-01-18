@@ -1,5 +1,6 @@
 package com.zpf.support.network.base;
 
+import com.zpf.api.IResultBean;
 
 /**
  * Created by ZPF on 2019/2/14.
@@ -8,12 +9,12 @@ package com.zpf.support.network.base;
 public interface IResponseHandler {
 
     //解析callback中的handleError
-    IResponseBean parsingException(Throwable e);
+    IResultBean parsingException(Throwable e);
 
     boolean checkDataNull(Object data);
 
     //拦截callback中的fail方法
-    boolean interceptFailHandle(IResponseBean result);
+    boolean interceptFailHandle(IResultBean result);
 
     void showHint(int code, String message);
 

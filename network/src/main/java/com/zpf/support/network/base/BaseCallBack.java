@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import com.zpf.api.ICancelable;
 import com.zpf.api.IManager;
 import com.zpf.api.INeedManage;
+import com.zpf.api.IResultBean;
 import com.zpf.support.network.model.CustomException;
 import com.zpf.support.network.model.ResponseResult;
 import com.zpf.tool.config.AppContext;
@@ -143,7 +144,7 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
             code = ErrorCode.IO_ERROR;
             description = getString(R.string.network_io_error);
         } else {
-            IResponseBean parseResult = null;
+            IResultBean parseResult = null;
             if (responseHandler != null) {
                 parseResult = responseHandler.parsingException(e);
             }
@@ -205,10 +206,11 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
      */
     protected boolean checkResponse(T result) {
         boolean check = true;
-        if (result instanceof IResponseBean) {
-            check = ((IResponseBean) result).isSuccess();
-            responseResult.setCode(((IResponseBean) result).getCode());
-            responseResult.setMessage(((IResponseBean) result).getMessage());
+        responseResult.setCode(ErrorCode.RESPONSE_SUCCESS);
+        if (result instanceof IResultBean) {
+            check = ((IResultBean) result).isSuccess();
+            responseResult.setCode(((IResultBean) result).getCode());
+            responseResult.setMessage(((IResultBean) result).getMessage());
         }
         if (check && checkDataNull(result)) {
             responseResult.setCode(ErrorCode.DATA_NULL);
@@ -222,8 +224,8 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
     protected boolean checkDataNull(T result) {
         if (result == null) {
             return true;
-        } else if (result instanceof IResponseBean) {
-            return ((IResponseBean) result).getData() == null;
+        } else if (result instanceof IResultBean) {
+            return ((IResultBean) result).getData() == null;
         } else {
             return responseHandler != null && responseHandler.checkDataNull(result);
         }
@@ -279,6 +281,6 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
 
     protected abstract void doCancel();
 
-    protected abstract void complete(boolean success, @NonNull IResponseBean<T> responseResult);
+    protected abstract void complete(boolean success, @NonNull IResultBean<T> responseResult);
 
 }

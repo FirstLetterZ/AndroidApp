@@ -11,4 +11,5 @@
     <string name="network_io_error">数据流异常，解析失败</string>
     <string name="network_illegal_error">返回数据不合规</string>
     <string name="network_host_error">服务器域名解析失败</string>
+    <string name="file_not_find">未找到对应文件</string>
 </resources>

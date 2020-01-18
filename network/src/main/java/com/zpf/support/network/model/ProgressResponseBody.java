@@ -3,7 +3,6 @@ package com.zpf.support.network.model;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.view.View;
 
 import com.zpf.api.OnProgressListener;
 
@@ -25,9 +24,9 @@ public class ProgressResponseBody extends ResponseBody {
     private ResponseBody responseBody;
     private Handler myHandler;
     private BufferedSource bufferedSource;
-    private OnProgressListener<View> mListener;
+    private OnProgressListener mListener;
 
-    public ProgressResponseBody(ResponseBody responseBody, OnProgressListener<View> listener) {
+    public ProgressResponseBody(ResponseBody responseBody, OnProgressListener listener) {
         this.responseBody = responseBody;
         mListener = listener;
         myHandler = new Handler(Looper.getMainLooper());
@@ -63,7 +62,7 @@ public class ProgressResponseBody extends ResponseBody {
                     @Override
                     public void run() {
                         if (mListener != null) {
-                            mListener.onChanged(null, bytesReaded, contentLength());
+                            mListener.onChanged(bytesReaded, contentLength());
                         }
                     }
                 });

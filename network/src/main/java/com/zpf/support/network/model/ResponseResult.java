@@ -1,9 +1,9 @@
 package com.zpf.support.network.model;
 
+import com.zpf.api.IResultBean;
 import com.zpf.support.network.base.ErrorCode;
-import com.zpf.support.network.base.IResponseBean;
 
-public class ResponseResult<T> implements Cloneable, IResponseBean<T> {
+public class ResponseResult<T> implements Cloneable, IResultBean<T> {
     private int code;
     private String message;
     private T data;

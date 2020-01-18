@@ -8,7 +8,7 @@ import com.zpf.api.IManager;
 /**
  * Created by ZPF on 2018/6/13.
  */
-public class CancelableManager implements IManager<ICancelable>{
+public class CancelableManager implements IManager<ICancelable> {
     private LongSparseArray<ICancelable> callBackList = new LongSparseArray<>();
     private volatile boolean cancelAll = false;
 
@@ -32,13 +32,6 @@ public class CancelableManager implements IManager<ICancelable>{
     @Override
     public void remove(long id) {
         if (!cancelAll) {
-            callBackList.remove(id);
-        }
-    }
-
-    @Override
-    public void cancel(long id) {
-        if (!cancelAll) {
             ICancelable callBack = callBackList.get(id);
             if (callBack != null) {
                 callBack.cancel();
@@ -48,8 +41,19 @@ public class CancelableManager implements IManager<ICancelable>{
     }
 
     @Override
-    public void cancelAll() {
+    public void reset() {
         cancelAll = true;
+        clear();
+        cancelAll = false;
+    }
+
+    @Override
+    public void onDestroy() {
+        clear();
+        cancelAll = true;
+    }
+
+    private void clear() {
         if (callBackList.size() > 0) {
             synchronized (this) {
                 if (callBackList.size() > 0) {
@@ -63,16 +67,5 @@ public class CancelableManager implements IManager<ICancelable>{
                 }
             }
         }
-    }
-
-    @Override
-    public void reset() {
-        cancelAll();
-        cancelAll = false;
-    }
-
-    @Override
-    public void onDestroy() {
-        reset();
     }
 }

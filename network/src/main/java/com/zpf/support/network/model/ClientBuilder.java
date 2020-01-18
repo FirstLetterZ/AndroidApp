@@ -12,7 +12,7 @@ import retrofit2.Retrofit;
  * Created by ZPF on 2018/9/5.
  */
 public class ClientBuilder {
-    private final int timeOutInSeconds = 90;
+    private static final int timeOutInSeconds = 90;
     private OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
     private Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
     private HeaderInterceptor headerInterceptor = new HeaderInterceptor();
@@ -20,13 +20,26 @@ public class ClientBuilder {
     public static ClientBuilder createDefBuilder(HeaderCarrier headerCarrier) {
         ClientBuilder clientBuilder = new ClientBuilder();
         clientBuilder.httpClientBuilder.retryOnConnectionFailure(true);
-        clientBuilder.httpClientBuilder.connectTimeout(clientBuilder.timeOutInSeconds, TimeUnit.SECONDS)
-                .writeTimeout(clientBuilder.timeOutInSeconds, TimeUnit.SECONDS)
-                .readTimeout(clientBuilder.timeOutInSeconds, TimeUnit.SECONDS);
+        clientBuilder.httpClientBuilder.connectTimeout(timeOutInSeconds, TimeUnit.SECONDS)
+                .writeTimeout(timeOutInSeconds, TimeUnit.SECONDS)
+                .readTimeout(timeOutInSeconds, TimeUnit.SECONDS);
         TrustAllUtil.setClientTrustAll(clientBuilder.httpClientBuilder);
         clientBuilder.httpClientBuilder.addNetworkInterceptor(clientBuilder.headerInterceptor);
-        clientBuilder.headerInterceptor.getHeaderCarrier().reset(headerCarrier);
+        clientBuilder.headerInterceptor.setHeaderCarrier(headerCarrier);
         return clientBuilder;
+    }
+
+    public static OkHttpClient.Builder createOkHttpClientBuilder(HeaderCarrier headerCarrier) {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.retryOnConnectionFailure(true);
+        builder.connectTimeout(timeOutInSeconds, TimeUnit.SECONDS)
+                .writeTimeout(timeOutInSeconds, TimeUnit.SECONDS)
+                .readTimeout(timeOutInSeconds, TimeUnit.SECONDS);
+        TrustAllUtil.setClientTrustAll(builder);
+        HeaderInterceptor headerInterceptor = new HeaderInterceptor();
+        headerInterceptor.setHeaderCarrier(headerCarrier);
+        builder.addNetworkInterceptor(headerInterceptor);
+        return builder;
     }
 
     public HeaderCarrier headerBuilder() {

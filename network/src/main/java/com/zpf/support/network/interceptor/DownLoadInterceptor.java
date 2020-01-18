@@ -1,7 +1,5 @@
 package com.zpf.support.network.interceptor;
 
-import android.view.View;
-
 import com.zpf.api.OnProgressListener;
 import com.zpf.support.network.model.ProgressResponseBody;
 
@@ -15,9 +13,9 @@ import okhttp3.Response;
  * Created by ZPF on 2018/7/26.
  */
 public class DownLoadInterceptor implements Interceptor {
-    private OnProgressListener<View> listener;
+    private OnProgressListener listener;
 
-    public DownLoadInterceptor(OnProgressListener<View> listener) {
+    public DownLoadInterceptor(OnProgressListener listener) {
         this.listener = listener;
     }
 

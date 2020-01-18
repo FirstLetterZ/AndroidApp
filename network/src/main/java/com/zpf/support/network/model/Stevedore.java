@@ -3,12 +3,13 @@ package com.zpf.support.network.model;
 import android.support.annotation.NonNull;
 
 import com.zpf.api.IGroup;
+import com.zpf.api.IResultBean;
 import com.zpf.api.OnDestroyListener;
+import com.zpf.api.OnStateChangedListener;
 import com.zpf.support.network.base.ErrorCode;
 import com.zpf.support.network.base.ILocalCacheManager;
 import com.zpf.support.network.base.INetworkCallCreator;
 import com.zpf.support.network.base.IResponseBean;
-import com.zpf.support.network.base.StateChangedListener;
 import com.zpf.support.network.retrofit.ResponseCallBack;
 
 import retrofit2.Call;
@@ -19,7 +20,7 @@ public class Stevedore<T> implements OnDestroyListener {
     private volatile boolean done = false;
     private Call<T> call;
     private INetworkCallCreator<T> callNetworkManager;
-    private StateChangedListener<T> stateChangedListener;
+    private OnStateChangedListener<T> stateChangedListener;
     private ILocalCacheManager<T> localCacheManager;
 
     protected T searchLocal() {
@@ -119,7 +120,7 @@ public class Stevedore<T> implements OnDestroyListener {
         }
         call.enqueue(new ResponseCallBack<T>(requestType) {
             @Override
-            protected void complete(boolean success, @NonNull IResponseBean<T> responseResult) {
+            protected void complete(boolean success, @NonNull IResultBean<T> responseResult) {
                 onStateChanged(false, responseResult.getCode(), null, responseResult.getData());
                 call = null;
                 done = true;

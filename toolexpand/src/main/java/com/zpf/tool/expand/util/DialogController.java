@@ -87,12 +87,7 @@ public class DialogController implements IManager<ICustomWindow> {
     }
 
     @Override
-    public void cancel(long id) {
-        remove(id);
-    }
-
-    @Override
-    public void cancelAll() {
+    public void reset() {
         isDestroy = true;
         if (checkShowing()) {
             showingWindow.dismiss();
@@ -101,11 +96,6 @@ public class DialogController implements IManager<ICustomWindow> {
         showingWindowId = -1;
         cacheList.clear();
         isDestroy = false;
-    }
-
-    @Override
-    public void reset() {
-        cancelAll();
     }
 
     @Override
