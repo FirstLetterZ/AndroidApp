@@ -76,7 +76,7 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
                 layoutId = getLayoutId();
             }
             if (layoutId != 0) {
-                mRootLayout.setContentView(LayoutInflater.from(getContext()), getLayoutId());
+                mRootLayout.setContentView(LayoutInflater.from(getContext()), layoutId);
             }
         }
     }
