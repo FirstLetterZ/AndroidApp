@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -19,6 +20,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
@@ -31,6 +33,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.zpf.api.IChecker;
+import com.zpf.api.ILogger;
 import com.zpf.api.OnProgressListener;
 import com.zpf.api.dataparser.JsonParserInterface;
 import com.zpf.api.dataparser.StringParseResult;
@@ -49,18 +52,16 @@ import java.util.List;
  */
 public class BridgeWebView extends WebView {
     private List<String> whiteList;//白名单关键字
-    private int logLevel;
     private final String jsFileName = "bridge.js";
     private String jsFileString;
     private List<WebViewStateListener> stateListenerList = new ArrayList<>();
     private OnReceivedWebPageListener webPageListener;
     private WebViewWindowListener windowListener;
     private WebViewFileChooserListener fileChooserListener;
-    private OnProgressListener<WebView> progressChangedListener;
+    private OnProgressListener progressChangedListener;
     private IChecker<String> urlInterceptor;//url拦截
     private JsCallNativeListener jsCallNativeListener;//js调用native的回调
     private OverrideLoadUrlListener overrideLoadUrlListener;//OverrideLoadUrlListener
-    private String TAG = "BridgeWebView";
     private boolean isTraceless;//无痕浏览
     private boolean useWebTitle = true;//使用浏览器标题
     private WebPageInfo webPageInfo = new WebPageInfo();//当前加载页面
@@ -68,6 +69,11 @@ public class BridgeWebView extends WebView {
     private JsonParserInterface realParser;//json解析
     private View customView = null;
     private WebChromeClient.CustomViewCallback customCallback = null;
+    private WebViewScrollListener scrollChangeListener = null;
+    //日志打印
+    private boolean printLog = false;
+    private String TAG;
+    private ILogger realLogger = null;
 
     public BridgeWebView(Context context) {
         super(context);
@@ -202,6 +208,14 @@ public class BridgeWebView extends WebView {
         }
     }
 
+    @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        super.onScrollChanged(l, t, oldl, oldt);
+        if (scrollChangeListener != null) {
+            scrollChangeListener.onScrollChange(l, t, oldl, oldt);
+        }
+    }
+
     /**
      * 创建默认的 WebChromeClient
      */
@@ -212,11 +226,9 @@ public class BridgeWebView extends WebView {
                 if (webPageInfo.waitInit) {
                     webPageInfo.waitInit = !initJsBridge();
                 }
-                if (logLevel >= WebViewLogLevel.LEVEL_MOST) {
-                    Log.i(TAG, "========================onReceivedTitle======================");
-                    Log.i(TAG, "url=" + view.getUrl());
-                    Log.i(TAG, "title=" + title);
-                }
+                logInfo("========================onReceivedTitle======================");
+                logInfo("url=" + view.getUrl());
+                logInfo("title=" + title);
                 if (webPageListener != null) {
                     webPageListener.onReceivedTitle(title);
                 }
@@ -228,14 +240,12 @@ public class BridgeWebView extends WebView {
                 if (webPageInfo.waitInit) {
                     webPageInfo.waitInit = !initJsBridge();
                 }
-                if (logLevel >= WebViewLogLevel.LEVEL_ALL) {
-                    Log.i(TAG, "========================onReceivedIcon======================");
-                    Log.i(TAG, "url=" + view.getUrl());
-                    if (icon != null) {
-                        Log.i(TAG, "icon size:width=" + icon.getWidth() + " ;height=" + icon.getHeight());
-                    } else {
-                        Log.i(TAG, "icon == null");
-                    }
+                logInfo("========================onReceivedIcon======================");
+                logInfo("url=" + view.getUrl());
+                if (icon != null) {
+                    logInfo("icon size:width=" + icon.getWidth() + " ;height=" + icon.getHeight());
+                } else {
+                    logInfo("icon == null");
                 }
                 if (webPageListener != null) {
                     webPageListener.onReceivedIcon(icon);
@@ -245,26 +255,22 @@ public class BridgeWebView extends WebView {
 
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
-                if (logLevel >= WebViewLogLevel.LEVEL_MOST) {
-                    Log.i(TAG, "========================onProgressChanged======================");
-                    Log.i(TAG, "url=" + view.getUrl());
-                    Log.i(TAG, "newProgress=" + newProgress);
-                }
+                logInfo("========================onProgressChanged======================");
+                logInfo("url=" + view.getUrl());
+                logInfo("newProgress=" + newProgress);
                 if (webPageInfo.waitInit && newProgress > 10) {
                     initJsBridge();
                 }
                 if (progressChangedListener != null) {
-                    progressChangedListener.onChanged(view, 100, newProgress);
+                    progressChangedListener.onChanged(100, newProgress);
                 }
                 super.onProgressChanged(view, newProgress);
             }
 
             @Override
             public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
-                if (logLevel >= WebViewLogLevel.LEVEL_MOST) {
-                    Log.i(TAG, "========================onCreateWindow======================");
-                    Log.i(TAG, "url=" + view.getUrl());
-                }
+                logInfo("========================onCreateWindow======================");
+                logInfo("url=" + view.getUrl());
                 if (windowListener != null) {
                     return windowListener.onCreateWindow(view, isDialog, isUserGesture, resultMsg);
                 } else {
@@ -282,9 +288,7 @@ public class BridgeWebView extends WebView {
 
             @Override
             public void onCloseWindow(WebView window) {
-                if (logLevel >= WebViewLogLevel.LEVEL_MOST) {
-                    Log.i(TAG, "========================onCloseWindow======================");
-                }
+                logInfo("========================onCloseWindow======================");
                 if (windowListener != null) {
                     windowListener.onCloseWindow(window);
                 }
@@ -356,7 +360,15 @@ public class BridgeWebView extends WebView {
                             filePathCallback, new String[]{acceptType});
                 }
             }
+
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                logInfo("sourceId=" + consoleMessage.sourceId());
+                logInfo("message=" + consoleMessage.message());
+                return super.onConsoleMessage(consoleMessage);
+            }
         };
+
     }
 
 
@@ -367,10 +379,8 @@ public class BridgeWebView extends WebView {
         return new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                if (logLevel >= WebViewLogLevel.LEVEL_NORMAL) {
-                    Log.i(TAG, "========================onPageStarted======================");
-                    Log.i(TAG, "url=" + url);
-                }
+                logInfo("========================onPageStarted======================");
+                logInfo("url=" + url);
                 if ((interceptRedirected(url)) || (urlInterceptor != null && urlInterceptor.check(url))) {
                     view.stopLoading();
                     goBack();
@@ -389,10 +399,8 @@ public class BridgeWebView extends WebView {
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                if (logLevel >= WebViewLogLevel.LEVEL_NORMAL) {
-                    Log.i(TAG, "========================onPageFinished======================");
-                    Log.i(TAG, "url=" + url);
-                }
+                logInfo("========================onPageFinished======================");
+                logInfo("url=" + url);
                 if (urlInterceptor != null && urlInterceptor.check(url)) {
                     goBack();
                     return;
@@ -419,11 +427,9 @@ public class BridgeWebView extends WebView {
 
             @Override
             public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
-                if (logLevel >= WebViewLogLevel.LEVEL_ALL) {
-                    Log.i(TAG, "========================doUpdateVisitedHistory======================");
-                    Log.i(TAG, "url=" + url);
-                    Log.i(TAG, "isReload=" + isReload);
-                }
+                logInfo("========================doUpdateVisitedHistory======================");
+                logInfo("url=" + url);
+                logInfo("isReload=" + isReload);
                 if (isTraceless) {
                     view.clearHistory();
                 }
@@ -434,61 +440,77 @@ public class BridgeWebView extends WebView {
             @Override
             public boolean shouldOverrideUrlLoading(final WebView view, WebResourceRequest request) {
                 final String url = request.getUrl().toString();
-                if (logLevel >= WebViewLogLevel.LEVEL_NORMAL) {
-                    Log.i(TAG, "========================shouldOverrideUrlLoading======================");
-                    Log.i(TAG, "url=" + url);
-                }
+                logInfo("========================shouldOverrideUrlLoading======================");
+                logInfo("url=" + url);
                 return handleOverrideUrlLoading(view, url);
             }
 
             @Override
             public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
-                if (logLevel >= WebViewLogLevel.LEVEL_NORMAL) {
-                    Log.i(TAG, "========================shouldOverrideUrlLoading======================");
-                    Log.i(TAG, "url=" + url);
-                }
+                logInfo("========================shouldOverrideUrlLoading======================");
+                logInfo("url=" + url);
                 return handleOverrideUrlLoading(view, url);
             }
 
             @Override
-            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                if (logLevel >= WebViewLogLevel.LEVEL_NORMAL) {
-                    Log.i(TAG, "========================onReceivedError======================");
-                    if (request != null) {
-                        Log.i(TAG, "request=" + request.toString());
-                    }
-                    if (error != null) {
-                        Log.i(TAG, "error=" + error.toString());
-                    }
-                }
+            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
+                super.onReceivedHttpError(view, request, errorResponse);
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                logInfo("========================onReceivedError======================");
+                logInfo("request.url=" + failingUrl);
+                logInfo("error.code=" + errorCode);
+                logInfo("error.description=" + description);
                 if (stateListenerList.size() > 0) {
                     for (WebViewStateListener listener : stateListenerList) {
-                        listener.onPageError(view, request, error);
+                        listener.onPageError(view, failingUrl, errorCode, description);
                     }
                 }
                 webPageInfo.waitInit = false;
                 webPageInfo.loadComplete = true;
                 webPageInfo.finishTime = System.currentTimeMillis();
-                super.onReceivedError(view, request, error);
+            }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                int code = 0;
+                String description = null;
+                String url = null;
+                boolean isForMainFrame = true;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    isForMainFrame = request.isForMainFrame();
+                    url = request.getUrl().toString();
+                    code = error.getErrorCode();
+                    description = error.getDescription().toString();
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    isForMainFrame = request.isForMainFrame();
+                    url = request.getUrl().toString();
+                }
+                if (isForMainFrame) {
+                    onReceivedError(BridgeWebView.this, code, description, url);
+                } else {
+                    logInfo("========================onReceivedFrameError======================");
+                    logInfo("request.url=" + url);
+                    logInfo("error.code=" + code);
+                    logInfo("error.description=" + description);
+                }
             }
 
             @Override
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-                if (logLevel >= WebViewLogLevel.LEVEL_MOST) {
-                    Log.i(TAG, "========================onReceivedSslError======================");
-                    if (error != null) {
-                        Log.i(TAG, "error=" + error.toString());
-                    }
+                logInfo("========================onReceivedSslError======================");
+                if (error != null) {
+                    logInfo("error=" + error.toString());
                 }
                 handler.proceed(); // 接受证书
             }
 
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-                if (logLevel >= WebViewLogLevel.LEVEL_MOST) {
-                    Log.i(TAG, "========================shouldInterceptRequest======================");
-                    Log.i(TAG, "url=" + url);
-                }
+                logInfo("========================shouldInterceptRequest======================");
+                logInfo("url=" + url);
                 boolean pass = false;
                 if (whiteList != null && whiteList.size() > 0 && url != null) {
                     for (String whiteKey : whiteList) {
@@ -524,20 +546,16 @@ public class BridgeWebView extends WebView {
         @JavascriptInterface
         public void connect() {
             webPageInfo.waitInit = false;
-            if (logLevel >= WebViewLogLevel.LEVEL_NORMAL) {
-                Log.i(TAG, "========================jsBridge connect======================");
-            }
+            logInfo("========================jsBridge connect======================");
         }
 
         //当前线程为JsBridge
         @JavascriptInterface
         public String callNative(String action, String params, String callBackName) {
-            if (logLevel >= WebViewLogLevel.LEVEL_NORMAL) {
-                Log.i(TAG, "========================JavaScriptInterface callNative======================");
-                Log.i(TAG, "action=" + action);
-                Log.i(TAG, "params=" + params);
-                Log.i(TAG, "callBackName=" + callBackName);
-            }
+            logInfo("========================JavaScriptInterface callNative======================");
+            logInfo("action=" + action);
+            logInfo("params=" + params);
+            logInfo("callBackName=" + callBackName);
             if (jsCallNativeListener == null) {
                 return "";
             }
@@ -596,10 +614,8 @@ public class BridgeWebView extends WebView {
                 forebody = forebody + ",";
             }
             final String javascript = forebody + result + ")";
-            if (logLevel >= WebViewLogLevel.LEVEL_MOST) {
-                Log.i(TAG, "======================== onCallBack ======================");
-                Log.i(TAG, "javascript=" + javascript);
-            }
+            logInfo("======================== onCallBack ======================");
+            logInfo("javascript=" + javascript);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -620,15 +636,33 @@ public class BridgeWebView extends WebView {
             public void run() {
                 if (canGoBack()) {
                     BridgeWebView.super.goBack();
-                } else if (getContext() != null || getContext() instanceof Activity) {
-                    try {
-                        ((Activity) getContext()).finish();
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                } else {
+                    Context context = getContext();
+                    if (context instanceof ContextWrapper) {
+                        context = ((ContextWrapper) context).getBaseContext();
+                    }
+                    if (context instanceof Activity) {
+                        try {
+                            ((Activity) context).finish();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
         });
+    }
+
+    private void logInfo(String message) {
+        String realTag = TAG;
+        if (realTag == null) {
+            realTag = getClass().getSimpleName();
+        }
+        if (realLogger != null) {
+            realLogger.log(Log.INFO, realTag, message);
+        } else {
+            Log.i(realTag, message);
+        }
     }
 
     private boolean handleOverrideUrlLoading(WebView webView, final String url) {
@@ -642,7 +676,7 @@ public class BridgeWebView extends WebView {
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 getContext().startActivity(intent);
             } catch (ActivityNotFoundException e) {
-                Log.w(TAG, "activity not found to handle uri scheme for: " + url);
+                logInfo("activity not found to handle uri scheme for: " + url);
             }
             return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
         } else {
@@ -665,15 +699,11 @@ public class BridgeWebView extends WebView {
 
     public boolean initJsBridge() {
         if (jsFileString != null) {
-            if (logLevel >= WebViewLogLevel.LEVEL_ALL) {
-                Log.i(TAG, "start load jsFile");
-            }
+            logInfo("start load jsFile");
             loadUrl("javascript:" + jsFileString);
             return true;
         } else {
-            if (logLevel >= WebViewLogLevel.LEVEL_NORMAL) {
-                Log.w(TAG, "cannot load jsFile");
-            }
+            logInfo("cannot load jsFile");
             return false;
         }
     }
@@ -686,8 +716,13 @@ public class BridgeWebView extends WebView {
         }
     }
 
-    public void setDebug(boolean isDebug, @WebViewLogLevel int level) {
-        this.logLevel = level;
+    public void setLogger(String tag, ILogger logger) {
+        realLogger = logger;
+        TAG = tag;
+    }
+
+    public void setDebug(boolean isDebug) {
+        printLog = isDebug;
         if (Build.VERSION.SDK_INT >= 19) {
             WebView.setWebContentsDebuggingEnabled(isDebug);
         }
@@ -733,7 +768,7 @@ public class BridgeWebView extends WebView {
         this.windowListener = windowListener;
     }
 
-    public void setProgressListener(OnProgressListener<WebView> progressChangedListener) {
+    public void setProgressListener(OnProgressListener progressChangedListener) {
         this.progressChangedListener = progressChangedListener;
     }
 

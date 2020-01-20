@@ -11,13 +11,14 @@ import com.zpf.api.OnProgressListener;
 import com.zpf.support.network.base.ErrorCode;
 import com.zpf.support.network.header.HeaderCarrier;
 import com.zpf.support.network.interceptor.DownLoadInterceptor;
-import com.zpf.support.network.okhttp.DownloadCallBack;
 import com.zpf.support.network.okhttp.OkHttpCallBack;
 import com.zpf.tool.config.AppContext;
-import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.util.network.R;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,6 +27,7 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 
 public class OkHttpNetUtil {
 
@@ -41,13 +43,13 @@ public class OkHttpNetUtil {
     }
 
     public static void callNetwork(@NonNull OkHttpClient client, @NonNull Request request,
-                                   @Nullable OnDataResultListener<IResultBean<String>> resultListener,
+                                   @Nullable OnDataResultListener<IResultBean<ResponseBody>> resultListener,
                                    @Nullable IManager<ICancelable> manager) {
         callNetwork(client, request, 0, resultListener, manager, true);
     }
 
     public static void callNetwork(@NonNull OkHttpClient client, @NonNull Request request, int type,
-                                   @Nullable OnDataResultListener<IResultBean<String>> resultListener,
+                                   @Nullable OnDataResultListener<IResultBean<ResponseBody>> resultListener,
                                    @Nullable IManager<ICancelable> manager, boolean singleRequest) {
         final String cacheKey = request.method() + "=" + request.url().toString();
         CacheInfo cacheInfo = cacheMap.get(cacheKey);
@@ -70,14 +72,14 @@ public class OkHttpNetUtil {
 
 
     public static void requestGetCall(@NonNull String url, @Nullable Map<String, String> params,
-                                      @Nullable OnDataResultListener<IResultBean<String>> resultListener,
+                                      @Nullable OnDataResultListener<IResultBean<ResponseBody>> resultListener,
                                       @Nullable IManager<ICancelable> manager) {
         requestGetCall(url, params, null, 0, resultListener, manager, true);
     }
 
     public static void requestGetCall(@NonNull String url, @Nullable Map<String, String> params,
                                       @Nullable Map<String, String> heads, int type,
-                                      @Nullable OnDataResultListener<IResultBean<String>> resultListener,
+                                      @Nullable OnDataResultListener<IResultBean<ResponseBody>> resultListener,
                                       @Nullable IManager<ICancelable> manager, boolean singleRequest) {
         final String cacheKey = "get=" + url;
         CacheInfo cacheInfo = cacheMap.get(cacheKey);
@@ -125,14 +127,14 @@ public class OkHttpNetUtil {
     }
 
     public static void requestPostCall(@NonNull String url, @Nullable RequestBody body,
-                                       @Nullable OnDataResultListener<IResultBean<String>> resultListener,
+                                       @Nullable OnDataResultListener<IResultBean<ResponseBody>> resultListener,
                                        @Nullable IManager<ICancelable> manager) {
         requestPostCall(url, body, null, 0, resultListener, manager, true);
     }
 
     public static void requestPostCall(@NonNull String url, @Nullable RequestBody body,
                                        @Nullable Map<String, String> heads, int type,
-                                       @Nullable OnDataResultListener<IResultBean<String>> resultListener,
+                                       @Nullable OnDataResultListener<IResultBean<ResponseBody>> resultListener,
                                        @Nullable IManager<ICancelable> manager, boolean singleRequest) {
         final String cacheKey = "post=" + url;
         CacheInfo cacheInfo = cacheMap.get(cacheKey);
@@ -166,19 +168,19 @@ public class OkHttpNetUtil {
     }
 
     public static void download(@NonNull String url, @NonNull File file, @Nullable Map<String, String> heads,
-                                int type, @Nullable OnDataResultListener<IResultBean<String>> resultListener,
+                                int type, @Nullable OnDataResultListener<IResultBean<ResponseBody>> resultListener,
                                 @Nullable OnProgressListener progressListener,
                                 @Nullable IManager<ICancelable> manager) {
 
         if (!file.exists()) {
             if (resultListener != null) {
                 resultListener.onResult(false,
-                        new ResponseResult<String>(ErrorCode.SAVE_LOCAL_FAIL,
+                        new ResponseResult<ResponseBody>(ErrorCode.SAVE_LOCAL_FAIL,
                                 AppContext.get().getString(R.string.file_not_find)));
             }
             return;
         }
-        final String cacheKey = file.getName() + "=" + url;
+        final String cacheKey = file.getAbsolutePath();
         CacheInfo cacheInfo = cacheMap.get(cacheKey);
         if (cacheInfo == null) {
             cacheInfo = new CacheInfo();
@@ -219,7 +221,7 @@ public class OkHttpNetUtil {
         return new OkHttpCallBack(type) {
 
             @Override
-            protected void complete(boolean success, @NonNull IResultBean<String> responseResult) {
+            protected void complete(boolean success, @NonNull IResultBean<ResponseBody> responseResult) {
                 CacheInfo cacheInfo = cacheMap.get(key);
                 if (cacheInfo != null && cacheInfo.resultListener != null) {
                     cacheInfo.resultListener.onResult(success, responseResult);
@@ -235,20 +237,32 @@ public class OkHttpNetUtil {
         return new OkHttpCallBack(type) {
 
             @Override
-            protected void handleResponse(String response) {
-                CacheInfo cacheInfo = cacheMap.get(key);
-                if (cacheInfo != null && cacheInfo.resultListener != null) {
-                    cacheInfo.resultListener.onResult(true, responseResult);
+            protected void handleResponse(ResponseBody response) throws Throwable {
+                byte[] buf = new byte[2048];
+                int len;
+                FileOutputStream fos = null;
+                InputStream inputStream = response.byteStream();
+                try {
+                    fos = new FileOutputStream(key);
+                    while ((len = inputStream.read(buf)) != -1) {
+                        fos.write(buf, 0, len);
+                        fos.flush();
+                    }
+                } finally {
+                    try {
+                        if (inputStream != null) inputStream.close();
+                        if (fos != null) fos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
             @Override
-            protected void complete(boolean success, @NonNull IResultBean<String> responseResult) {
-                if (!success) {
-                    CacheInfo cacheInfo = cacheMap.get(key);
-                    if (cacheInfo != null && cacheInfo.resultListener != null) {
-                        cacheInfo.resultListener.onResult(false, responseResult);
-                    }
+            protected void complete(boolean success, @NonNull IResultBean<ResponseBody> responseResult) {
+                CacheInfo cacheInfo = cacheMap.get(key);
+                if (cacheInfo != null && cacheInfo.resultListener != null) {
+                    cacheInfo.resultListener.onResult(success, responseResult);
                 }
                 cacheMap.remove(key);
             }
@@ -289,6 +303,6 @@ public class OkHttpNetUtil {
         ICancelable controller;
         Call realCall;
         OnProgressListener progressListener;
-        OnDataResultListener<IResultBean<String>> resultListener;
+        OnDataResultListener<IResultBean<ResponseBody>> resultListener;
     }
 }

@@ -29,7 +29,7 @@ public class RootLayout extends LinearLayout implements IRootLayout {
     private ITitleBar titleBar;
     private BottomShadow bottomShadow;
     private FrameLayout contentLayout;
-    private View currentContent;
+    private View contentView;
 
     public RootLayout(Context context) {
         this(context, null, 0);
@@ -102,26 +102,27 @@ public class RootLayout extends LinearLayout implements IRootLayout {
 
     @Override
     public void setContentView(@NonNull View view) {
-        if (view == currentContent) {
+        if (view == contentView) {
             return;
         }
-        if (currentContent != null) {
-            contentLayout.removeView(currentContent);
+        if (contentView != null) {
+            contentLayout.removeView(contentView);
         }
-        currentContent = view;
-        contentLayout.addView(view);
+        contentView = view;
+        contentLayout.addView(view, 0);
         bottomShadow.bringToFront();
     }
 
     @Override
     public void setContentView(@Nullable LayoutInflater inflater, int layoutId) {
-        if (currentContent != null) {
-            contentLayout.removeView(currentContent);
+        if (contentView != null) {
+            contentLayout.removeView(contentView);
         }
         if (inflater == null) {
             inflater = LayoutInflater.from(getContext());
         }
-        currentContent = inflater.inflate(layoutId, contentLayout, true);
+        contentView = inflater.inflate(layoutId, contentLayout, true);
+        contentLayout.addView(contentView, 0);
         bottomShadow.bringToFront();
     }
 
@@ -133,5 +134,10 @@ public class RootLayout extends LinearLayout implements IRootLayout {
     @Override
     public FrameLayout getContentLayout() {
         return contentLayout;
+    }
+
+    @Override
+    public View getContentView() {
+        return contentView;
     }
 }

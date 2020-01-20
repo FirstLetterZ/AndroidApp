@@ -14,5 +14,5 @@ public interface WebViewStateListener {
 
     void onPageFinish(WebView view, String url);//完成加载
 
-    void onPageError(WebView view, WebResourceRequest request, WebResourceError error);//加载失败
+    void onPageError(WebView view,  String url,int code,String message);//加载失败
 }

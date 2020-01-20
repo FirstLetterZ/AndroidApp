@@ -9,6 +9,7 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -59,20 +60,29 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
 
     public ViewProcessor() {
         this.mContainer = ContainerController.mInitingViewContainer;
-        mRootLayout = new RootLayout(getContext());
+        mRootLayout = onCreateRootLayout(getContext());
         mTitleBar = mRootLayout.getTitleBar();
         bindTitleBar(mRootLayout);
-        ILayoutId iLayoutId = getClass().getAnnotation(ILayoutId.class);
-        if (iLayoutId != null && iLayoutId.value() != 0) {
-            mRootLayout.setContentView(null, iLayoutId.value());
+        View layoutView = getLayoutView(getContext());
+        if (layoutView != null) {
+            mRootLayout.setContentView(layoutView);
         } else {
-            View layoutView = getLayoutView(mContainer.getContext());
-            if (layoutView == null) {
-                mRootLayout.setContentView(null, getLayoutId());
-            } else {
-                mRootLayout.setContentView(layoutView);
+            int layoutId = 0;
+            ILayoutId iLayoutId = getClass().getAnnotation(ILayoutId.class);
+            if (iLayoutId != null) {
+                layoutId = iLayoutId.value();
+            }
+            if (layoutId == 0) {
+                layoutId = getLayoutId();
+            }
+            if (layoutId != 0) {
+                mRootLayout.setContentView(LayoutInflater.from(getContext()), getLayoutId());
             }
         }
+    }
+
+    protected IRootLayout onCreateRootLayout(Context context) {
+        return new RootLayout(context);
     }
 
     @Override
@@ -395,12 +405,12 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
 
     @Override
     public boolean addListener(Object listener, @Nullable Type listenerClass) {
-        return mContainer.addListener(listener,listenerClass);
+        return mContainer.addListener(listener, listenerClass);
     }
 
     @Override
     public boolean removeListener(Object listener, @Nullable Type listenerClass) {
-        return mContainer.removeListener(listener,listenerClass);
+        return mContainer.removeListener(listener, listenerClass);
     }
 
     @Override

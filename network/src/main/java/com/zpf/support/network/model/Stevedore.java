@@ -1,7 +1,9 @@
 package com.zpf.support.network.model;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
+import com.zpf.api.ICancelable;
 import com.zpf.api.IGroup;
 import com.zpf.api.IResultBean;
 import com.zpf.api.OnDestroyListener;
@@ -9,19 +11,18 @@ import com.zpf.api.OnStateChangedListener;
 import com.zpf.support.network.base.ErrorCode;
 import com.zpf.support.network.base.ILocalCacheManager;
 import com.zpf.support.network.base.INetworkCallCreator;
-import com.zpf.support.network.base.IResponseBean;
 import com.zpf.support.network.retrofit.ResponseCallBack;
 
 import retrofit2.Call;
 
-public class Stevedore<T> implements OnDestroyListener {
+public class Stevedore<T> implements OnDestroyListener, ICancelable {
     private boolean destroyed = false;
     private T resultData = null;
     private volatile boolean done = false;
     private Call<T> call;
-    private INetworkCallCreator<T> callNetworkManager;
-    private OnStateChangedListener<T> stateChangedListener;
-    private ILocalCacheManager<T> localCacheManager;
+    public INetworkCallCreator<T> callNetworkManager;
+    public OnStateChangedListener<T> stateChangedListener;
+    public ILocalCacheManager<T> localCacheManager;
 
     protected T searchLocal() {
         if (localCacheManager == null) {
@@ -69,11 +70,24 @@ public class Stevedore<T> implements OnDestroyListener {
         done = true;
     }
 
+    @Override
+    public boolean isCancelled() {
+        return call != null && call.isCanceled();
+    }
+
     public void load() {
-        load(RequestType.DEF_TYPE);
+        load(RequestType.DEF_TYPE, null);
     }
 
     public void load(RequestType type) {
+        load(type, null);
+    }
+
+    public void load(@Nullable INetworkCallCreator<T> callCreator) {
+        load(RequestType.DEF_TYPE, callCreator);
+    }
+
+    public void load(RequestType type, @Nullable INetworkCallCreator<T> callCreator) {
         if (destroyed || type == null) {
             return;
         }
@@ -92,20 +106,25 @@ public class Stevedore<T> implements OnDestroyListener {
         if (resultData != null) {
             onStateChanged(false, ErrorCode.LOAD_LOCAL_DATA, null, resultData);
             if (type.auto_update) {
-                loadDataFromNetwork(type);
+                loadDataFromNetwork(type, callCreator);
             } else {
                 done = true;
             }
         } else {
-            loadDataFromNetwork(type);
+            loadDataFromNetwork(type, callCreator);
         }
     }
 
-    private void loadDataFromNetwork(RequestType type) {
+    private void loadDataFromNetwork(RequestType type, @Nullable INetworkCallCreator<T> callCreator) {
         if (destroyed || type == null) {
             return;
         }
-        call = callNetwork();
+        if (callCreator != null) {
+            call = callCreator.callNetwork();
+        }
+        if (call == null) {
+            call = callNetwork();
+        }
         if (call == null || destroyed) {
             done = true;
             return;

@@ -19,7 +19,7 @@ import com.zpf.tool.expand.util.LoadStateListener;
 /**
  * Created by ZPF on 2019/7/19.
  */
-public abstract class MaskLayout<T extends View> extends PackedLayout<T> {
+public class MaskLayout<T extends View> extends PackedLayout<T> {
     protected LinearLayout maskLayout;
     protected ProgressBar loadView;
     protected ImageView ivPicture;
@@ -39,8 +39,6 @@ public abstract class MaskLayout<T extends View> extends PackedLayout<T> {
     public MaskLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
-    protected abstract T createContentView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr);
 
     //初始化全部要用的视图
     public void initView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {

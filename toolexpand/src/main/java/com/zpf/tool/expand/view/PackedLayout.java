@@ -15,7 +15,8 @@ import com.zpf.api.IPackedLayout;
 /**
  * Created by ZPF on 2018/7/7.
  */
-public abstract class PackedLayout<T extends View> extends FrameLayout implements IPackedLayout {
+public  class PackedLayout<T extends View> extends FrameLayout implements IPackedLayout {
+    @Nullable
     protected T contentView;
     private final SparseArray<View> childrenArray = new SparseArray<>();
 
@@ -29,17 +30,13 @@ public abstract class PackedLayout<T extends View> extends FrameLayout implement
 
     public PackedLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        contentView = createContentView(context, attrs, defStyleAttr);
-        childrenArray.put(0, contentView);
-        addView(contentView, new LayoutParams(LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT));
         initView(context, attrs, defStyleAttr);
     }
 
-    protected abstract T createContentView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr);
-
     //初始化全部要用的视图
-    public abstract void initView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr);
+    public  void initView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr){
+
+    }
 
     @NonNull
     @Override
@@ -82,7 +79,7 @@ public abstract class PackedLayout<T extends View> extends FrameLayout implement
     public void addChildByKey(@IntRange(from = 1, to = 16) int key, View view) {
         if (view != null) {
             ViewGroup.LayoutParams params = view.getLayoutParams();
-            if (params == null || !(params instanceof MarginLayoutParams)) {
+            if (!(params instanceof MarginLayoutParams)) {
                 params = new LayoutParams(LayoutParams.MATCH_PARENT,
                         LayoutParams.MATCH_PARENT);
             }
@@ -97,9 +94,21 @@ public abstract class PackedLayout<T extends View> extends FrameLayout implement
                 getChildAt(i).setVisibility(GONE);
             }
         }
-        contentView.setVisibility(VISIBLE);
+        if (contentView != null) {
+            contentView.setVisibility(VISIBLE);
+        }
     }
 
+    public void setContentView(T view) {
+        contentView = view;
+        if (contentView != null) {
+            childrenArray.put(0, contentView);
+            addView(contentView, 0, new LayoutParams(LayoutParams.MATCH_PARENT,
+                    LayoutParams.MATCH_PARENT));
+        }
+    }
+
+    @Nullable
     public T getContentView() {
         return contentView;
     }

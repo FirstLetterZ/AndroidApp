@@ -11,11 +11,12 @@ import java.io.IOException;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 /**
  * Created by ZPF .
  */
-public abstract class OkHttpCallBack extends BaseCallBack<String> implements Callback {
+public abstract class OkHttpCallBack extends BaseCallBack<ResponseBody> implements Callback {
     private Call call;
 
     public OkHttpCallBack() {
@@ -43,17 +44,11 @@ public abstract class OkHttpCallBack extends BaseCallBack<String> implements Cal
         if (response == null) {
             onDataNull();
         } else if (response.isSuccessful()) {
-            String temp = null;
-            try {
-                temp = response.body() != null ? response.body().string() : null;
-            } catch (Exception e) {
-                //
-            }
-            final String result = temp;
-            if (checkResponse(result)) {
+            ResponseBody body = response.body();
+            if (checkResponse(body)) {
                 try {
-                    handleResponse(result);
-                } catch (Exception e) {
+                    handleResponse(body);
+                } catch (Throwable e) {
                     handleError(e);
                     return;
                 }
@@ -118,7 +113,8 @@ public abstract class OkHttpCallBack extends BaseCallBack<String> implements Cal
         }
     }
 
-    protected void handleResponse(String response) {
+    //默认在子线程运行
+    protected void handleResponse(ResponseBody responseBody) throws Throwable {
 
     }
 
