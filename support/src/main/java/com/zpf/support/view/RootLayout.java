@@ -122,7 +122,6 @@ public class RootLayout extends LinearLayout implements IRootLayout {
             inflater = LayoutInflater.from(getContext());
         }
         contentView = inflater.inflate(layoutId, contentLayout, true);
-        contentLayout.addView(contentView, 0);
         bottomShadow.bringToFront();
     }
 
