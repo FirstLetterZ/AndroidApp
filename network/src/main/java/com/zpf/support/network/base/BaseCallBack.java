@@ -188,8 +188,10 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
 
     protected void removeObservable() {
         if (manager != null) {
+            boolean realState = isCancel;
             manager.remove(bindId);
             manager = null;
+            isCancel = realState;
         }
     }
 
