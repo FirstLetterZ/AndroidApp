@@ -29,7 +29,7 @@ import com.zpf.support.constant.AppConst;
 import com.zpf.support.model.SimpleEvent;
 import com.zpf.support.model.IconTextEntry;
 import com.zpf.support.model.TitleBarEntry;
-import com.zpf.support.view.RootLayout;
+import com.zpf.support.view.LinearRootLayout;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.PermissionUtil;
 import com.zpf.tool.SafeClickListener;
@@ -82,7 +82,7 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
     }
 
     protected IRootLayout onCreateRootLayout(Context context) {
-        return new RootLayout(context);
+        return new LinearRootLayout(context);
     }
 
     @Override

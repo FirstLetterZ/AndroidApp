@@ -5,7 +5,7 @@ import android.graphics.Color;
 import com.zpf.api.IClassLoader;
 import com.zpf.api.dataparser.JsonParserInterface;
 import com.zpf.support.network.base.IResponseHandler;
-import com.zpf.support.view.RootLayout;
+import com.zpf.support.view.LinearRootLayout;
 import com.zpf.tool.config.GlobalConfigInterface;
 import com.zpf.tool.expand.util.ClassLoaderImpl;
 import com.zpf.tool.gson.GsonUtil;
@@ -26,11 +26,11 @@ public class RealGlobalConfig implements GlobalConfigInterface {
     @Override
     public void onObjectInit(Object object) {
         if (object != null) {
-            if (object instanceof RootLayout) {
-                ((RootLayout) object).getLayout().setBackgroundColor(Color.WHITE);
-                ((RootLayout) object).getTopLayout().getLayout().setBackgroundColor(Color.BLUE);
-                ((RootLayout) object).getShadowLine().setShadowColor(Color.DKGRAY);
-                ((RootLayout) object).getShadowLine().setElevation(4);
+            if (object instanceof LinearRootLayout) {
+                ((LinearRootLayout) object).getLayout().setBackgroundColor(Color.WHITE);
+                ((LinearRootLayout) object).getTopLayout().getLayout().setBackgroundColor(Color.BLUE);
+                ((LinearRootLayout) object).getShadowLine().setShadowColor(Color.DKGRAY);
+                ((LinearRootLayout) object).getShadowLine().setElevation(4);
             }
         }
     }

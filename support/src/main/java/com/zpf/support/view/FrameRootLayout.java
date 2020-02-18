@@ -9,39 +9,30 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import com.zpf.frame.IRootLayout;
 import com.zpf.frame.IShadowLine;
 import com.zpf.frame.ITitleBar;
 import com.zpf.frame.ITopLayout;
-import com.zpf.support.R;
-import com.zpf.tool.PublicUtil;
 import com.zpf.tool.config.GlobalConfigImpl;
 
-/**
- * 带标题栏的默认布局
- * Created by ZPF on 2018/6/14.
- */
-public class RootLayout extends LinearLayout implements IRootLayout {
+public class FrameRootLayout extends FrameLayout implements IRootLayout {
     private ITopLayout topView;
     private View statusBar;
     private ITitleBar titleBar;
     private BottomShadow bottomShadow;
-    private FrameLayout contentLayout;
     private View contentView;
 
-    public RootLayout(Context context) {
+    public FrameRootLayout(Context context) {
         this(context, null, 0);
     }
 
-    public RootLayout(Context context, @Nullable AttributeSet attrs) {
+    public FrameRootLayout(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public RootLayout(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public FrameRootLayout(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        setOrientation(VERTICAL);
         setFitsSystemWindows(true);
         createChildren(context);
     }
@@ -53,18 +44,11 @@ public class RootLayout extends LinearLayout implements IRootLayout {
     }
 
     protected void createChildren(Context context) {
-        topView = new TopLayout(context);
+        topView = new ShadowTopLayout(context);
         statusBar = topView.getStatusBar();
         titleBar = topView.getTitleBar();
-        bottomShadow = new BottomShadow(context);
-        bottomShadow.setElevation(2);
-        bottomShadow.setShadowColor(PublicUtil.getColor(R.color.bottom_shadow));
+        bottomShadow = ((ShadowTopLayout) topView).getBottomShadow();
         addView(topView.getLayout());
-        contentLayout = new FrameLayout(context);
-        contentLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-        contentLayout.addView(bottomShadow);
-        addView(contentLayout);
         GlobalConfigImpl.get().onObjectInit(this);
     }
 
@@ -106,24 +90,23 @@ public class RootLayout extends LinearLayout implements IRootLayout {
             return;
         }
         if (contentView != null) {
-            contentLayout.removeView(contentView);
+            removeView(contentView);
         }
         contentView = view;
-        contentLayout.addView(view, 0);
-        bottomShadow.bringToFront();
+        addView(view, 0);
+        bringChildToFront(topView.getLayout());
     }
 
     @Override
     public void setContentView(@Nullable LayoutInflater inflater, int layoutId) {
         if (contentView != null) {
-            contentLayout.removeView(contentView);
+            removeView(contentView);
         }
         if (inflater == null) {
             inflater = LayoutInflater.from(getContext());
         }
-        contentView = inflater.inflate(layoutId, contentLayout, false);
-        contentLayout.addView(contentView, 0);
-        bottomShadow.bringToFront();
+        contentView = inflater.inflate(layoutId, this, true);
+        bringChildToFront(topView.getLayout());
     }
 
     @Override
@@ -133,7 +116,7 @@ public class RootLayout extends LinearLayout implements IRootLayout {
 
     @Override
     public FrameLayout getContentLayout() {
-        return contentLayout;
+        return this;
     }
 
     @Override
@@ -141,3 +124,4 @@ public class RootLayout extends LinearLayout implements IRootLayout {
         return contentView;
     }
 }
+
