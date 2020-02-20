@@ -105,7 +105,8 @@ public class FrameRootLayout extends FrameLayout implements IRootLayout {
         if (inflater == null) {
             inflater = LayoutInflater.from(getContext());
         }
-        contentView = inflater.inflate(layoutId, this, true);
+        contentView = inflater.inflate(layoutId, this, false);
+        addView(contentView, 0);
         bringChildToFront(topView.getLayout());
     }
 

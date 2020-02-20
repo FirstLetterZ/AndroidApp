@@ -1,6 +1,6 @@
 package com.zpf.app.global;
 
-import com.zpf.support.network.base.IResponseBean;
+import com.zpf.api.IResultBean;
 import com.zpf.support.network.base.IResponseHandler;
 import com.zpf.support.network.model.ResponseResult;
 import com.zpf.tool.ToastUtil;
@@ -33,7 +33,7 @@ public class ResponseHandleImpl implements IResponseHandler {
     }
 
     @Override
-    public boolean interceptFailHandle(IResponseBean result) {
+    public boolean interceptFailHandle(IResultBean result) {
         return false;
     }
 
