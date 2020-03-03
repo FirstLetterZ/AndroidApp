@@ -1,4 +1,4 @@
-package com.zpf.support.network.model;
+package com.zpf.support.network.util;
 
 import android.support.annotation.Nullable;
 

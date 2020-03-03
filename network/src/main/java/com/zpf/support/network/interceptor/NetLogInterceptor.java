@@ -1,8 +1,9 @@
 package com.zpf.support.network.interceptor;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
+
+import com.zpf.support.network.util.Util;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -11,21 +12,18 @@ import java.nio.charset.Charset;
 import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.Buffer;
-import okio.BufferedSource;
 
 /**
  * 网络日志拦截，目前只拦截打印json类型数据内容，其余情况只打印类型
  * Created by ZPF on 2018/9/17.
  */
 public class NetLogInterceptor implements Interceptor {
-    private Charset defCharset = Charset.forName("UTF-8");
     private OnNetLogListener logListener;
 
     @Override
@@ -66,15 +64,8 @@ public class NetLogInterceptor implements Interceptor {
         long t2 = System.currentTimeMillis();
         if (response.isSuccessful()) {
             ResponseBody body = response.body();
-            if (body != null) {
-                MediaType responseMediaType = body.contentType();
-                if (responseMediaType != null && "json".equals(responseMediaType.subtype())) {
-                    BufferedSource source = body.source();
-                    source.request(Long.MAX_VALUE); // Buffer the entire body.
-                    Buffer buffer = source.getBuffer();
-                    Charset charset = checkCharset(responseMediaType);
-                    bodyString = buffer.clone().readString(charset);
-                }
+            if ("json".equals(Util.getMediaSubType(body))) {
+                bodyString = Util.readResponseString(body);
             }
             if (TextUtils.isEmpty(bodyString)) {
                 bodyString = "{\"code\":" + response.code() + ",\"message\":\"" + response.message() +
@@ -129,17 +120,17 @@ public class NetLogInterceptor implements Interceptor {
                 builder.append("{\"contentLength\":").append(contentLength).append("}");
             } else {
                 if (contentLength >= 0) {
-                    Charset charset = checkCharset(requestBody.contentType());
+                    Charset charset = Util.checkCharset(requestBody.contentType());
                     Buffer buffer = new Buffer();
                     try {
                         requestBody.writeTo(buffer);
                         if (buffer.size() > 0 && isPlaintext(buffer)) {
-                            String par=buffer.readString(charset);
-                            if(TextUtils.isEmpty(par)){
+                            String par = buffer.readString(charset);
+                            if (TextUtils.isEmpty(par)) {
                                 builder.append("{}");
-                            }else if(par.startsWith("{")||par.startsWith("[")){
+                            } else if (par.startsWith("{") || par.startsWith("[")) {
                                 builder.append(par);
-                            }else {
+                            } else {
                                 builder.append("\"").append(par).append("\"");
                             }
                         } else {
@@ -173,18 +164,6 @@ public class NetLogInterceptor implements Interceptor {
         } catch (EOFException e) {
             return false;
         }
-    }
-
-    @NonNull
-    private Charset checkCharset(@Nullable MediaType type) {
-        if (type == null) {
-            return defCharset;
-        }
-        Charset charset = type.charset(defCharset);
-        if (charset == null) {
-            charset = defCharset;
-        }
-        return charset;
     }
 
     public OnNetLogListener getLogListener() {

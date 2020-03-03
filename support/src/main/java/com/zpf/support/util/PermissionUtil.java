@@ -98,7 +98,9 @@ public class PermissionUtil {
 
     public boolean checkToastEnabled(@NonNull Activity activity, DialogInterface.OnDismissListener listener) {
         boolean isOpen = compatChecker.checkToastEnabled(activity);
-        showHintDialog(activity, listener);
+        if (!isOpen && listener != null) {
+            showHintDialog(activity, listener);
+        }
         return isOpen;
     }
 

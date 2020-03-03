@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="network_data_null">返回数据为空</string>
     <string name="network_common_error">网络请求失败</string>

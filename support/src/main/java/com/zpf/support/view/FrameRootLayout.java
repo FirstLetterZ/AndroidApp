@@ -48,7 +48,8 @@ public class FrameRootLayout extends FrameLayout implements IRootLayout {
         statusBar = topView.getStatusBar();
         titleBar = topView.getTitleBar();
         bottomShadow = ((ShadowTopLayout) topView).getBottomShadow();
-        addView(topView.getLayout());
+        addView(topView.getLayout(), new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
         GlobalConfigImpl.get().onObjectInit(this);
     }
 

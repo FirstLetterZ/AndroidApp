@@ -2,6 +2,7 @@ package com.zpf.support.network.model;
 
 import com.zpf.support.network.header.HeaderCarrier;
 import com.zpf.support.network.interceptor.HeaderInterceptor;
+import com.zpf.support.network.util.TrustAllUtil;
 
 import java.util.concurrent.TimeUnit;
 

@@ -4,6 +4,7 @@ import com.zpf.api.ICancelable;
 import com.zpf.api.IManager;
 import com.zpf.support.network.base.BaseCallBack;
 import com.zpf.support.network.base.ErrorCode;
+import com.zpf.support.network.util.Util;
 import com.zpf.util.network.R;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ import okhttp3.ResponseBody;
 /**
  * Created by ZPF .
  */
-public abstract class OkHttpCallBack extends BaseCallBack<ResponseBody> implements Callback {
+public abstract class OkHttpCallBack extends BaseCallBack<String> implements Callback {
     private Call call;
 
     public OkHttpCallBack() {
@@ -45,7 +46,23 @@ public abstract class OkHttpCallBack extends BaseCallBack<ResponseBody> implemen
             onDataNull();
         } else if (response.isSuccessful()) {
             ResponseBody body = response.body();
-            if (checkResponse(body)) {
+            if (body == null) {
+                onDataNull();
+                return;
+            }
+            String bodyString;
+            String subType = Util.getMediaSubType(body);
+            if ("json".equals(subType)) {
+                try {
+                    bodyString = body.string();
+                } catch (IOException e) {
+                    fail(response.code(), getString(R.string.network_parse_error));
+                    return;
+                }
+            } else {
+                bodyString = "{\"subType\":\"" + subType + "\"}";
+            }
+            if (checkResponse(bodyString)) {
                 try {
                     handleResponse(body);
                 } catch (Throwable e) {
