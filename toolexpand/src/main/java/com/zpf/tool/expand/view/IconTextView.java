@@ -32,7 +32,7 @@ public class IconTextView extends TextView implements IconText {
     private int mCurrentColor;
     private ColorStateList mTint;
     private PorterDuff.Mode mCurrentMode = PorterDuff.Mode.SRC_IN;
-    private Drawable[] mDrawableArray = new Drawable[]{null, null, null, null};
+    private Drawable[] mDrawableArray;
 
     public IconTextView(Context context) {
         super(context);
@@ -257,6 +257,9 @@ public class IconTextView extends TextView implements IconText {
 
     @Override
     public void setCompoundDrawables(@Nullable Drawable left, @Nullable Drawable top, @Nullable Drawable right, @Nullable Drawable bottom) {
+        if (mDrawableArray == null) {
+            mDrawableArray = new Drawable[]{null, null, null, null};
+        }
         mDrawableArray[0] = left;
         mDrawableArray[1] = top;
         mDrawableArray[2] = right;
@@ -267,6 +270,10 @@ public class IconTextView extends TextView implements IconText {
 
     private void updateTint() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            if (mDrawableArray == null) {
+                mDrawableArray = new Drawable[]{null, null, null, null};
+                return;
+            }
             for (Drawable d : mDrawableArray) {
                 if (d != null) {
                     if (mCurrentMode == null || mTint == null) {

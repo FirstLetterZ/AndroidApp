@@ -55,12 +55,12 @@ ext {
             design                : 'com.android.support:design:27.1.1',
             multidex              : 'com.android.support:multidex:1.0.2',
             /* ============================== 项目内工具库 ================================ */
-            toolExpand            : 'com.zpf.android:tool-expand:0.3.1',
+            toolExpand            : 'com.zpf.android:tool-expand:0.3.3',
             webview               : 'com.zpf.android:bridgeWebview:1.2.0',
             refresh               : 'com.zpf.android:pullRefresh:1.0.8',
             network               : 'com.zpf.android:util-retrofit:2.0.2',
             rxnetwork             : 'com.zpf.android:util-rxNetwork:1.3.1',
-            support               : 'com.zpf.android:tool-support:0.4.4',
+            support               : 'com.zpf.android:tool-support:0.5.17',
             gsonParse             : 'com.zpf.android:util-gson:1.0.8',
             glideutil             : 'com.zpf.android:util-glide:1.0.1',
             /* ============================== 项目内依赖工具库 ================================ */
