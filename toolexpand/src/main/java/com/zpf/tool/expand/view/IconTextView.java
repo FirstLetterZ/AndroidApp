@@ -1,8 +1,11 @@
 package com.zpf.tool.expand.view;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IntRange;
 import android.support.annotation.Nullable;
@@ -26,6 +29,10 @@ public class IconTextView extends TextView implements IconText {
     private int imageHeight;
     private final String defaultTtfFilePath = "iconfont/iconfont.ttf";//默认的ttf文件位置
     private boolean autoCheck = true;
+    private int mCurrentColor;
+    private ColorStateList mTint;
+    private PorterDuff.Mode mCurrentMode = PorterDuff.Mode.SRC_IN;
+    private Drawable[] mDrawableArray = new Drawable[]{null, null, null, null};
 
     public IconTextView(Context context) {
         super(context);
@@ -42,9 +49,10 @@ public class IconTextView extends TextView implements IconText {
         initOriginalParams(context, attrs);
     }
 
-    private void initOriginalParams(Context context, @Nullable AttributeSet attrs) {
+    protected void initOriginalParams(Context context, @Nullable AttributeSet attrs) {
         mOriginalTypeface = getTypeface();
         mTypeface = mOriginalTypeface;
+        setIncludeFontPadding(false);
     }
 
     @Override
@@ -110,6 +118,44 @@ public class IconTextView extends TextView implements IconText {
     @Override
     public int getImageHeight() {
         return imageHeight;
+    }
+
+    @Override
+    public void setImageTintList(@Nullable ColorStateList tint) {
+        mTint = tint;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            setCompoundDrawableTintList(tint);
+        } else {
+            updateTint();
+        }
+    }
+
+    @Override
+    public ColorStateList getImageTintList() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return getCompoundDrawableTintList();
+        } else {
+            return mTint;
+        }
+    }
+
+    @Override
+    public void setImageTintMode(@Nullable PorterDuff.Mode tintMode) {
+        mCurrentMode = tintMode;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            setCompoundDrawableTintMode(tintMode);
+        } else {
+            updateTint();
+        }
+    }
+
+    @Override
+    public PorterDuff.Mode getImageTintMode() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return getCompoundDrawableTintMode();
+        } else {
+            return mCurrentMode;
+        }
     }
 
     @Override
@@ -205,6 +251,34 @@ public class IconTextView extends TextView implements IconText {
                 drawable.setBounds(0, 0, (int) (b * drawable.getIntrinsicWidth()), (int) height);
             } else {
                 drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+            }
+        }
+    }
+
+    @Override
+    public void setCompoundDrawables(@Nullable Drawable left, @Nullable Drawable top, @Nullable Drawable right, @Nullable Drawable bottom) {
+        mDrawableArray[0] = left;
+        mDrawableArray[1] = top;
+        mDrawableArray[2] = right;
+        mDrawableArray[3] = bottom;
+        updateTint();
+        super.setCompoundDrawables(left, top, right, bottom);
+    }
+
+    private void updateTint() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            for (Drawable d : mDrawableArray) {
+                if (d != null) {
+                    if (mCurrentMode == null || mTint == null) {
+                        d.clearColorFilter();
+                    } else {
+                        int color = mTint.getColorForState(d.getState(), mTint.getDefaultColor());
+                        if (mCurrentColor != color) {
+                            d.setColorFilter(color, mCurrentMode);
+                            mCurrentColor = color;
+                        }
+                    }
+                }
             }
         }
     }

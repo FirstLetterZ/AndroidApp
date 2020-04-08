@@ -8,8 +8,10 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 
 import com.zpf.api.IBackPressInterceptor;
 import com.zpf.api.ICancelable;
@@ -73,8 +75,16 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
     }
 
     protected void initWindow(@NonNull Window window) {
+        boolean useDefWindowConfig = true;
         if (mViewProcessor != null) {
-            mViewProcessor.initWindow(window);
+            useDefWindowConfig = !mViewProcessor.initWindow(window);
+        }
+        if (useDefWindowConfig) {
+            window.getDecorView().setPadding(0, 0, 0, 0);
+            window.getAttributes().gravity = Gravity.CENTER;
+            window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         }
     }
 
