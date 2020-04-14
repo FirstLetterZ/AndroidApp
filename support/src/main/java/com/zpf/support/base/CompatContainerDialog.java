@@ -48,7 +48,12 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
     protected IManager<ICustomWindow> listener;
     protected long bindId = -1;
 
-    public CompatContainerDialog(@NonNull IViewContainer viewContainer, Class<? extends IViewProcessor> targetClass, @Nullable Bundle params) {
+    public CompatContainerDialog(@NonNull IViewContainer viewContainer, Class<? extends IViewProcessor> targetClass) {
+        this(viewContainer, 0, targetClass, null);
+    }
+
+    public CompatContainerDialog(@NonNull IViewContainer viewContainer, Class<? extends IViewProcessor> targetClass,
+                                 @Nullable Bundle params) {
         this(viewContainer, 0, targetClass, params);
     }
 

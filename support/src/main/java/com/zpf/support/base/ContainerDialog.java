@@ -48,7 +48,13 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
     protected IManager<ICustomWindow> listener;
     protected long bindId = -1;
 
-    public ContainerDialog(@NonNull IViewContainer viewContainer, Class<? extends IViewProcessor> targetClass, @Nullable Bundle params) {
+
+    public ContainerDialog(@NonNull IViewContainer viewContainer, Class<? extends IViewProcessor> targetClass) {
+        this(viewContainer, 0, targetClass, null);
+    }
+
+    public ContainerDialog(@NonNull IViewContainer viewContainer, Class<? extends IViewProcessor> targetClass,
+                           @Nullable Bundle params) {
         this(viewContainer, 0, targetClass, params);
     }
 
