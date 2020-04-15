@@ -43,11 +43,15 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
         } else if (response.isSuccessful()) {
             final T result = response.body();
             if (checkResponse(result)) {
+                try {
+                    handleResponse(result);
+                } catch (Exception e) {
+                    handleError(e);
+                }
                 runInMain(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            handleResponse(result);
                             complete(true, responseResult);
                         } catch (Exception e) {
                             handleError(e);
@@ -102,7 +106,8 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
         }
     }
 
-    protected abstract void handleResponse(T response);
+    protected void handleResponse(T response) {
 
+    }
 
 }
