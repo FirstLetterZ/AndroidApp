@@ -7,9 +7,9 @@ import android.view.View;
  */
 
 public interface BannerViewCreator {
-    View createView(int position);
+    View onCreateView(int position);
 
     int getSize();
 
-    void onItemClick(int position);
+    void onBindView(View view, int position);
 }

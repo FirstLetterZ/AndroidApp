@@ -22,6 +22,7 @@ import com.zpf.support.util.LogUtil;
 import com.zpf.support.view.banner.BannerPagerView;
 import com.zpf.support.view.banner.BannerViewCreator;
 import com.zpf.support.view.banner.StretchableIndicator;
+import com.zpf.tool.SafeClickListener;
 import com.zpf.tool.ToastUtil;
 
 /**
@@ -84,8 +85,9 @@ public class LoginView extends ViewProcessor {
         bpv.setPageMargin((int) (-25 * d));
         bpv.setBannerIndicator(indicator);
         bpv.init(new BannerViewCreator() {
+
             @Override
-            public View createView(int position) {
+            public View onCreateView(int position) {
                 LinearLayout layout = new LinearLayout(getContext());
                 layout.setGravity(Gravity.CENTER);
                 layout.setPadding((int) (20 * d), (int) (20 * d), (int) (20 * d), (int) (20 * d));
@@ -105,8 +107,12 @@ public class LoginView extends ViewProcessor {
             }
 
             @Override
-            public void onItemClick(int position) {
-                ToastUtil.toast("onItemClick--->" + position);
+            public void onBindView(View view, int position) {
+                view.setOnClickListener(new SafeClickListener<Object>() {
+                    @Override
+                    public void click(View v) {
+                    }
+                });
             }
 
         });

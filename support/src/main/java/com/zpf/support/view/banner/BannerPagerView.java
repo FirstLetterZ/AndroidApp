@@ -11,8 +11,10 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Interpolator;
 import android.widget.Scroller;
+
+import com.zpf.api.OnItemViewClickListener;
+import com.zpf.tool.SafeClickListener;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,12 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class BannerPagerView extends ViewPager {
     private AtomicInteger current = new AtomicInteger(1);//当前页码
-    private float x;//用于判断是否为水平滑动
-    private float y;//用于判断是否为竖直滑动
-    private boolean isMove;//滑动不触发点击事件
     private long pauseTime; //按下的时间
-    private long hold;//按住了多久
-    private long lastClick;//上次触发点击事件的事件
     private volatile boolean isPaused = false;
     /*可设置的参数*/
     private int interval = 4000;//自动滚动间隔时间
@@ -48,6 +45,7 @@ public class BannerPagerView extends ViewPager {
 
     private boolean realVisible = false;
     private boolean autoScrollable = true;
+    private OnItemViewClickListener itemViewClickListener;
 
     public BannerPagerView(@NonNull Context context) {
         this(context, null);
@@ -134,27 +132,12 @@ public class BannerPagerView extends ViewPager {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_UP:
-                restart();
-                if (viewCreator != null && pagerAdapter != null && pagerAdapter.getCount() > 0 && hold < 800 && !isMove) {//按住小于0.8秒，点击事件不为空，不是滑动状态，则出发点击
-                    if (System.currentTimeMillis() - lastClick > 200) {//防抖
-                        lastClick = System.currentTimeMillis();
-                        viewCreator.onItemClick(getRealPosition());
-                    }
-                }
-                break;
-            case MotionEvent.ACTION_DOWN:
-                pause();
-                x = event.getRawX();
-                y = event.getRawY();
-                isMove = false;
-                return true;//返回false则无法监听MotionEvent.ACTION_UP
             case MotionEvent.ACTION_CANCEL:
                 restart();
                 break;
-            case MotionEvent.ACTION_MOVE:
-                if (Math.abs(event.getRawX() - x) > 8 || Math.abs(event.getRawY() - y) > 8) {//水平或竖直方向位移绝对值超过8像素视为滑动
-                    isMove = true;
-                }
+            case MotionEvent.ACTION_DOWN:
+                pause();
+                return true;//返回false则无法监听MotionEvent.ACTION_UP
             default://正常不会是running状态
                 pause();
                 break;
@@ -233,14 +216,6 @@ public class BannerPagerView extends ViewPager {
 
         ViewPagerScroller(Context context) {
             super(context);
-        }
-
-        public ViewPagerScroller(Context context, Interpolator interpolator) {
-            super(context, interpolator);
-        }
-
-        public ViewPagerScroller(Context context, Interpolator interpolator, boolean flywheel) {
-            super(context, interpolator, flywheel);
         }
 
         @Override
@@ -324,12 +299,21 @@ public class BannerPagerView extends ViewPager {
                     } else {
                         rulePosition = position - 1;
                     }
-                    v = viewCreator.createView(rulePosition);
+                    v = viewCreator.onCreateView(rulePosition);
                     pagerArray[position] = v;
                 }
                 if (v.getParent() != null) {
                     ((ViewGroup) v.getParent()).removeView(v);
                 }
+                v.setOnClickListener(new SafeClickListener() {
+                    @Override
+                    public void click(View v) {
+                        if (itemViewClickListener != null) {
+                            itemViewClickListener.onItemViewClick(position, v);
+                        }
+                    }
+                });
+                viewCreator.onBindView(v, position);
                 container.addView(v);
                 return v;
             }
@@ -375,7 +359,8 @@ public class BannerPagerView extends ViewPager {
             return;
         }
         if (isRecyclable()) {
-            hold = System.currentTimeMillis() - pauseTime;
+            //按住了多久
+            long hold = System.currentTimeMillis() - pauseTime;
             long wait;
             if (interval - hold < restartWait) {
                 wait = restartWait;
@@ -395,6 +380,10 @@ public class BannerPagerView extends ViewPager {
             removeCallbacks(circulationRunnable);
             pauseTime = System.currentTimeMillis();
         }
+    }
+
+    public void setItemViewClickListener(OnItemViewClickListener itemViewClickListener) {
+        this.itemViewClickListener = itemViewClickListener;
     }
 
     public int getScrollTime() {
