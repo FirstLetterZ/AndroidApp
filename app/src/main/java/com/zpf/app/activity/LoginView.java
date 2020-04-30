@@ -19,10 +19,10 @@ import com.zpf.support.base.ViewProcessor;
 import com.zpf.app.R;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.util.LogUtil;
+import com.zpf.support.view.TriangleView;
 import com.zpf.support.view.banner.BannerPagerView;
 import com.zpf.support.view.banner.BannerViewCreator;
 import com.zpf.support.view.banner.StretchableIndicator;
-import com.zpf.tool.SafeClickListener;
 import com.zpf.tool.ToastUtil;
 
 /**
@@ -32,8 +32,10 @@ import com.zpf.tool.ToastUtil;
 public class LoginView extends ViewProcessor {
     private AsyncLoadListener loadListener;
     private BannerPagerView bpv = (BannerPagerView) $(R.id.bpv);
+    private TriangleView triangle = (TriangleView) $(R.id.triangle);
     private StretchableIndicator indicator = (StretchableIndicator) $(R.id.indicator);
     private int pageSize = 2;
+    private int d = 1;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -93,7 +95,6 @@ public class LoginView extends ViewProcessor {
                 layout.setPadding((int) (20 * d), (int) (20 * d), (int) (20 * d), (int) (20 * d));
                 TextView view = new TextView(getContext());
                 view.setGravity(Gravity.CENTER);
-                view.setText(("position=" + position));
                 view.setTextColor(Color.BLACK);
                 view.setBackgroundColor(Color.BLUE);
                 layout.addView(view, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -108,11 +109,12 @@ public class LoginView extends ViewProcessor {
 
             @Override
             public void onBindView(View view, int position) {
-                view.setOnClickListener(new SafeClickListener<Object>() {
-                    @Override
-                    public void click(View v) {
-                    }
-                });
+                try {
+                    View one = ((LinearLayout) view).getChildAt(0);
+                    ((TextView) one).setText(("tag=" + view.getTag()));
+                } catch (Exception e) {
+                    //
+                }
             }
 
         });
@@ -144,7 +146,10 @@ public class LoginView extends ViewProcessor {
                 }
                 break;
             case R.id.btn_start:
-                PluginController.get().getClassAsync("TestMainLayout", "plugin_test", loadListener);
+                d = triangle.getTriangleDirection() + 1;
+                triangle.setTriangleDirection(d);
+                triangle.invalidate();
+//                PluginController.get().getClassAsync("TestMainLayout", "plugin_test", loadListener);
                 break;
             case R.id.btn_cancel:
                 Bundle params = new Bundle();

@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Scroller;
 
 import com.zpf.api.OnItemViewClickListener;
+import com.zpf.support.util.LogUtil;
 import com.zpf.tool.SafeClickListener;
 
 import java.lang.reflect.Field;
@@ -34,7 +35,6 @@ public class BannerPagerView extends ViewPager {
     private BannerIndicator bannerIndicator;
     private AtomicInteger pagerSize = new AtomicInteger(0);
     private BannerViewCreator viewCreator;
-    private View[] pagerArray;
     private PagerAdapter pagerAdapter;
     private float lastPositionOffset = 0;
     private boolean rebuildAllView = false;
@@ -46,6 +46,8 @@ public class BannerPagerView extends ViewPager {
     private boolean realVisible = false;
     private boolean autoScrollable = true;
     private OnItemViewClickListener itemViewClickListener;
+    private View firstView;
+    private View lastView;
 
     public BannerPagerView(@NonNull Context context) {
         this(context, null);
@@ -258,14 +260,17 @@ public class BannerPagerView extends ViewPager {
         rebuildAllView = rebuild || pagerSize.get() != newSize;
         pagerSize.set(newSize);
         if (newSize < 1) {
-            pagerArray = null;
+            firstView = null;
+            lastView = null;
             pagerAdapter.notifyDataSetChanged();
         } else if (newSize == 1) {
-            pagerArray = new View[1];
+            firstView = null;
+            lastView = null;
             pagerAdapter.notifyDataSetChanged();
             setCurrentItem(0, false);
         } else {
-            pagerArray = new View[pagerSize.get() + 2];
+            firstView = viewCreator.onCreateView(0);
+            lastView = viewCreator.onCreateView(newSize + 1);
             pagerAdapter.notifyDataSetChanged();
             setCurrentItem(1, false);
             restart();
@@ -289,9 +294,59 @@ public class BannerPagerView extends ViewPager {
             @NonNull
             @Override
             public Object instantiateItem(@NonNull ViewGroup container, final int position) {
-                View v = pagerArray[position];
-                if (v == null) {
-                    int rulePosition;
+                final int rulePosition;
+                View child = null;
+                if (position == 0) {
+                    child = firstView;
+                    rulePosition = pagerSize.get() - 1;
+                } else if (position == pagerSize.get() + 1) {
+                    child = lastView;
+                    rulePosition = 0;
+                } else {
+                    rulePosition = position - 1;
+                }
+                if (child == null) {
+                    child = viewCreator.onCreateView(rulePosition);
+                    if (position == 0) {
+                        firstView = child;
+                    } else if (position == pagerSize.get() + 1) {
+                        lastView = child;
+                    }
+                }
+                if (child.getParent() != null) {
+                    ((ViewGroup) child.getParent()).removeView(child);
+                }
+                child.setOnClickListener(new SafeClickListener() {
+                    @Override
+                    public void click(View v) {
+                        if (itemViewClickListener != null) {
+                            itemViewClickListener.onItemViewClick(rulePosition, v);
+                        }
+                    }
+                });
+                child.setTag(position);
+                viewCreator.onBindView(child, rulePosition);
+                container.addView(child);
+                return child;
+            }
+
+            @Override
+            public int getItemPosition(@NonNull Object object) {
+                if (rebuildAllView) {
+                    LogUtil.e("getItemPosition-->position=" + POSITION_NONE);
+                    return POSITION_NONE;
+                }
+                int position = -1;
+                try {
+                    position = ((int) ((View) object).getTag());
+                } catch (Exception e) {
+                    //
+                }
+                if (position < 0) {
+                    LogUtil.e("getItemPosition-->position=getItemPosition");
+                    return super.getItemPosition(object);
+                } else {
+                    final int rulePosition;
                     if (position == 0) {
                         rulePosition = pagerSize.get() - 1;
                     } else if (position == pagerSize.get() + 1) {
@@ -299,31 +354,10 @@ public class BannerPagerView extends ViewPager {
                     } else {
                         rulePosition = position - 1;
                     }
-                    v = viewCreator.onCreateView(rulePosition);
-                    pagerArray[position] = v;
+                    viewCreator.onBindView((View) object, rulePosition);
+                    LogUtil.e("getItemPosition-->position=" + position);
+                    return position;
                 }
-                if (v.getParent() != null) {
-                    ((ViewGroup) v.getParent()).removeView(v);
-                }
-                v.setOnClickListener(new SafeClickListener() {
-                    @Override
-                    public void click(View v) {
-                        if (itemViewClickListener != null) {
-                            itemViewClickListener.onItemViewClick(position, v);
-                        }
-                    }
-                });
-                viewCreator.onBindView(v, position);
-                container.addView(v);
-                return v;
-            }
-
-            @Override
-            public int getItemPosition(@NonNull Object object) {
-                if (rebuildAllView) {
-                    return POSITION_NONE;
-                }
-                return super.getItemPosition(object);
             }
 
             @Override
@@ -333,7 +367,11 @@ public class BannerPagerView extends ViewPager {
 
             @Override
             public int getCount() {
-                return pagerArray == null ? 0 : pagerArray.length;
+                if (pagerSize.get() > 1) {
+                    return pagerSize.get() + 2;
+                } else {
+                    return pagerSize.get();
+                }
             }
 
             @Override
