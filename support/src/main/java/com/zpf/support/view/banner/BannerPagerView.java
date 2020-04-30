@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.Scroller;
 
 import com.zpf.api.OnItemViewClickListener;
-import com.zpf.support.util.LogUtil;
 import com.zpf.tool.SafeClickListener;
 
 import java.lang.reflect.Field;
@@ -270,7 +269,7 @@ public class BannerPagerView extends ViewPager {
             setCurrentItem(0, false);
         } else {
             firstView = viewCreator.onCreateView(0);
-            lastView = viewCreator.onCreateView(newSize + 1);
+            lastView = viewCreator.onCreateView(newSize - 1);
             pagerAdapter.notifyDataSetChanged();
             setCurrentItem(1, false);
             restart();
@@ -333,7 +332,6 @@ public class BannerPagerView extends ViewPager {
             @Override
             public int getItemPosition(@NonNull Object object) {
                 if (rebuildAllView) {
-                    LogUtil.e("getItemPosition-->position=" + POSITION_NONE);
                     return POSITION_NONE;
                 }
                 int position = -1;
@@ -343,7 +341,6 @@ public class BannerPagerView extends ViewPager {
                     //
                 }
                 if (position < 0) {
-                    LogUtil.e("getItemPosition-->position=getItemPosition");
                     return super.getItemPosition(object);
                 } else {
                     final int rulePosition;
@@ -355,7 +352,6 @@ public class BannerPagerView extends ViewPager {
                         rulePosition = position - 1;
                     }
                     viewCreator.onBindView((View) object, rulePosition);
-                    LogUtil.e("getItemPosition-->position=" + position);
                     return position;
                 }
             }
