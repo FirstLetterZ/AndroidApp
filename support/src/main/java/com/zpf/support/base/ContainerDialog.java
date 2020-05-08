@@ -9,7 +9,6 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.Gravity;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -20,6 +19,7 @@ import com.zpf.api.IManager;
 import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.frame.ILoadingManager;
+import com.zpf.frame.ILoadingStateListener;
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
@@ -308,7 +308,17 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
     }
 
     @Override
-    public View getLoadingView() {
+    public void addStateListener(ILoadingStateListener listener) {
+        mParentContainer.addStateListener(listener);
+    }
+
+    @Override
+    public void removeStateListener(ILoadingStateListener listener) {
+        mParentContainer.removeStateListener(listener);
+    }
+
+    @Override
+    public Object getLoadingView() {
         return mParentContainer.getLoadingView();
     }
 

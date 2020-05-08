@@ -17,6 +17,7 @@ import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
 import com.zpf.api.OnActivityResultListener;
 import com.zpf.frame.ILoadingManager;
+import com.zpf.frame.ILoadingStateListener;
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
@@ -300,7 +301,21 @@ public class ContainerFragment extends Fragment implements IViewContainer, IView
     }
 
     @Override
-    public View getLoadingView() {
+    public void addStateListener(ILoadingStateListener listener) {
+        if (loadingManager != null) {
+            loadingManager.addStateListener(listener);
+        }
+    }
+
+    @Override
+    public void removeStateListener(ILoadingStateListener listener) {
+        if (loadingManager != null) {
+            loadingManager.removeStateListener(listener);
+        }
+    }
+
+    @Override
+    public Object getLoadingView() {
         return loadingManager == null ? null : loadingManager.getLoadingView();
     }
 

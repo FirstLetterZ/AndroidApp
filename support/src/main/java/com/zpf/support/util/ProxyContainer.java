@@ -16,6 +16,7 @@ import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
 import com.zpf.frame.ILoadingManager;
+import com.zpf.frame.ILoadingStateListener;
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
@@ -172,12 +173,12 @@ public class ProxyContainer extends Fragment implements IViewContainer {
 
     @Override
     public boolean addListener(Object listener, @Nullable Type listenerClass) {
-        return mController.addListener(listener,listenerClass);
+        return mController.addListener(listener, listenerClass);
     }
 
     @Override
     public boolean removeListener(Object listener, @Nullable Type listenerClass) {
-        return mController.removeListener(listener,listenerClass);
+        return mController.removeListener(listener, listenerClass);
     }
 
     @Override
@@ -211,8 +212,22 @@ public class ProxyContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public View getLoadingView() {
-        return null;
+    public void addStateListener(ILoadingStateListener listener) {
+        if (loadingManager != null) {
+            loadingManager.addStateListener(listener);
+        }
+    }
+
+    @Override
+    public void removeStateListener(ILoadingStateListener listener) {
+        if (loadingManager != null) {
+            loadingManager.removeStateListener(listener);
+        }
+    }
+
+    @Override
+    public Object getLoadingView() {
+        return loadingManager == null ? null : loadingManager.getLoadingView();
     }
 
     @Override
