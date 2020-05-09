@@ -33,6 +33,7 @@ public class EventManagerImpl implements IEventManager {
             IEvent<?> waitHandleEvent = waitHandlerMap.get(receiverName);
             if (waitHandleEvent != null) {
                 receiver.func(waitHandleEvent);
+                waitHandlerMap.remove(receiverName);
             }
         }
     }

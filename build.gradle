@@ -55,7 +55,7 @@ ext {
             design                : 'com.android.support:design:27.1.1',
             multidex              : 'com.android.support:multidex:1.0.2',
             /* ============================== 项目内工具库 ================================ */
-            toolExpand            : 'com.zpf.android:tool-expand:0.3.4',
+            toolExpand            : 'com.zpf.android:tool-expand:0.3.5',
             webview               : 'com.zpf.android:bridgeWebview:1.2.0',
             refresh               : 'com.zpf.android:pullRefresh:1.0.8',
             network               : 'com.zpf.android:util-retrofit:2.0.2',
