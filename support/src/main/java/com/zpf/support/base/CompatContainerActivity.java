@@ -393,7 +393,6 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         return mParams;
     }
 
-
     @Override
     public int getContainerType() {
         return ContainerType.CONTAINER_COMPAT_ACTIVITY;
@@ -460,6 +459,5 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     protected Class<? extends IViewProcessor> launcherViewProcessorClass() {
         return null;
     }
-
 
 }

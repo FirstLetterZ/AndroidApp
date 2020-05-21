@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatDialog;
@@ -256,16 +255,16 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
 
     @Override
     public void show(final ICustomWindow window) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            mController.show(window);
-        } else {
-            MainHandler.get().post(new Runnable() {
-                @Override
-                public void run() {
+        MainHandler.runOnMainTread(new Runnable() {
+            @Override
+            public void run() {
+                if (mParentContainer != null) {
+                    mParentContainer.show(window);
+                } else {
                     mController.show(window);
                 }
-            });
-        }
+            }
+        });
     }
 
     @Override

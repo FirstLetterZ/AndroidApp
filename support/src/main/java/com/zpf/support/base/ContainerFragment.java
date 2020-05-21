@@ -1,12 +1,12 @@
 package com.zpf.support.base;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,8 +19,6 @@ import com.zpf.api.OnActivityResultListener;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.ILoadingStateListener;
 import com.zpf.frame.INavigator;
-import com.zpf.frame.IViewProcessor;
-import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewStateListener;
 import com.zpf.support.R;
 import com.zpf.support.constant.ContainerType;
@@ -28,6 +26,8 @@ import com.zpf.support.model.ContainerStackItem;
 import com.zpf.support.single.base.CompatSinglePageActivity;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
+import com.zpf.frame.IViewContainer;
+import com.zpf.frame.IViewProcessor;
 import com.zpf.support.util.FragmentHelper;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.LogUtil;
@@ -35,7 +35,6 @@ import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.stack.IStackItem;
 
 import java.lang.reflect.Type;
-
 
 /**
  * 基于android.app.Fragment的视图容器层
@@ -110,7 +109,6 @@ public class ContainerFragment extends Fragment implements IViewContainer, IView
         checkVisibleChange(false, false);
     }
 
-
     @Override
     public void onDestroyView() {
         if (mController.getState() < LifecycleState.AFTER_DESTROY) {
@@ -134,10 +132,8 @@ public class ContainerFragment extends Fragment implements IViewContainer, IView
 
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        if (outState != null) {
-            mController.onSaveInstanceState(outState);
-        }
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        mController.onSaveInstanceState(outState);
         super.onSaveInstanceState(outState);
     }
 
@@ -333,8 +329,8 @@ public class ContainerFragment extends Fragment implements IViewContainer, IView
             } else if (isLiving()) {
                 if (loadingManager == null) {
                     loadingManager = new LoadingManagerImpl(getContext());
-                    loadingManager.showLoading(message);
                 }
+                loadingManager.showLoading(message);
             }
         }
     }

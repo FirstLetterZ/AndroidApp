@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.view.View;
 
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
@@ -19,7 +18,6 @@ import com.zpf.frame.IContainerHelper;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.ILoadingStateListener;
 import com.zpf.frame.INavigator;
-import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewStateListener;
 import com.zpf.support.R;
@@ -28,8 +26,10 @@ import com.zpf.support.constant.ContainerType;
 import com.zpf.support.model.ContainerStackItem;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
+import com.zpf.frame.IViewContainer;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.LogUtil;
+import com.zpf.support.util.StackAnimUtil;
 import com.zpf.tool.ViewUtil;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.LifecycleState;
@@ -49,7 +49,6 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
     private boolean isLauncher;
     private IStackItem stackItem;
     private IViewProcessor mViewProcessor;
-    private IContainerHelper mHelper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -140,17 +139,6 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
         }
     }
 
-    @NonNull
-    @Override
-    public IStackItem getStackItem() {
-        if (stackItem == null) {
-            stackItem = new ContainerStackItem(this);
-        } else {
-            stackItem.bindActivity(getCurrentActivity());
-        }
-        return stackItem;
-    }
-
     @Override
     protected void onNewIntent(Intent intent) {
         Bundle oldParams = getIntent().getExtras();
@@ -181,6 +169,17 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         mController.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @NonNull
+    @Override
+    public IStackItem getStackItem() {
+        if (stackItem == null) {
+            stackItem = new ContainerStackItem(this);
+        } else {
+            stackItem.bindActivity(getCurrentActivity());
+        }
+        return stackItem;
     }
 
     @Override
@@ -243,6 +242,7 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
     @Override
     public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
         super.startActivityForResult(intent, requestCode, options);
+        StackAnimUtil.onPush(this, intent.getIntExtra(AppConst.ANIM_TYPE, 0));
     }
 
     @Override
@@ -266,7 +266,7 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
 
     @Override
     public IManager<ICancelable> getCancelableManager() {
-        return null;
+        return mController.getCancelableManager();
     }
 
     @Override
@@ -288,8 +288,8 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
     @Override
     public void finish() {
         super.finish();
+        StackAnimUtil.onPoll(this, getIntent().getIntExtra(AppConst.ANIM_TYPE, 0));
     }
-
 
     @Override
     public boolean hideLoading() {
@@ -321,14 +321,12 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
     }
 
     @Override
-    public void showLoading(Object msg) {
+    public void showLoading(Object message) {
         if (isLiving()) {
             if (loadingManager == null) {
                 loadingManager = new LoadingManagerImpl(getContext());
             }
-
-            loadingManager.showLoading(msg);
-
+            loadingManager.showLoading(message);
         }
     }
 
@@ -372,9 +370,10 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
             }
         }
         if (isLauncher) {
+            IContainerHelper containerHelper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
             Class launcherClass = null;
-            if (mHelper != null) {
-                launcherClass = mHelper.getLaunchProcessorClass(null);
+            if (containerHelper != null) {
+                launcherClass = containerHelper.getLaunchProcessorClass(null);
             }
             if (launcherClass == null) {
                 launcherClass = launcherViewProcessorClass();
@@ -382,15 +381,12 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
             if (launcherClass == null) {
                 launcherClass = defViewProcessorClass();
             }
-            if (launcherClass == null && mHelper != null) {
-                launcherClass = mHelper.getErrorProcessorClass(null);
+            if (launcherClass == null && containerHelper != null) {
+                launcherClass = containerHelper.getErrorProcessorClass(null);
             }
             if (launcherClass != null) {
                 mParams.putSerializable(AppConst.TARGET_VIEW_CLASS, launcherClass);
             }
-        }
-        if (mParams.getSerializable(AppConst.TARGET_VIEW_CLASS) == null) {
-            mParams.putSerializable(AppConst.TARGET_VIEW_CLASS, defViewProcessorClass());
         }
         return mParams;
     }
@@ -410,6 +406,7 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
     }
 
     @Override
+    @Nullable
     public IViewProcessor getViewProcessor() {
         return mViewProcessor;
     }

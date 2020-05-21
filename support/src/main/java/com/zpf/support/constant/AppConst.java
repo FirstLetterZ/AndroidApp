@@ -22,6 +22,10 @@ public class AppConst {
     public static final String ID03 = "id_03";
     public static final String CODE = "code";
     public static final String NAME = "name";
+    public static final String SWITCH = "switch";
+    public static final String SWITCH01 = "switch01";
+    public static final String SWITCH02 = "switch02";
+    public static final String SWITCH03 = "switch03";
     public static final String MESSAGE = "message";
     public static final String CALL_BACK = "callback";
     public static final String ANIM_TYPE = "anim_type";

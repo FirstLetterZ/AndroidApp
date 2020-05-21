@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.Gravity;
@@ -257,16 +256,16 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
 
     @Override
     public void show(final ICustomWindow window) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            getParentContainer().show(window);
-        } else {
-            MainHandler.get().post(new Runnable() {
-                @Override
-                public void run() {
-                    getParentContainer().show(window);
+        MainHandler.runOnMainTread(new Runnable() {
+            @Override
+            public void run() {
+                if (mParentContainer != null) {
+                    mParentContainer.show(window);
+                } else {
+                    mController.show(window);
                 }
-            });
-        }
+            }
+        });
     }
 
     @Override
