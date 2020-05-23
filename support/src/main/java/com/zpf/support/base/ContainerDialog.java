@@ -59,7 +59,7 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
 
     public ContainerDialog(@NonNull IViewContainer viewContainer, int themeResId,
                            Class<? extends IViewProcessor> targetClass, @Nullable Bundle params) {
-        super(viewContainer.getContext(), themeResId);
+        super(viewContainer.getCurrentActivity(), themeResId);
         mParentContainer = viewContainer;
         mParams = params;
         mParentContainer.addListener(this, IBackPressInterceptor.class);

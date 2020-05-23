@@ -58,7 +58,7 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
 
     public CompatContainerDialog(@NonNull IViewContainer viewContainer, int themeResId,
                                  Class<? extends IViewProcessor> targetClass, @Nullable Bundle params) {
-        super(viewContainer.getContext(), themeResId);
+        super(viewContainer.getCurrentActivity(), themeResId);
         mParentContainer = viewContainer;
         mParams = params;
         mParentContainer.addListener(this, IBackPressInterceptor.class);
