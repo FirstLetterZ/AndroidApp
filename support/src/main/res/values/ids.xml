@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="view_tag_id" type="id">view_tag_id</item>
+    <item name="support_depend_tag_id" type="id"/>
 </resources>

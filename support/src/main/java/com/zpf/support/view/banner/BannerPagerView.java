@@ -320,11 +320,16 @@ public class BannerPagerView extends ViewPager {
                     @Override
                     public void click(View v) {
                         if (itemViewClickListener != null) {
-                            itemViewClickListener.onItemViewClick(rulePosition, v);
+                            int p = getViewPosition(v);
+                            if (p < 0) {
+                                itemViewClickListener.onItemViewClick(rulePosition, v);
+                            } else {
+                                itemViewClickListener.onItemViewClick(p, v);
+                            }
                         }
                     }
                 });
-                child.setTag(R.id.view_tag_id, position);
+                child.setTag(R.id.support_depend_tag_id, position);
                 viewCreator.onBindView(child, rulePosition);
                 container.addView(child);
                 return child;
@@ -335,12 +340,7 @@ public class BannerPagerView extends ViewPager {
                 if (rebuildAllView) {
                     return POSITION_NONE;
                 }
-                int position = -1;
-                try {
-                    position = ((int) ((View) object).getTag(R.id.view_tag_id));
-                } catch (Exception e) {
-                    //
-                }
+                int position = getViewPosition((View) object);
                 if (position < 0) {
                     return super.getItemPosition(object);
                 } else {
@@ -352,6 +352,7 @@ public class BannerPagerView extends ViewPager {
                     } else {
                         rulePosition = position - 1;
                     }
+                    ((View) object).setTag(R.id.support_depend_tag_id, rulePosition);
                     viewCreator.onBindView((View) object, rulePosition);
                     return position;
                 }
@@ -377,6 +378,16 @@ public class BannerPagerView extends ViewPager {
             }
         };
         setAdapter(pagerAdapter);
+    }
+
+    public int getViewPosition(View view) {
+        int position = -1;
+        try {
+            position = ((int) view.getTag(R.id.support_depend_tag_id));
+        } catch (Exception e) {
+            //
+        }
+        return position;
     }
 
     public void notifyDataSetChanged(boolean rebuildAllView) {
