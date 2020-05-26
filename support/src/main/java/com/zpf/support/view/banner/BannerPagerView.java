@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Scroller;
 
 import com.zpf.api.OnItemViewClickListener;
+import com.zpf.support.R;
 import com.zpf.tool.SafeClickListener;
 
 import java.lang.reflect.Field;
@@ -268,8 +269,8 @@ public class BannerPagerView extends ViewPager {
             pagerAdapter.notifyDataSetChanged();
             setCurrentItem(0, false);
         } else {
-            firstView = viewCreator.onCreateView(0);
-            lastView = viewCreator.onCreateView(newSize - 1);
+            firstView = viewCreator.onCreateView(getContext(), 0);
+            lastView = viewCreator.onCreateView(getContext(), newSize - 1);
             pagerAdapter.notifyDataSetChanged();
             setCurrentItem(1, false);
             restart();
@@ -305,7 +306,7 @@ public class BannerPagerView extends ViewPager {
                     rulePosition = position - 1;
                 }
                 if (child == null) {
-                    child = viewCreator.onCreateView(rulePosition);
+                    child = viewCreator.onCreateView(container.getContext(), rulePosition);
                     if (position == 0) {
                         firstView = child;
                     } else if (position == pagerSize.get() + 1) {
@@ -323,7 +324,7 @@ public class BannerPagerView extends ViewPager {
                         }
                     }
                 });
-                child.setTag(position);
+                child.setTag(R.id.view_tag_id, position);
                 viewCreator.onBindView(child, rulePosition);
                 container.addView(child);
                 return child;
@@ -336,7 +337,7 @@ public class BannerPagerView extends ViewPager {
                 }
                 int position = -1;
                 try {
-                    position = ((int) ((View) object).getTag());
+                    position = ((int) ((View) object).getTag(R.id.view_tag_id));
                 } catch (Exception e) {
                     //
                 }

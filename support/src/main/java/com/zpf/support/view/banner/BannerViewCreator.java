@@ -1,5 +1,6 @@
 package com.zpf.support.view.banner;
 
+import android.content.Context;
 import android.view.View;
 
 /**
@@ -7,7 +8,7 @@ import android.view.View;
  */
 
 public interface BannerViewCreator {
-    View onCreateView(int position);
+    View onCreateView(Context context, int position);
 
     int getSize();
 
