@@ -1,5 +1,6 @@
 package com.zpf.app.activity;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -89,7 +90,7 @@ public class LoginView extends ViewProcessor {
         bpv.init(new BannerViewCreator() {
 
             @Override
-            public View onCreateView(int position) {
+            public View onCreateView(Context context, int position) {
                 LinearLayout layout = new LinearLayout(getContext());
                 layout.setGravity(Gravity.CENTER);
                 layout.setPadding((int) (20 * d), (int) (20 * d), (int) (20 * d), (int) (20 * d));

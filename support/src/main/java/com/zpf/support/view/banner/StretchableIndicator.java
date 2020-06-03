@@ -166,6 +166,7 @@ public class StretchableIndicator extends RelativeLayout implements BannerIndica
             dotsLayout.removeAllViews();
         }
         if (dotSize <= 1) {
+            setVisibility(View.GONE);
             return;
         }
         //添加计数小圆点
@@ -184,6 +185,7 @@ public class StretchableIndicator extends RelativeLayout implements BannerIndica
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dotSpace, LinearLayout.LayoutParams.WRAP_CONTENT);
         space.setLayoutParams(lp);
         dotsLayout.addView(space);
+        setVisibility(View.VISIBLE);
     }
 
 }

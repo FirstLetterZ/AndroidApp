@@ -6,5 +6,5 @@ package com.zpf.support.view.banner;
 public interface BannerIndicator {
     void onScroll(int position, float positionOffset);
 
-     void setSize(int size) ;
+    void setSize(int size);
 }

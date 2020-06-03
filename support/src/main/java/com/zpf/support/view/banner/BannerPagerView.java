@@ -48,6 +48,12 @@ public class BannerPagerView extends ViewPager {
     private OnItemViewClickListener itemViewClickListener;
     private View firstView;
     private View lastView;
+    private Runnable changeCurrent = new Runnable() {
+        @Override
+        public void run() {
+            setCurrentItem(getRealPosition(), false);
+        }
+    };
 
     public BannerPagerView(@NonNull Context context) {
         this(context, null);
@@ -68,8 +74,13 @@ public class BannerPagerView extends ViewPager {
                     if (current.get() == 1) {
                         return;
                     }
+                    removeCallbacks(changeCurrent);
                     current.set(1);
-                    setCurrentItem(current.get(), false);
+                    if (!isPaused) {
+                        postDelayed(changeCurrent, 24);
+                    } else {
+                        setCurrentItem(current.get(), false);
+                    }
                 } else if (position == 0 && positionOffset <= 0.01 && lastPositionOffset <= 0.09 && lastPositionOffset >= positionOffset) {
                     if (current.get() == pagerSize.get()) {
                         return;
@@ -77,7 +88,9 @@ public class BannerPagerView extends ViewPager {
                     current.set(pagerSize.get());
                     setCurrentItem(current.get(), false);
                 } else if (bannerIndicator != null) {
-                    bannerIndicator.onScroll(position - 1, positionOffset);
+                    if (positionOffset != 0 || lastPositionOffset != positionOffset) {
+                        bannerIndicator.onScroll(position - 1, positionOffset);
+                    }
                 }
                 lastPositionOffset = positionOffset;
             }
