@@ -16,6 +16,7 @@ import android.widget.Scroller;
 import com.zpf.api.OnItemViewClickListener;
 import com.zpf.support.R;
 import com.zpf.tool.SafeClickListener;
+import com.zpf.tool.ShakeInterceptor;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,16 +43,17 @@ public class BannerPagerView extends ViewPager {
     private boolean parentVisible = true;
     private boolean windowVisible = false;
     private boolean hasDraw = false;
-
     private boolean realVisible = false;
     private boolean autoScrollable = true;
     private OnItemViewClickListener itemViewClickListener;
+    private ShakeInterceptor shakeInterceptor = new ShakeInterceptor();//滚动监听频率控制
+    private int lastScroll = 0;//滚动监听距离控制
     private View firstView;
     private View lastView;
     private Runnable changeCurrent = new Runnable() {
         @Override
         public void run() {
-            setCurrentItem(getRealPosition(), false);
+            setCurrentItem(current.get(), false);
         }
     };
 
@@ -124,10 +126,10 @@ public class BannerPagerView extends ViewPager {
                 postDelayed(circulationRunnable, interval);
             } else {
                 removeCallbacks(circulationRunnable);
+                pause();
             }
         }
     };
-
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -165,6 +167,21 @@ public class BannerPagerView extends ViewPager {
         checkStateChanged();
     }
 
+
+    public void onParentScrolled(int scroll) {
+        if (!realVisible && (Math.abs(lastScroll - scroll) > getMeasuredHeight() || shakeInterceptor.checkInterval())) {
+            checkStateChanged();
+            lastScroll = scroll;
+        }
+    }
+
+    @Override
+    protected void onVisibilityChanged(@NonNull View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        realVisible = visibility == View.VISIBLE;
+        checkStateChanged();
+    }
+
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
@@ -187,7 +204,7 @@ public class BannerPagerView extends ViewPager {
     }
 
     private boolean checkVisible() {
-        if (windowVisible && hasAttached && parentVisible && hasDraw) {
+        if (windowVisible && hasAttached && parentVisible && hasDraw && getVisibility() == View.VISIBLE) {
             return getGlobalVisibleRect(rect);
         } else {
             return false;
@@ -224,6 +241,16 @@ public class BannerPagerView extends ViewPager {
             return 0;
         } else {
             return current.addAndGet(-1);
+        }
+    }
+
+    private int getRealPosition(int position) {
+        if (position == 0) {
+            return pagerSize.get() - 1;
+        } else if (position == pagerSize.get() + 1) {
+            return 0;
+        } else {
+            return position - 1;
         }
     }
 
@@ -307,19 +334,19 @@ public class BannerPagerView extends ViewPager {
             @NonNull
             @Override
             public Object instantiateItem(@NonNull ViewGroup container, final int position) {
-                final int rulePosition;
+                final int realPosition;
                 View child = null;
                 if (position == 0) {
                     child = firstView;
-                    rulePosition = pagerSize.get() - 1;
+                    realPosition = pagerSize.get() - 1;
                 } else if (position == pagerSize.get() + 1) {
                     child = lastView;
-                    rulePosition = 0;
+                    realPosition = 0;
                 } else {
-                    rulePosition = position - 1;
+                    realPosition = position - 1;
                 }
                 if (child == null) {
-                    child = viewCreator.onCreateView(container.getContext(), rulePosition);
+                    child = viewCreator.onCreateView(container.getContext(), realPosition);
                     if (position == 0) {
                         firstView = child;
                     } else if (position == pagerSize.get() + 1) {
@@ -335,15 +362,15 @@ public class BannerPagerView extends ViewPager {
                         if (itemViewClickListener != null) {
                             int p = getViewPosition(v);
                             if (p < 0) {
-                                itemViewClickListener.onItemViewClick(rulePosition, v);
+                                itemViewClickListener.onItemViewClick(realPosition, v);
                             } else {
-                                itemViewClickListener.onItemViewClick(p, v);
+                                itemViewClickListener.onItemViewClick(getRealPosition(p), v);
                             }
                         }
                     }
                 });
                 child.setTag(R.id.support_depend_tag_id, position);
-                viewCreator.onBindView(child, rulePosition);
+                viewCreator.onBindView(child, realPosition);
                 container.addView(child);
                 return child;
             }
@@ -357,16 +384,7 @@ public class BannerPagerView extends ViewPager {
                 if (position < 0) {
                     return super.getItemPosition(object);
                 } else {
-                    final int rulePosition;
-                    if (position == 0) {
-                        rulePosition = pagerSize.get() - 1;
-                    } else if (position == pagerSize.get() + 1) {
-                        rulePosition = 0;
-                    } else {
-                        rulePosition = position - 1;
-                    }
-                    ((View) object).setTag(R.id.support_depend_tag_id, rulePosition);
-                    viewCreator.onBindView((View) object, rulePosition);
+                    viewCreator.onBindView((View) object, getRealPosition(position));
                     return position;
                 }
             }

@@ -21,9 +21,10 @@
         <com.zpf.support.view.TriangleView
             android:id="@+id/triangle"
             android:layout_width="20dp"
+            android:layout_height="20dp"
             app:triangle_color="@color/dialog_default_cancel"
-            app:triangle_direction="left"
-            android:layout_height="20dp" />
+            app:triangle_direction="left" />
+
         <Button
             android:id="@+id/btn_copy"
             android:layout_width="match_parent"
