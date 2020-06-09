@@ -52,10 +52,30 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
         return callNetworkManager.callNetwork();
     }
 
+    @Nullable
+    public T getValue() {
+        return resultData;
+    }
+
     @Override
     public void onDestroy() {
         destroyed = true;
         cancel();
+    }
+
+    public Stevedore<T> setCallCreator(INetworkCallCreator<T> callCreator) {
+        this.callNetworkManager = callCreator;
+        return this;
+    }
+
+    public Stevedore<T> setStateListener(OnStateChangedListener<T> stateListener) {
+        stateChangedListener = stateListener;
+        return this;
+    }
+
+    public Stevedore<T> setCacheManager(ILocalCacheManager<T> cacheManager) {
+        localCacheManager = cacheManager;
+        return this;
     }
 
     public Stevedore<T> bindController(IGroup<OnDestroyListener> controller) {
@@ -157,4 +177,7 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
         });
     }
 
+    public class Builder {
+
+    }
 }
