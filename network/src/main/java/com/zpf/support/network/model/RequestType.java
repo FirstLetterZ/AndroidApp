@@ -7,8 +7,11 @@ public class RequestType {
     boolean auto_toast;
     boolean ignore_loading;
     public static RequestType DEF_TYPE = new RequestType(true, true, true, true, false);
+    public static RequestType NULABLE = new RequestType(false, true, true, true, false);
+    public static RequestType NOTOAST = new RequestType(true, true, true, false, false);
+    public static RequestType NULABLE_NOTOAST = new RequestType(false, true, true, false, false);
 
-    RequestType(boolean auto_toast) {
+    public RequestType(boolean auto_toast) {
         this.non_null = true;
         this.check_local = false;
         this.auto_update = false;
@@ -16,7 +19,7 @@ public class RequestType {
         this.ignore_loading = false;
     }
 
-    RequestType(boolean non_null, boolean auto_toast) {
+    public RequestType(boolean non_null, boolean auto_toast) {
         this.non_null = non_null;
         this.check_local = false;
         this.auto_update = false;
@@ -24,7 +27,7 @@ public class RequestType {
         this.ignore_loading = false;
     }
 
-    RequestType(boolean non_null, boolean auto_toast, boolean ignore_loading) {
+    public RequestType(boolean non_null, boolean auto_toast, boolean ignore_loading) {
         this.non_null = non_null;
         this.check_local = false;
         this.auto_update = false;
@@ -32,7 +35,7 @@ public class RequestType {
         this.ignore_loading = ignore_loading;
     }
 
-    RequestType(boolean non_null, boolean check_local, boolean auto_update, boolean auto_toast, boolean ignore_loading) {
+    public RequestType(boolean non_null, boolean check_local, boolean auto_update, boolean auto_toast, boolean ignore_loading) {
         this.non_null = non_null;
         this.check_local = check_local;
         this.auto_update = auto_update;

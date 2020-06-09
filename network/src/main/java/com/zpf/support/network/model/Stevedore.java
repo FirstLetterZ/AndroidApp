@@ -18,11 +18,12 @@ import retrofit2.Call;
 public class Stevedore<T> implements OnDestroyListener, ICancelable {
     private boolean destroyed = false;
     private T resultData = null;
-    private volatile boolean done = false;
+    private volatile boolean done = true;
     private Call<T> call;
     public INetworkCallCreator<T> callNetworkManager;
     public OnStateChangedListener<T> stateChangedListener;
     public ILocalCacheManager<T> localCacheManager;
+    private volatile long lastIgnore = 0;
 
     protected T searchLocal() {
         if (localCacheManager == null) {
@@ -53,7 +54,7 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
     }
 
     @Nullable
-    public T getValue() {
+    public T getResultData() {
         return resultData;
     }
 
@@ -90,6 +91,10 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
         done = true;
     }
 
+    public boolean isDone() {
+        return done;
+    }
+
     @Override
     public boolean isCancelled() {
         return call != null && call.isCanceled();
@@ -108,11 +113,21 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
     }
 
     public void load(RequestType type, @Nullable INetworkCallCreator<T> callCreator) {
-        if (destroyed || type == null) {
+        if (destroyed) {
             return;
         }
-        if (!type.ignore_loading && !done) {
-            return;
+        if (!done) {
+            if (!type.ignore_loading) {
+                return;
+            } else if (System.currentTimeMillis() - lastIgnore > 160) {
+                cancel();
+                lastIgnore = System.currentTimeMillis();
+            } else {
+                return;
+            }
+        }
+        if (type == null) {
+            type = RequestType.DEF_TYPE;
         }
         done = false;
         resultData = null;
@@ -124,11 +139,12 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
             }
         }
         if (resultData != null) {
-            onStateChanged(false, ErrorCode.LOAD_LOCAL_DATA, null, resultData);
             if (type.auto_update) {
+                onStateChanged(true, ErrorCode.LOAD_LOCAL_DATA, null, resultData);
                 loadDataFromNetwork(type, callCreator);
             } else {
                 done = true;
+                onStateChanged(false, ErrorCode.LOAD_LOCAL_DATA, null, resultData);
             }
         } else {
             loadDataFromNetwork(type, callCreator);
@@ -160,9 +176,9 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
         call.enqueue(new ResponseCallBack<T>(requestType) {
             @Override
             protected void complete(boolean success, @NonNull IResultBean<T> responseResult) {
+                done = true;
                 onStateChanged(false, responseResult.getCode(), null, responseResult.getData());
                 call = null;
-                done = true;
             }
 
             @Override
@@ -177,7 +193,4 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
         });
     }
 
-    public class Builder {
-
-    }
 }
