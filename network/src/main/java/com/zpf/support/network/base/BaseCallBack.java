@@ -209,15 +209,17 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
     protected boolean checkResponse(T result) {
         boolean check = true;
         responseResult.setCode(ErrorCode.RESPONSE_SUCCESS);
-        if (checkDataNull(result)) {
-            responseResult.setCode(ErrorCode.DATA_NULL);
-            responseResult.setMessage(getString(R.string.network_data_null));
-            check = isNullable();
-        }
-        if (check && (result instanceof IResultBean)) {
+        if (result instanceof IResultBean) {
             check = ((IResultBean) result).isSuccess();
             responseResult.setCode(((IResultBean) result).getCode());
             responseResult.setMessage(((IResultBean) result).getMessage());
+        }
+        if (check && checkDataNull(result)) {
+            check = isNullable();
+            if (!check) {
+                responseResult.setCode(ErrorCode.DATA_NULL);
+                responseResult.setMessage(getString(R.string.network_data_null));
+            }
         }
         responseResult.setData(result);
         return check;
