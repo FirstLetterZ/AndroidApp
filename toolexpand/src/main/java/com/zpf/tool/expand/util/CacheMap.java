@@ -45,10 +45,16 @@ public class CacheMap {
     }
 
     public synchronized static void put(int key, Object value) {
-        get().cacheValue.put(key, value);
         if (key > 0 && get().localStorage != null) {
-            get().localStorage.save(CACHE_STORAGE_KEY + key, value);
+            Object oldValue = get().cacheValue.get(key);
+            get().cacheValue.put(key, value);
+            if (value != oldValue) {
+                get().localStorage.save(CACHE_STORAGE_KEY + key, value);
+            }
+        } else {
+            get().cacheValue.put(key, value);
         }
+
     }
 
     public static String getString(int key) {
@@ -81,7 +87,11 @@ public class CacheMap {
         }
         T result = null;
         if (isDefaultValue(value) && get().localStorage != null) {
-            value = get().localStorage.find(CACHE_STORAGE_KEY + key, cls);
+            try {
+                value = get().localStorage.find(CACHE_STORAGE_KEY + key, cls);
+            } catch (Exception e) {
+                value = null;
+            }
             if (value != null) {
                 get().cacheValue.put(key, value);
             }
@@ -121,7 +131,11 @@ public class CacheMap {
             e.printStackTrace();
         }
         if (isDefaultValue(value) && get().localStorage != null) {
-            value = get().localStorage.find(CACHE_STORAGE_KEY + key, defaultValue);
+            try {
+                value = get().localStorage.find(CACHE_STORAGE_KEY + key, defaultValue);
+            } catch (Exception e) {
+                value = null;
+            }
             if (value != null) {
                 get().cacheValue.put(key, value);
             }
@@ -174,7 +188,11 @@ public class CacheMap {
                 }
             }
         } else if (get().localStorage != null) {
-            value = get().localStorage.find(CACHE_STORAGE_KEY + key, cls);
+            try {
+                value = get().localStorage.find(CACHE_STORAGE_KEY + key, cls);
+            } catch (Exception e) {
+                value = null;
+            }
             if (value != null && value instanceof List) {
                 try {
                     result = (List<T>) value;
