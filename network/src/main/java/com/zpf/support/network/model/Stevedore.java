@@ -87,6 +87,7 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
     public void cancel() {
         if (call != null && !call.isCanceled()) {
             call.cancel();
+            call = null;
         }
         done = true;
     }
@@ -114,9 +115,10 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
 
     public void load(RequestType type, @Nullable INetworkCallCreator<T> callCreator) {
         if (destroyed) {
+            done = true;
             return;
         }
-        if (!done) {
+        if (!done && call != null && !call.isCanceled()) {
             if (!type.ignore_loading) {
                 return;
             } else if (System.currentTimeMillis() - lastIgnore > 160) {
@@ -129,13 +131,13 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
         if (type == null) {
             type = RequestType.DEF_TYPE;
         }
-        done = false;
+        call = null;
         resultData = null;
         if (type.check_local) {
             try {
                 resultData = searchLocal();
             } catch (Exception e) {
-                e.printStackTrace();
+                //
             }
         }
         if (resultData != null) {
@@ -151,10 +153,12 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
         }
     }
 
-    private void loadDataFromNetwork(RequestType type, @Nullable INetworkCallCreator<T> callCreator) {
+    private synchronized void loadDataFromNetwork(RequestType type, @Nullable INetworkCallCreator<T> callCreator) {
         if (destroyed || type == null) {
+            done = true;
             return;
         }
+        done = false;
         if (callCreator != null) {
             call = callCreator.callNetwork();
         }
