@@ -96,6 +96,10 @@ public class PermissionUtil {
         return compatChecker;
     }
 
+    public PermissionManager getPermissionManager() {
+        return permissionManager;
+    }
+
     public boolean checkToastEnabled(@NonNull Activity activity, DialogInterface.OnDismissListener listener) {
         boolean isOpen = compatChecker.checkToastEnabled(activity);
         if (!isOpen && listener != null) {
@@ -114,7 +118,7 @@ public class PermissionUtil {
         hintDialog.getIcon().setVisibility(View.GONE);
         hintDialog.getTitle().setVisibility(View.VISIBLE);
         hintDialog.getTitle().setText("缺少通知权限");
-        String msg = "无法收到部分弹窗信息，请前往“设置-通知”中找到" + appName + "并授予通知权限";
+        String msg = "无法收到部分提示信息，请前往“设置-通知”中找到" + appName + "并授予通知权限";
         hintDialog.getMessage().setText(msg);
         hintDialog.getViewLine().setVisibility(View.VISIBLE);
         hintDialog.getCancel().setText("下次再说");
