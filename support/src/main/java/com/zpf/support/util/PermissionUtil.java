@@ -100,8 +100,8 @@ public class PermissionUtil {
         return permissionManager;
     }
 
-    public boolean checkToastEnabled(@NonNull Activity activity, DialogInterface.OnDismissListener listener) {
-        boolean isOpen = compatChecker.checkToastEnabled(activity);
+    public boolean checkNoticeEnabled(@NonNull Activity activity, DialogInterface.OnDismissListener listener) {
+        boolean isOpen = compatChecker.checkNoticeEnabled(activity);
         if (!isOpen && listener != null) {
             showHintDialog(activity, listener);
         }
