@@ -12,6 +12,7 @@ import com.zpf.support.network.base.ErrorCode;
 import com.zpf.support.network.base.ILocalCacheManager;
 import com.zpf.support.network.base.INetworkCallCreator;
 import com.zpf.support.network.retrofit.ResponseCallBack;
+import com.zpf.tool.config.MainHandler;
 
 import retrofit2.Call;
 
@@ -40,10 +41,15 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
         }
     }
 
-    protected void onStateChanged(boolean loading, int code, String msg, T data) {
-        if (stateChangedListener != null) {
-            stateChangedListener.onStateChanged(loading, code, msg, data);
-        }
+    protected void onStateChanged(final boolean loading, final int code, final String msg, final T data) {
+        MainHandler.runOnMainTread(new Runnable() {
+            @Override
+            public void run() {
+                if (stateChangedListener != null) {
+                    stateChangedListener.onStateChanged(loading, code, msg, data);
+                }
+            }
+        });
     }
 
     protected Call<T> callNetwork() {
@@ -181,7 +187,7 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
             @Override
             protected void complete(boolean success, @NonNull IResultBean<T> responseResult) {
                 done = true;
-                onStateChanged(false, responseResult.getCode(), null, responseResult.getData());
+                onStateChanged(false, responseResult.getCode(), responseResult.getMessage(), responseResult.getData());
                 call = null;
             }
 
@@ -191,7 +197,7 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
                 try {
                     saveToLocal(response);
                 } catch (Exception e) {
-                    onStateChanged(true, ErrorCode.SAVE_LOCAL_FAIL, null, response);
+                    fail(ErrorCode.SAVE_LOCAL_FAIL, e.getMessage());
                 }
             }
         });
