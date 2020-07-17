@@ -19,6 +19,8 @@ import com.zpf.tool.expand.view.CustomDialog;
 public class ProgressDialog extends CustomDialog {
 
     protected TextView textView;
+    private long minCancelTime = 3000;//时间内不能被取消
+    private long showTime = 0;
 
     public ProgressDialog(@NonNull Context context) {
         this(context, R.style.customDialog);
@@ -46,6 +48,19 @@ public class ProgressDialog extends CustomDialog {
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        showTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (System.currentTimeMillis() - showTime >= minCancelTime) {
+            super.onBackPressed();
+        }
+    }
+
     public void setText(String content) {
         if (textView != null) {
             textView.setText(content);
@@ -57,4 +72,7 @@ public class ProgressDialog extends CustomDialog {
         }
     }
 
+    public void setMinCancelTime(long minCancelTime) {
+        this.minCancelTime = minCancelTime;
+    }
 }
