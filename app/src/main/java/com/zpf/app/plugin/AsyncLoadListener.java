@@ -1,7 +1,7 @@
 package com.zpf.app.plugin;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public interface AsyncLoadListener {
     void onState(@AsyncLoadState int sateCode, @NonNull String targetName, @Nullable PluginApkBean apkBean);

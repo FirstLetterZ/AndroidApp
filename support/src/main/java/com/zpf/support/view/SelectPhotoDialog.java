@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+
 import android.text.TextUtils;
 
 import com.zpf.frame.IViewContainer;
@@ -32,7 +34,7 @@ public class SelectPhotoDialog extends BottomDialog {
     private IViewContainer viewContainer;
     private Activity activity;
     private android.app.Fragment fragment;
-    private android.support.v4.app.Fragment compatFragment;
+    private androidx.fragment.app.Fragment compatFragment;
 
     public SelectPhotoDialog(@NonNull IViewContainer viewContainer) {
         super(viewContainer.getContext());
@@ -50,7 +52,7 @@ public class SelectPhotoDialog extends BottomDialog {
         this.fragment = fragment;
     }
 
-    public SelectPhotoDialog(@NonNull android.support.v4.app.Fragment fragment) {
+    public SelectPhotoDialog(@NonNull androidx.fragment.app.Fragment fragment) {
         super(fragment.getContext());
         this.compatFragment = fragment;
     }

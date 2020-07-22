@@ -16,6 +16,8 @@ public class AppConst {
     public static final String PARAM = "params";
     public static final String TYPE = "type";
     public static final String URL = "url";
+    public static final String FLAG = "flag";
+    public static final String DATA = "data";
     public static final String ID = "id";
     public static final String ID01 = "id_01";
     public static final String ID02 = "id_02";

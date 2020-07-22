@@ -4,10 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +38,7 @@ import com.zpf.tool.config.stack.IStackItem;
 import java.lang.reflect.Type;
 
 /**
- * 基于android.support.v4.app.Fragment的视图容器层
+ * 基于androidx.fragment.app.Fragment的视图容器层
  * Created by ZPF on 2018/6/14.
  */
 public class CompatContainerFragment extends Fragment implements IViewContainer, IViewStateListener, OnActivityResultListener {
@@ -409,7 +409,7 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
 
     @Override
     public IViewContainer getParentContainer() {
-        android.support.v4.app.Fragment parentFragment = getParentFragment();
+        androidx.fragment.app.Fragment parentFragment = getParentFragment();
         if (parentFragment instanceof IViewContainer) {
             return ((IViewContainer) parentFragment);
         }

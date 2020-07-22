@@ -1,6 +1,6 @@
 package com.zpf.support.network.interceptor;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.zpf.support.network.util.Util;
@@ -27,6 +27,7 @@ public class NetLogInterceptor implements Interceptor {
     private OnNetLogListener logListener;
 
     @Override
+    @NonNull
     public Response intercept(@NonNull Chain chain) throws IOException {
         if (logListener == null) {
             return chain.proceed(chain.request());

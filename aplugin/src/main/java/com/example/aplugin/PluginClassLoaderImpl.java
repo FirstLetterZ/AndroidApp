@@ -1,6 +1,6 @@
 package com.example.aplugin;
 
-import android.support.annotation.Keep;
+import androidx.annotation.Keep;
 
 import com.zpf.api.IClassLoader;
 @Keep

@@ -2,8 +2,8 @@ package com.zpf.support.util;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
 
 import com.zpf.frame.IContainerHelper;
 import com.zpf.frame.IViewContainer;
@@ -50,9 +50,9 @@ public class FragmentHelper {
         return null;
     }
 
-    public static android.support.v4.app.FragmentManager getComptParentManager(IViewContainer container) {
-        if (container != null && container instanceof android.support.v4.app.Fragment) {
-            return ((android.support.v4.app.Fragment) container).getFragmentManager();
+    public static androidx.fragment.app.FragmentManager getComptParentManager(IViewContainer container) {
+        if (container != null && container instanceof androidx.fragment.app.Fragment) {
+            return ((androidx.fragment.app.Fragment) container).getFragmentManager();
         }
         return null;
     }
@@ -68,11 +68,11 @@ public class FragmentHelper {
         return null;
     }
 
-    public static android.support.v4.app.FragmentManager getComptChildManager(IViewContainer container) {
+    public static androidx.fragment.app.FragmentManager getComptChildManager(IViewContainer container) {
         if (container == null) {
             return null;
-        } else if (container instanceof android.support.v4.app.Fragment) {
-            return ((android.support.v4.app.Fragment) container).getChildFragmentManager();
+        } else if (container instanceof androidx.fragment.app.Fragment) {
+            return ((androidx.fragment.app.Fragment) container).getChildFragmentManager();
         } else if (container instanceof FragmentActivity) {
             return ((FragmentActivity) container).getSupportFragmentManager();
         }
@@ -84,7 +84,7 @@ public class FragmentHelper {
     }
 
 
-    public static boolean checkFragmentVisible(android.support.v4.app.Fragment fragment) {
+    public static boolean checkFragmentVisible(androidx.fragment.app.Fragment fragment) {
         return fragment != null && fragment.getUserVisibleHint() && fragment.isAdded() && !fragment.isHidden();
     }
 
@@ -102,8 +102,8 @@ public class FragmentHelper {
         return result;
     }
 
-    public static boolean checkParentFragmentVisible(android.support.v4.app.Fragment fragment) {
-        android.support.v4.app.Fragment parent = fragment.getParentFragment();
+    public static boolean checkParentFragmentVisible(androidx.fragment.app.Fragment fragment) {
+        androidx.fragment.app.Fragment parent = fragment.getParentFragment();
         boolean result = true;
         while (parent != null) {
             result = checkFragmentVisible(parent);
@@ -129,11 +129,11 @@ public class FragmentHelper {
         }
     }
 
-    public static void notifyChildrenFragmentVisible(android.support.v4.app.Fragment parent, boolean visible) {
-        android.support.v4.app.FragmentManager manager = parent.getChildFragmentManager();
-        List<android.support.v4.app.Fragment> list = manager.getFragments();
+    public static void notifyChildrenFragmentVisible(androidx.fragment.app.Fragment parent, boolean visible) {
+        androidx.fragment.app.FragmentManager manager = parent.getChildFragmentManager();
+        List<androidx.fragment.app.Fragment> list = manager.getFragments();
         if (list != null) {
-            for (android.support.v4.app.Fragment fragment : list) {
+            for (androidx.fragment.app.Fragment fragment : list) {
                 fragment.onHiddenChanged(!visible);
             }
         }

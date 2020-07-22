@@ -2,7 +2,7 @@ package com.zpf.tool.expand.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.zpf.api.dataparser.JsonParserInterface;
 import com.zpf.tool.config.AppContext;

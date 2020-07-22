@@ -4,8 +4,9 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+
 import android.text.TextUtils;
 import android.view.View;
 
@@ -43,7 +44,7 @@ public class PermissionUtil {
     }
 
 
-    public boolean checkPermission(@NonNull android.support.v4.app.Fragment fragment, @NonNull String... permission) {
+    public boolean checkPermission(@NonNull androidx.fragment.app.Fragment fragment, @NonNull String... permission) {
         compatChecker.checkPermissions(fragment, permission);
         Activity activity = fragment.getActivity();
         if (activity == null) {

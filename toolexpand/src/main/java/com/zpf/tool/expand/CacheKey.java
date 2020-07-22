@@ -1,6 +1,6 @@
 package com.zpf.tool.expand;
 
-import android.support.annotation.IntRange;
+import androidx.annotation.IntRange;
 
 /**
  * Created by ZPF on 2019/1/23.

@@ -124,7 +124,7 @@ public class StackAnimUtil {
     }
 
 
-    public static void onPush(android.support.v4.app.FragmentTransaction transaction, @StackInAnimType int type) {
+    public static void onPush(androidx.fragment.app.FragmentTransaction transaction, @StackInAnimType int type) {
         switch (type) {
             case StackInAnimType.IN_BOTTOM:
                 transaction.setCustomAnimations(R.anim.in_from_bottom, 0);
@@ -153,7 +153,7 @@ public class StackAnimUtil {
         }
     }
 
-    public static void onPoll(android.support.v4.app.FragmentTransaction transaction, @StackInAnimType int type) {
+    public static void onPoll(androidx.fragment.app.FragmentTransaction transaction, @StackInAnimType int type) {
         switch (type) {
             case StackInAnimType.IN_BOTTOM:
                 transaction.setCustomAnimations(0, R.anim.out_to_bottom);

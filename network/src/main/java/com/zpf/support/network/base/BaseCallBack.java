@@ -3,9 +3,10 @@ package com.zpf.support.network.base;
 import android.accounts.AccountsException;
 import android.net.ParseException;
 import android.os.Looper;
-import android.support.annotation.IntRange;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
+
+import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
 
 import com.zpf.api.ICancelable;
 import com.zpf.api.IManager;

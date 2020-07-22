@@ -1,5 +1,7 @@
 package com.zpf.support.network.interceptor;
 
+import androidx.annotation.NonNull;
+
 import com.zpf.support.network.header.HeaderCarrier;
 
 import java.io.IOException;
@@ -16,7 +18,8 @@ public class HeaderInterceptor implements Interceptor {
     private final HeaderCarrier headerCarrier = new HeaderCarrier();
 
     @Override
-    public Response intercept(Chain chain) throws IOException {
+    @NonNull
+    public Response intercept(@NonNull Chain chain) throws IOException {
         if (headerCarrier.size() > 0) {
             Request request = headerCarrier.addHeaders(chain.request().newBuilder())
                     .build();

@@ -2,7 +2,7 @@ package com.zpf.support.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
 
 public class TitleBarEntry implements Parcelable {
     public IconTextEntry leftIconEntry;

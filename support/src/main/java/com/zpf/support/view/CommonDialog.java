@@ -1,8 +1,8 @@
 package com.zpf.support.view;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.StyleRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.StyleRes;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;

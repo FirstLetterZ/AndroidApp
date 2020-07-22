@@ -13,14 +13,17 @@ import android.net.http.SslError;
 import android.os.Build;
 import android.os.Looper;
 import android.os.Message;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
+import android.webkit.DownloadListener;
 import android.webkit.JavascriptInterface;
 import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
@@ -29,6 +32,7 @@ import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
+import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -70,10 +74,9 @@ public class BridgeWebView extends WebView {
     private View customView = null;
     private WebChromeClient.CustomViewCallback customCallback = null;
     private WebViewScrollListener scrollChangeListener = null;
-    //日志打印
-    private boolean printLog = false;
     private String TAG;
     private ILogger realLogger = null;
+    private boolean isDebug;
 
     public BridgeWebView(Context context) {
         super(context);
@@ -95,6 +98,14 @@ public class BridgeWebView extends WebView {
         setWebChromeClient(initWebChromeClient());
         setWebViewClient(initWebViewClient());
         initJsString();
+        setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
+                Uri uri = Uri.parse(url);
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                getContext().startActivity(intent);
+            }
+        });
     }
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
@@ -653,15 +664,24 @@ public class BridgeWebView extends WebView {
         });
     }
 
+    public void clearAllCache() {
+        clearCache(true);
+        clearFormData();
+        clearHistory();
+        WebStorage.getInstance().deleteAllData();
+    }
+
     private void logInfo(String message) {
-        String realTag = TAG;
-        if (realTag == null) {
-            realTag = getClass().getSimpleName();
-        }
-        if (realLogger != null) {
-            realLogger.log(Log.INFO, realTag, message);
-        } else {
-            Log.i(realTag, message);
+        if (isDebug) {
+            String realTag = TAG;
+            if (realTag == null) {
+                realTag = getClass().getSimpleName();
+            }
+            if (realLogger != null) {
+                realLogger.log(Log.INFO, realTag, message);
+            } else {
+                Log.i(realTag, message);
+            }
         }
     }
 
@@ -722,7 +742,7 @@ public class BridgeWebView extends WebView {
     }
 
     public void setDebug(boolean isDebug) {
-        printLog = isDebug;
+        this.isDebug = isDebug;
         if (Build.VERSION.SDK_INT >= 19) {
             WebView.setWebContentsDebuggingEnabled(isDebug);
         }

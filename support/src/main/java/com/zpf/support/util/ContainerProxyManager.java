@@ -1,7 +1,7 @@
 package com.zpf.support.util;
 
 import android.app.Activity;
-import android.support.v4.app.FragmentActivity;
+import androidx.fragment.app.FragmentActivity;
 
 import com.zpf.frame.IViewContainer;
 
@@ -14,9 +14,9 @@ public class ContainerProxyManager {
     public static IViewContainer create(Activity activity) {
         if (activity instanceof FragmentActivity) {
             ProxyCompatContainer proxyViewContainer;
-            android.support.v4.app.FragmentManager manager = ((FragmentActivity) activity).getSupportFragmentManager();
-            android.support.v4.app.FragmentTransaction transaction = manager.beginTransaction();
-            android.support.v4.app.Fragment fragment = manager.findFragmentByTag(TAG + activity.getClass().getName());
+            androidx.fragment.app.FragmentManager manager = ((FragmentActivity) activity).getSupportFragmentManager();
+            androidx.fragment.app.FragmentTransaction transaction = manager.beginTransaction();
+            androidx.fragment.app.Fragment fragment = manager.findFragmentByTag(TAG + activity.getClass().getName());
             if (fragment instanceof ProxyCompatContainer) {
                 proxyViewContainer = (ProxyCompatContainer) fragment;
                 if (proxyViewContainer.isHidden()) {
@@ -68,11 +68,11 @@ public class ContainerProxyManager {
         return proxyViewContainer;
     }
 
-    public static IViewContainer create(android.support.v4.app.Fragment fragment) {
+    public static IViewContainer create(androidx.fragment.app.Fragment fragment) {
         ProxyCompatContainer proxyViewContainer;
-        android.support.v4.app.FragmentManager manager = fragment.getChildFragmentManager();
-        android.support.v4.app.FragmentTransaction transaction = manager.beginTransaction();
-        android.support.v4.app.Fragment childFragment = manager.findFragmentByTag(TAG + fragment.getClass().getName());
+        androidx.fragment.app.FragmentManager manager = fragment.getChildFragmentManager();
+        androidx.fragment.app.FragmentTransaction transaction = manager.beginTransaction();
+        androidx.fragment.app.Fragment childFragment = manager.findFragmentByTag(TAG + fragment.getClass().getName());
         if (childFragment != null && childFragment instanceof ProxyCompatContainer) {
             proxyViewContainer = (ProxyCompatContainer) childFragment;
             if (proxyViewContainer.isHidden()) {

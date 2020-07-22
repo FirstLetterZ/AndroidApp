@@ -53,7 +53,7 @@ public class PhotoUtil {
         return false;
     }
 
-    public static boolean takePhoto(android.support.v4.app.Fragment fragment, String filePath, int requestCode) {
+    public static boolean takePhoto(androidx.fragment.app.Fragment fragment, String filePath, int requestCode) {
         if (fragment != null && PermissionUtil.get()
                 .checkPermission(fragment, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)) {
             Intent capIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -113,7 +113,7 @@ public class PhotoUtil {
         return false;
     }
 
-    public static boolean selectFromAlbum(android.support.v4.app.Fragment fragment, int requestCode) {
+    public static boolean selectFromAlbum(androidx.fragment.app.Fragment fragment, int requestCode) {
         if (fragment != null && PermissionUtil.get()
                 .checkPermission(fragment, Manifest.permission.READ_EXTERNAL_STORAGE)) {
             Intent albumIntent = new Intent(Intent.ACTION_GET_CONTENT);

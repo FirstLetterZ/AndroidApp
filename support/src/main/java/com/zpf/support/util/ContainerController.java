@@ -1,8 +1,8 @@
 package com.zpf.support.util;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.zpf.frame.IContainerHelper;
 import com.zpf.frame.IViewContainer;

@@ -18,7 +18,8 @@ android {
 
 dependencies {
     compileOnly rootProject.ext.dependencies.api
-    compileOnly rootProject.ext.dependencies.supportV4
     compileOnly rootProject.ext.dependencies.recyclerview
+    compileOnly rootProject.ext.dependencies.viewPager
+    compileOnly rootProject.ext.dependencies.fragment
 }
 apply from: "../bintrayUpload.gradle"

@@ -14,7 +14,7 @@ import retrofit2.Response;
  * Created by ZPF on 2019/2/14.
  */
 public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Callback<T> {
-    private Call call;
+    private Call<T> call;
 
     public ResponseCallBack() {
         super();

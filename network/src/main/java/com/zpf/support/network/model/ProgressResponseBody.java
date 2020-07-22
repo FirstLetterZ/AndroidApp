@@ -2,7 +2,7 @@ package com.zpf.support.network.model;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.zpf.api.OnProgressListener;
 
@@ -43,6 +43,7 @@ public class ProgressResponseBody extends ResponseBody {
     }
 
     @Override
+    @NonNull
     public BufferedSource source() {
         if (bufferedSource == null) {
             bufferedSource = Okio.buffer(source(responseBody.source()));

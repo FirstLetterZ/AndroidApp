@@ -23,7 +23,7 @@
 # 保留部分
 -ignorewarnings
 -dontwarn android.support.v4.**
--keep class android.support.v4.app.** { *; }
+-keep class androidx.fragment.app.** { *; }
 -keep interface android.support.v4.app.** { *; }
 -keep class android.support.v4.** { *; }
 
@@ -91,20 +91,20 @@
     protected Object[][] getContents();
 }
 #Keep注解
--keep @android.support.annotation.Keep class *
--keep @android.support.annotation.Keep interface *
+-keep @androidx.annotation.Keep class *
+-keep @androidx.annotation.Keep interface *
 -dontwarn javax.annotation.**
 -dontwarn javax.inject.**
 -keepclassmembers class * {
-    @android.support.annotation.Keep <methods>;
+    @androidx.annotation.Keep <methods>;
 }
 
 -keepclassmembers class * {
-    @android.support.annotation.Keep <fields>;
+    @androidx.annotation.Keep <fields>;
 }
 
 -keepclassmembers interface * {
-    @android.support.annotation.Keep <methods>;
+    @androidx.annotation.Keep <methods>;
 }
 
 # webview

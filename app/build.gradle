@@ -56,7 +56,7 @@ dependencies {
     api rootProject.ext.dependencies.okhttp
     api rootProject.ext.dependencies.retrofit
     api rootProject.ext.dependencies.retrofitGsonConverter
-    api rootProject.ext.dependencies.appcompatV7
+    api rootProject.ext.dependencies.appcompat
     api rootProject.ext.dependencies.recyclerview
 //    api rootProject.ext.dependencies.support
     api rootProject.ext.dependencies.gsonParse
