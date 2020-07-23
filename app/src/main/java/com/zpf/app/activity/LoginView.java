@@ -3,8 +3,10 @@ package com.zpf.app.activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +37,7 @@ public class LoginView extends ViewProcessor {
     private BannerPagerView bpv = (BannerPagerView) $(R.id.bpv);
     private TriangleView triangle = (TriangleView) $(R.id.triangle);
     private StretchableIndicator indicator = (StretchableIndicator) $(R.id.indicator);
-    private int pageSize = 2;
+    private int pageSize = 8;
     private int d = 1;
 
     @Override
@@ -112,7 +114,7 @@ public class LoginView extends ViewProcessor {
             public void onBindView(View view, int position) {
                 try {
                     View one = ((LinearLayout) view).getChildAt(0);
-                    ((TextView) one).setText(("tag=" + view.getTag()));
+                    ((TextView) one).setText(("position=" + position));
                 } catch (Exception e) {
                     //
                 }

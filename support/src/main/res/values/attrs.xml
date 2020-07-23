@@ -3,6 +3,7 @@
     <declare-styleable name="StretchableIndicator">
         <attr name="dotHeight" format="dimension" />
         <attr name="dotWidth" format="dimension" />
+        <attr name="frontWidth" format="dimension" />
         <attr name="dotSpace" format="dimension" />
         <attr name="dotFront" format="reference" />
         <attr name="dotBack" format="reference" />

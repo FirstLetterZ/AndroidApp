@@ -18,7 +18,7 @@ public class MyApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        if (PublicUtil.isPackageProces(this)) {
+        if (PublicUtil.isPackageProcess(this)) {
             registerActivityLifecycleCallbacks(AppStackUtil.get());
             CacheMap.setLocalStorage(SpUtil.get());
             ClassLoaderImpl.get().add(new MainClassLoader());

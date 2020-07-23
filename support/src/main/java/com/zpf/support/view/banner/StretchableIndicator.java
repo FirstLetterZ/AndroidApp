@@ -28,6 +28,7 @@ public class StretchableIndicator extends RelativeLayout implements BannerIndica
     private int dotSpace;//指示点间距
     private int dotHeight;//指示点高度
     private int dotWidth;//指示点宽度
+    private int frontWidth;//指示点宽度
     private int defDotWidth;//
     private int indicatorDx;//指示点水平位移
     private int indicatorWidth;//指示点当前宽度
@@ -49,7 +50,7 @@ public class StretchableIndicator extends RelativeLayout implements BannerIndica
         if (typedArray != null) {
             initValue(context, typedArray);
         }
-        dotsLayout = new LinearLayout(context);  //前方指示点
+        dotsLayout = new LinearLayout(context);  //后方指示点
         LayoutParams dotsParams = new LayoutParams(
                 LayoutParams.WRAP_CONTENT, dotHeight);
         dotsParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
@@ -70,6 +71,8 @@ public class StretchableIndicator extends RelativeLayout implements BannerIndica
                 dotHeight = typedArray.getDimensionPixelSize(attr, -1);
             } else if (attr == R.styleable.StretchableIndicator_dotWidth) {
                 dotWidth = typedArray.getDimensionPixelSize(attr, -1);
+            } else if (attr == R.styleable.StretchableIndicator_frontWidth) {
+                frontWidth = typedArray.getDimensionPixelSize(attr, -1);
             } else if (attr == R.styleable.StretchableIndicator_dotSpace) {
                 dotSpace = typedArray.getDimensionPixelSize(attr, -1);
             } else if (attr == R.styleable.StretchableIndicator_dotBack) {
@@ -87,6 +90,9 @@ public class StretchableIndicator extends RelativeLayout implements BannerIndica
         }
         if (dotSpace <= 0) {
             dotSpace = defDotWidth;
+        }
+        if (frontWidth <= 0) {
+            frontWidth = dotWidth;
         }
         Resources resources = context.getResources();
         if (dotBackId > 0) {
@@ -125,20 +131,21 @@ public class StretchableIndicator extends RelativeLayout implements BannerIndica
         //通过改变指示小圆点的宽度和水平位来达到滑动指示动画效果
         if (positionOffset < 0.0001f) {
             scrollToBorder = false;
-            indicatorDx = dotWidth * position + dotSpace * (position + 1);
+            indicatorDx = dotWidth * position + dotSpace * (position + 1) - (frontWidth - dotWidth) / 2;
             indicatorParams.setMargins(indicatorDx, 0, 0, 0);
-            indicatorWidth = dotWidth;
+            indicatorWidth = frontWidth;
         } else if (positionOffset < 0.4f) {//拉伸段
             if (position == -1 && scrollToBorder) {
                 position = dotSize - 1;
             }
-            indicatorWidth = (int) (dotWidth + dotSpace * positionOffset * 2);
-            indicatorDx = dotWidth * position + dotSpace * (position + 1);
+            indicatorWidth = (int) (frontWidth + dotSpace * positionOffset * 2);
+            indicatorDx = dotWidth * position + dotSpace * (position + 1) - (frontWidth - dotWidth) / 2;
         } else if (positionOffset < 0.6f) {//平移段
             if (position != dotSize - 1 && position != -1) {
                 scrollToBorder = false;
-                indicatorWidth = (int) (dotWidth + dotSpace * 0.8f);
-                indicatorDx = (int) (dotWidth * position + dotSpace * (position + 1) + (dotWidth + 0.2 * dotSpace) * (positionOffset - 0.4) / 0.2);
+                indicatorWidth = (int) (frontWidth + dotSpace * 0.8f);
+                indicatorDx = (int) (dotWidth * position + dotSpace * (position + 1) +
+                        (dotWidth + 0.2 * dotSpace) * (positionOffset - 0.4) / 0.2) - (frontWidth - dotWidth) / 2;
             } else {
                 //已滚动到边界，需要对拉伸段和收缩段做特殊处理
                 scrollToBorder = true;
@@ -147,8 +154,9 @@ public class StretchableIndicator extends RelativeLayout implements BannerIndica
             if (position == dotSize - 1 && scrollToBorder) {
                 position = -1;
             }
-            indicatorWidth = (int) (dotWidth + 0.8 * dotSpace - 0.8 * dotSpace * (positionOffset - 0.6) / 0.4);
-            indicatorDx = dotWidth * (position + 1) + dotSpace * (position + 2) + dotWidth - indicatorWidth;
+            indicatorWidth = (int) (frontWidth + 0.8 * dotSpace - 0.8 * dotSpace * (positionOffset - 0.6) / 0.4);
+            indicatorDx = dotWidth * (position + 2) + dotSpace * (position + 2) +
+                    (frontWidth - dotWidth) / 2 - indicatorWidth;
         }
         indicatorParams.setMargins(indicatorDx, 0, 0, 0);
         indicatorParams.width = indicatorWidth;
