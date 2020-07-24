@@ -165,8 +165,10 @@ public class StretchableIndicator extends RelativeLayout implements BannerIndica
 
     @Override
     public void setSize(int dotSize) {
-        this.dotSize = dotSize;
-        initDots();
+        if (this.dotSize != dotSize) {
+            this.dotSize = dotSize;
+            initDots();
+        }
     }
 
     private void initDots() {

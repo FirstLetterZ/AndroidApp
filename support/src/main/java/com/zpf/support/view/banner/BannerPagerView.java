@@ -3,6 +3,7 @@ package com.zpf.support.view.banner;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewpager.widget.PagerAdapter;
@@ -297,6 +298,7 @@ public class BannerPagerView extends ViewPager {
         pause();
         if (bannerIndicator != null) {
             bannerIndicator.setSize(newSize);
+            bannerIndicator.onScroll(0, 0);
         }
         rebuildAllView = rebuild || pagerSize.get() != newSize;
         pagerSize.set(newSize);
@@ -409,7 +411,7 @@ public class BannerPagerView extends ViewPager {
                 return view == object;
             }
         };
-        setAdapter(pagerAdapter);
+        super.setAdapter(pagerAdapter);
     }
 
     public int getViewPosition(View view) {
@@ -450,6 +452,11 @@ public class BannerPagerView extends ViewPager {
         } else {
             pause();
         }
+    }
+
+    @Override
+    public void setAdapter(@Nullable PagerAdapter adapter) {
+        notifyDataSetChanged(true);
     }
 
     public void pause() {
