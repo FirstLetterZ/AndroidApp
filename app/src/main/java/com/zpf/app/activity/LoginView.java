@@ -7,13 +7,17 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.zpf.api.ILayoutId;
+import com.zpf.api.ItemViewCreator;
+import com.zpf.app.SpiderDiagramLayout;
 import com.zpf.app.plugin.AsyncLoadListener;
 import com.zpf.app.plugin.AsyncLoadState;
 import com.zpf.app.plugin.PluginApkBean;
@@ -35,6 +39,7 @@ import com.zpf.tool.ToastUtil;
 public class LoginView extends ViewProcessor {
     private AsyncLoadListener loadListener;
     private BannerPagerView bpv = (BannerPagerView) $(R.id.bpv);
+    private SpiderDiagramLayout sdl = (SpiderDiagramLayout) $(R.id.sdl);
     private TriangleView triangle = (TriangleView) $(R.id.triangle);
     private StretchableIndicator indicator = (StretchableIndicator) $(R.id.indicator);
     private int pageSize = 8;
@@ -121,6 +126,22 @@ public class LoginView extends ViewProcessor {
             }
 
         });
+
+        float[] pp = new float[]{0.6f, 0.7f, 0.8f, 0.6f, 0.8f};
+        sdl.setItemViewCreator(new ItemViewCreator() {
+            @Override
+            public View onCreateView(Context context, int type) {
+                return LayoutInflater.from(context).inflate(R.layout.item_test, sdl, false);
+            }
+
+            @Override
+            public void onBindView(View view, int position) {
+                TextView tv = view.findViewById(R.id.tv_title);
+                tv.setText(position + "->" + pp[position]);
+            }
+        });
+        sdl.setPointPercents(pp);
+
     }
 
     private void jumpToLayout(String targetName, Class<?> targetClass) {

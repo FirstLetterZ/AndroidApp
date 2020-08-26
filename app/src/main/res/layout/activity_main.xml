@@ -2,8 +2,8 @@
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:background="#0091EA"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#0091EA">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -11,14 +11,25 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
+        <com.zpf.support.view.StatusBar
+            android:background="@color/dialog_default_cancel"
+            android:layout_width="match_parent"
+            android:layout_height="0dp" />
+
         <TextView
             android:id="@+id/tv_msg"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="204dp"
             android:clickable="false"
             android:gravity="center"
             android:text="等待命令"
-            android:textSize="20dp" />
+            android:textSize="20dp"
+            android:visibility="gone" />
+
+        <com.zpf.app.SpiderDiagramLayout
+            android:id="@+id/sdl"
+            android:layout_width="match_parent"
+            android:layout_height="400dp" />
 
         <com.zpf.support.view.TriangleView
             android:id="@+id/triangle"
