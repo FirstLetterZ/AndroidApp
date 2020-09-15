@@ -7,7 +7,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +25,6 @@ import com.zpf.support.base.ViewProcessor;
 import com.zpf.app.R;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.util.LogUtil;
-import com.zpf.support.view.TriangleView;
 import com.zpf.support.view.banner.BannerPagerView;
 import com.zpf.support.view.banner.BannerViewCreator;
 import com.zpf.support.view.banner.StretchableIndicator;

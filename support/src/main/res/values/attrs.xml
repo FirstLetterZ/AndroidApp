@@ -8,13 +8,4 @@
         <attr name="dotFront" format="reference" />
         <attr name="dotBack" format="reference" />
     </declare-styleable>
-    <declare-styleable name="TriangleView">
-        <attr name="triangle_color" format="color" />
-        <attr name="triangle_direction" format="enum">
-            <enum name="left" value="0" />
-            <enum name="top" value="1" />
-            <enum name="right" value="2" />
-            <enum name="bottom" value="3" />
-        </attr>
-    </declare-styleable>
 </resources>
