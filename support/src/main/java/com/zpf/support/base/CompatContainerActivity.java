@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Looper;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -53,9 +54,10 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        Intent intent = getIntent();
+        initTheme(intent.getIntExtra(AppConst.TARGET_VIEW_THEME, -1));
         super.onCreate(savedInstanceState);
         //防止初次安装从后台返回的重启问题
-        Intent intent = getIntent();
         isLauncher = (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && Intent.ACTION_MAIN.equals(intent.getAction()));
         if ((intent.getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0 && isLauncher) {
             finish();
@@ -432,11 +434,13 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         mController.onActivityChanged(activity);
     }
 
-    protected void initWindow() {
-        int themeId = getParams().getInt(AppConst.TARGET_VIEW_THEME, -1);
+    protected void initTheme(int themeId) {
         if (themeId > 0) {
             setTheme(themeId);
         }
+    }
+
+    protected void initWindow() {
         setRequestedOrientation(getParams().getInt(AppConst.TARGET_VIEW_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
         if (getParams().getBoolean(AppConst.TARGET_STATUS_TRANSLUCENT, true)) {
             ViewUtil.setStatusBarTranslucent(getWindow());
