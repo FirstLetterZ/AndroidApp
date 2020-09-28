@@ -90,6 +90,14 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
         return this;
     }
 
+    public void reEnable() {
+        destroyed = false;
+    }
+
+    public boolean isEnable(){
+        return !destroyed;
+    }
+
     public void cancel() {
         if (call != null && !call.isCanceled()) {
             call.cancel();
