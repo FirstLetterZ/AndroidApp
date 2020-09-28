@@ -27,7 +27,7 @@ public class StackAnimUtil {
                 activity.overridePendingTransition(R.anim.in_center_zoom, R.anim.out_center_zoom);
                 break;
             case StackInAnimType.IN_ZOOM:
-                activity.overridePendingTransition(R.anim.in_from_bottom, 0);
+                activity.overridePendingTransition(R.anim.in_center_zoom, 0);
                 break;
             case StackInAnimType.NONE:
                 activity.overridePendingTransition(0, 0);
@@ -50,10 +50,10 @@ public class StackAnimUtil {
                 activity.overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
                 break;
             case StackInAnimType.IN_RIGHT:
-                activity.overridePendingTransition(0, R.anim.in_from_left);
+                activity.overridePendingTransition(0, R.anim.out_to_right);
                 break;
             case StackInAnimType.IN_ZOOM_OUT_ZOOM:
-                activity.overridePendingTransition(0, R.anim.out_center_zoom);
+                activity.overridePendingTransition(R.anim.in_center_zoom, R.anim.out_center_zoom);
                 break;
             case StackInAnimType.IN_ZOOM:
                 activity.overridePendingTransition(0, R.anim.out_center_zoom);
