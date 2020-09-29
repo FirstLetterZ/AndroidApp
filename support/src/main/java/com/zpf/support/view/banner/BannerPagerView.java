@@ -312,8 +312,8 @@ public class BannerPagerView extends ViewPager {
             pagerAdapter.notifyDataSetChanged();
             setCurrentItem(0, false);
         } else {
-            firstView = viewCreator.onCreateView(getContext(), 0);
-            lastView = viewCreator.onCreateView(getContext(), newSize - 1);
+            lastView = viewCreator.onCreateView(getContext(), 0);
+            firstView = viewCreator.onCreateView(getContext(), newSize - 1);
             pagerAdapter.notifyDataSetChanged();
             setCurrentItem(1, false);
             restart();
