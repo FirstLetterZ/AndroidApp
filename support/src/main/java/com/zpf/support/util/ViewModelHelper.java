@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModelStoreOwner;
 import com.zpf.api.Initializer;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.support.model.AppViewModelFactory;
-import com.zpf.tool.config.stack.AppStackUtil;
+import com.zpf.tool.stack.AppStackUtil;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;

@@ -8,8 +8,8 @@ import android.text.TextUtils;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.support.constant.AppConst;
-import com.zpf.tool.config.stack.IStackItem;
-import com.zpf.tool.config.stack.StackElementState;
+import com.zpf.tool.stack.IStackItem;
+import com.zpf.tool.stack.StackElementState;
 
 import java.lang.ref.WeakReference;
 import java.util.LinkedList;

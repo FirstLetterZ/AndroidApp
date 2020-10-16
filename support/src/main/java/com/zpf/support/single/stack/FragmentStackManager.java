@@ -14,7 +14,6 @@ import com.zpf.frame.INavigator;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.single.OnStackEmptyListener;
-import com.zpf.support.single.StackElementState;
 import com.zpf.support.util.FragmentHelper;
 import com.zpf.tool.config.MainHandler;
 
@@ -244,7 +243,6 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
         int requestCode;
         int resultCode;
         Intent resultData;
-        @StackElementState
         int state;
     }
 }

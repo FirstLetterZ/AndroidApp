@@ -11,11 +11,6 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
-        <com.zpf.support.view.StatusBar
-            android:background="@color/dialog_default_cancel"
-            android:layout_width="match_parent"
-            android:layout_height="0dp" />
-
         <TextView
             android:id="@+id/tv_msg"
             android:layout_width="match_parent"
@@ -30,13 +25,6 @@
             android:id="@+id/sdl"
             android:layout_width="match_parent"
             android:layout_height="400dp" />
-
-        <com.zpf.support.view.TriangleView
-            android:id="@+id/triangle"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            app:triangle_color="@color/dialog_default_cancel"
-            app:triangle_direction="left" />
 
         <Button
             android:id="@+id/btn_copy"

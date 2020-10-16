@@ -17,10 +17,10 @@ import com.zpf.tool.permission.ActivityPermissionChecker;
 import com.zpf.tool.compat.permission.CompatPermissionChecker;
 import com.zpf.tool.permission.FragmentPermissionChecker;
 import com.zpf.tool.permission.PermissionChecker;
-import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.expand.util.DialogController;
 import com.zpf.tool.expand.util.ViewStateListener;
 import com.zpf.api.OnDestroyListener;
+import com.zpf.tool.stack.LifecycleState;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;

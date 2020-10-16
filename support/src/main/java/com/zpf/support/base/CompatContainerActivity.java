@@ -34,9 +34,9 @@ import com.zpf.support.util.LogUtil;
 import com.zpf.support.util.StackAnimUtil;
 import com.zpf.tool.ViewUtil;
 import com.zpf.tool.config.GlobalConfigImpl;
-import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.MainHandler;
-import com.zpf.tool.config.stack.IStackItem;
+import com.zpf.tool.stack.IStackItem;
+import com.zpf.tool.stack.LifecycleState;
 
 import java.lang.reflect.Type;
 

@@ -5,8 +5,10 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
@@ -28,9 +30,9 @@ import com.zpf.support.constant.ContainerType;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.support.util.LogUtil;
-import com.zpf.tool.config.LifecycleState;
 import com.zpf.tool.config.MainHandler;
-import com.zpf.tool.config.stack.IStackItem;
+import com.zpf.tool.stack.IStackItem;
+import com.zpf.tool.stack.LifecycleState;
 
 import java.lang.reflect.Type;
 
