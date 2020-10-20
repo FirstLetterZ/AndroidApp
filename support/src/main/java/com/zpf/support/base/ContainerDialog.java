@@ -378,6 +378,16 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
     }
 
     @Override
+    public boolean setProcessorLinker(Object linker) {
+        try {
+            mViewProcessor.setLinker(linker);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
     public IViewContainer getParentContainer() {
         return mParentContainer;
     }

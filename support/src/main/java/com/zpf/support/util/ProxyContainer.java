@@ -395,6 +395,11 @@ public class ProxyContainer extends Fragment implements IViewContainer {
     }
 
     @Override
+    public boolean setProcessorLinker(Object linker) {
+        return false;
+    }
+
+    @Override
     public IViewContainer getParentContainer() {
         return null;
     }

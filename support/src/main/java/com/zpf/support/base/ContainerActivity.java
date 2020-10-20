@@ -399,6 +399,16 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
     }
 
     @Override
+    public boolean setProcessorLinker(Object linker) {
+        try {
+            mViewProcessor.setLinker(linker);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
     public IViewContainer getParentContainer() {
         Activity parentActivity = getParent();
         if (parentActivity instanceof IViewContainer) {

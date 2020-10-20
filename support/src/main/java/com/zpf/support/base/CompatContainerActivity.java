@@ -400,6 +400,16 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     @Override
+    public boolean setProcessorLinker(Object linker) {
+        try {
+            mViewProcessor.setLinker(linker);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
     public IViewContainer getParentContainer() {
         Activity parentActivity = getParent();
         if (parentActivity instanceof IViewContainer) {

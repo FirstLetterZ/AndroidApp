@@ -15,6 +15,7 @@ public class AppConst {
     public static final String BUNDLE_KEY = "bundle_key";
     public static final String PARAM = "params";
     public static final String TYPE = "type";
+    public static final String NUMBER = "number";
     public static final String URL = "url";
     public static final String FLAG = "flag";
     public static final String DATA = "data";
