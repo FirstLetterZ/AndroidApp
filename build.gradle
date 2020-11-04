@@ -58,7 +58,7 @@ ext {
             refresh               : 'com.zpf.android:pullRefresh:1.1.0',
             network               : 'com.zpf.android:util-retrofit:2.2.0',
             support               : 'com.zpf.android:tool-support:1.1.0',
-            gsonParse             : 'com.zpf.android:util-gson:1.0.8',
+            gsonParse             : 'com.zpf.android:util-gson:1.1.0',
             glideutil             : 'com.zpf.android:util-glide:1.1.0',
             /* ============================== 项目内依赖工具库 ================================ */
             dhl                   : 'com.zpf.android:tool-dhl:1.0.0',

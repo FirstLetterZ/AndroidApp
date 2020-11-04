@@ -2,7 +2,10 @@ package com.zpf.tool.gson;
 
 import android.text.TextUtils;
 
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -29,7 +32,19 @@ import java.util.Map;
  * Created by ZPF on 2018/7/21.
  */
 public class GsonUtil implements JsonParserInterface {
-    private final Gson defGson = new Gson();
+    private final Gson defGson = new GsonBuilder()
+            .addSerializationExclusionStrategy(new ExclusionStrategy() {
+                @Override
+                public boolean shouldSkipField(FieldAttributes f) {
+                    return f == null || f.getAnnotation(SkipParse.class) != null;
+                }
+
+                @Override
+                public boolean shouldSkipClass(Class<?> clazz) {
+                    return clazz == null || clazz.getAnnotation(SkipParse.class) != null;
+                }
+            })
+            .create();
     private Gson mGson;
     private final JsonParser mJsonParser = new JsonParser();
 
