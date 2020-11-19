@@ -176,7 +176,6 @@ public class IconTextView extends TextView implements IconText {
 
     @Override
     public void setTypefaceFromAsset(String path) {
-        mTypeface = null;
         if (!TextUtils.isEmpty(path)) {
             try {
                 mTypeface = Typeface.createFromAsset(getContext().getAssets(), path);
@@ -189,7 +188,6 @@ public class IconTextView extends TextView implements IconText {
 
     @Override
     public void setTypefaceFromFile(File file) {
-        mTypeface = null;
         if (file != null && file.exists()) {
             try {
                 mTypeface = Typeface.createFromFile(file);
