@@ -1,6 +1,9 @@
 package com.zpf.support.util;
 
+import android.app.Dialog;
 import android.content.ContextWrapper;
+import android.view.View;
+import android.widget.PopupWindow;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -88,6 +91,14 @@ public class ViewModelHelper {
                 break;
             } else if (obj instanceof ContextWrapper) {
                 obj = ((ContextWrapper) obj).getBaseContext();
+            } else if (obj instanceof View) {
+                obj = ((View) obj).getContext();
+            } else if (obj instanceof Dialog) {
+                obj = ((Dialog) obj).getContext();
+            } else if (obj instanceof PopupWindow) {
+                obj = ((PopupWindow) obj).getContentView();
+            } else {
+                break;
             }
         }
         return result;

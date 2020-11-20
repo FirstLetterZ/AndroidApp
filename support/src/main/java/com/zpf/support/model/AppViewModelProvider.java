@@ -3,7 +3,7 @@ package com.zpf.support.model;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
+import androidx.lifecycle.ViewModelStore;
 
 import com.zpf.support.util.ViewModelHelper;
 
@@ -14,6 +14,7 @@ public class AppViewModelProvider extends ViewModelProvider {
 
     private final HashMap<String, WeakReference<ViewModel>> mMap = new HashMap<>();
     private final ViewModelProvider.Factory factory = AppViewModelFactory.getInstance();
+    private static ViewModelStore viewModelStore = new ViewModelStore();
 
     public static AppViewModelProvider get() {
         return AppViewModelProvider.Instance.provider;
@@ -24,7 +25,7 @@ public class AppViewModelProvider extends ViewModelProvider {
     }
 
     public AppViewModelProvider() {
-        super((ViewModelStoreOwner) null, null);
+        super(viewModelStore, AppViewModelFactory.getInstance());
     }
 
     @NonNull
