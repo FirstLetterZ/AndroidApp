@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialog;
@@ -74,6 +75,7 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
         Window window = getWindow();
         if (window != null) {
             window.requestFeature(Window.FEATURE_NO_TITLE);// 取消标题
+            window.getDecorView().setPadding(0, 0, 0, 0);
             initWindow(window);
         }
         initView();
@@ -85,8 +87,10 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
             useDefWindowConfig = !mViewProcessor.initWindow(window);
         }
         if (useDefWindowConfig) {
-            window.getDecorView().setPadding(0, 0, 0, 0);
-            window.getAttributes().gravity = Gravity.CENTER;
+            WindowManager.LayoutParams lp = window.getAttributes();
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            lp.gravity = Gravity.CENTER;
             window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
             window.setBackgroundDrawableResource(android.R.color.transparent);
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
