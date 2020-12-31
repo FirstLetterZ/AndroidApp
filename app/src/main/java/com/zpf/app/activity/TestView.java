@@ -17,7 +17,7 @@ import com.zpf.support.base.ViewProcessor;
 /**
  * Created by ZPF on 2019/3/25.
  */
-@ILayoutId(R.layout.activity_test2)
+@ILayoutId(R.layout.activity_test)
 public class TestView extends ViewProcessor {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -27,8 +27,6 @@ public class TestView extends ViewProcessor {
     @Override
     public void onResume() {
         super.onResume();
-        setBgDrawable($(R.id.ll_test), R.mipmap.pic_bg_report_list,
-                getContext().getResources());
     }
 
     /**

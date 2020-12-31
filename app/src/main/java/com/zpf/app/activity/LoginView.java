@@ -16,7 +16,6 @@ import android.widget.TextView;
 
 import com.zpf.api.ILayoutId;
 import com.zpf.api.ItemViewCreator;
-import com.zpf.app.SpiderDiagramLayout;
 import com.zpf.app.plugin.AsyncLoadListener;
 import com.zpf.app.plugin.AsyncLoadState;
 import com.zpf.app.plugin.PluginApkBean;
@@ -37,8 +36,6 @@ import com.zpf.tool.ToastUtil;
 public class LoginView extends ViewProcessor {
     private AsyncLoadListener loadListener;
     private BannerPagerView bpv = (BannerPagerView) $(R.id.bpv);
-    private SpiderDiagramLayout sdl = (SpiderDiagramLayout) $(R.id.sdl);
-    private TriangleView triangle = (TriangleView) $(R.id.triangle);
     private StretchableIndicator indicator = (StretchableIndicator) $(R.id.indicator);
     private int pageSize = 8;
     private int d = 1;
@@ -126,19 +123,19 @@ public class LoginView extends ViewProcessor {
         });
 
         float[] pp = new float[]{0.6f, 0.7f, 0.8f, 0.6f, 0.8f};
-        sdl.setItemViewCreator(new ItemViewCreator() {
-            @Override
-            public View onCreateView(Context context, int type) {
-                return LayoutInflater.from(context).inflate(R.layout.item_test, sdl, false);
-            }
-
-            @Override
-            public void onBindView(View view, int position) {
-                TextView tv = view.findViewById(R.id.tv_title);
-                tv.setText(position + "->" + pp[position]);
-            }
-        });
-        sdl.setPointPercents(pp);
+//        sdl.setItemViewCreator(new ItemViewCreator() {
+//            @Override
+//            public View onCreateView(Context context, int type) {
+//                return LayoutInflater.from(context).inflate(R.layout.item_test, sdl, false);
+//            }
+//
+//            @Override
+//            public void onBindView(View view, int position) {
+//                TextView tv = view.findViewById(R.id.tv_title);
+//                tv.setText(position + "->" + pp[position]);
+//            }
+//        });
+//        sdl.setPointPercents(pp);
 
     }
 
@@ -166,12 +163,6 @@ public class LoginView extends ViewProcessor {
                 } else {
                     ToastUtil.toast("fail");
                 }
-                break;
-            case R.id.btn_start:
-                d = triangle.getTriangleDirection() + 1;
-                triangle.setTriangleDirection(d);
-                triangle.invalidate();
-//                PluginController.get().getClassAsync("TestMainLayout", "plugin_test", loadListener);
                 break;
             case R.id.btn_cancel:
                 Bundle params = new Bundle();

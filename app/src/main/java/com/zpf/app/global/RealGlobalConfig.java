@@ -19,8 +19,8 @@ public class RealGlobalConfig implements GlobalConfigInterface {
     private UUID uuid = UUID.randomUUID();
 
     @Override
-    public UUID getId() {
-        return uuid;
+    public String getId() {
+        return uuid.toString();
     }
 
     @Override

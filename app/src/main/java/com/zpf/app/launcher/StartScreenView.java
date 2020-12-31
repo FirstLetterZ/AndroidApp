@@ -20,18 +20,18 @@ public class StartScreenView extends ViewProcessor {
         mRootLayout.getStatusBar().setVisibility(View.GONE);
         mTitleBar.getLayout().setVisibility(View.GONE);
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        MainHandler.get().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Bundle params = new Bundle();
-//                params.putSerializable(AppConst.TARGET_CONTAINER_CLASS, CompatSinglePageActivity.class);
-                push(LoginView.class, params);
-                remove(StartScreenView.class);
-            }
-        }, 2000);
-    }
+//
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        MainHandler.get().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                Bundle params = new Bundle();
+////                params.putSerializable(AppConst.TARGET_CONTAINER_CLASS, CompatSinglePageActivity.class);
+//                push(LoginView.class, params);
+//                remove(StartScreenView.class);
+//            }
+//        }, 2000);
+//    }
 }
