@@ -14,7 +14,6 @@ public class TitleBarEntry implements Parcelable {
     public String leftLayoutAction;
     public String rightLayoutAction;
     public boolean hideStatusBar;
-    public boolean hideBottomShadow;
     public boolean hideTitleBar;
     @ColorInt
     public int statusBarColor;
@@ -34,7 +33,6 @@ public class TitleBarEntry implements Parcelable {
         leftLayoutAction = in.readString();
         rightLayoutAction = in.readString();
         hideStatusBar = in.readByte() != 0;
-        hideBottomShadow = in.readByte() != 0;
         hideTitleBar = in.readByte() != 0;
         statusBarColor = in.readInt();
         titleBarColor = in.readInt();
@@ -51,7 +49,6 @@ public class TitleBarEntry implements Parcelable {
         dest.writeString(leftLayoutAction);
         dest.writeString(rightLayoutAction);
         dest.writeByte((byte) (hideStatusBar ? 1 : 0));
-        dest.writeByte((byte) (hideBottomShadow ? 1 : 0));
         dest.writeByte((byte) (hideTitleBar ? 1 : 0));
         dest.writeInt(statusBarColor);
         dest.writeInt(titleBarColor);

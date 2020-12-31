@@ -4,8 +4,10 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
+
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,19 +17,20 @@ import com.zpf.frame.IShadowLine;
 /**
  * Created by ZPF on 2019/3/28.
  */
-
-public class BottomShadow extends View implements IShadowLine {
+public class LinearShadowLine extends View implements IShadowLine {
     private int elevation;
+    private int shadowColor = 0;
+    private GradientDrawable.Orientation orientation = GradientDrawable.Orientation.TOP_BOTTOM;
 
-    public BottomShadow(Context context) {
+    public LinearShadowLine(Context context) {
         super(context);
     }
 
-    public BottomShadow(Context context, @Nullable AttributeSet attrs) {
+    public LinearShadowLine(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public BottomShadow(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public LinearShadowLine(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
@@ -48,13 +51,25 @@ public class BottomShadow extends View implements IShadowLine {
 
     @Override
     public void setShadowColor(@ColorInt int startColor) {
-        GradientDrawable gradientDrawable = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
+        shadowColor = startColor;
+        GradientDrawable gradientDrawable = new GradientDrawable(orientation,
                 new int[]{startColor, Color.TRANSPARENT});
         setBackground(gradientDrawable);
     }
 
     @Override
-    public void setShadowDrwable(Drawable background) {
+    public void setShadowOrientation(GradientDrawable.Orientation orientation) {
+        if (this.orientation != orientation) {
+            this.orientation = orientation;
+            if (shadowColor != 0) {
+                setShadowColor(shadowColor);
+            }
+        }
+    }
+
+    @Override
+    public void setShadowDrawable(Drawable background) {
+        shadowColor = 0;
         setBackground(background);
     }
 

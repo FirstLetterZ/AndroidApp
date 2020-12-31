@@ -11,7 +11,7 @@ import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 
 public class NameStackItem implements IStackItem {
-    private String name;
+    private final String name;
     private int elementState = StackElementState.STACK_OUTSIDE;
     private WeakReference<Activity> mInstance;
 

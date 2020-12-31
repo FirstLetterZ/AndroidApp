@@ -4,16 +4,16 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.annotation.CallSuper;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.TextView;
 
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
@@ -29,7 +29,7 @@ import com.zpf.support.constant.AppConst;
 import com.zpf.support.model.SimpleEvent;
 import com.zpf.support.model.IconTextEntry;
 import com.zpf.support.model.TitleBarEntry;
-import com.zpf.support.view.LinearRootLayout;
+import com.zpf.support.view.ContainerRootLayout;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.PermissionUtil;
 import com.zpf.tool.SafeClickListener;
@@ -76,13 +76,13 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
                 layoutId = getLayoutId();
             }
             if (layoutId != 0) {
-                mRootLayout.setContentView(LayoutInflater.from(getContext()), layoutId);
+                mRootLayout.setContentView(layoutId);
             }
         }
     }
 
     protected IRootLayout onCreateRootLayout(Context context) {
-        return new LinearRootLayout(context);
+        return new ContainerRootLayout(context);
     }
 
     @Override
@@ -209,7 +209,7 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
     }
 
     @Override
-    public <T extends View> T $(@IdRes int viewId) {
+    public <T extends View> T find(@IdRes int viewId) {
         return mRootLayout.getLayout().findViewById(viewId);
     }
 
@@ -255,19 +255,11 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
         }
         final TitleBarEntry titleBarEntry = getParams().getParcelable(AppConst.TITLE_ENTRY);
         if (titleBarEntry != null) {
-            if (titleBarEntry.hideBottomShadow) {
-                rootLayout.getShadowLine().getView().setVisibility(View.GONE);
-            } else {
-                rootLayout.getShadowLine().getView().setVisibility(View.VISIBLE);
-            }
-            if (titleBarEntry.hideStatusBar && titleBarEntry.hideTitleBar) {
-                rootLayout.getTopLayout().getLayout().setVisibility(View.GONE);
-            } else {
                 if (!TextUtils.isEmpty(titleBarEntry.leftLayoutAction)) {
                     rootLayout.getTitleBar().getLeftLayout().setOnClickListener(new SafeClickListener() {
                         @Override
                         public void click(View v) {
-                            onReceiveEvent(new SimpleEvent(titleBarEntry.leftLayoutAction));
+                            onReceiveEvent(new SimpleEvent<>(titleBarEntry.leftLayoutAction));
                         }
                     });
                 }
@@ -275,14 +267,14 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
                     rootLayout.getTitleBar().getRightLayout().setOnClickListener(new SafeClickListener() {
                         @Override
                         public void click(View v) {
-                            onReceiveEvent(new SimpleEvent(titleBarEntry.rightLayoutAction));
+                            onReceiveEvent(new SimpleEvent<>(titleBarEntry.rightLayoutAction));
                         }
                     });
                 }
                 if (titleBarEntry.hideStatusBar) {
-                    rootLayout.getShadowLine().getView().setVisibility(View.GONE);
+                    rootLayout.getStatusBar().setVisibility(View.GONE);
                 } else {
-                    rootLayout.getShadowLine().getView().setVisibility(View.VISIBLE);
+                    rootLayout.getStatusBar().setVisibility(View.VISIBLE);
                 }
                 if (titleBarEntry.hideTitleBar) {
                     rootLayout.getTitleBar().getLayout().setVisibility(View.GONE);
@@ -308,7 +300,6 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
                     }
                 }
             }
-        }
     }
 
     protected void bindIconText(IconText iconText, IconTextEntry entry) {
@@ -332,14 +323,6 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
         }
     }
 
-    public void setText(int viewId, CharSequence content) {
-        TextView textView = $(viewId);
-        if (textView != null) {
-            textView.setText(content);
-            textView.setVisibility(TextUtils.isEmpty(content) ? View.GONE : View.VISIBLE);
-        }
-    }
-
     public void setClickListener(View... views) {
         if (views != null) {
             for (View view : views) {
@@ -355,7 +338,7 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
     }
 
     public void setClickListener(int viewId) {
-        View v = $(viewId);
+        View v = find(viewId);
         if (v != null) {
             v.setOnClickListener(safeClickListener);
         }

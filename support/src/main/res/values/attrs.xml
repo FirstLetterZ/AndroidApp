@@ -8,4 +8,16 @@
         <attr name="dotFront" format="reference" />
         <attr name="dotBack" format="reference" />
     </declare-styleable>
+
+    <declare-styleable name="ContainerRootLayout">
+        <attr name="childType" format="enum">
+            <enum name="statusBar" value="0" />
+            <enum name="titleBar" value="1" />
+            <enum name="contentView" value="2" />
+            <enum name="contentDecorations" value="3" />
+            <enum name="pageDecoration" value="4" />
+        </attr>
+        <attr name="hierarchy" format="integer" />
+        <attr name="contentBelowTitle" format="boolean" />
+    </declare-styleable>
 </resources>

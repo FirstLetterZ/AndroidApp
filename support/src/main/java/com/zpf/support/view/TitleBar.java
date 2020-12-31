@@ -22,15 +22,15 @@ import com.zpf.tool.expand.view.IconTextView;
  * Created by ZPF on 2018/6/14.
  */
 public class TitleBar extends RelativeLayout implements ITitleBar {
-    private IconTextView tvLeft;
-    private IconTextView ivLeft;
-    private LinearLayout leftLayout;
-    private LinearLayout titleLayout;
-    private IconTextView title;
-    private IconTextView subtitle;
-    private LinearLayout rightLayout;
-    private IconTextView ivRight;
-    private IconTextView tvRight;
+    private final IconTextView tvLeft;
+    private final IconTextView ivLeft;
+    private final LinearLayout leftLayout;
+    private final LinearLayout titleLayout;
+    private final IconTextView title;
+    private final IconTextView subtitle;
+    private final LinearLayout rightLayout;
+    private final IconTextView ivRight;
+    private final IconTextView tvRight;
     public final int defHeight;
 
     public TitleBar(Context context) {
@@ -43,7 +43,7 @@ public class TitleBar extends RelativeLayout implements ITitleBar {
 
     public TitleBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        int space = (int) (context.getResources().getDimension(R.dimen.support_space_normal));
+        int space = context.getResources().getDimensionPixelSize(R.dimen.support_title_bar_padding);
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 
         leftLayout = new LinearLayout(context);
@@ -132,7 +132,7 @@ public class TitleBar extends RelativeLayout implements ITitleBar {
         addView(leftLayout);
         addView(rightLayout);
         addView(titleLayout);
-        defHeight = (int) (44 * metrics.density);
+        defHeight = context.getResources().getDimensionPixelSize(R.dimen.support_title_bar_height);
         setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, defHeight));
     }
 
