@@ -192,18 +192,19 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
         return result;
     }
 
-    protected void bindAllChildren(ViewGroup viewGroup) {
-        if (viewGroup == null) {
-            return;
-        }
-        View child;
-        for (int i = 0; i < viewGroup.getChildCount(); i++) {
-            child = viewGroup.getChildAt(i);
-            if (child.isClickable() && child.getId() != View.NO_ID) {
-                child.setOnClickListener(safeClickListener);
-            }
-            if (child instanceof ViewGroup) {
-                bindAllChildren((ViewGroup) child);
+    protected void bindAllChildren(View target) {
+        ViewGroup parent;
+        if (target instanceof ViewGroup) {
+            parent = ((ViewGroup) target);
+            View child;
+            for (int i = 0; i < parent.getChildCount(); i++) {
+                child = parent.getChildAt(i);
+                if (child.isClickable() && child.getId() != View.NO_ID) {
+                    child.setOnClickListener(safeClickListener);
+                }
+                if (child instanceof ViewGroup) {
+                    bindAllChildren((ViewGroup) child);
+                }
             }
         }
     }
@@ -255,51 +256,51 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
         }
         final TitleBarEntry titleBarEntry = getParams().getParcelable(AppConst.TITLE_ENTRY);
         if (titleBarEntry != null) {
-                if (!TextUtils.isEmpty(titleBarEntry.leftLayoutAction)) {
-                    rootLayout.getTitleBar().getLeftLayout().setOnClickListener(new SafeClickListener() {
-                        @Override
-                        public void click(View v) {
-                            onReceiveEvent(new SimpleEvent<>(titleBarEntry.leftLayoutAction));
-                        }
-                    });
+            if (!TextUtils.isEmpty(titleBarEntry.leftLayoutAction)) {
+                rootLayout.getTitleBar().getLeftLayout().setOnClickListener(new SafeClickListener() {
+                    @Override
+                    public void click(View v) {
+                        onReceiveEvent(new SimpleEvent<>(titleBarEntry.leftLayoutAction));
+                    }
+                });
+            }
+            if (!TextUtils.isEmpty(titleBarEntry.rightLayoutAction)) {
+                rootLayout.getTitleBar().getRightLayout().setOnClickListener(new SafeClickListener() {
+                    @Override
+                    public void click(View v) {
+                        onReceiveEvent(new SimpleEvent<>(titleBarEntry.rightLayoutAction));
+                    }
+                });
+            }
+            if (titleBarEntry.hideStatusBar) {
+                rootLayout.getStatusBar().setVisibility(View.GONE);
+            } else {
+                rootLayout.getStatusBar().setVisibility(View.VISIBLE);
+            }
+            if (titleBarEntry.hideTitleBar) {
+                rootLayout.getTitleBar().getLayout().setVisibility(View.GONE);
+            } else {
+                rootLayout.getTitleBar().getLayout().setVisibility(View.VISIBLE);
+                if (titleBarEntry.leftIconEntry != null) {
+                    bindIconText(rootLayout.getTitleBar().getLeftImage(), titleBarEntry.leftIconEntry);
                 }
-                if (!TextUtils.isEmpty(titleBarEntry.rightLayoutAction)) {
-                    rootLayout.getTitleBar().getRightLayout().setOnClickListener(new SafeClickListener() {
-                        @Override
-                        public void click(View v) {
-                            onReceiveEvent(new SimpleEvent<>(titleBarEntry.rightLayoutAction));
-                        }
-                    });
+                if (titleBarEntry.leftTextEntry != null) {
+                    bindIconText(rootLayout.getTitleBar().getLeftText(), titleBarEntry.leftTextEntry);
                 }
-                if (titleBarEntry.hideStatusBar) {
-                    rootLayout.getStatusBar().setVisibility(View.GONE);
-                } else {
-                    rootLayout.getStatusBar().setVisibility(View.VISIBLE);
+                if (titleBarEntry.rightIconEntry != null) {
+                    bindIconText(rootLayout.getTitleBar().getRightImage(), titleBarEntry.rightIconEntry);
                 }
-                if (titleBarEntry.hideTitleBar) {
-                    rootLayout.getTitleBar().getLayout().setVisibility(View.GONE);
-                } else {
-                    rootLayout.getTitleBar().getLayout().setVisibility(View.VISIBLE);
-                    if (titleBarEntry.leftIconEntry != null) {
-                        bindIconText(rootLayout.getTitleBar().getLeftImage(), titleBarEntry.leftIconEntry);
-                    }
-                    if (titleBarEntry.leftTextEntry != null) {
-                        bindIconText(rootLayout.getTitleBar().getLeftText(), titleBarEntry.leftTextEntry);
-                    }
-                    if (titleBarEntry.rightIconEntry != null) {
-                        bindIconText(rootLayout.getTitleBar().getRightImage(), titleBarEntry.rightIconEntry);
-                    }
-                    if (titleBarEntry.rightTextEntry != null) {
-                        bindIconText(rootLayout.getTitleBar().getRightText(), titleBarEntry.rightTextEntry);
-                    }
-                    if (titleBarEntry.titleEntry != null) {
-                        bindIconText(rootLayout.getTitleBar().getTitle(), titleBarEntry.titleEntry);
-                    }
-                    if (titleBarEntry.subtitleEntry != null) {
-                        bindIconText(rootLayout.getTitleBar().getSubTitle(), titleBarEntry.subtitleEntry);
-                    }
+                if (titleBarEntry.rightTextEntry != null) {
+                    bindIconText(rootLayout.getTitleBar().getRightText(), titleBarEntry.rightTextEntry);
+                }
+                if (titleBarEntry.titleEntry != null) {
+                    bindIconText(rootLayout.getTitleBar().getTitle(), titleBarEntry.titleEntry);
+                }
+                if (titleBarEntry.subtitleEntry != null) {
+                    bindIconText(rootLayout.getTitleBar().getSubTitle(), titleBarEntry.subtitleEntry);
                 }
             }
+        }
     }
 
     protected void bindIconText(IconText iconText, IconTextEntry entry) {

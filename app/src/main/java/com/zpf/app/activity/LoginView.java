@@ -35,8 +35,8 @@ import com.zpf.tool.ToastUtil;
 @ILayoutId(R.layout.activity_main)
 public class LoginView extends ViewProcessor {
     private AsyncLoadListener loadListener;
-    private BannerPagerView bpv = (BannerPagerView) $(R.id.bpv);
-    private StretchableIndicator indicator = (StretchableIndicator) $(R.id.indicator);
+    private BannerPagerView bpv = (BannerPagerView) find(R.id.bpv);
+    private StretchableIndicator indicator = (StretchableIndicator) find(R.id.indicator);
     private int pageSize = 8;
     private int d = 1;
 
@@ -44,7 +44,7 @@ public class LoginView extends ViewProcessor {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mTitleBar.getTitle().setText("测试");
-        bindAllChildren(mRootLayout.getContentLayout());
+        bindAllChildren(mRootLayout.getContentView());
         loadListener = new AsyncLoadListener() {
             @Override
             public void onState(int sateCode, @NonNull String targetName, @Nullable PluginApkBean apkBean) {
