@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.zpf.api.IFullLifecycle;
-import com.zpf.tool.config.LifecycleState;
+import com.zpf.tool.stack.LifecycleState;
 
 /**
  * Created by ZPF on 2018/6/28.

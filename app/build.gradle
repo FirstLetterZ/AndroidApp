@@ -56,8 +56,24 @@ dependencies {
     api rootProject.ext.dependencies.okhttp
     api rootProject.ext.dependencies.retrofit
     api rootProject.ext.dependencies.retrofitGsonConverter
-    api rootProject.ext.dependencies.appcompat
-    api rootProject.ext.dependencies.recyclerview
+    api(rootProject.ext.dependencies.appcompat)
+            {
+                exclude group: 'androidx.activity'
+                exclude group: 'androidx.fragment'
+                exclude group: 'androidx.arch.core'
+                exclude group: 'androidx.core'
+                exclude group: 'androidx.lifecycle'
+            }
+    api(rootProject.ext.dependencies.activity)
+    api(rootProject.ext.dependencies.fragment)
+    api(rootProject.ext.dependencies.recyclerview)
+            {
+                exclude group: 'androidx.annotation'
+                exclude group: 'androidx.core'
+                exclude group: 'androidx.arch.core'
+                exclude group: 'androidx.collection'
+                exclude group: 'androidx.lifecycle'
+            }
 //    api rootProject.ext.dependencies.support
     api rootProject.ext.dependencies.gsonParse
     api rootProject.ext.dependencies.network

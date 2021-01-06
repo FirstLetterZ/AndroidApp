@@ -58,7 +58,7 @@ public class BridgeWebView extends WebView {
     private List<String> whiteList;//白名单关键字
     private final String jsFileName = "bridge.js";
     private String jsFileString;
-    private List<WebViewStateListener> stateListenerList = new ArrayList<>();
+    private final List<WebViewStateListener> stateListenerList = new ArrayList<>();
     private OnReceivedWebPageListener webPageListener;
     private WebViewWindowListener windowListener;
     private WebViewFileChooserListener fileChooserListener;
@@ -68,8 +68,8 @@ public class BridgeWebView extends WebView {
     private OverrideLoadUrlListener overrideLoadUrlListener;//OverrideLoadUrlListener
     private boolean isTraceless;//无痕浏览
     private boolean useWebTitle = true;//使用浏览器标题
-    private WebPageInfo webPageInfo = new WebPageInfo();//当前加载页面
-    private HashMap<String, Boolean> redirectedUrlMap = new HashMap<>();//重定向原始url集合
+    private final WebPageInfo webPageInfo = new WebPageInfo();//当前加载页面
+    private final HashMap<String, Boolean> redirectedUrlMap = new HashMap<>();//重定向原始url集合
     private JsonParserInterface realParser;//json解析
     private View customView = null;
     private WebChromeClient.CustomViewCallback customCallback = null;
@@ -778,6 +778,10 @@ public class BridgeWebView extends WebView {
                 (stateListenerList.size() == 0 || !stateListenerList.contains(loadStateListener))) {
             stateListenerList.add(loadStateListener);
         }
+    }
+
+    public void setScrollChangeListener(WebViewScrollListener scrollChangeListener) {
+        this.scrollChangeListener = scrollChangeListener;
     }
 
     public void setWebPageListener(OnReceivedWebPageListener webPageListener) {

@@ -40,7 +40,7 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
     private final DialogController mDialogController = new DialogController();
     private final CancelableManager mCallBackManager = new CancelableManager();
     private final ViewStateListener mStateListener = new ViewStateListener();
-    private PermissionChecker mPermissionChecker;
+    private PermissionChecker<?> mPermissionChecker;
 
     public ContainerListenerController() {
         mLifecycleList.add(mStateListener);
@@ -143,7 +143,6 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
         mLifecycleList.clear();
         mDestroyListenerList.clear();
         if (mPermissionChecker != null) {
-            mPermissionChecker.onDestroy();
             mPermissionChecker = null;
         }
     }
@@ -275,7 +274,6 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
         if (mPermissionChecker == null) {
             mPermissionChecker = new ActivityPermissionChecker();
         } else if (!(mPermissionChecker instanceof ActivityPermissionChecker)) {
-            mPermissionChecker.onDestroy();
             mPermissionChecker = new ActivityPermissionChecker();
         }
         return (ActivityPermissionChecker) mPermissionChecker;
@@ -285,7 +283,6 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
         if (mPermissionChecker == null) {
             mPermissionChecker = new FragmentPermissionChecker();
         } else if (!(mPermissionChecker instanceof FragmentPermissionChecker)) {
-            mPermissionChecker.onDestroy();
             mPermissionChecker = new FragmentPermissionChecker();
         }
         return (FragmentPermissionChecker) mPermissionChecker;
@@ -295,7 +292,6 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
         if (mPermissionChecker == null) {
             mPermissionChecker = new CompatPermissionChecker();
         } else if (!(mPermissionChecker instanceof CompatPermissionChecker)) {
-            mPermissionChecker.onDestroy();
             mPermissionChecker = new CompatPermissionChecker();
         }
         return (CompatPermissionChecker) mPermissionChecker;

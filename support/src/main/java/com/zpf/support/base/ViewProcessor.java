@@ -20,11 +20,13 @@ import com.zpf.api.ICustomWindow;
 import com.zpf.api.IEvent;
 import com.zpf.api.ILayoutId;
 import com.zpf.api.IManager;
+import com.zpf.api.IPermissionResult;
 import com.zpf.api.IconText;
 import com.zpf.frame.IContainerHelper;
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IRootLayout;
 import com.zpf.frame.ITitleBar;
+import com.zpf.frame.IViewLinker;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.model.SimpleEvent;
 import com.zpf.support.model.IconTextEntry;
@@ -36,8 +38,7 @@ import com.zpf.tool.SafeClickListener;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
 import com.zpf.tool.config.GlobalConfigImpl;
-import com.zpf.tool.permission.OnLockPermissionRunnable;
-import com.zpf.tool.permission.PermissionInfo;
+import com.zpf.tool.permission.PermissionDescription;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -46,7 +47,7 @@ import java.util.List;
  * 视图处理
  * Created by ZPF on 2018/6/14.
  */
-public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? extends IViewProcessor>> {
+public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends IViewProcessor>> {
     protected final IViewContainer mContainer;
     protected final ITitleBar mTitleBar;
     protected final IRootLayout mRootLayout;
@@ -56,7 +57,6 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
             ViewProcessor.this.onClick(v);
         }
     };
-    protected C mLinker;//
 
     public ViewProcessor() {
         this.mContainer = ContainerController.mInitingViewContainer;
@@ -161,22 +161,24 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
     }
 
     @Override
-    public void runWithPermission(Runnable runnable, String... permissions) {
-        mContainer.checkPermissions(runnable, new OnLockPermissionRunnable() {
+    public void runWithPermission(final Runnable runnable, String... permissions) {
+        mContainer.checkPermissions(new IPermissionResult() {
             @Override
-            public void onLock(List<PermissionInfo> list) {
-                PermissionUtil.get().showPermissionRationaleDialog(mContainer.getCurrentActivity(), list);
+            public void onPermissionChecked(boolean formResult, int requestCode,
+                                            String[] requestPermissions, @Nullable List<String> missPermissions) {
+                if (missPermissions == null || missPermissions.size() == 0) {
+                    runnable.run();
+                } else {
+                    PermissionUtil.get().showPermissionRationaleDialog(
+                            getCurrentActivity(), PermissionDescription.get().queryMissInfo(missPermissions));
+                }
             }
         }, permissions);
     }
 
-    @Override
-    public void runWithPermission(Runnable runnable, Runnable onLackOfPermissions, String... permissions) {
-        mContainer.checkPermissions(runnable, onLackOfPermissions, permissions);
-    }
 
-    public void runWithPermission(Runnable runnable, OnLockPermissionRunnable onLackOfPermissions, String... permissions) {
-        mContainer.checkPermissions(runnable, onLackOfPermissions, permissions);
+    public void runWithPermission(IPermissionResult result, String... permissions) {
+        mContainer.checkPermissions(result, permissions);
     }
 
     public <T extends View> T bind(@IdRes int viewId) {
@@ -225,6 +227,11 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
     }
 
     @Override
+    public void onReceiveLinker(IViewLinker linker) {
+
+    }
+
+    @Override
     public void onReceiveEvent(IEvent event) {
 
     }
@@ -232,11 +239,6 @@ public class ViewProcessor<C> implements IViewProcessor<C>, INavigator<Class<? e
     @Override
     public Activity getCurrentActivity() {
         return mContainer.getCurrentActivity();
-    }
-
-    @Override
-    public void setLinker(C linker) {
-        this.mLinker = linker;
     }
 
     @Override

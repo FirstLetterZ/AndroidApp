@@ -20,6 +20,7 @@ dependencies {
     compileOnly rootProject.ext.dependencies.api
     compileOnly rootProject.ext.dependencies.dataparser
     compileOnly rootProject.ext.dependencies.global
+    compileOnly rootProject.ext.dependencies.appstack
     compileOnly rootProject.ext.dependencies.annotations
 }
 

@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialog;
 
-import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -17,12 +16,14 @@ import com.zpf.api.IBackPressInterceptor;
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
+import com.zpf.api.IPermissionResult;
 import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.ILoadingStateListener;
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewContainer;
+import com.zpf.frame.IViewLinker;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewStateListener;
 import com.zpf.support.constant.AppConst;
@@ -104,13 +105,7 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
 
     @Override
     public void show() {
-        if (listener != null) {
-            if (listener.execute(1)) {
-                super.show();
-            }
-        } else {
-            super.show();
-        }
+        show(this);
     }
 
     @Override
@@ -345,13 +340,13 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
     }
 
     @Override
-    public void checkPermissions(Runnable onPermission, Runnable onLock, String... permissions) {
-        mParentContainer.checkPermissions(onPermission, onLock, permissions);
+    public void checkPermissions(IPermissionResult permissionResult, String... permissions) {
+        mParentContainer.checkPermissions(permissionResult, permissions);
     }
 
     @Override
-    public void checkPermissions(Runnable onPermission, Runnable onLock, int requestCode, String... permissions) {
-        mParentContainer.checkPermissions(onPermission, onLock, requestCode, permissions);
+    public void checkPermissions(IPermissionResult permissionResult, int requestCode, String... permissions) {
+        mParentContainer.checkPermissions(permissionResult, requestCode, permissions);
     }
 
     @Override
@@ -379,9 +374,9 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
     }
 
     @Override
-    public boolean setProcessorLinker(Object linker) {
+    public boolean setProcessorLinker(IViewLinker linker) {
         try {
-            mViewProcessor.setLinker(linker);
+            mViewProcessor.onReceiveLinker(linker);
             return true;
         } catch (Exception e) {
             return false;

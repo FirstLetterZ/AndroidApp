@@ -26,7 +26,7 @@ public class ContainerStackItem implements IStackItem {
             IViewProcessor viewProcessor = viewContainer.getViewProcessor();
             if (viewProcessor == null) {
                 try {
-                    Class cls = (Class) viewContainer.getParams().getSerializable(AppConst.TARGET_VIEW_CLASS);
+                    Class<?> cls = (Class<?>) viewContainer.getParams().getSerializable(AppConst.TARGET_VIEW_CLASS);
                     name = cls.getName();
                 } catch (Exception e) {
                     name = viewContainer.getClass().getName();

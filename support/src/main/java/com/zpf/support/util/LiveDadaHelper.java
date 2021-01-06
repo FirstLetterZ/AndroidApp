@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class LiveDadaHelper {
-    private HashMap<LiveData<?>, HashSet<Observer<?>>> observerMap = new HashMap<>();
+    private final HashMap<LiveData<?>, HashSet<Observer<?>>> observerMap = new HashMap<>();
 
     public LiveDadaHelper(IGroup<OnDestroyListener> destroyGroup) {
         if (destroyGroup != null) {

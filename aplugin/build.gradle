@@ -23,11 +23,28 @@ android {
     }
 //    修改资源id
     aaptOptions {
-        additionalParameters '--allow-reserved-package-id','--package-id','0x70'
+        additionalParameters '--allow-reserved-package-id', '--package-id', '0x70'
     }
 }
 
 dependencies {
-    api rootProject.ext.dependencies.design
-    api rootProject.ext.dependencies.support
+    api(rootProject.ext.dependencies.design) {
+        exclude group: 'androidx.appcompat'
+        exclude group: 'androidx.activity'
+        exclude group: 'androidx.fragment'
+        exclude group: 'androidx.arch.core'
+        exclude group: 'androidx.core'
+        exclude group: 'androidx.lifecycle'
+    }
+    api(rootProject.ext.dependencies.appcompat) {
+        exclude group: 'androidx.activity'
+        exclude group: 'androidx.fragment'
+        exclude group: 'androidx.arch.core'
+        exclude group: 'androidx.core'
+        exclude group: 'androidx.lifecycle'
+    }
+    compileOnly(rootProject.ext.dependencies.activity)
+    compileOnly(rootProject.ext.dependencies.fragment)
+//    api rootProject.ext.dependencies.support
+    api project(':support')
 }

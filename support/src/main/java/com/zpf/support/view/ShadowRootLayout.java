@@ -2,8 +2,6 @@ package com.zpf.support.view;
 
 import android.content.Context;
 
-import androidx.annotation.Nullable;
-
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 

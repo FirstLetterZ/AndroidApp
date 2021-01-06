@@ -5,10 +5,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,15 +18,18 @@ import android.view.ViewGroup;
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
+import com.zpf.api.IPermissionResult;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.ILoadingStateListener;
 import com.zpf.frame.INavigator;
+import com.zpf.frame.IViewLinker;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.R;
 import com.zpf.support.constant.ContainerType;
 import com.zpf.support.model.ContainerStackItem;
 import com.zpf.support.model.NameStackItem;
+import com.zpf.tool.permission.PermissionChecker;
 import com.zpf.tool.stack.IStackItem;
 import com.zpf.tool.stack.LifecycleState;
 
@@ -347,7 +352,6 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
         checkVisibleChange(isVisibleToUser);
     }
 
-
     @Override
     public boolean checkPermissions(String... permissions) {
         return mController.getSupportFragmentPermissionChecker().checkPermissions(this, permissions);
@@ -359,13 +363,15 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public void checkPermissions(Runnable onPermission, Runnable onLock, String... permissions) {
-        mController.getSupportFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, permissions);
+    public void checkPermissions(IPermissionResult permissionResult, String... permissions) {
+        mController.getSupportFragmentPermissionChecker().checkPermissions(
+                this, PermissionChecker.REQ_PERMISSION_CODE, permissionResult, permissions);
     }
 
     @Override
-    public void checkPermissions(Runnable onPermission, Runnable onLock, int requestCode, String... permissions) {
-        mController.getSupportFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
+    public void checkPermissions(IPermissionResult permissionResult, int requestCode, String... permissions) {
+        mController.getSupportFragmentPermissionChecker().checkPermissions(
+                this, requestCode, permissionResult, permissions);
     }
 
     @Override
@@ -395,7 +401,7 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public boolean setProcessorLinker(Object linker) {
+    public boolean setProcessorLinker(IViewLinker linker) {
         return false;
     }
 

@@ -27,8 +27,8 @@ import java.util.List;
 public class FragmentStackManager implements INavigator<Class<? extends ViewProcessor>> {
     private final LinkedList<FragmentElementInfo> stackList = new LinkedList<>();
     private OnStackEmptyListener emptyListener;
-    private FragmentManager fragmentManager;
-    private int viewId;
+    private final FragmentManager fragmentManager;
+    private final int viewId;
 
     public FragmentStackManager(FragmentManager fragmentManager, int viewId) {
         this.fragmentManager = fragmentManager;

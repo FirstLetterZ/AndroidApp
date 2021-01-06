@@ -1,7 +1,5 @@
 package com.zpf.support.network.okhttp;
 
-import androidx.annotation.NonNull;
-
 import com.zpf.api.ICancelable;
 import com.zpf.api.IManager;
 import com.zpf.support.network.base.BaseCallBack;

@@ -8,19 +8,20 @@ import android.widget.Button;
 
 import com.zpf.api.ILayoutId;
 import com.zpf.support.base.ViewProcessor;
-import com.zpf.support.util.PermissionUtil;
 import com.zpf.support.view.CommonDialog;
 import com.zpf.tool.SafeClickListener;
-import com.zpf.tool.ToastUtil;
 import com.zpf.tool.config.AppContext;
+import com.zpf.tool.permission.PermissionChecker;
+import com.zpf.tool.toast.ToastUtil;
+import com.zpf.tool.toast.ToastWindow;
 
 
 @ILayoutId(R.layout.activity_main)
 public class TestSecondLayout extends ViewProcessor {
     //    TextView textView = (TextView) $(R.id.tv_msg);
-    Button button = (Button) $(R.id.btn_test);
+    Button button = find(R.id.btn_test);
     int i = 0;
-    private View.OnClickListener btnClick = new SafeClickListener() {
+    private final View.OnClickListener btnClick = new SafeClickListener() {
 
         @Override
         public void click(View v) {
@@ -49,7 +50,7 @@ public class TestSecondLayout extends ViewProcessor {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (PermissionUtil.get().getCompatChecker().checkDrawOverlays(getCurrentActivity())) {
+        if (PermissionChecker.checkDrawOverlays(getCurrentActivity())) {
             ToastUtil.setToaster( new ToastWindow(AppContext.get()));
         }
         button.setText(R.string.test_text01);

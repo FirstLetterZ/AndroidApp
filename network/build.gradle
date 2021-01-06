@@ -17,7 +17,10 @@ android {
 }
 
 dependencies {
-    compileOnly rootProject.ext.dependencies.retrofit
+    compileOnly(rootProject.ext.dependencies.retrofit) {
+        exclude(group: 'com.squareup.okhttp')
+    }
+    compileOnly rootProject.ext.dependencies.okhttp
     compileOnly rootProject.ext.dependencies.api
     compileOnly rootProject.ext.dependencies.global
     compileOnly rootProject.ext.dependencies.annotations

@@ -15,10 +15,12 @@ import com.zpf.api.IBackPressInterceptor;
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
+import com.zpf.api.IPermissionResult;
 import com.zpf.api.OnActivityResultListener;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.ILoadingStateListener;
 import com.zpf.frame.INavigator;
+import com.zpf.frame.IViewLinker;
 import com.zpf.frame.IViewStateListener;
 import com.zpf.support.R;
 import com.zpf.support.constant.ContainerType;
@@ -31,6 +33,7 @@ import com.zpf.frame.IViewProcessor;
 import com.zpf.support.util.FragmentHelper;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.LogUtil;
+import com.zpf.tool.permission.PermissionChecker;
 import com.zpf.tool.stack.IStackItem;
 import com.zpf.tool.stack.LifecycleState;
 
@@ -48,7 +51,7 @@ public class ContainerFragment extends Fragment implements IViewContainer, IView
     private boolean isActivity;
     private IStackItem stackItem;
     private IViewProcessor mViewProcessor;
-    private IBackPressInterceptor backPressInterceptor = new IBackPressInterceptor() {
+    private final IBackPressInterceptor backPressInterceptor = new IBackPressInterceptor() {
         @Override
         public boolean onInterceptBackPress() {
             return isVisible && (close() || mController.onInterceptBackPress());
@@ -346,13 +349,15 @@ public class ContainerFragment extends Fragment implements IViewContainer, IView
     }
 
     @Override
-    public void checkPermissions(Runnable onPermission, Runnable onLock, String... permissions) {
-        mController.getFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, permissions);
+    public void checkPermissions(IPermissionResult permissionResult, String... permissions) {
+        mController.getFragmentPermissionChecker().checkPermissions(
+                this, PermissionChecker.REQ_PERMISSION_CODE, permissionResult, permissions);
     }
 
     @Override
-    public void checkPermissions(Runnable onPermission, Runnable onLock, int requestCode, String... permissions) {
-        mController.getFragmentPermissionChecker().checkPermissions(this, onPermission, onLock, requestCode, permissions);
+    public void checkPermissions(IPermissionResult permissionResult, int requestCode, String... permissions) {
+        mController.getFragmentPermissionChecker().checkPermissions(
+                this, requestCode, permissionResult, permissions);
     }
 
     @Override
@@ -407,9 +412,9 @@ public class ContainerFragment extends Fragment implements IViewContainer, IView
     }
 
     @Override
-    public boolean setProcessorLinker(Object linker) {
+    public boolean setProcessorLinker(IViewLinker linker) {
         try {
-            mViewProcessor.setLinker(linker);
+            mViewProcessor.onReceiveLinker(linker);
             return true;
         } catch (Exception e) {
             return false;

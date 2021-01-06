@@ -17,9 +17,30 @@ android {
 }
 
 dependencies {
-    compileOnly rootProject.ext.dependencies.appcompat
-    compileOnly rootProject.ext.dependencies.recyclerview
-    api rootProject.ext.dependencies.frame
+    compileOnly(rootProject.ext.dependencies.appcompat)
+            {
+                exclude group: 'androidx.activity'
+                exclude group: 'androidx.fragment'
+                exclude group: 'androidx.arch.core'
+                exclude group: 'androidx.core'
+                exclude group: 'androidx.lifecycle'
+            }
+    compileOnly(rootProject.ext.dependencies.activity)
+    compileOnly(rootProject.ext.dependencies.fragment)
+    compileOnly(rootProject.ext.dependencies.recyclerview)
+            {
+                exclude group: 'androidx.annotation'
+                exclude group: 'androidx.core'
+                exclude group: 'androidx.arch.core'
+                exclude group: 'androidx.collection'
+                exclude group: 'androidx.lifecycle'
+            }
+    api(rootProject.ext.dependencies.frame)
+            {
+                exclude(group: 'com.zpf.api')
+            }
+    api rootProject.ext.dependencies.api
+    api rootProject.ext.dependencies.appstack
     api rootProject.ext.dependencies.compatPermission
     api rootProject.ext.dependencies.toolExpand
     api rootProject.ext.dependencies.dataparser

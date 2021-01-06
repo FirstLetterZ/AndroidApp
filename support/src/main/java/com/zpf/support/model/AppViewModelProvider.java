@@ -14,7 +14,7 @@ public class AppViewModelProvider extends ViewModelProvider {
 
     private final HashMap<String, WeakReference<ViewModel>> mMap = new HashMap<>();
     private final ViewModelProvider.Factory factory = AppViewModelFactory.getInstance();
-    private static ViewModelStore viewModelStore = new ViewModelStore();
+    private static final ViewModelStore viewModelStore = new ViewModelStore();
 
     public static AppViewModelProvider get() {
         return AppViewModelProvider.Instance.provider;

@@ -2,35 +2,36 @@ package com.zpf.support.util;
 
 import android.app.Activity;
 import android.content.DialogInterface;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
+
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
+import androidx.annotation.Nullable;
 
 import android.text.TextUtils;
 import android.view.View;
 
+import com.zpf.api.IPermissionResult;
 import com.zpf.support.view.CommonDialog;
-import com.zpf.tool.compat.permission.CompatPermissionChecker;
+import com.zpf.tool.permission.ActivityPermissionChecker;
 import com.zpf.tool.permission.PermissionChecker;
+import com.zpf.tool.permission.PermissionDescription;
 import com.zpf.tool.permission.PermissionInfo;
 import com.zpf.tool.permission.PermissionManager;
 import com.zpf.tool.config.AppContext;
-import com.zpf.tool.expand.util.SpUtil;
 import com.zpf.tool.PublicUtil;
 
-import java.util.ArrayList;
+import java.lang.ref.SoftReference;
 import java.util.List;
 
 /**
  * Created by ZPF on 2018/7/26.
  */
-public class PermissionUtil {
+public class PermissionUtil implements IPermissionResult {
     private final String appName = PublicUtil.getAppName(AppContext.get());
     private static volatile PermissionUtil instance;
-    private PermissionManager permissionManager = new PermissionManager();
-    private CompatPermissionChecker compatChecker = new CompatPermissionChecker();
-
+    private final PermissionManager permissionManager = new PermissionManager();
+    private final ActivityPermissionChecker activityChecker = new ActivityPermissionChecker();
+    private SoftReference<Activity> softReference = null;
 
     public static PermissionUtil get() {
         if (instance == null) {
@@ -43,9 +44,7 @@ public class PermissionUtil {
         return instance;
     }
 
-
     public boolean checkPermission(@NonNull androidx.fragment.app.Fragment fragment, @NonNull String... permission) {
-        compatChecker.checkPermissions(fragment, permission);
         Activity activity = fragment.getActivity();
         if (activity == null) {
             return false;
@@ -64,37 +63,22 @@ public class PermissionUtil {
     }
 
     public boolean checkPermission(@NonNull Activity activity, @NonNull String... permission) {
-        List<String> needRationaleList = new ArrayList<>();
-        List<String> missPermissionList = new ArrayList<>();
-        for (String per : permission) {
-            if (ActivityCompat.checkSelfPermission(activity, per) != PackageManager.PERMISSION_GRANTED) {
-                if (!SpUtil.getBoolean(per)) {
-                    missPermissionList.add(per);
-                    SpUtil.put(per, true);
-                } else {
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(activity, per)) {
-                        missPermissionList.add(per);
-                    } else {
-                        needRationaleList.add(per);
-                    }
-                }
-            }
-        }
-        if (needRationaleList.size() > 0) {
-            showPermissionRationaleDialog(activity, compatChecker.getMissInfo(needRationaleList));
-            return false;
-        } else if (missPermissionList.size() > 0) {
-            int size = missPermissionList.size();
-            ActivityCompat.requestPermissions(activity, missPermissionList.toArray(new String[size]),
-                    PermissionChecker.REQ_PERMISSION_CODE);
-            return false;
-        } else {
-            return true;
+        softReference = new SoftReference<>(activity);
+        return activityChecker.checkPermissions(activity, PermissionChecker.REQ_PERMISSION_CODE,
+                this, permission);
+    }
+
+    @Override
+    public void onPermissionChecked(boolean formResult, int requestCode, String[] requestPermissions, @Nullable List<String> missPermissions) {
+        final SoftReference<Activity> activityReference = softReference;
+        softReference = null;
+        if (activityReference != null) {
+            showPermissionRationaleDialog(activityReference.get(), PermissionDescription.get().queryMissInfo(missPermissions));
         }
     }
 
-    public CompatPermissionChecker getCompatChecker() {
-        return compatChecker;
+    public ActivityPermissionChecker getChecker() {
+        return activityChecker;
     }
 
     public PermissionManager getPermissionManager() {
@@ -102,7 +86,7 @@ public class PermissionUtil {
     }
 
     public boolean checkNoticeEnabled(@NonNull Activity activity, DialogInterface.OnDismissListener listener) {
-        boolean isOpen = compatChecker.checkNoticeEnabled(activity);
+        boolean isOpen = PermissionChecker.checkNoticeEnabled(activity);
         if (!isOpen && listener != null) {
             showHintDialog(activity, listener);
         }

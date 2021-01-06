@@ -5,12 +5,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.provider.MediaStore;
 
+import androidx.annotation.Nullable;
+
+import com.zpf.api.IPermissionResult;
 import com.zpf.tool.FileUtil;
 import com.zpf.tool.PublicUtil;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.R;
-import com.zpf.tool.permission.OnLockPermissionRunnable;
-import com.zpf.tool.permission.PermissionInfo;
+import com.zpf.tool.permission.PermissionDescription;
 
 import java.util.List;
 
@@ -21,23 +23,23 @@ public class PhotoUtil {
 
     public static boolean takePhoto(final IViewContainer viewContainer, final String filePath, final int requestCode) {
         if (viewContainer != null) {
-            viewContainer.checkPermissions(new Runnable() {
+            viewContainer.checkPermissions(new IPermissionResult() {
                 @Override
-                public void run() {
-                    try {
-                        Intent capIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                        capIntent.putExtra(MediaStore.EXTRA_OUTPUT, FileUtil.getUri(viewContainer.getContext(), filePath));
-                        viewContainer.startActivityForResult(capIntent, requestCode);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                public void onPermissionChecked(boolean formResult, int requestCode, String[] requestPermissions, @Nullable List<String> missPermissions) {
+                    if (missPermissions == null || missPermissions.size() == 0) {
+                        try {
+                            Intent capIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                            capIntent.putExtra(MediaStore.EXTRA_OUTPUT, FileUtil.getUri(viewContainer.getContext(), filePath));
+                            viewContainer.startActivityForResult(capIntent, requestCode);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        PermissionUtil.get().showPermissionRationaleDialog(
+                                viewContainer.getCurrentActivity(), PermissionDescription.get().queryMissInfo(missPermissions));
                     }
                 }
-            }, new OnLockPermissionRunnable() {
-                @Override
-                public void onLock(List<PermissionInfo> list) {
-                    PermissionUtil.get().showPermissionRationaleDialog(viewContainer.getCurrentActivity(), list);
-                }
-            }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA);
+            }, requestCode, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA);
         }
         return false;
     }
@@ -77,25 +79,25 @@ public class PhotoUtil {
 
     public static boolean selectFromAlbum(final IViewContainer viewContainer, final int requestCode) {
         if (viewContainer != null) {
-            viewContainer.checkPermissions(new Runnable() {
+            viewContainer.checkPermissions(new IPermissionResult() {
                 @Override
-                public void run() {
-                    try {
-                        Intent albumIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                        albumIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-                        String title = PublicUtil.getString(R.string.select_photo);
-                        Intent intent = Intent.createChooser(albumIntent, title);
-                        viewContainer.startActivityForResult(intent, requestCode);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                public void onPermissionChecked(boolean formResult, int requestCode, String[] requestPermissions, @Nullable List<String> missPermissions) {
+                    if (missPermissions == null || missPermissions.size() == 0) {
+                        try {
+                            Intent albumIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                            albumIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+                            String title = PublicUtil.getString(R.string.select_photo);
+                            Intent intent = Intent.createChooser(albumIntent, title);
+                            viewContainer.startActivityForResult(intent, requestCode);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        PermissionUtil.get().showPermissionRationaleDialog(
+                                viewContainer.getCurrentActivity(), PermissionDescription.get().queryMissInfo(missPermissions));
                     }
                 }
-            }, new OnLockPermissionRunnable() {
-                @Override
-                public void onLock(List<PermissionInfo> list) {
-                    PermissionUtil.get().showPermissionRationaleDialog(viewContainer.getCurrentActivity(), list);
-                }
-            }, Manifest.permission.READ_EXTERNAL_STORAGE);
+            }, requestCode, Manifest.permission.READ_EXTERNAL_STORAGE);
         }
         return false;
     }
