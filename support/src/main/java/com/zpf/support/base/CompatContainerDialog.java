@@ -273,7 +273,7 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
 
     @Override
     public IManager<ICancelable> getCancelableManager() {
-        return null;
+        return mController.getCancelableManager();
     }
 
     @Override

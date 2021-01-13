@@ -1,18 +1,16 @@
 package com.zpf.app.launcher;
 
 import android.os.Bundle;
+
 import androidx.annotation.Nullable;
+
 import android.view.View;
 
 import com.zpf.api.ILayoutId;
-import com.zpf.app.activity.LoginView;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.app.R;
-import com.zpf.support.constant.AppConst;
-import com.zpf.support.single.base.CompatSinglePageActivity;
-import com.zpf.tool.config.MainHandler;
 
-@ILayoutId(R.layout.layout_start)
+@ILayoutId(value = R.layout.layout_start)
 public class StartScreenView extends ViewProcessor {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {

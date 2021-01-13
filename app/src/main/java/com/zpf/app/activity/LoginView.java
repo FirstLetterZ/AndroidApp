@@ -8,18 +8,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.zpf.api.ILayoutId;
-import com.zpf.api.ItemViewCreator;
 import com.zpf.app.plugin.AsyncLoadListener;
 import com.zpf.app.plugin.AsyncLoadState;
 import com.zpf.app.plugin.PluginApkBean;
 import com.zpf.app.plugin.PluginController;
+import com.zpf.frame.IViewProcessor;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.app.R;
 import com.zpf.support.constant.AppConst;
@@ -27,7 +26,7 @@ import com.zpf.support.util.LogUtil;
 import com.zpf.support.view.banner.BannerPagerView;
 import com.zpf.support.view.banner.BannerViewCreator;
 import com.zpf.support.view.banner.StretchableIndicator;
-import com.zpf.tool.ToastUtil;
+import com.zpf.tool.toast.ToastUtil;
 
 /**
  * Created by ZPF on 2019/3/25.
@@ -144,7 +143,7 @@ public class LoginView extends ViewProcessor {
         params.setClassLoader(targetClass.getClassLoader());
         params.putString(AppConst.INTENT_KEY, "123");
         params.putString(AppConst.TARGET_VIEW_CLASS_NAME, targetName);
-        push(targetClass, params);
+        push((Class<? extends IViewProcessor>) targetClass, params);
     }
 
     @Override

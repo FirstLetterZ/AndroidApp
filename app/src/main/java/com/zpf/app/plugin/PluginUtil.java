@@ -1,5 +1,6 @@
 package com.zpf.app.plugin;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.AssetManager;
@@ -33,7 +34,10 @@ public class PluginUtil {
                 (nextContext = ((ContextWrapper) context).getBaseContext()) != null) {
             context = nextContext;
         }
-        AssetManager assetManager;
+        AssetManager assetManager = context.getAssets();
+        if (assetManager != null) {
+            return assetManager;
+        }
         try {
             Method method = context.getClass().getDeclaredMethod("getAssets");
             assetManager = (AssetManager) method.invoke(context);
@@ -44,11 +48,13 @@ public class PluginUtil {
         return assetManager;
     }
 
+    @SuppressLint("SoonBlockedPrivateApi")
     public static int addAssetPath(AssetManager assetManager, String filePath) {
         int index = -1;
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                index = (int) AssetManager.class.getMethod("addAssetPathInternal", String.class, boolean.class, boolean.class)
+                index = (int) AssetManager.class.getDeclaredMethod("addAssetPathInternal",
+                        String.class, boolean.class, boolean.class)
                         .invoke(assetManager, filePath, false, false);
             } else {
                 index = (int) AssetManager.class.getDeclaredMethod("addAssetPath", String.class)

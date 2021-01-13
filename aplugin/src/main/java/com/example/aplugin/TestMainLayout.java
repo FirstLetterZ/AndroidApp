@@ -11,7 +11,7 @@ import com.zpf.tool.SafeClickListener;
 
 @ILayoutId(R.layout.activity_main)
 public class TestMainLayout extends ViewProcessor {
-    Button button = (Button) find(R.id.btn_test);
+    Button button = find(R.id.btn_test);
     int i = 0;
     private View.OnClickListener btnClick = new SafeClickListener() {
 

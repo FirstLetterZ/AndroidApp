@@ -275,7 +275,7 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
 
     @Override
     public IManager<ICancelable> getCancelableManager() {
-        return null;
+        return mController.getCancelableManager();
     }
 
     @Override
