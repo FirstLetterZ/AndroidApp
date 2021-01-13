@@ -26,7 +26,15 @@ dependencies {
                 exclude group: 'androidx.lifecycle'
             }
     compileOnly(rootProject.ext.dependencies.activity)
+            {
+                exclude group: 'androidx.core'
+                exclude group: 'androidx.arch.core'
+            }
     compileOnly(rootProject.ext.dependencies.fragment)
+            {
+                exclude group: 'androidx.core'
+                exclude group: 'androidx.arch.core'
+            }
     compileOnly(rootProject.ext.dependencies.recyclerview)
             {
                 exclude group: 'androidx.annotation'
@@ -35,6 +43,7 @@ dependencies {
                 exclude group: 'androidx.collection'
                 exclude group: 'androidx.lifecycle'
             }
+    compileOnly(rootProject.ext.dependencies.core)
     api(rootProject.ext.dependencies.frame)
             {
                 exclude(group: 'com.zpf.api')

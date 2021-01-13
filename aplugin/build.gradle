@@ -43,8 +43,13 @@ dependencies {
         exclude group: 'androidx.core'
         exclude group: 'androidx.lifecycle'
     }
-    compileOnly(rootProject.ext.dependencies.activity)
-    compileOnly(rootProject.ext.dependencies.fragment)
+    api(rootProject.ext.dependencies.core)
+    api(rootProject.ext.dependencies.activity){
+        exclude group: 'androidx.core'
+    }
+    api(rootProject.ext.dependencies.fragment){
+        exclude group: 'androidx.core'
+    }
 //    api rootProject.ext.dependencies.support
     api project(':support')
 }

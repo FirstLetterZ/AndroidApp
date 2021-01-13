@@ -37,15 +37,14 @@ public class ViewModelHelper {
     public static <T extends ViewModel> T createModel(
             @NonNull Class<T> cls, @Nullable String tag, @Nullable ViewModelProvider provider,
             @Nullable Initializer<T> initializer) {
-        String key = tag;
-        if (key == null || key.length() < 1) {
-            key = cls.getName();
-        }
         T model;
-        if (provider != null) {
-            model = provider.get(key, cls);
+        if (provider == null) {
+            provider = AppViewModelProvider.get();
+        }
+        if (tag == null) {
+            model = provider.get(cls);
         } else {
-            model = AppViewModelProvider.get().get(key, cls);
+            model = provider.get(tag, cls);
         }
         if (initializer != null) {
             initializer.onInit(model);

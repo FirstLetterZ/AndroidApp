@@ -18,8 +18,17 @@ android {
 
 dependencies {
     compileOnly rootProject.ext.dependencies.api
-    compileOnly rootProject.ext.dependencies.recyclerview
+    compileOnly(rootProject.ext.dependencies.recyclerview)
+            {
+                exclude group: 'androidx.annotation'
+                exclude group: 'androidx.core'
+                exclude group: 'androidx.arch.core'
+                exclude group: 'androidx.collection'
+                exclude group: 'androidx.lifecycle'
+            }
     compileOnly rootProject.ext.dependencies.viewPager
-    compileOnly rootProject.ext.dependencies.fragment
-}
+    api(rootProject.ext.dependencies.core)
+    api(rootProject.ext.dependencies.fragment){
+        exclude group: 'androidx.core'
+    }}
 apply from: "../bintrayUpload.gradle"
