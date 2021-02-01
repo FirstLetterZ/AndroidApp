@@ -14,9 +14,9 @@ import retrofit2.Retrofit;
  */
 public class ClientBuilder {
     private static final int timeOutInSeconds = 90;
-    private OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
-    private Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
-    private HeaderInterceptor headerInterceptor = new HeaderInterceptor();
+    private final OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
+    private final Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
+    private final HeaderInterceptor headerInterceptor = new HeaderInterceptor();
 
     public static ClientBuilder createDefBuilder(HeaderCarrier headerCarrier) {
         ClientBuilder clientBuilder = new ClientBuilder();

@@ -2,6 +2,8 @@ package com.zpf.support.util;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -10,6 +12,7 @@ import com.zpf.api.ICustomWindow;
 import com.zpf.api.IFullLifecycle;
 import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnPermissionResultListener;
+import com.zpf.api.OnTouchKeyListener;
 import com.zpf.frame.ILifecycleMonitor;
 import com.zpf.frame.IViewStateListener;
 import com.zpf.tool.expand.util.CancelableManager;
@@ -30,12 +33,13 @@ import java.util.List;
  * Created by ZPF on 2018/6/28.
  */
 public class ContainerListenerController implements ILifecycleMonitor, IFullLifecycle, OnActivityResultListener,
-        OnPermissionResultListener, IBackPressInterceptor, IViewStateListener {
+        OnPermissionResultListener, OnTouchKeyListener, IBackPressInterceptor, IViewStateListener {
     private final List<OnDestroyListener> mDestroyListenerList = new ArrayList<>();
     private final List<IFullLifecycle> mLifecycleList = new ArrayList<>();
     private final List<OnActivityResultListener> mActivityResultCallBackList = new ArrayList<>();
     private final List<OnPermissionResultListener> mPermissionCallBackList = new ArrayList<>();
     private final List<IBackPressInterceptor> mBackPressInterceptor = new ArrayList<>();
+    private final List<OnTouchKeyListener> mTouchKeyListener = new ArrayList<>();
     private final List<IViewStateListener> mViewStateList = new ArrayList<>();
     private final DialogController mDialogController = new DialogController();
     private final CancelableManager mCallBackManager = new CancelableManager();
@@ -71,6 +75,30 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
         for (IBackPressInterceptor listener : mBackPressInterceptor) {
             if (listener.onInterceptBackPress()) {
                 result = true;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        boolean result = false;
+        for (OnTouchKeyListener listener : mTouchKeyListener) {
+            if (listener.onKeyDown(keyCode, event)) {
+                result = true;
+                break;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        boolean result = false;
+        for (OnTouchKeyListener listener : mTouchKeyListener) {
+            if (listener.onKeyUp(keyCode, event)) {
+                result = true;
+                break;
             }
         }
         return result;
@@ -210,6 +238,12 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
             if ((listenerClass == null || listenerClass == IBackPressInterceptor.class) && listener instanceof IBackPressInterceptor) {
                 if (mBackPressInterceptor.size() == 0 || !mBackPressInterceptor.contains(listener)) {
                     mBackPressInterceptor.add((IBackPressInterceptor) listener);
+                }
+                result = true;
+            }
+            if ((listenerClass == null || listenerClass == OnTouchKeyListener.class) && listener instanceof OnTouchKeyListener) {
+                if (mTouchKeyListener.size() == 0 || !mTouchKeyListener.contains(listener)) {
+                    mTouchKeyListener.add((OnTouchKeyListener) listener);
                 }
                 result = true;
             }

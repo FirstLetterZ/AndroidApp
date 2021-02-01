@@ -11,7 +11,7 @@ import java.util.LinkedList;
  * Created by ZPF on 2018/6/5.
  */
 public class DialogController implements IManager<ICustomWindow> {
-    private LinkedList<Pair<Long, ICustomWindow>> cacheList = new LinkedList<>();
+    private final LinkedList<Pair<Long, ICustomWindow>> cacheList = new LinkedList<>();
     private ICustomWindow showingWindow;
     private long showingWindowId;
     private volatile boolean isDestroy = false;

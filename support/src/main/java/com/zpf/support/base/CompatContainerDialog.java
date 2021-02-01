@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialog;
 
+import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -163,6 +164,22 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
         if (!mController.onInterceptBackPress()) {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (mController.onKeyDown(keyCode,event)) {
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (mController.onKeyUp(keyCode,event)) {
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
     }
 
     @NonNull

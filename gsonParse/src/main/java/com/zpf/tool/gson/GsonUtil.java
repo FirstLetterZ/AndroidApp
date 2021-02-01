@@ -14,6 +14,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.stream.JsonReader;
 import com.zpf.api.dataparser.JsonParserInterface;
+import com.zpf.api.dataparser.SkipParse;
 import com.zpf.api.dataparser.StringParseResult;
 import com.zpf.api.dataparser.StringParseType;
 

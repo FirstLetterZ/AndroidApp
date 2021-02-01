@@ -20,7 +20,7 @@ public class ClassLoaderImpl implements IClassLoader, IGroup<IClassLoader>, OnDe
         return Instance.mInstance;
     }
 
-    private HashSet<IClassLoader> mLoaderSet = new HashSet<>();
+    private final HashSet<IClassLoader> mLoaderSet = new HashSet<>();
 
     @Override
     public void remove(@NonNull IClassLoader classLoader) {

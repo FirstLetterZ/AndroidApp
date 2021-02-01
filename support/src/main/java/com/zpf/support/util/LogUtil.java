@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class LogUtil implements ILogger {
     private boolean logOut = false;
-    private List<ILogger> realLoggerList = new LinkedList<>();
+    private final List<ILogger> realLoggerList = new LinkedList<>();
     private static String TAG = "AppLogUtil";
     private static volatile LogUtil mInstance;
 

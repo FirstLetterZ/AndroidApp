@@ -9,7 +9,7 @@ import okhttp3.RequestBody;
  * Created by ZPF on 2018/10/17.
  */
 public class RealRequestBuilder implements RequestBuilder {
-    private JSONObject params;
+    private final JSONObject params;
 
     public RealRequestBuilder() {
         params = new JSONObject();

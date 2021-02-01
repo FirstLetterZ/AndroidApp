@@ -33,7 +33,7 @@ import okhttp3.ResponseBody;
 
 public class OkHttpNetUtil {
 
-    private static ConcurrentHashMap<String, CacheInfo> cacheMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, CacheInfo> cacheMap = new ConcurrentHashMap<>();
     private static OkHttpClient defClient;
 
     public static void setDefClient(@NonNull OkHttpClient client) {

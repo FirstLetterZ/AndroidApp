@@ -1,5 +1,7 @@
 package com.zpf.support.network.okhttp;
 
+import androidx.annotation.NonNull;
+
 import com.zpf.api.ICancelable;
 import com.zpf.api.IManager;
 import com.zpf.support.network.base.BaseCallBack;
@@ -37,7 +39,7 @@ public abstract class OkHttpCallBack extends BaseCallBack<String> implements Cal
     }
 
     @Override
-    public void onResponse(Call call, final Response response) {
+    public void onResponse(@NonNull Call call, final Response response) {
         if (isCancelled() || call.isCanceled()) {
             return;
         }

@@ -21,10 +21,10 @@ import okio.Source;
  * Created by ZPF on 2018/8/28.
  */
 public class ProgressResponseBody extends ResponseBody {
-    private ResponseBody responseBody;
-    private Handler myHandler;
+    private final ResponseBody responseBody;
+    private final Handler myHandler;
     private BufferedSource bufferedSource;
-    private OnProgressListener mListener;
+    private final OnProgressListener mListener;
 
     public ProgressResponseBody(ResponseBody responseBody, OnProgressListener listener) {
         this.responseBody = responseBody;

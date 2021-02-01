@@ -9,7 +9,7 @@ import com.zpf.api.IManager;
  * Created by ZPF on 2018/6/13.
  */
 public class CancelableManager implements IManager<ICancelable> {
-    private LongSparseArray<ICancelable> callBackList = new LongSparseArray<>();
+    private final LongSparseArray<ICancelable> callBackList = new LongSparseArray<>();
     private volatile boolean cancelAll = false;
 
     @Override

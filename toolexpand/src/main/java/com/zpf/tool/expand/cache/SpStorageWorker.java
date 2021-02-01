@@ -1,18 +1,29 @@
-package com.zpf.tool.expand.util;
+package com.zpf.tool.expand.cache;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
 import androidx.annotation.NonNull;
 
+import com.zpf.api.IStorageManager;
+import com.zpf.api.IStorageQueue;
 import com.zpf.api.dataparser.JsonParserInterface;
 import com.zpf.tool.config.AppContext;
-import com.zpf.tool.config.DataDefault;
 import com.zpf.tool.config.GlobalConfigImpl;
+import com.zpf.tool.config.SpInstance;
 
-public class SpWorker {
-    private SharedPreferences mSP;
+public class SpStorageWorker implements IStorageManager<String> {
+    private final SharedPreferences mSP;
 
-    public SpWorker(String name) {
+    public SpStorageWorker() {
+        mSP= SpInstance.get();
+    }
+
+    public SpStorageWorker(SharedPreferences sharedPreferences) {
+        mSP = sharedPreferences;
+    }
+
+    public SpStorageWorker(String name) {
         mSP = AppContext.get().getSharedPreferences(name, Context.MODE_PRIVATE);
     }
 
@@ -152,4 +163,30 @@ public class SpWorker {
         return mSP;
     }
 
+    @Override
+    public IStorageManager<String> save(String name, Object value) {
+        put(name, value);
+        put(name, value);
+        return this;
+    }
+
+    @Override
+    public <T> T find(String key, @NonNull Class<T> cls) {
+        return getValue(key, cls);
+    }
+
+    @Override
+    public <T> T find(String key, @NonNull T defValue) {
+        return getValue(key, defValue);
+    }
+
+    @Override
+    public void clearAll() {
+        clear();
+    }
+
+    @Override
+    public IStorageQueue<String> createQueue() {
+        return new SpStorageQueue(this);
+    }
 }

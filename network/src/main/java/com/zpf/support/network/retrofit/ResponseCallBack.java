@@ -1,5 +1,7 @@
 package com.zpf.support.network.retrofit;
 
+import androidx.annotation.NonNull;
+
 import com.zpf.api.ICancelable;
 import com.zpf.api.IManager;
 import com.zpf.support.network.base.BaseCallBack;
@@ -33,7 +35,7 @@ public abstract class ResponseCallBack<T> extends BaseCallBack<T> implements Cal
     }
 
     @Override
-    public void onResponse(Call<T> call, final Response<T> response) {
+    public void onResponse(@NonNull Call<T> call, final Response<T> response) {
         if (isCancelled() || call.isCanceled()) {
             return;
         }

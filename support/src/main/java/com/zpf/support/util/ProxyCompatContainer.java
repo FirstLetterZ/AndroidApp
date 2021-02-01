@@ -38,6 +38,7 @@ import java.lang.reflect.Type;
 /**
  * 将普通的activity或fragment打造成IViewContainer
  * Created by ZPF on 2018/6/28.
+ * 不支持按键拦截 2021/2/1.
  */
 public class ProxyCompatContainer extends Fragment implements IViewContainer {
     private FragmentActivity activity;
@@ -427,10 +428,7 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
         if (newVisible != this.isVisible) {
             this.isVisible = newVisible;
             mController.onVisibleChanged(newVisible);
-            if (!isVisible && isActivity) {
-                isActivity = false;
-                mController.onActivityChanged(false);
-            }
+            checkActivity(mController.isActive());
         }
     }
 

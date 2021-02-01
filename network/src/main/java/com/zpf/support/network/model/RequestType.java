@@ -1,11 +1,11 @@
 package com.zpf.support.network.model;
 
 public class RequestType {
-    boolean non_null;
-    boolean check_local;
-    boolean auto_update;
-    boolean auto_toast;
-    boolean ignore_loading;
+    public final boolean non_null;
+    public final boolean check_local;
+    public final boolean auto_update;
+    public final boolean auto_toast;
+    public final boolean ignore_loading;
     public static RequestType DEF_TYPE = new RequestType(true, true, true, true, false);
     public static RequestType NULABLE = new RequestType(false, true, true, true, false);
     public static RequestType NOTOAST = new RequestType(true, true, true, false, false);

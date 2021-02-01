@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Looper;
+import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -126,6 +127,22 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
         if (!mController.onInterceptBackPress() && !close()) {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (mController.onKeyDown(keyCode,event)) {
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (mController.onKeyUp(keyCode,event)) {
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
     }
 
     @Override

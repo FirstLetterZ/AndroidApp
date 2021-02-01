@@ -1,4 +1,4 @@
-package com.zpf.support.network.model;
+package com.zpf.support.network.util;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,12 +11,13 @@ import com.zpf.api.OnStateChangedListener;
 import com.zpf.support.network.base.ErrorCode;
 import com.zpf.support.network.base.ILocalCacheManager;
 import com.zpf.support.network.base.INetworkCallCreator;
+import com.zpf.support.network.model.RequestType;
 import com.zpf.support.network.retrofit.ResponseCallBack;
 import com.zpf.tool.config.MainHandler;
 
 import retrofit2.Call;
 
-public class Stevedore<T> implements OnDestroyListener, ICancelable {
+public class RequestManager<T> implements OnDestroyListener, ICancelable {
     private boolean destroyed = false;
     private T resultData = null;
     private volatile boolean done = true;
@@ -33,11 +34,9 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
         return localCacheManager.searchLocal();
     }
 
-    protected boolean saveToLocal(T data) {
-        if (localCacheManager == null) {
-            return false;
-        } else {
-            return localCacheManager.saveToLocal(data);
+    protected void saveToLocal(T data) {
+        if (localCacheManager != null) {
+            localCacheManager.saveToLocal(data);
         }
     }
 
@@ -70,27 +69,27 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
         cancel();
     }
 
-    public Stevedore<T> setCallCreator(INetworkCallCreator<T> callCreator) {
+    public RequestManager<T> setCallCreator(INetworkCallCreator<T> callCreator) {
         this.callNetworkManager = callCreator;
         return this;
     }
 
-    public Stevedore<T> setStateListener(OnStateChangedListener<T> stateListener) {
+    public RequestManager<T> setStateListener(OnStateChangedListener<T> stateListener) {
         stateChangedListener = stateListener;
         return this;
     }
 
-    public Stevedore<T> setCacheManager(ILocalCacheManager<T> cacheManager) {
+    public RequestManager<T> setCacheManager(ILocalCacheManager<T> cacheManager) {
         localCacheManager = cacheManager;
         return this;
     }
 
-    public Stevedore<T> bindController(IGroup<OnDestroyListener> controller) {
+    public RequestManager<T> bindController(IGroup<OnDestroyListener> controller) {
         controller.add(this);
         return this;
     }
 
-    public void reEnable() {
+    public void reset() {
         destroyed = false;
     }
 
@@ -132,6 +131,9 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
             done = true;
             return;
         }
+        if (type == null) {
+            type = RequestType.DEF_TYPE;
+        }
         if (!done && call != null && !call.isCanceled()) {
             if (!type.ignore_loading) {
                 return;
@@ -141,9 +143,6 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
             } else {
                 return;
             }
-        }
-        if (type == null) {
-            type = RequestType.DEF_TYPE;
         }
         call = null;
         resultData = null;
@@ -205,7 +204,7 @@ public class Stevedore<T> implements OnDestroyListener, ICancelable {
                 try {
                     saveToLocal(response);
                 } catch (Exception e) {
-                    fail(ErrorCode.SAVE_LOCAL_FAIL, e.getMessage());
+                    //
                 }
             }
         });

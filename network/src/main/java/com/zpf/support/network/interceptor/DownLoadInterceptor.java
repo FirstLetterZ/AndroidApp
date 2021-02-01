@@ -1,5 +1,7 @@
 package com.zpf.support.network.interceptor;
 
+import androidx.annotation.NonNull;
+
 import com.zpf.api.OnProgressListener;
 import com.zpf.support.network.model.ProgressResponseBody;
 
@@ -13,12 +15,13 @@ import okhttp3.Response;
  * Created by ZPF on 2018/7/26.
  */
 public class DownLoadInterceptor implements Interceptor {
-    private OnProgressListener listener;
+    private final OnProgressListener listener;
 
     public DownLoadInterceptor(OnProgressListener listener) {
         this.listener = listener;
     }
 
+    @NonNull
     @Override
     public Response intercept(Chain chain) throws IOException {
         Response originalResponse = chain.proceed(chain.request());

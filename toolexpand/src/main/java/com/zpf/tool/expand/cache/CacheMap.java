@@ -1,16 +1,16 @@
-package com.zpf.tool.expand.util;
+package com.zpf.tool.expand.cache;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.util.SparseArray;
 
+import com.zpf.api.IStorageChangedListener;
 import com.zpf.api.IStorageManager;
 import com.zpf.api.IStorageQueue;
 import com.zpf.api.dataparser.JsonParserInterface;
-import com.zpf.tool.config.DataDefault;
 import com.zpf.tool.config.GlobalConfigImpl;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * CacheMap
@@ -18,43 +18,38 @@ import java.util.List;
  */
 public class CacheMap {
     public static final String CACHE_STORAGE_KEY = "cache_storage_";
-    private SparseArray<Object> cacheValue = new SparseArray<>();
-    private static volatile CacheMap appCacheUtil;
-    private IStorageManager<String> localStorage;
+    private static final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
+    private static IStorageManager<String> localStorageManager;
+    private static IStorageChangedListener<Integer> changedListener;
 
-    private static CacheMap get() {
-        if (appCacheUtil == null) {
-            synchronized (CacheMap.class) {
-                if (appCacheUtil == null) {
-                    appCacheUtil = new CacheMap();
-                }
-            }
-        }
-        return appCacheUtil;
+    public synchronized static void setLocalStorageManager(IStorageManager<String> manager) {
+        localStorageManager = manager;
     }
 
-    public synchronized static void setLocalStorage(IStorageManager<String> localStorage) {
-        get().localStorage = localStorage;
+    public static void setCacheChangedListener(IStorageChangedListener<Integer> listener) {
+        changedListener = listener;
     }
 
     public synchronized static void clear() {
-        get().cacheValue.clear();
-        if (get().localStorage != null) {
-            get().localStorage.clearAll();
+        cacheValue.clear();
+        if (localStorageManager != null) {
+            localStorageManager.clearAll();
+        }
+        if (changedListener != null) {
+            changedListener.onStorageClear();
         }
     }
 
-    public synchronized static void put(int key, Object value) {
-        if (key > 0 && get().localStorage != null) {
-            Object oldValue = get().cacheValue.get(key);
-            get().cacheValue.put(key, value);
+    public static void put(int key, Object value) {
+        if (key > 0 && localStorageManager != null) {
+            Object oldValue = cacheValue.get(CACHE_STORAGE_KEY + key);
+            putValue(key, value);
             if (value != oldValue) {
-                get().localStorage.save(CACHE_STORAGE_KEY + key, value);
+                localStorageManager.save(CACHE_STORAGE_KEY + key, value);
             }
         } else {
-            get().cacheValue.put(key, value);
+            putValue(key, value);
         }
-
     }
 
     public static String getString(int key) {
@@ -81,19 +76,19 @@ public class CacheMap {
     public synchronized static <T> T getValue(int key, @NonNull Class<T> cls) {
         Object value = null;
         try {
-            value = get().cacheValue.get(key);
+            value = cacheValue.get(CACHE_STORAGE_KEY + key);
         } catch (Exception e) {
             e.printStackTrace();
         }
         T result = null;
-        if (isDefaultValue(value) && get().localStorage != null) {
+        if (DataDefault.isDefaultValue(value) && localStorageManager != null) {
             try {
-                value = get().localStorage.find(CACHE_STORAGE_KEY + key, cls);
+                value = localStorageManager.find(CACHE_STORAGE_KEY + key, cls);
             } catch (Exception e) {
                 value = null;
             }
             if (value != null) {
-                get().cacheValue.put(key, value);
+                putValue(key, value);
             }
         }
         if (value != null) {
@@ -107,9 +102,8 @@ public class CacheMap {
                 JsonParserInterface jsonParser =
                         GlobalConfigImpl.get().getGlobalInstance(JsonParserInterface.class);
                 if (jsonParser != null) {
-                    String valueString = jsonParser.toString(value);
                     try {
-                        result = jsonParser.fromJson(valueString, cls);
+                        result = jsonParser.fromJson(value, cls);
                     } catch (Exception e) {
                         //
                     }
@@ -126,18 +120,18 @@ public class CacheMap {
         T result = defaultValue;
         Object value = null;
         try {
-            value = get().cacheValue.get(key);
+            value = cacheValue.get(CACHE_STORAGE_KEY + key);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (isDefaultValue(value) && get().localStorage != null) {
+        if (DataDefault.isDefaultValue(value) && localStorageManager != null) {
             try {
-                value = get().localStorage.find(CACHE_STORAGE_KEY + key, defaultValue);
+                value = localStorageManager.find(CACHE_STORAGE_KEY + key, defaultValue);
             } catch (Exception e) {
                 value = null;
             }
             if (value != null) {
-                get().cacheValue.put(key, value);
+                putValue(key, value);
             }
         }
         if (value != null) {
@@ -151,9 +145,8 @@ public class CacheMap {
                 JsonParserInterface jsonParser =
                         GlobalConfigImpl.get().getGlobalInstance(JsonParserInterface.class);
                 if (jsonParser != null) {
-                    String valueString = jsonParser.toString(value);
                     try {
-                        result = jsonParser.fromJson(valueString, defaultValue.getClass());
+                        result = jsonParser.fromJson(value, defaultValue.getClass());
                     } catch (Exception e) {
                         //
                     }
@@ -168,7 +161,7 @@ public class CacheMap {
 
     @Nullable
     public synchronized static <T> List<T> getArray(int key, @NonNull Class<T> cls) {
-        Object value = get().cacheValue.get(key);
+        Object value = cacheValue.get(CACHE_STORAGE_KEY + key);
         List<T> result = null;
         if (value != null) {
             if (value instanceof List) {
@@ -183,21 +176,21 @@ public class CacheMap {
                 if (jsonParser != null) {
                     result = jsonParser.fromJsonList(value, cls);
                     if (result != null && result.size() > 0) {
-                        get().cacheValue.put(key, result);
+                        putValue(key, result);
                     }
                 }
             }
-        } else if (get().localStorage != null) {
+        } else if (localStorageManager != null) {
             try {
-                value = get().localStorage.find(CACHE_STORAGE_KEY + key, cls);
+                value = localStorageManager.find(CACHE_STORAGE_KEY + key, cls);
             } catch (Exception e) {
-                value = null;
+                //
             }
-            if (value != null && value instanceof List) {
+            if (value instanceof List) {
                 try {
                     result = (List<T>) value;
                     if (result.size() > 0) {
-                        get().cacheValue.put(key, result);
+                        putValue(key, result);
                     }
                 } catch (Exception e) {
                     //
@@ -207,46 +200,30 @@ public class CacheMap {
         return result;
     }
 
-
-    private static boolean isDefaultValue(Object o) {
-        if (o == null) {
-            return true;
-        } else if (o instanceof String) {
-            return DataDefault.DEF_STRING.equals(o);
-        } else if (o instanceof Integer) {
-            return DataDefault.DEF_INT == (int) o;
-        } else if (o instanceof Double) {
-            return DataDefault.DEF_DOUBLE == (double) o;
-        } else if (o instanceof Long) {
-            return DataDefault.DEF_LONG == (long) o;
-        } else if (o instanceof Float) {
-            return DataDefault.DEF_FLOAT == (float) o;
-        } else {
-            return o instanceof Boolean && DataDefault.DEF_BOOLEAN == (boolean) o;
-        }
-    }
-
-    public static CacheStorageQueue createQueue() {
-        return get().startCreateQueue();
-    }
-
-    private CacheStorageQueue startCreateQueue() {
+    public static IStorageQueue<Integer> createQueue() {
         return new CacheStorageQueue();
     }
 
-    class CacheStorageQueue implements IStorageQueue<Integer> {
+    private static void putValue(int key, Object value) {
+        cacheValue.put(CACHE_STORAGE_KEY + key, value);
+        if (changedListener != null) {
+            changedListener.onStorageChanged(key, value);
+        }
+    }
+
+    static class CacheStorageQueue implements IStorageQueue<Integer> {
         IStorageQueue<String> localStorageQueue;
 
         CacheStorageQueue() {
-            if (get().localStorage != null) {
-                localStorageQueue = get().localStorage.createQueue();
+            if (localStorageManager != null) {
+                localStorageQueue = localStorageManager.createQueue();
             }
         }
 
         @Override
         public CacheStorageQueue add(Integer name, Object value) {
             if (name != null) {
-                get().cacheValue.put(name, value);
+                putValue(name, value);
                 if (name > 0 && localStorageQueue != null) {
                     localStorageQueue.add(CACHE_STORAGE_KEY + name, value);
                 }

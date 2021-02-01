@@ -2,6 +2,7 @@ package com.zpf.app.global;
 
 import android.app.Application;
 
+import com.zpf.api.IClassLoader;
 import com.zpf.app.plugin.MainClassLoader;
 import com.zpf.support.util.LogUtil;
 import com.zpf.tool.PublicUtil;
@@ -24,6 +25,7 @@ public class MyApp extends Application {
             ClassLoaderImpl.get().add(new MainClassLoader());
             GlobalConfigImpl.get().init(this, new RealGlobalConfig());
             LogUtil.setLogOut(GlobalConfigImpl.get().isDebug());
+            GlobalConfigImpl.get().getGlobalInstance(IClassLoader.class).getClass("aaa");
         }
     }
 }

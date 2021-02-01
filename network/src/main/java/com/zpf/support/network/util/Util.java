@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
@@ -12,7 +13,7 @@ import okio.Buffer;
 import okio.BufferedSource;
 
 public class Util {
-    private static Charset defCharset = Charset.forName("UTF-8");
+    private static final Charset defCharset = StandardCharsets.UTF_8;
 
     @NonNull
     public static Charset checkCharset(@Nullable MediaType type) {

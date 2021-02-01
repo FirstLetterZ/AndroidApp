@@ -26,6 +26,7 @@ import com.zpf.support.util.LogUtil;
 import com.zpf.support.view.banner.BannerPagerView;
 import com.zpf.support.view.banner.BannerViewCreator;
 import com.zpf.support.view.banner.StretchableIndicator;
+import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.toast.ToastUtil;
 
 /**
@@ -35,7 +36,7 @@ import com.zpf.tool.toast.ToastUtil;
 public class LoginView extends ViewProcessor {
     private AsyncLoadListener loadListener;
     private BannerPagerView bpv = (BannerPagerView) find(R.id.bpv);
-    private StretchableIndicator indicator = (StretchableIndicator) find(R.id.indicator);
+    private StretchableIndicator indicator = (StretchableIndicator) bind(R.id.indicator);
     private int pageSize = 8;
     private int d = 1;
 
