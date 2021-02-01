@@ -7,9 +7,9 @@ import com.zpf.app.plugin.MainClassLoader;
 import com.zpf.support.util.LogUtil;
 import com.zpf.tool.PublicUtil;
 import com.zpf.tool.config.GlobalConfigImpl;
-import com.zpf.tool.expand.util.CacheMap;
+import com.zpf.tool.expand.cache.CacheMap;
+import com.zpf.tool.expand.cache.SpUtil;
 import com.zpf.tool.expand.util.ClassLoaderImpl;
-import com.zpf.tool.expand.util.SpUtil;
 import com.zpf.tool.stack.AppStackUtil;
 
 /**
@@ -21,7 +21,7 @@ public class MyApp extends Application {
         super.onCreate();
         if (PublicUtil.isPackageProcess(this)) {
             registerActivityLifecycleCallbacks(AppStackUtil.get());
-            CacheMap.setLocalStorage(SpUtil.get());
+            CacheMap.setLocalStorageManager(SpUtil.get());
             ClassLoaderImpl.get().add(new MainClassLoader());
             GlobalConfigImpl.get().init(this, new RealGlobalConfig());
             LogUtil.setLogOut(GlobalConfigImpl.get().isDebug());

@@ -12,7 +12,7 @@ import com.zpf.tool.FileUtil;
 import com.zpf.tool.config.AppContext;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.expand.util.ClassLoaderImpl;
-import com.zpf.tool.expand.util.SpWorker;
+import com.zpf.tool.expand.cache.SpStorageImpl;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
 public class PluginController {
     private final ArrayMap<String, PluginApkBean> pluginInfoMap = new ArrayMap<>();
     private final ArrayMap<String, ClassLoader> pluginClassLoaderMap = new ArrayMap<>();
-    private final SpWorker spWorker = new SpWorker("sp_plugin_config_file");
+    private final SpStorageImpl spWorker = new SpStorageImpl("sp_plugin_config_file");
 
     private static class Instance {
         static final PluginController mInstance = new PluginController();
