@@ -11,7 +11,6 @@ import android.widget.Button;
 import com.zpf.api.ILayoutId;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.support.view.CommonDialog;
-import com.zpf.tool.SafeClickListener;
 import com.zpf.tool.config.AppContext;
 import com.zpf.tool.permission.PermissionChecker;
 import com.zpf.tool.toast.ToastUtil;

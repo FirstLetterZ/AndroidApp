@@ -9,6 +9,7 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.zpf.api.ILayoutId;
 import com.zpf.app.R;
@@ -27,6 +28,8 @@ public class TestView extends ViewProcessor {
     @Override
     public void onResume() {
         super.onResume();
+        Toast.makeText(getContext(),"test",Toast.LENGTH_SHORT);
+        Log.e("ZPF", "onResume==>>");
     }
 
     /**

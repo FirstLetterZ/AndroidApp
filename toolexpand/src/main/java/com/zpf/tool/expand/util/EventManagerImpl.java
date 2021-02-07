@@ -2,6 +2,7 @@ package com.zpf.tool.expand.util;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import android.text.TextUtils;
 import android.util.LruCache;
 
@@ -57,7 +58,7 @@ public class EventManagerImpl implements IEventManager {
 
     private void handleEvent(@Nullable String receiverName, @Nullable IEvent<?> event, boolean infallible) {
         boolean noHandler = true;
-        if (TextUtils.isEmpty(receiverName)) {
+        if (receiverName == null || receiverName.length() == 0) {
             for (IFunction1<IEvent<?>> handler : receiverMap.values()) {
                 if (handler != null) {
                     handler.func(event);

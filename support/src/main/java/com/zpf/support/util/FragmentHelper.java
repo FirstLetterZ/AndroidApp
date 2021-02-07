@@ -50,7 +50,7 @@ public class FragmentHelper {
         return null;
     }
 
-    public static androidx.fragment.app.FragmentManager getComptParentManager(IViewContainer container) {
+    public static androidx.fragment.app.FragmentManager getCompatParentManager(IViewContainer container) {
         if (container != null && container instanceof androidx.fragment.app.Fragment) {
             return ((androidx.fragment.app.Fragment) container).getFragmentManager();
         }
@@ -68,7 +68,7 @@ public class FragmentHelper {
         return null;
     }
 
-    public static androidx.fragment.app.FragmentManager getComptChildManager(IViewContainer container) {
+    public static androidx.fragment.app.FragmentManager getCompatChildManager(IViewContainer container) {
         if (container == null) {
             return null;
         } else if (container instanceof androidx.fragment.app.Fragment) {

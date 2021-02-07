@@ -145,7 +145,7 @@ public class BridgeWebView extends WebView {
                 StringBuilder sb = new StringBuilder();
                 do {
                     line = bufferedReader.readLine();
-                    if (line != null && !line.matches("^\\s*\\/\\/.*")) {
+                    if (line != null && !line.matches("^\\s*//.*")) {
                         sb.append(line);
                     }
                 } while (line != null);

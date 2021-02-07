@@ -46,7 +46,7 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
     private volatile boolean isCancel = false;
     protected IManager<ICancelable> manager;
     protected long bindId;
-    private IResponseHandler responseHandler = GlobalConfigImpl.get().getGlobalInstance(IResponseHandler.class);
+    private final IResponseHandler responseHandler = GlobalConfigImpl.get().getGlobalInstance(IResponseHandler.class);
     protected ResponseResult<T> responseResult = new ResponseResult<>();
 
     public BaseCallBack() {
@@ -61,7 +61,7 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
         int a = type * 2;
         int b;
         int n = 0;
-        while (true) {
+        do {
             a = a / 2;
             b = a % 2;
             if (b > 0) {
@@ -70,14 +70,11 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
                 this.type[n] = 0;
             }
             n++;
-            if (a == 0 || n == this.type.length) {
-                break;
-            }
-        }
+        } while (a != 0 && n != this.type.length);
     }
 
     @Override
-    public BaseCallBack toBind(IManager<ICancelable> manager) {
+    public BaseCallBack<T> toBind(IManager<ICancelable> manager) {
         if (manager != null) {
             this.manager = manager;
             bindId = manager.bind(this);
@@ -110,8 +107,8 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
         int code;
         if (e instanceof HttpException) {
             HttpException exception = (HttpException) e;
-            description = exception.response().message();
-            code = exception.response().code();
+            description = exception.message();
+            code = exception.code();
         } else if (e instanceof CustomException) {
             code = ((CustomException) e).getCode();
             description = e.getMessage();
@@ -145,7 +142,7 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
             code = ErrorCode.IO_ERROR;
             description = getString(R.string.network_io_error);
         } else {
-            IResultBean parseResult = null;
+            IResultBean<?> parseResult = null;
             if (responseHandler != null) {
                 parseResult = responseHandler.parsingException(e);
             }

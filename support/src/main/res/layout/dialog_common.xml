@@ -60,7 +60,7 @@
                 android:textColor="@color/dialog_default_message"
                 android:textSize="14dp"
                 android:visibility="gone"
-                tools:text="dddddddddddddddddddddnddddddddddddd" />
+                tools:text="1223" />
         </LinearLayout>
 
         <View

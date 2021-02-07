@@ -73,7 +73,7 @@ public class LogUtil implements ILogger {
 
     @Override
     public void log(int priority, String tag, String content) {
-        if (get().logOut) {
+        if (get().logOut && content != null) {
             if (realLoggerList.size() > 0) {
                 if (TextUtils.isEmpty(tag)) {
                     tag = TAG;
@@ -83,7 +83,7 @@ public class LogUtil implements ILogger {
                 }
             } else {
                 final int maxLen = 2000;
-                if (content != null && content.length() > maxLen) {
+                if (content.length() > maxLen) {
                     for (int i = 0; i < content.length(); i += maxLen) {
                         if (i + maxLen < content.length())
                             Log.println(priority, tag, content.substring(i, i + maxLen));

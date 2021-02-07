@@ -1,8 +1,6 @@
 package com.zpf.webview;
 
 import android.graphics.Bitmap;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 
 /**

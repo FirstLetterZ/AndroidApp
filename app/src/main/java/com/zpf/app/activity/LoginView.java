@@ -26,7 +26,6 @@ import com.zpf.support.util.LogUtil;
 import com.zpf.support.view.banner.BannerPagerView;
 import com.zpf.support.view.banner.BannerViewCreator;
 import com.zpf.support.view.banner.StretchableIndicator;
-import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.toast.ToastUtil;
 
 /**
