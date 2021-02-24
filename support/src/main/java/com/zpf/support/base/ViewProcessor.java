@@ -65,7 +65,6 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
         this.mContainer = ContainerController.mInitingViewContainer;
         mRootLayout = onCreateRootLayout(getContext());
         mTitleBar = mRootLayout.getTitleBar();
-        bindTitleBar(mRootLayout);
         View layoutView = getLayoutView(getContext());
         if (layoutView != null) {
             mRootLayout.setContentView(layoutView);
@@ -97,6 +96,7 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
     @Override
     @CallSuper
     public void onCreate(@Nullable Bundle savedInstanceState) {
+        bindTitleBar(mRootLayout);
         GlobalConfigImpl.get().onObjectInit(this);
         EventManagerImpl.get().register(getClass().getName(), new IFunction1<IEvent<?>>() {
             @Override
@@ -312,6 +312,14 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
                 if (titleBarEntry.subtitleEntry != null) {
                     bindIconText(rootLayout.getTitleBar().getSubTitle(), titleBarEntry.subtitleEntry);
                 }
+            }
+        } else {
+            if (mContainer instanceof Activity) {
+                rootLayout.getTitleBar().getLayout().setVisibility(View.VISIBLE);
+                rootLayout.getStatusBar().setVisibility(View.VISIBLE);
+            } else {
+                rootLayout.getTitleBar().getLayout().setVisibility(View.GONE);
+                rootLayout.getStatusBar().setVisibility(View.GONE);
             }
         }
     }
