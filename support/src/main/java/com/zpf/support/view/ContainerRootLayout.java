@@ -19,6 +19,7 @@ import com.zpf.frame.IRootLayout;
 import com.zpf.frame.ITitleBar;
 import com.zpf.support.R;
 import com.zpf.tool.ViewUtil;
+import com.zpf.tool.config.GlobalConfigImpl;
 
 import java.util.LinkedList;
 
@@ -66,6 +67,7 @@ public class ContainerRootLayout extends ViewGroup implements IRootLayout {
             contentBelowTitle = array.getBoolean(R.styleable.ContainerRootLayout_contentBelowTitle, true);
             array.recycle();
         }
+        GlobalConfigImpl.get().onObjectInit(this);
     }
 
     @Override

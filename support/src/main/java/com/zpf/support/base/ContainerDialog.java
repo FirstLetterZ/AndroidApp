@@ -215,13 +215,18 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
     }
 
     @Override
-    public boolean isLiving() {
-        return mController.isLiving();
+    public boolean living() {
+        return mController.living();
     }
 
     @Override
-    public boolean isActive() {
-        return mController.isActive();
+    public boolean interactive() {
+        return mController.interactive();
+    }
+
+    @Override
+    public boolean visible() {
+        return mController.visible();
     }
 
     @Override

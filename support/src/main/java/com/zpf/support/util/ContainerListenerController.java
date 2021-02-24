@@ -45,6 +45,7 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
     private final CancelableManager mCallBackManager = new CancelableManager();
     private final ViewStateListener mStateListener = new ViewStateListener();
     private PermissionChecker<?> mPermissionChecker;
+    private boolean visible = false;
 
     public ContainerListenerController() {
         mLifecycleList.add(mStateListener);
@@ -182,14 +183,19 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
     }
 
     @Override
-    public boolean isLiving() {
+    public boolean living() {
         return mStateListener.getState() >= LifecycleState.BEFORE_CREATE
                 && mStateListener.getState() < LifecycleState.AFTER_DESTROY;
     }
 
     @Override
-    public boolean isActive() {
+    public boolean interactive() {
         return mStateListener.getState() == LifecycleState.AFTER_RESUME;
+    }
+
+    @Override
+    public boolean visible() {
+        return visible;
     }
 
     @Override
@@ -292,6 +298,7 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
 
     @Override
     public void onVisibleChanged(boolean visible) {
+        this.visible = visible;
         for (IViewStateListener listener : mViewStateList) {
             listener.onVisibleChanged(visible);
         }

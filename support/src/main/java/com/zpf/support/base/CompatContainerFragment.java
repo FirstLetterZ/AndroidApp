@@ -210,13 +210,18 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
     }
 
     @Override
-    public boolean isLiving() {
-        return mController.isLiving();
+    public boolean living() {
+        return mController.living();
     }
 
     @Override
-    public boolean isActive() {
-        return mController.isActive();
+    public boolean interactive() {
+        return mController.interactive();
+    }
+
+    @Override
+    public boolean visible() {
+        return mController.visible();
     }
 
     @Override
@@ -349,7 +354,7 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
         if (activity != null) {
             if (activity instanceof IViewContainer) {
                 ((IViewContainer) activity).showLoading(message);
-            } else if (isLiving()) {
+            } else if (living()) {
                 if (loadingManager == null) {
                     loadingManager = new LoadingManagerImpl(getContext());
                 }
@@ -493,7 +498,7 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
             if (notifyChildren) {
                 FragmentHelper.notifyChildrenFragmentVisible(this, newVisible);
             }
-            checkActivity(mController.isActive());
+            checkActivity(mController.interactive());
         }
     }
 

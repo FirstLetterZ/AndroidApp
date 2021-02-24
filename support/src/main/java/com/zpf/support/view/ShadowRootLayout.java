@@ -26,12 +26,12 @@ public class ShadowRootLayout extends ContainerRootLayout {
 
     @Override
     protected void initConfig(Context context, AttributeSet attrs) {
-        super.initConfig(context, attrs);
         linearShadowLine = new LinearShadowLine(context);
         linearShadowLine.setElevation(2);
         linearShadowLine.setShadowColor(PublicUtil.getColor(R.color.bottom_shadow));
         addContentDecoration(linearShadowLine, -1, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
+        super.initConfig(context, attrs);
     }
 
     public IShadowLine getShadowLine() {

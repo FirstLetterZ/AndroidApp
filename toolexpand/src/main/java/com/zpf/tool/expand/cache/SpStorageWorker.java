@@ -14,9 +14,10 @@ import com.zpf.tool.config.SpInstance;
 
 public class SpStorageWorker implements IStorageManager<String> {
     private final SharedPreferences mSP;
+    private JsonParserInterface jsonParser;
 
     public SpStorageWorker() {
-        mSP= SpInstance.get();
+        mSP = SpInstance.get();
     }
 
     public SpStorageWorker(SharedPreferences sharedPreferences) {
@@ -27,11 +28,12 @@ public class SpStorageWorker implements IStorageManager<String> {
         mSP = AppContext.get().getSharedPreferences(name, Context.MODE_PRIVATE);
     }
 
-    public void put(String key, Object value) {
-        SharedPreferences.Editor editor = mSP.edit();
+    public void put(@NonNull String key, Object value) {
         if (key == null) {
             return;
-        } else if (value == null) {
+        }
+        SharedPreferences.Editor editor = mSP.edit();
+        if (value == null) {
             editor.remove(key);
         } else if (value instanceof String) {
             editor.putString(key, (String) value);
@@ -44,10 +46,9 @@ public class SpStorageWorker implements IStorageManager<String> {
         } else if (value instanceof Long) {
             editor.putLong(key, (long) value);
         } else {
-            JsonParserInterface jsonParser =
-                    GlobalConfigImpl.get().getGlobalInstance(JsonParserInterface.class);
-            if (jsonParser != null) {
-                editor.putString(key, jsonParser.toString(value));
+            String cacheString = putCacheObject(key, value);
+            if (cacheString != null) {
+                editor.putString(key, cacheString);
             }
         }
         editor.commit();
@@ -75,7 +76,7 @@ public class SpStorageWorker implements IStorageManager<String> {
     }
 
     public <T> T getValue(@NonNull String key, @NonNull Class<T> cls) {
-        T result = null;
+        T result;
         if (cls.getName().equals(String.class.getName())) {
             result = (T) getString(key);
         } else if (cls.getName().equals(Integer.class.getName())) {
@@ -87,43 +88,37 @@ public class SpStorageWorker implements IStorageManager<String> {
         } else if (cls.getName().equals(Boolean.class.getName())) {
             result = (T) ((Boolean) getBoolean(key));
         } else {
-            JsonParserInterface jsonParser =
-                    GlobalConfigImpl.get().getGlobalInstance(JsonParserInterface.class);
-            if (jsonParser != null) {
-                String str = getString(key);
-                if (str.length() > 0) {
-                    result = jsonParser.fromJson(str, cls);
-                }
-            }
+            result = getCacheObject(key, cls);
         }
         return result;
     }
 
     public <T> T getValue(@NonNull String key, @NonNull T defaultValue) {
+        T result;
         if (defaultValue instanceof String) {
-            defaultValue = (T) mSP.getString(key, (String) defaultValue);
+            result = (T) mSP.getString(key, (String) defaultValue);
         } else if (defaultValue instanceof Integer) {
-            defaultValue = (T) (Integer) mSP.getInt(key, (Integer) defaultValue);
+            result = (T) (Integer) mSP.getInt(key, (Integer) defaultValue);
         } else if (defaultValue instanceof Long) {
-            defaultValue = (T) (Long) mSP.getLong(key, (Long) defaultValue);
+            result = (T) (Long) mSP.getLong(key, (Long) defaultValue);
         } else if (defaultValue instanceof Float) {
-            defaultValue = (T) (Float) mSP.getFloat(key, (Float) defaultValue);
+            result = (T) (Float) mSP.getFloat(key, (Float) defaultValue);
         } else if (defaultValue instanceof Boolean) {
-            defaultValue = (T) (Boolean) mSP.getBoolean(key, (Boolean) defaultValue);
+            result = (T) (Boolean) mSP.getBoolean(key, (Boolean) defaultValue);
         } else {
-            JsonParserInterface jsonParser =
-                    GlobalConfigImpl.get().getGlobalInstance(JsonParserInterface.class);
-            if (jsonParser != null) {
-                String str = getString(key);
-                if (str.length() > 0) {
-                    defaultValue = jsonParser.fromJson(str, defaultValue.getClass());
-                }
-            }
+            result = (T) getCacheObject(key, defaultValue.getClass());
         }
-        return defaultValue;
+        if (result != null) {
+            return result;
+        } else {
+            return defaultValue;
+        }
     }
 
-    public void remove(String key) {
+    public void remove(@NonNull String key) {
+        if (key == null) {
+            return;
+        }
         mSP.edit().remove(key).commit();
     }
 
@@ -150,10 +145,9 @@ public class SpStorageWorker implements IStorageManager<String> {
         } else if (value instanceof Long) {
             editor.putLong(key, (long) value);
         } else {
-            JsonParserInterface jsonParser =
-                    GlobalConfigImpl.get().getGlobalInstance(JsonParserInterface.class);
-            if (jsonParser != null) {
-                editor.putString(key, jsonParser.toString(value));
+            String cacheString = putCacheObject(key, value);
+            if (cacheString != null) {
+                editor.putString(key, cacheString);
             }
         }
         return editor;
@@ -161,6 +155,36 @@ public class SpStorageWorker implements IStorageManager<String> {
 
     public SharedPreferences getSharedPreferences() {
         return mSP;
+    }
+
+    public void setJsonParser(JsonParserInterface parser) {
+        jsonParser = parser;
+    }
+
+    protected JsonParserInterface getJsonParser() {
+        if (jsonParser == null) {
+            jsonParser = GlobalConfigImpl.get().getGlobalInstance(JsonParserInterface.class);
+        }
+        return jsonParser;
+    }
+
+    protected String putCacheObject(@NonNull String key, Object value) {
+        JsonParserInterface jsonParser = getJsonParser();
+        if (jsonParser != null) {
+            return jsonParser.toString(value);
+        }
+        return null;
+    }
+
+    protected <T> T getCacheObject(@NonNull String key, @NonNull Class<T> cls) {
+        JsonParserInterface jsonParser = getJsonParser();
+        if (jsonParser != null) {
+            String str = getString(key);
+            if (str.length() > 0) {
+                return jsonParser.fromJson(str, cls);
+            }
+        }
+        return null;
     }
 
     @Override

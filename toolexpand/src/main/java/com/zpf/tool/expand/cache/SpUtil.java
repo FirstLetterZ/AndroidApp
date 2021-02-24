@@ -76,4 +76,8 @@ public class SpUtil {
         Instance.mInstance.defWorker.clear();
     }
 
+    public static void clearInstanceCache() {
+        Instance.mInstance.spMap.clear();
+    }
+
 }

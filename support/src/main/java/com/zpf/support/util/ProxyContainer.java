@@ -65,13 +65,18 @@ public class ProxyContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public boolean isLiving() {
-        return mController.isLiving();
+    public boolean living() {
+        return mController.living();
     }
 
     @Override
-    public boolean isActive() {
-        return mController.isActive();
+    public boolean interactive() {
+        return mController.interactive();
+    }
+
+    @Override
+    public boolean visible() {
+        return mController.visible();
     }
 
     @Override
@@ -247,7 +252,7 @@ public class ProxyContainer extends Fragment implements IViewContainer {
         if (activity != null) {
             if (activity instanceof IViewContainer) {
                 ((IViewContainer) activity).showLoading(message);
-            } else if (isLiving()) {
+            } else if (living()) {
                 if (loadingManager == null) {
                     loadingManager = new LoadingManagerImpl(getContext());
                 }
@@ -429,7 +434,7 @@ public class ProxyContainer extends Fragment implements IViewContainer {
         if (newVisible != this.isVisible) {
             this.isVisible = newVisible;
             mController.onVisibleChanged(newVisible);
-            checkActivity(mController.isActive());
+            checkActivity(mController.interactive());
         }
     }
 

@@ -16,6 +16,7 @@ import android.widget.RelativeLayout;
 
 import com.zpf.frame.ITitleBar;
 import com.zpf.support.R;
+import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.expand.view.IconTextView;
 
 /**
@@ -134,6 +135,7 @@ public class TitleBar extends RelativeLayout implements ITitleBar {
         addView(titleLayout);
         defHeight = context.getResources().getDimensionPixelSize(R.dimen.support_title_bar_height);
         setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, defHeight));
+        GlobalConfigImpl.get().onObjectInit(this);
     }
 
     @Override

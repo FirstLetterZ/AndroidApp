@@ -132,7 +132,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mController.onKeyDown(keyCode,event)) {
+        if (mController.onKeyDown(keyCode, event)) {
             return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -140,7 +140,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (mController.onKeyUp(keyCode,event)) {
+        if (mController.onKeyUp(keyCode, event)) {
             return true;
         }
         return super.onKeyUp(keyCode, event);
@@ -212,13 +212,18 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     @Override
-    public boolean isLiving() {
-        return mController.isLiving();
+    public boolean living() {
+        return mController.living();
     }
 
     @Override
-    public boolean isActive() {
-        return mController.isActive();
+    public boolean interactive() {
+        return mController.interactive();
+    }
+
+    @Override
+    public boolean visible() {
+        return mController.visible();
     }
 
     @Override
@@ -345,7 +350,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     @Override
     public void showLoading(Object message) {
-        if (isLiving()) {
+        if (living()) {
             if (loadingManager == null) {
                 loadingManager = new LoadingManagerImpl(getContext());
             }

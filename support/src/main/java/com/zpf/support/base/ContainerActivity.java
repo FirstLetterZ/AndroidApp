@@ -211,13 +211,18 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
     }
 
     @Override
-    public boolean isLiving() {
-        return mController.isLiving();
+    public boolean living() {
+        return mController.living();
     }
 
     @Override
-    public boolean isActive() {
-        return mController.isActive();
+    public boolean interactive() {
+        return mController.interactive();
+    }
+
+    @Override
+    public boolean visible() {
+        return mController.visible();
     }
 
     @Override
@@ -344,7 +349,7 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
 
     @Override
     public void showLoading(Object message) {
-        if (isLiving()) {
+        if (living()) {
             if (loadingManager == null) {
                 loadingManager = new LoadingManagerImpl(getContext());
             }

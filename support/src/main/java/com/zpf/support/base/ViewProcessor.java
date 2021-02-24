@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -18,6 +19,7 @@ import android.view.Window;
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IEvent;
+import com.zpf.api.IFunction1;
 import com.zpf.api.ILayoutId;
 import com.zpf.api.IManager;
 import com.zpf.api.IPermissionResult;
@@ -38,6 +40,7 @@ import com.zpf.tool.SafeClickListener;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
 import com.zpf.tool.config.GlobalConfigImpl;
+import com.zpf.tool.expand.util.EventManagerImpl;
 import com.zpf.tool.permission.PermissionDescription;
 
 import java.lang.reflect.Type;
@@ -86,13 +89,21 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
     }
 
     @Override
+    @CallSuper
     public void onDestroy() {
+        EventManagerImpl.get().unregister(getClass().getName());
     }
 
     @Override
     @CallSuper
     public void onCreate(@Nullable Bundle savedInstanceState) {
-
+        GlobalConfigImpl.get().onObjectInit(this);
+        EventManagerImpl.get().register(getClass().getName(), new IFunction1<IEvent<?>>() {
+            @Override
+            public void func(IEvent<?> iEvent) {
+                handleEvent(iEvent);
+            }
+        });
     }
 
     @Override
@@ -227,12 +238,12 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
     }
 
     @Override
-    public void onReceiveLinker(IViewLinker linker) {
-
+    public boolean handleEvent(IEvent<?> event) {
+        return !living();
     }
 
     @Override
-    public void onReceiveEvent(IEvent event) {
+    public void onReceiveLinker(IViewLinker linker) {
 
     }
 
@@ -262,7 +273,7 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
                 rootLayout.getTitleBar().getLeftLayout().setOnClickListener(new SafeClickListener() {
                     @Override
                     public void click(View v) {
-                        onReceiveEvent(new SimpleEvent<>(titleBarEntry.leftLayoutAction));
+                        handleEvent(new SimpleEvent<>(titleBarEntry.leftLayoutAction));
                     }
                 });
             }
@@ -270,7 +281,7 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
                 rootLayout.getTitleBar().getRightLayout().setOnClickListener(new SafeClickListener() {
                     @Override
                     public void click(View v) {
-                        onReceiveEvent(new SimpleEvent<>(titleBarEntry.rightLayoutAction));
+                        handleEvent(new SimpleEvent<>(titleBarEntry.rightLayoutAction));
                     }
                 });
             }
@@ -365,13 +376,18 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
     }
 
     @Override
-    public boolean isLiving() {
-        return mContainer.isLiving();
+    public boolean living() {
+        return mContainer.living();
     }
 
     @Override
-    public boolean isActive() {
-        return mContainer.isActive();
+    public boolean interactive() {
+        return mContainer.interactive();
+    }
+
+    @Override
+    public boolean visible() {
+        return mContainer.visible();
     }
 
     @Override
@@ -401,7 +417,7 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
 
     @Override
     public void push(Class<? extends IViewProcessor> target, Bundle params, int requestCode) {
-        if (isLiving() && mContainer != null && getContext() != null) {
+        if (getContext() != null && living()) {
             if (mContainer.getNavigator() != null) {
                 mContainer.getNavigator().push(target, params, requestCode);
             } else {
@@ -458,7 +474,7 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
 
     @Override
     public void poll(int resultCode, Intent data) {
-        if (isLiving() && mContainer != null && getContext() != null) {
+        if (living() && getContext() != null) {
             if (mContainer.getNavigator() != null) {
                 mContainer.getNavigator().poll(resultCode, data);
             } else {
@@ -474,7 +490,7 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
 
     @Override
     public void pollUntil(Class<? extends IViewProcessor> target, int resultCode, Intent data) {
-        if (isLiving() && mContainer != null && getContext() != null) {
+        if (living() && getContext() != null) {
             if (mContainer.getNavigator() != null) {
                 mContainer.getNavigator().pollUntil(target, resultCode, data);
             } else {
@@ -491,7 +507,7 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
 
     @Override
     public void remove(Class<? extends IViewProcessor> target, int resultCode, Intent data) {
-        if (isLiving() && mContainer != null && getContext() != null) {
+        if (living() && getContext() != null) {
             if (mContainer.getNavigator() != null) {
                 mContainer.getNavigator().remove(target, resultCode, data);
             } else {
@@ -504,5 +520,15 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
     @Override
     public void remove(Class<? extends IViewProcessor> target) {
         this.remove(target, AppConst.DEF_RESULT_CODE, null);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        return false;
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        return false;
     }
 }
