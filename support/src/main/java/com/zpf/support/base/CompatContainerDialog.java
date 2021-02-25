@@ -31,9 +31,8 @@ import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
-import com.zpf.support.util.LogUtil;
 import com.zpf.tool.config.MainHandler;
-import com.zpf.tool.stack.IStackItem;
+import com.zpf.tool.expand.util.LogUtil;
 import com.zpf.tool.stack.LifecycleState;
 
 import java.lang.reflect.Type;
@@ -47,7 +46,7 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
     protected final ContainerListenerController mController = new ContainerListenerController();
     private Bundle mParams;
     private IViewProcessor mViewProcessor;
-    private IViewContainer mParentContainer;
+    private final IViewContainer mParentContainer;
     protected IManager<ICustomWindow> listener;
     protected long bindId = -1;
 
@@ -199,12 +198,6 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
     @Override
     public void cancel() {
         mParentContainer.close();
-    }
-
-    @NonNull
-    @Override
-    public IStackItem getStackItem() {
-        return mParentContainer.getStackItem();
     }
 
     @Override

@@ -7,6 +7,7 @@ import android.widget.PopupWindow;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
@@ -77,6 +78,30 @@ public class ViewModelHelper {
         } else {
             return new ViewModelProvider(storeOwner, factory);
         }
+    }
+
+    public static LifecycleOwner getLifecycleOwner(@Nullable Object obj) {
+        LifecycleOwner result = null;
+        if (obj == null) {
+            obj = AppStackUtil.get().getTopActivity();
+        }
+        while (obj != null) {
+            if (obj instanceof LifecycleOwner) {
+                result = ((LifecycleOwner) obj);
+                break;
+            } else if (obj instanceof ContextWrapper) {
+                obj = ((ContextWrapper) obj).getBaseContext();
+            } else if (obj instanceof View) {
+                obj = ((View) obj).getContext();
+            } else if (obj instanceof Dialog) {
+                obj = ((Dialog) obj).getContext();
+            } else if (obj instanceof PopupWindow) {
+                obj = ((PopupWindow) obj).getContentView();
+            } else {
+                break;
+            }
+        }
+        return result;
     }
 
     public static ViewModelStoreOwner getViewModelStoreOwner(@Nullable Object obj) {

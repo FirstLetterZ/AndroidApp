@@ -42,6 +42,7 @@ import com.zpf.frame.IViewContainer;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.expand.util.EventManagerImpl;
 import com.zpf.tool.permission.PermissionDescription;
+import com.zpf.tool.stack.AppStackUtil;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -431,7 +432,7 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
             } else {
                 Intent intent = new Intent();
                 Context context = getContext();
-                Class defContainerClass = null;
+                Class<?> defContainerClass = null;
                 IContainerHelper helper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
                 if (helper != null) {
                     defContainerClass = helper.getDefContainerClassByType(mContainer.getContainerType());
@@ -443,9 +444,9 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
                     intent.setClass(context, defContainerClass);
                     intent.putExtra(AppConst.TARGET_VIEW_CLASS_NAME, target.getName());
                 } else {
-                    Class containerClass = null;
+                    Class<?> containerClass = null;
                     try {
-                        containerClass = (Class) params.getSerializable(AppConst.TARGET_CONTAINER_CLASS);
+                        containerClass = (Class<?>) params.getSerializable(AppConst.TARGET_CONTAINER_CLASS);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -502,6 +503,7 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
             if (mContainer.getNavigator() != null) {
                 mContainer.getNavigator().pollUntil(target, resultCode, data);
             } else {
+                AppStackUtil.get().finishAboveName(target.getName());
                 //TODO
                 mContainer.finishWithResult(resultCode, data);
             }

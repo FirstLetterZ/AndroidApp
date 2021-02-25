@@ -27,18 +27,17 @@ import com.zpf.frame.IViewStateListener;
 import com.zpf.support.R;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
-import com.zpf.support.model.ContainerStackItem;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.util.LoadingManagerImpl;
-import com.zpf.support.util.LogUtil;
 import com.zpf.support.util.StackAnimUtil;
 import com.zpf.tool.ViewUtil;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.MainHandler;
+import com.zpf.tool.expand.util.LogUtil;
 import com.zpf.tool.permission.PermissionChecker;
-import com.zpf.tool.stack.IStackItem;
+import com.zpf.tool.stack.AppStackUtil;
 import com.zpf.tool.stack.LifecycleState;
 
 import java.lang.reflect.Type;
@@ -52,13 +51,20 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
     private ILoadingManager loadingManager;
     private Bundle mParams;
     private boolean isLauncher;
-    private IStackItem stackItem;
     private IViewProcessor mViewProcessor;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         Intent intent = getIntent();
         initTheme(intent.getIntExtra(AppConst.TARGET_VIEW_THEME, -1));
+        String stackItemName = intent.getStringExtra(AppStackUtil.STACK_ITEM_NAME);
+        if ((stackItemName == null || stackItemName.length() == 0) && mViewProcessor != null) {
+            Class<?> cls = (Class<?>) intent.getSerializableExtra(AppConst.TARGET_VIEW_CLASS);
+            if (cls != null) {
+                stackItemName = cls.getName();
+                intent.putExtra(AppStackUtil.STACK_ITEM_NAME, stackItemName);
+            }
+        }
         super.onCreate(savedInstanceState);
         //防止初次安装从后台返回的重启问题
         isLauncher = (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && Intent.ACTION_MAIN.equals(intent.getAction()));
@@ -191,17 +197,6 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         mController.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    @NonNull
-    @Override
-    public IStackItem getStackItem() {
-        if (stackItem == null) {
-            stackItem = new ContainerStackItem(this);
-        } else {
-            stackItem.bindActivity(getCurrentActivity());
-        }
-        return stackItem;
     }
 
     @Override

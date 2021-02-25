@@ -10,10 +10,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-public class LiveDadaHelper {
+public class LiveDataHelper {
     private final HashMap<LiveData<?>, HashSet<Observer<?>>> observerMap = new HashMap<>();
 
-    public LiveDadaHelper(IGroup<OnDestroyListener> destroyGroup) {
+    public LiveDataHelper(IGroup<OnDestroyListener> destroyGroup) {
         if (destroyGroup != null) {
             destroyGroup.add(new OnDestroyListener() {
                 @Override

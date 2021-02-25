@@ -22,7 +22,6 @@ import com.zpf.frame.IViewProcessor;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.app.R;
 import com.zpf.support.constant.AppConst;
-import com.zpf.support.util.LogUtil;
 import com.zpf.support.view.banner.BannerPagerView;
 import com.zpf.support.view.banner.BannerViewCreator;
 import com.zpf.support.view.banner.StretchableIndicator;

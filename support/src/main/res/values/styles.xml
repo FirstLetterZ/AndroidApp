@@ -1,28 +1,41 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
     <style name="customDialog" parent="android:Theme.Dialog">
         <item name="android:windowFrame">@null</item><!--取消默认Dialog的windowFrame框-->
         <item name="android:windowNoTitle">true</item><!--设置无标题Dialog-->
         <item name="android:backgroundDimEnabled">true</item><!--是否四周变暗-->
         <item name="android:windowIsFloating">true</item><!-- 是否悬浮在activity上 -->
         <item name="android:windowContentOverlay">@null</item><!-- 取消默认ContentOverlay背景 -->
-        <item name="android:windowBackground">@android:color/transparent</item><!--取消window默认背景 不然四角会有黑影-->
+        <item name="android:windowBackground">@android:color/transparent
+        </item><!--取消window默认背景 不然四角会有黑影-->
     </style>
+
     <style name="bottom_dialog">
         <item name="android:windowEnterAnimation">@anim/in_from_bottom</item>
         <item name="android:windowExitAnimation">@anim/out_to_bottom</item>
     </style>
+
     <style name="CompatTransparent" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:windowFullscreen">true</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowDisablePreview">true</item>
     </style>
+
     <style name="Transparent" parent="android:Theme.Holo.Light.NoActionBar">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowDisablePreview">true</item>
+    </style>
+
+    <style name="CompatFullTransparent" parent="CompatTransparent">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="p">shortEdges</item>
+    </style>
+
+    <style name="FullTransparent" parent="Transparent">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="p">shortEdges</item>
     </style>
 </resources>

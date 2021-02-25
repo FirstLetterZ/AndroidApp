@@ -29,7 +29,6 @@ import com.zpf.frame.IViewLinker;
 import com.zpf.frame.IViewStateListener;
 import com.zpf.support.R;
 import com.zpf.support.constant.ContainerType;
-import com.zpf.support.model.ContainerStackItem;
 import com.zpf.support.single.base.CompatSinglePageActivity;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
@@ -37,9 +36,8 @@ import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.support.util.FragmentHelper;
 import com.zpf.support.util.LoadingManagerImpl;
-import com.zpf.support.util.LogUtil;
+import com.zpf.tool.expand.util.LogUtil;
 import com.zpf.tool.permission.PermissionChecker;
-import com.zpf.tool.stack.IStackItem;
 import com.zpf.tool.stack.LifecycleState;
 
 import java.lang.reflect.Type;
@@ -54,7 +52,6 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
     private Bundle mParams;
     private boolean isVisible;
     private boolean isActivity;
-    private IStackItem stackItem;
     private IViewProcessor mViewProcessor;
     private final IBackPressInterceptor backPressInterceptor = new IBackPressInterceptor() {
         @Override
@@ -178,17 +175,6 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         mController.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    @NonNull
-    @Override
-    public IStackItem getStackItem() {
-        if (stackItem == null) {
-            stackItem = new ContainerStackItem(this);
-        } else {
-            stackItem.bindActivity(getCurrentActivity());
-        }
-        return stackItem;
     }
 
     @Override

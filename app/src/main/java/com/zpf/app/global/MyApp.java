@@ -4,7 +4,6 @@ import android.app.Application;
 
 import com.zpf.api.IClassLoader;
 import com.zpf.app.plugin.MainClassLoader;
-import com.zpf.support.util.LogUtil;
 import com.zpf.tool.PublicUtil;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.expand.cache.CacheMap;

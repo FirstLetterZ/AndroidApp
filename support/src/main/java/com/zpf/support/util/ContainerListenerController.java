@@ -21,7 +21,6 @@ import com.zpf.tool.compat.permission.CompatPermissionChecker;
 import com.zpf.tool.permission.FragmentPermissionChecker;
 import com.zpf.tool.permission.PermissionChecker;
 import com.zpf.tool.expand.util.DialogController;
-import com.zpf.tool.expand.util.ViewStateListener;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.tool.stack.LifecycleState;
 
@@ -43,7 +42,7 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
     private final List<IViewStateListener> mViewStateList = new ArrayList<>();
     private final DialogController mDialogController = new DialogController();
     private final CancelableManager mCallBackManager = new CancelableManager();
-    private final ViewStateListener mStateListener = new ViewStateListener();
+    private final OnLifecycleStateListener mStateListener = new OnLifecycleStateListener();
     private PermissionChecker<?> mPermissionChecker;
     private boolean visible = false;
 

@@ -1,6 +1,7 @@
-package com.zpf.tool.expand.util;
+package com.zpf.support.util;
 
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -11,7 +12,7 @@ import com.zpf.tool.stack.LifecycleState;
  * Created by ZPF on 2018/6/28.
  */
 
-public class ViewStateListener implements IFullLifecycle {
+public class OnLifecycleStateListener implements IFullLifecycle {
     private int mViewState = LifecycleState.BEFORE_CREATE;
 
     @Override

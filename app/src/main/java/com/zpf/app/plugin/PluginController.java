@@ -7,7 +7,6 @@ import android.util.ArrayMap;
 
 import com.zpf.api.IClassLoader;
 import com.zpf.api.dataparser.JsonParserInterface;
-import com.zpf.support.util.LogUtil;
 import com.zpf.tool.FileUtil;
 import com.zpf.tool.config.AppContext;
 import com.zpf.tool.config.GlobalConfigImpl;

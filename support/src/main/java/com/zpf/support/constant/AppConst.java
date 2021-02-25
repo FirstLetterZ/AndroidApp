@@ -33,10 +33,9 @@ public class AppConst {
     public static final String SWITCH03 = "switch03";
     public static final String MESSAGE = "message";
     public static final String CALL_BACK = "callback";
+
     public static final String ANIM_TYPE = "anim_type";
     public static final String LAUNCH_MODE = "launch_mode";
-    public static final String STACK_ITEM_NAME = "stack_item_name";
-
     public static final String REQUEST_CODE = "request_code";
     public static final String TARGET_CONTAINER_CLASS = "target_container_class";
     public static final String TARGET_CONTAINER_ACTION = "target_container_action";
