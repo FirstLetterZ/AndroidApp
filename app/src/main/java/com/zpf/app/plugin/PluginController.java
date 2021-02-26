@@ -10,8 +10,10 @@ import com.zpf.api.dataparser.JsonParserInterface;
 import com.zpf.tool.FileUtil;
 import com.zpf.tool.config.AppContext;
 import com.zpf.tool.config.GlobalConfigImpl;
+import com.zpf.tool.expand.cache.SpStorageWorker;
+import com.zpf.tool.expand.cache.SpUtil;
 import com.zpf.tool.expand.util.ClassLoaderImpl;
-import com.zpf.tool.expand.cache.SpStorageImpl;
+import com.zpf.tool.expand.util.LogUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,7 +25,7 @@ import java.lang.reflect.Method;
 public class PluginController {
     private final ArrayMap<String, PluginApkBean> pluginInfoMap = new ArrayMap<>();
     private final ArrayMap<String, ClassLoader> pluginClassLoaderMap = new ArrayMap<>();
-    private final SpStorageImpl spWorker = new SpStorageImpl("sp_plugin_config_file");
+    private final SpStorageWorker spWorker = SpUtil.get("sp_plugin_config_file");
 
     private static class Instance {
         static final PluginController mInstance = new PluginController();
