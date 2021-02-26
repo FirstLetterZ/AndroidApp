@@ -12,7 +12,7 @@ import com.zpf.tool.toast.ToastUtil;
 public class ResponseHandleImpl implements IResponseHandler {
 
     private static class Instance {
-        private static ResponseHandleImpl mInstance = new ResponseHandleImpl();
+        private static final ResponseHandleImpl mInstance = new ResponseHandleImpl();
     }
 
     private ResponseHandleImpl() {
@@ -23,7 +23,7 @@ public class ResponseHandleImpl implements IResponseHandler {
     }
 
     @Override
-    public ResponseResult parsingException(Throwable e) {
+    public ResponseResult<?> parsingException(Throwable e) {
         return null;
     }
 

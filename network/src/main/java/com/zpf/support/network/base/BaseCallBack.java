@@ -208,9 +208,9 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
         boolean check = true;
         responseResult.setCode(ErrorCode.RESPONSE_SUCCESS);
         if (result instanceof IResultBean) {
-            check = ((IResultBean) result).isSuccess();
-            responseResult.setCode(((IResultBean) result).getCode());
-            responseResult.setMessage(((IResultBean) result).getMessage());
+            check = ((IResultBean<?>) result).isSuccess();
+            responseResult.setCode(((IResultBean<?>) result).getCode());
+            responseResult.setMessage(((IResultBean<?>) result).getMessage());
         }
         if (check && checkDataNull(result)) {
             check = isNullable();
@@ -227,7 +227,7 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
         if (result == null) {
             return true;
         } else if (result instanceof IResultBean) {
-            return ((IResultBean) result).getData() == null;
+            return ((IResultBean<?>) result).getData() == null;
         } else {
             return responseHandler != null && responseHandler.checkDataNull(result);
         }

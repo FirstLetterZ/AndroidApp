@@ -38,8 +38,8 @@ public class CompatSinglePageActivity extends CompatContainerActivity {
         fragmentStackManager = new CompatFragmentStackManager(getSupportFragmentManager(), viewId);
         fragmentStackManager.setEmptyListener(new OnStackEmptyListener() {
             @Override
-            public void onEmpty(int requestCode, int resultCode, Intent data) {
-                finishWithResult(resultCode, data);
+            public void onEmpty(Intent data) {
+                finishWithResult(AppConst.POLL_BACK_RESULT_CODE, data);
             }
         });
         Class<? extends ViewProcessor> targetViewClass = null;

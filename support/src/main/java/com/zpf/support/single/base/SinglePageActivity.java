@@ -2,7 +2,9 @@ package com.zpf.support.single.base;
 
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.annotation.Nullable;
+
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -37,8 +39,8 @@ public class SinglePageActivity extends ContainerActivity {
         fragmentStackManager = new FragmentStackManager(getFragmentManager(), viewId);
         fragmentStackManager.setEmptyListener(new OnStackEmptyListener() {
             @Override
-            public void onEmpty(int requestCode, int resultCode, Intent data) {
-                finishWithResult(resultCode, data);
+            public void onEmpty(Intent data) {
+                finishWithResult(AppConst.POLL_BACK_RESULT_CODE, data);
             }
         });
         Class<? extends ViewProcessor> targetViewClass = null;

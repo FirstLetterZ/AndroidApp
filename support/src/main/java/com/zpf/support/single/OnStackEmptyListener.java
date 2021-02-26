@@ -7,5 +7,5 @@ import android.content.Intent;
  */
 
 public interface OnStackEmptyListener {
-    void onEmpty(int requestCode, int resultCode, Intent data);
+    void onEmpty(Intent data);
 }

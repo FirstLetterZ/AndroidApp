@@ -9,12 +9,12 @@ import com.zpf.api.IResultBean;
 public interface IResponseHandler {
 
     //解析callback中的handleError
-    IResultBean parsingException(Throwable e);
+    IResultBean<?> parsingException(Throwable e);
 
     boolean checkDataNull(Object data);
 
     //拦截callback中的fail方法
-    boolean interceptFailHandle(IResultBean result);
+    boolean interceptFailHandle(IResultBean<?> result);
 
     void showHint(int code, String message);
 

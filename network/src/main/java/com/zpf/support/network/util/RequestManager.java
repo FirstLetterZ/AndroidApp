@@ -7,7 +7,7 @@ import com.zpf.api.ICancelable;
 import com.zpf.api.IGroup;
 import com.zpf.api.IResultBean;
 import com.zpf.api.OnDestroyListener;
-import com.zpf.api.OnStateChangedListener;
+import com.zpf.support.network.base.OnResponseListener;
 import com.zpf.support.network.base.ErrorCode;
 import com.zpf.support.network.base.ILocalCacheManager;
 import com.zpf.support.network.base.INetworkCallCreator;
@@ -23,9 +23,16 @@ public class RequestManager<T> implements OnDestroyListener, ICancelable {
     private volatile boolean done = true;
     private Call<T> call;
     public INetworkCallCreator<T> callNetworkManager;
-    public OnStateChangedListener<T> stateChangedListener;
+    public OnResponseListener<T> responseListener;
     public ILocalCacheManager<T> localCacheManager;
     private volatile long lastIgnore = 0;
+
+    public static <T> RequestManager<T> create(INetworkCallCreator<T> creator
+            , OnResponseListener<T> listener) {
+        RequestManager<T> manager = new RequestManager<T>();
+        manager.setCallCreator(creator).setResponseListener(listener);
+        return manager;
+    }
 
     protected T searchLocal() {
         if (localCacheManager == null) {
@@ -40,15 +47,30 @@ public class RequestManager<T> implements OnDestroyListener, ICancelable {
         }
     }
 
-    protected void onStateChanged(final boolean loading, final int code, final String msg, final T data) {
-        MainHandler.runOnMainTread(new Runnable() {
-            @Override
-            public void run() {
-                if (stateChangedListener != null) {
-                    stateChangedListener.onStateChanged(loading, code, msg, data);
+    protected void notifyLoading(final boolean loading) {
+        if (responseListener != null) {
+            MainHandler.runOnMainTread(new Runnable() {
+                @Override
+                public void run() {
+                    if (responseListener != null) {
+                        responseListener.onLoading(loading);
+                    }
                 }
-            }
-        });
+            });
+        }
+    }
+
+    protected void notifyResponse(final int code, final String msg, final T data) {
+        if (responseListener != null) {
+            MainHandler.runOnMainTread(new Runnable() {
+                @Override
+                public void run() {
+                    if (responseListener != null) {
+                        responseListener.onResponse(code, data, msg);
+                    }
+                }
+            });
+        }
     }
 
     protected Call<T> callNetwork() {
@@ -74,8 +96,8 @@ public class RequestManager<T> implements OnDestroyListener, ICancelable {
         return this;
     }
 
-    public RequestManager<T> setStateListener(OnStateChangedListener<T> stateListener) {
-        stateChangedListener = stateListener;
+    public RequestManager<T> setResponseListener(OnResponseListener<T> responseListener) {
+        this.responseListener = responseListener;
         return this;
     }
 
@@ -93,7 +115,7 @@ public class RequestManager<T> implements OnDestroyListener, ICancelable {
         destroyed = false;
     }
 
-    public boolean isEnable(){
+    public boolean isEnable() {
         return !destroyed;
     }
 
@@ -155,11 +177,12 @@ public class RequestManager<T> implements OnDestroyListener, ICancelable {
         }
         if (resultData != null) {
             if (type.auto_update) {
-                onStateChanged(true, ErrorCode.LOAD_LOCAL_DATA, null, resultData);
+                notifyResponse(ErrorCode.LOAD_LOCAL_DATA, null, resultData);
                 loadDataFromNetwork(type, callCreator);
             } else {
                 done = true;
-                onStateChanged(false, ErrorCode.LOAD_LOCAL_DATA, null, resultData);
+                notifyResponse(ErrorCode.LOAD_LOCAL_DATA, null, resultData);
+                notifyLoading(false);
             }
         } else {
             loadDataFromNetwork(type, callCreator);
@@ -182,7 +205,7 @@ public class RequestManager<T> implements OnDestroyListener, ICancelable {
             done = true;
             return;
         }
-        onStateChanged(true, ErrorCode.LOADING_NETWORK, null, resultData);
+        notifyLoading(true);
         int requestType = 0;
         if (!type.auto_toast) {
             requestType = (requestType | 1);
@@ -194,7 +217,8 @@ public class RequestManager<T> implements OnDestroyListener, ICancelable {
             @Override
             protected void complete(boolean success, @NonNull IResultBean<T> responseResult) {
                 done = true;
-                onStateChanged(false, responseResult.getCode(), responseResult.getMessage(), responseResult.getData());
+                notifyResponse(responseResult.getCode(), responseResult.getMessage(), responseResult.getData());
+                notifyLoading(true);
                 call = null;
             }
 

@@ -46,5 +46,7 @@ public class AppConst {
     public static final String TARGET_STATUS_TRANSLUCENT = "target_status_translucent";
     public static final String TARGET_ALIAS = "target_alias";
     public static final int DEF_REQUEST_CODE = 65535;
+    public static final int POLL_BACK_REQUEST_CODE = 65534;
     public static final int DEF_RESULT_CODE = 0;
+    public static final int POLL_BACK_RESULT_CODE = 65534;
 }

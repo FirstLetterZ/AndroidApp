@@ -7,7 +7,11 @@ import android.os.Bundle;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+
 import android.text.TextUtils;
 
 import com.zpf.frame.INavigator;
@@ -102,13 +106,13 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
 
     @TargetApi(Build.VERSION_CODES.O)
     @Override
-    public void push(Class<? extends ViewProcessor> target, Bundle params) {
+    public void push(@NonNull Class<? extends ViewProcessor> target, Bundle params) {
         this.push(target, params, AppConst.DEF_REQUEST_CODE);
     }
 
     @TargetApi(Build.VERSION_CODES.O)
     @Override
-    public void push(Class<? extends ViewProcessor> target) {
+    public void push(@NonNull Class<? extends ViewProcessor> target) {
         this.push(target, null, AppConst.DEF_REQUEST_CODE);
     }
 
@@ -150,14 +154,12 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
         if (lastElementInfo != null) {
             lastElementInfo.instance.onActivityResult(requestCode, resultCode, data);
         } else {
-            final int a = requestCode;
-            final int b = resultCode;
             final Intent c = data;
             MainHandler.get().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     if (stackList.size() == 0 && emptyListener != null) {
-                        emptyListener.onEmpty(a, b, c);
+                        emptyListener.onEmpty(c);
                     }
                 }
             }, 16);
@@ -170,15 +172,13 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
     }
 
     @Override
-    public void pollUntil(Class<? extends ViewProcessor> target, int resultCode, Intent data) {
+    public boolean pollUntil(@NonNull Class<? extends ViewProcessor> target, @Nullable Intent data) {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         FragmentElementInfo lastElementInfo;
-        int requestCode = AppConst.DEF_REQUEST_CODE;
         synchronized (stackList) {
             while ((lastElementInfo = stackList.pollLast()) != null) {
                 if (TextUtils.equals(target.getName(), lastElementInfo.tag)) {
                     lastElementInfo.state = StackElementState.STACK_OUTSIDE;
-                    requestCode = lastElementInfo.requestCode;
                     transaction.remove(lastElementInfo.instance);
                     lastElementInfo = stackList.peekLast();
                     if (lastElementInfo != null) {
@@ -194,50 +194,48 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
         }
         transaction.commitAllowingStateLoss();
         if (lastElementInfo != null) {
-            lastElementInfo.instance.onActivityResult(requestCode, resultCode, data);
+            lastElementInfo.instance.onActivityResult(AppConst.POLL_BACK_REQUEST_CODE, AppConst.POLL_BACK_RESULT_CODE, data);
         } else {
-            final int a = requestCode;
-            final int b = resultCode;
             final Intent c = data;
             MainHandler.get().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     if (stackList.size() == 0 && emptyListener != null) {
-                        emptyListener.onEmpty(a, b, c);
+                        emptyListener.onEmpty(c);
                     }
                 }
             }, 16);
         }
+        return true;
     }
 
     @Override
-    public void pollUntil(Class<? extends ViewProcessor> target) {
-        this.pollUntil(target, AppConst.DEF_RESULT_CODE, null);
+    public boolean pollUntil(@NonNull Class<? extends ViewProcessor> target) {
+        return this.pollUntil(target, null);
     }
 
     @Override
-    public void remove(Class<? extends ViewProcessor> target, int resultCode, Intent data) {
+    public boolean remove(@NonNull Class<? extends ViewProcessor> target) {
+        boolean result = false;
         synchronized (stackList) {
             FragmentElementInfo lastElementInfo = stackList.peekLast();
             if (lastElementInfo != null && TextUtils.equals(lastElementInfo.tag, target.getName())) {
-                poll(resultCode, data);
+                poll();
+                result = true;
             } else {
                 for (FragmentElementInfo elementInfo : stackList) {
                     if (TextUtils.equals(elementInfo.tag, target.getName())) {
                         elementInfo.state = StackElementState.STACK_REMOVING;
+                        result = true;
                         break;
                     }
                 }
             }
         }
+        return result;
     }
 
-    @Override
-    public void remove(Class<? extends ViewProcessor> target) {
-        this.remove(target, AppConst.DEF_RESULT_CODE, null);
-    }
-
-    class FragmentElementInfo {
+    static class FragmentElementInfo {
         String tag;
         Fragment instance;
         Bundle params;

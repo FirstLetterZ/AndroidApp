@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -25,8 +26,8 @@ import java.util.List;
 public class CompatFragmentStackManager implements INavigator<Class<? extends IViewProcessor>> {
     private final LinkedList<FragmentElementInfo> stackList = new LinkedList<>();
     private OnStackEmptyListener emptyListener;
-    private FragmentManager fragmentManager;
-    private int viewId;
+    private final FragmentManager fragmentManager;
+    private final int viewId;
 
     public CompatFragmentStackManager(FragmentManager fragmentManager, int viewId) {
         this.fragmentManager = fragmentManager;
@@ -98,12 +99,12 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
     }
 
     @Override
-    public void push(Class<? extends IViewProcessor> target, Bundle params) {
+    public void push(@NonNull Class<? extends IViewProcessor> target, Bundle params) {
         this.push(target, params, AppConst.DEF_REQUEST_CODE);
     }
 
     @Override
-    public void push(Class<? extends IViewProcessor> target) {
+    public void push(@NonNull Class<? extends IViewProcessor> target) {
         this.push(target, null, AppConst.DEF_REQUEST_CODE);
     }
 
@@ -145,14 +146,12 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
         if (lastElementInfo != null) {
             lastElementInfo.instance.onActivityResult(requestCode, resultCode, data);
         } else {
-            final int a = requestCode;
-            final int b = resultCode;
             final Intent c = data;
             MainHandler.get().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     if (stackList.size() == 0 && emptyListener != null) {
-                        emptyListener.onEmpty(a, b, c);
+                        emptyListener.onEmpty(c);
                     }
                 }
             }, 16);
@@ -165,15 +164,13 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
     }
 
     @Override
-    public void pollUntil(Class<? extends IViewProcessor> target, int resultCode, Intent data) {
+    public boolean pollUntil(@NonNull Class<? extends IViewProcessor> target, Intent data) {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         FragmentElementInfo lastElementInfo;
-        int requestCode = AppConst.DEF_REQUEST_CODE;
         synchronized (stackList) {
             while ((lastElementInfo = stackList.pollLast()) != null) {
                 if (TextUtils.equals(target.getName(), lastElementInfo.tag)) {
                     lastElementInfo.state = StackElementState.STACK_OUTSIDE;
-                    requestCode = lastElementInfo.requestCode;
                     transaction.remove(lastElementInfo.instance);
                     lastElementInfo = stackList.peekLast();
                     if (lastElementInfo != null) {
@@ -189,50 +186,48 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
         }
         transaction.commitAllowingStateLoss();
         if (lastElementInfo != null) {
-            lastElementInfo.instance.onActivityResult(requestCode, resultCode, data);
+            lastElementInfo.instance.onActivityResult(AppConst.POLL_BACK_REQUEST_CODE, AppConst.POLL_BACK_RESULT_CODE, data);
         } else {
-            final int a = requestCode;
-            final int b = resultCode;
             final Intent c = data;
             MainHandler.get().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     if (stackList.size() == 0 && emptyListener != null) {
-                        emptyListener.onEmpty(a, b, c);
+                        emptyListener.onEmpty(c);
                     }
                 }
             }, 16);
         }
+        return true;
     }
 
     @Override
-    public void pollUntil(Class<? extends IViewProcessor> target) {
-        this.pollUntil(target, AppConst.DEF_RESULT_CODE, null);
+    public boolean pollUntil(@NonNull Class<? extends IViewProcessor> target) {
+        return this.pollUntil(target, null);
     }
 
     @Override
-    public void remove(Class<? extends IViewProcessor> target, int resultCode, Intent data) {
+    public boolean remove(@NonNull Class<? extends IViewProcessor> target) {
+        boolean result = false;
         synchronized (stackList) {
             FragmentElementInfo lastElementInfo = stackList.peekLast();
             if (lastElementInfo != null && TextUtils.equals(lastElementInfo.tag, target.getName())) {
-                poll(resultCode, data);
+                poll();
+                result = true;
             } else {
                 for (FragmentElementInfo elementInfo : stackList) {
                     if (TextUtils.equals(elementInfo.tag, target.getName())) {
                         elementInfo.state = StackElementState.STACK_REMOVING;
+                        result = true;
                         break;
                     }
                 }
             }
         }
+        return result;
     }
 
-    @Override
-    public void remove(Class<? extends IViewProcessor> target) {
-        this.remove(target, AppConst.DEF_RESULT_CODE, null);
-    }
-
-    class FragmentElementInfo {
+    static class FragmentElementInfo {
         String tag;
         Fragment instance;
         Bundle params;
