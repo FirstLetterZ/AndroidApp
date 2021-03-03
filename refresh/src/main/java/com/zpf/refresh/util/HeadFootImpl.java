@@ -32,27 +32,23 @@ public class HeadFootImpl implements HeadFootInterface {
             switch (sate) {
                 case RefreshLayoutState.DONE:
                 case RefreshLayoutState.INIT:
-                    this.state = sate;
                     mProgressBar.setVisibility(View.GONE);
                     mTextView.setText(initText);
                     break;
                 case RefreshLayoutState.TO_REFRESH:
                     if (!isFootLayout && (type == RefreshLayoutType.BOTH_UP_DOWN || type == RefreshLayoutType.ONLY_PULL_DOWN)) {
-                        this.state = sate;
                         mProgressBar.setVisibility(onlyText ? View.GONE : View.VISIBLE);
                         mTextView.setText("释放刷新页面");
                     }
                     break;
                 case RefreshLayoutState.REFRESHING:
                     if (!isFootLayout && (type == RefreshLayoutType.BOTH_UP_DOWN || type == RefreshLayoutType.ONLY_PULL_DOWN)) {
-                        this.state = sate;
                         mProgressBar.setVisibility(onlyText ? View.GONE : View.VISIBLE);
                         mTextView.setText("正在刷新...");
                     }
                     break;
                 case RefreshLayoutState.TO_LOAD:
                     if (isFootLayout && (type == RefreshLayoutType.BOTH_UP_DOWN || type == RefreshLayoutType.ONLY_PULL_UP)) {
-                        this.state = sate;
                         mProgressBar.setVisibility(onlyText ? View.GONE : View.VISIBLE);
                         mTextView.setText("释放加载更多");
                     }
@@ -146,15 +142,15 @@ public class HeadFootImpl implements HeadFootInterface {
             float d = parent.getResources().getDisplayMetrics().density;
             mDistHeight = (int) (44 * d);
             LinearLayout layout = new LinearLayout(parent.getContext());
+            layout.setOrientation(LinearLayout.HORIZONTAL);
             layout.setGravity(Gravity.CENTER);
             mProgressBar = new ProgressBar(parent.getContext());
-            mProgressBar.setLayoutParams(new ViewGroup.LayoutParams((int) (16 * d), (int) (16 * d)));
-            mProgressBar.setVisibility(View.GONE);
             mTextView = new TextView(parent.getContext());
             mTextView.setPadding((int) (8 * d), 0, (int) (8 * d), 0);
             mTextView.setTextColor(Color.parseColor("#333333"));
-            layout.addView(mProgressBar);
-            layout.addView(mTextView);
+            layout.addView(mProgressBar, new ViewGroup.LayoutParams((int) (16 * d), (int) (16 * d)));
+            layout.addView(mTextView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT));
             mLayout = layout;
         }
         return mLayout;

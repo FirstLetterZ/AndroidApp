@@ -7,7 +7,9 @@
     android:gravity="center"
     android:orientation="vertical">
 
+<!--    <com.zpf.refresh.view.RefreshLayout-->
     <com.zpf.refresh.view.LoadLayout
+        android:id="@+id/ll_load"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="20dp"
@@ -23,41 +25,39 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#FF8A80"
+                android:gravity="center"
                 android:orientation="vertical">
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="200dp"
+                    android:background="#FFFF8D"
                     android:gravity="center"
-                    android:text="Hello World!"
+                    android:text="9999999"
                     android:textSize="30dp" />
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="200dp"
+                    android:background="#FFFF8D"
                     android:gravity="center"
-                    android:text="Hello World!"
+                    android:text="9999999"
                     android:textSize="30dp" />
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="200dp"
+                    android:background="#FFFF8D"
                     android:gravity="center"
-                    android:text="Hello World!"
+                    android:text="9999999"
                     android:textSize="30dp" />
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="200dp"
+                    android:background="#FFFF8D"
                     android:gravity="center"
-                    android:text="Hello World!"
-                    android:textSize="30dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:gravity="center"
-                    android:text="Hello World!"
+                    android:text="9999999"
                     android:textSize="30dp" />
             </LinearLayout>
         </ScrollView>

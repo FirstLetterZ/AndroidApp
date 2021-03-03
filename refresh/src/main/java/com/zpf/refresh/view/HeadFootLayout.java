@@ -48,7 +48,7 @@ public class HeadFootLayout extends LinearLayout {
         }
     }
 
-    public boolean isLoadLayout() {
+    public boolean isFootLayout() {
         return isFootLayout;
     }
 
