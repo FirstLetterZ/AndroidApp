@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -141,16 +141,19 @@ public class HeadFootImpl implements HeadFootInterface {
         if (mLayout == null) {
             float d = parent.getResources().getDisplayMetrics().density;
             mDistHeight = (int) (44 * d);
-            LinearLayout layout = new LinearLayout(parent.getContext());
-            layout.setOrientation(LinearLayout.HORIZONTAL);
-            layout.setGravity(Gravity.CENTER);
+            FrameLayout layout = new FrameLayout(parent.getContext());
             mProgressBar = new ProgressBar(parent.getContext());
             mTextView = new TextView(parent.getContext());
-            mTextView.setPadding((int) (8 * d), 0, (int) (8 * d), 0);
+            mTextView.setGravity(Gravity.CENTER);
             mTextView.setTextColor(Color.parseColor("#333333"));
-            layout.addView(mProgressBar, new ViewGroup.LayoutParams((int) (16 * d), (int) (16 * d)));
-            layout.addView(mTextView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT));
+            layout.addView(mTextView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
+            FrameLayout.LayoutParams flp = new FrameLayout.LayoutParams((int) (16 * d), (int) (16 * d));
+            flp.setMarginStart((int) (parent.getResources().getDisplayMetrics().widthPixels / 4 - 16 * d));
+            flp.gravity = Gravity.CENTER_VERTICAL;
+            layout.addView(mProgressBar, flp);
+            layout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    mDistHeight));
             mLayout = layout;
         }
         return mLayout;

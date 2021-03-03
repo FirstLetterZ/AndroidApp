@@ -15,7 +15,6 @@ import com.zpf.refresh.util.HeadFootInterface;
 public class HeadFootLayout extends LinearLayout {
     protected boolean isFootLayout;
     private HeadFootInterface headFootInterface;
-    private final LayoutParams childParam;
 
     public HeadFootLayout(Context context) {
         this(context, false);
@@ -26,7 +25,6 @@ public class HeadFootLayout extends LinearLayout {
         this.isFootLayout = isFootLayout;
         setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
-        childParam = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         setOrientation(VERTICAL);
         if (isFootLayout) {
             setGravity(Gravity.TOP);
@@ -41,9 +39,8 @@ public class HeadFootLayout extends LinearLayout {
         if (headFootInterface != null) {
             View view = headFootInterface.onCreateView(this, isFootLayout);
             if (view != null) {
-                childParam.height = headFootInterface.getDistHeight();
                 view.setBackgroundColor(Color.GREEN);
-                addView(view, childParam);
+                addView(view);
             }
         }
     }

@@ -16,6 +16,14 @@ import com.zpf.refresh.view.StickyNavLayout;
  */
 public class BaseViewStateCheckImpl implements ViewStateCheckListener {
 
+    private static class Instance {
+        static BaseViewStateCheckImpl Instance = new BaseViewStateCheckImpl();
+    }
+
+    public static BaseViewStateCheckImpl get() {
+        return Instance.Instance;
+    }
+
     @Override
     public boolean checkPullUp(View view) {
         if (view == null) {

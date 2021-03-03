@@ -7,7 +7,6 @@
     android:gravity="center"
     android:orientation="vertical">
 
-<!--    <com.zpf.refresh.view.RefreshLayout-->
     <com.zpf.refresh.view.LoadLayout
         android:id="@+id/ll_load"
         android:layout_width="match_parent"

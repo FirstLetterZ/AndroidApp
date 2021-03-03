@@ -3,7 +3,6 @@ package com.zpf.refresh.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +35,7 @@ public class LoadLayout extends ViewGroup {
     private OnRefreshListener mListener;//监听
     private ViewStateCheckListener checkListener;
     private int lastChildAction = MotionEvent.ACTION_CANCEL;
+    private long lastLayoutTime = 0;
 
     public LoadLayout(Context context) {
         this(context, null, 0);
@@ -68,7 +68,6 @@ public class LoadLayout extends ViewGroup {
 
     @Override
     protected void onFinishInflate() {
-        Log.e("TAG_ZPF", "onFinishInflate==>");
         super.onFinishInflate();
         int childCount = getChildCount();
         if (bodyLayout != null) {
@@ -87,7 +86,6 @@ public class LoadLayout extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Log.e("TAG_ZPF", "onMeasure==>widthMeasureSpec=" + widthMeasureSpec + ";heightMeasureSpec=" + heightMeasureSpec);
         measureChildren(widthMeasureSpec, heightMeasureSpec);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
@@ -120,7 +118,6 @@ public class LoadLayout extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        Log.e("TAG_ZPF", "onLayout==>left=" + l + ";top=" + t + ";right=" + r + ";bottom=" + b);
         layoutChildren();
     }
 
@@ -228,9 +225,7 @@ public class LoadLayout extends ViewGroup {
                     } else if (state != RefreshLayoutState.REFRESHING && state != RefreshLayoutState.LOADING) {
                         changeState(RefreshLayoutState.INIT);
                     }
-//                    layoutChildren();
-//                    invalidate();
-                    requestLayout();
+                    layoutChildren();
                     ev.setAction(MotionEvent.ACTION_CANCEL);
                 } else if (lastChildAction != MotionEvent.ACTION_DOWN && lastChildAction != MotionEvent.ACTION_MOVE) {
                     ev.setAction(MotionEvent.ACTION_DOWN);
@@ -246,7 +241,6 @@ public class LoadLayout extends ViewGroup {
                 if (state == RefreshLayoutState.TO_REFRESH &&
                         (type == RefreshLayoutType.ONLY_PULL_DOWN || type == RefreshLayoutType.BOTH_UP_DOWN)) {
                     changeState(RefreshLayoutState.REFRESHING);
-//                    Log.e("TAG_ZPF", "changeState==>RefreshLayoutState.REFRESHING");
                     // 刷新操作
                     if (mListener != null) {
                         mListener.onRefresh();
@@ -254,7 +248,6 @@ public class LoadLayout extends ViewGroup {
                 } else if (state == RefreshLayoutState.TO_LOAD &&
                         (type == RefreshLayoutType.ONLY_PULL_UP || type == RefreshLayoutType.BOTH_UP_DOWN)) {
                     changeState(RefreshLayoutState.LOADING);
-//                    Log.e("TAG_ZPF", "changeState==>RefreshLayoutState.LOADING");
                     // 加载操作
                     if (mListener != null) {
                         mListener.onLoadMore();
@@ -314,10 +307,15 @@ public class LoadLayout extends ViewGroup {
     }
 
     private void scrollBack() {
-        scrollBack(10);
+        scrollBack(16 + lastLayoutTime - System.currentTimeMillis());
     }
 
     private void scrollBack(long delay) {
+        if (delay > 14) {
+            delay = 14;
+        } else if (delay < 0) {
+            delay = 0;
+        }
         removeCallbacks(backRunnable);
         postDelayed(backRunnable, delay);
     }
@@ -340,14 +338,12 @@ public class LoadLayout extends ViewGroup {
             } else {
                 pullY = Math.min(end, pullY + 8 * radio);
             }
+            layoutChildren();
             if (pullY != end) {
                 scrollBack();
             } else if (state != RefreshLayoutState.REFRESHING && state != RefreshLayoutState.LOADING) {
                 changeState(RefreshLayoutState.INIT);
             }
-//            layoutChildren();
-//            invalidate();
-            requestLayout();
         }
     };
 
@@ -356,6 +352,7 @@ public class LoadLayout extends ViewGroup {
         bodyLayout.layout(lp.leftMargin, (int) (pullY + lp.topMargin),
                 getMeasuredWidth() - lp.rightMargin, (int) (pullY + getMeasuredHeight() - lp.bottomMargin));
         if (type == RefreshLayoutType.NO_STRETCHY) {
+            lastLayoutTime = System.currentTimeMillis();
             return;
         }
         if (type != RefreshLayoutType.ONLY_PULL_UP && headLayout.getDistHeight() > 0) {
@@ -366,17 +363,17 @@ public class LoadLayout extends ViewGroup {
             footLayout.layout(0, (int) (pullY + getMeasuredHeight()), getMeasuredWidth(),
                     (int) (pullY + getMeasuredHeight() + footLayout.getMeasuredHeight()));
         }
+        lastLayoutTime = System.currentTimeMillis();
     }
 
     private ViewStateCheckListener getCheckListener() {
         if (checkListener == null) {
-            checkListener = new BaseViewStateCheckImpl();
+            checkListener = BaseViewStateCheckImpl.get();
         }
         return checkListener;
     }
 
     private void changeState(@RefreshLayoutState int state) {
-        Log.e("TAG_ZPF", "changeState===>state=" + state);
         if (!(this.state == RefreshLayoutState.TO_LOAD || this.state == RefreshLayoutState.LOADING)
                 && !(state == RefreshLayoutState.TO_LOAD || state == RefreshLayoutState.LOADING)) {
             headLayout.changeState(state);
