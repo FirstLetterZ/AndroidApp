@@ -137,7 +137,7 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mController.onKeyDown(keyCode,event)) {
+        if (mController.onKeyDown(keyCode, event)) {
             return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -145,7 +145,7 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (mController.onKeyUp(keyCode,event)) {
+        if (mController.onKeyUp(keyCode, event)) {
             return true;
         }
         return super.onKeyUp(keyCode, event);
@@ -472,7 +472,11 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
     }
 
     protected void initWindow() {
-        setRequestedOrientation(getParams().getInt(AppConst.TARGET_VIEW_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
+        try {
+            setRequestedOrientation(getParams().getInt(AppConst.TARGET_VIEW_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
+        } catch (Exception e) {
+            //
+        }
         if (getParams().getBoolean(AppConst.TARGET_STATUS_TRANSLUCENT, true)) {
             ViewUtil.setStatusBarTranslucent(getWindow());
         }

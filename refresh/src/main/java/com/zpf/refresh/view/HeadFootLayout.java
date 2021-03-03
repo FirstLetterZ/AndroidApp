@@ -1,19 +1,21 @@
 package com.zpf.refresh.view;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 
 import com.zpf.refresh.util.HeadFootInterface;
 
 /**
  * Created by ZPF on 2018/11/27.
  */
-public class HeadFootLayout extends RelativeLayout {
-    protected boolean isFootLayout = false;
+public class HeadFootLayout extends LinearLayout {
+    protected boolean isFootLayout;
     private HeadFootInterface headFootInterface;
-    private LayoutParams childParam;
+    private final LayoutParams childParam;
 
     public HeadFootLayout(Context context) {
         this(context, false);
@@ -25,10 +27,11 @@ public class HeadFootLayout extends RelativeLayout {
         setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         childParam = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        setOrientation(VERTICAL);
         if (isFootLayout) {
-            childParam.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+            setGravity(Gravity.TOP);
         } else {
-            childParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+            setGravity(Gravity.BOTTOM);
         }
     }
 
@@ -39,6 +42,7 @@ public class HeadFootLayout extends RelativeLayout {
             View view = headFootInterface.onCreateView(this, isFootLayout);
             if (view != null) {
                 childParam.height = headFootInterface.getDistHeight();
+                view.setBackgroundColor(Color.GREEN);
                 addView(view, childParam);
             }
         }

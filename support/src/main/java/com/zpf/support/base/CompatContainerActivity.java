@@ -472,7 +472,11 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     protected void initWindow() {
-        setRequestedOrientation(getParams().getInt(AppConst.TARGET_VIEW_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
+        try {
+            setRequestedOrientation(getParams().getInt(AppConst.TARGET_VIEW_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
+        } catch (Exception e) {
+            //
+        }
         if (getParams().getBoolean(AppConst.TARGET_STATUS_TRANSLUCENT, true)) {
             ViewUtil.setStatusBarTranslucent(getWindow());
         }

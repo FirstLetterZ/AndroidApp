@@ -1,7 +1,9 @@
 package com.zpf.refresh.util;
 
 import android.graphics.Color;
+
 import androidx.annotation.NonNull;
+
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +23,7 @@ public class HeadFootImpl implements HeadFootInterface {
     private int type = -1;
     private boolean isFootLayout = false;
     private int mDistHeight;
+    private View mLayout;
 
     @Override
     public void onStateChange(int sate) {
@@ -139,19 +142,22 @@ public class HeadFootImpl implements HeadFootInterface {
     @Override
     public View onCreateView(@NonNull ViewGroup parent, boolean isFootLayout) {
         this.isFootLayout = isFootLayout;
-        float d = parent.getResources().getDisplayMetrics().density;
-        mDistHeight = (int) (44 * d);
-        LinearLayout layout = new LinearLayout(parent.getContext());
-        layout.setGravity(Gravity.CENTER);
-        mProgressBar = new ProgressBar(parent.getContext());
-        mProgressBar.setLayoutParams(new ViewGroup.LayoutParams((int) (16 * d), (int) (16 * d)));
-        mProgressBar.setVisibility(View.GONE);
-        mTextView = new TextView(parent.getContext());
-        mTextView.setPadding((int) (8 * d), 0, (int) (8 * d), 0);
-        mTextView.setTextColor(Color.parseColor("#333333"));
-        layout.addView(mProgressBar);
-        layout.addView(mTextView);
-        return layout;
+        if (mLayout == null) {
+            float d = parent.getResources().getDisplayMetrics().density;
+            mDistHeight = (int) (44 * d);
+            LinearLayout layout = new LinearLayout(parent.getContext());
+            layout.setGravity(Gravity.CENTER);
+            mProgressBar = new ProgressBar(parent.getContext());
+            mProgressBar.setLayoutParams(new ViewGroup.LayoutParams((int) (16 * d), (int) (16 * d)));
+            mProgressBar.setVisibility(View.GONE);
+            mTextView = new TextView(parent.getContext());
+            mTextView.setPadding((int) (8 * d), 0, (int) (8 * d), 0);
+            mTextView.setTextColor(Color.parseColor("#333333"));
+            layout.addView(mProgressBar);
+            layout.addView(mTextView);
+            mLayout = layout;
+        }
+        return mLayout;
     }
 
 }

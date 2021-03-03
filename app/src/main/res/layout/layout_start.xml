@@ -3,61 +3,112 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:background="#fff"
+    android:gravity="center"
     android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hello World!"
-            android:textSize="30dp" />
-<!--    <com.zpf.support.view.ContainerRootLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:background="#18b1f9"-->
-<!--        app:contentBelowTitle="false">-->
+    <com.zpf.refresh.view.LoadLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="20dp"
+        android:background="#999"
+        android:padding="8dp">
 
-<!--        <androidx.appcompat.widget.AppCompatTextView-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="160dp"-->
-<!--            android:background="#FFEB3B"-->
-<!--            android:gravity="center"-->
-<!--            android:text="content"-->
-<!--            app:childType="contentView" />-->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="20dp">
 
-<!--        <androidx.appcompat.widget.AppCompatTextView-->
-<!--            android:layout_width="120dp"-->
-<!--            android:layout_height="40dp"-->
-<!--            android:layout_gravity="center_horizontal"-->
-<!--            android:background="#E91E63"-->
-<!--            android:text="contentDecorations2222"-->
-<!--            app:childType="contentDecorations"-->
-<!--            app:hierarchy="2" />-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FF8A80"
+                android:orientation="vertical">
 
-<!--        <androidx.appcompat.widget.AppCompatTextView-->
-<!--            android:layout_width="120dp"-->
-<!--            android:layout_height="110dp"-->
-<!--            android:layout_gravity="center_horizontal"-->
-<!--            android:background="#4CAF50"-->
-<!--            android:text="contentDecorations1111"-->
-<!--            app:childType="contentDecorations" />-->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:gravity="center"
+                    android:text="Hello World!"
+                    android:textSize="30dp" />
 
-<!--        <androidx.appcompat.widget.AppCompatTextView-->
-<!--            android:layout_width="60dp"-->
-<!--            android:layout_height="120dp"-->
-<!--            android:layout_gravity="left"-->
-<!--            android:background="#673AB7"-->
-<!--            android:text="pageDecoration1111"-->
-<!--            app:childType="pageDecoration" />-->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:gravity="center"
+                    android:text="Hello World!"
+                    android:textSize="30dp" />
 
-<!--        <androidx.appcompat.widget.AppCompatTextView-->
-<!--            android:layout_width="60dp"-->
-<!--            android:layout_height="120dp"-->
-<!--            android:layout_gravity="right"-->
-<!--            android:background="#673AB7"-->
-<!--            android:text="pageDecoration222"-->
-<!--            app:childType="pageDecoration" />-->
-<!--    </com.zpf.support.view.ContainerRootLayout>-->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:gravity="center"
+                    android:text="Hello World!"
+                    android:textSize="30dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:gravity="center"
+                    android:text="Hello World!"
+                    android:textSize="30dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:gravity="center"
+                    android:text="Hello World!"
+                    android:textSize="30dp" />
+            </LinearLayout>
+        </ScrollView>
+
+    </com.zpf.refresh.view.LoadLayout>
+    <!--    <com.zpf.support.view.ContainerRootLayout-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        android:background="#18b1f9"-->
+    <!--        app:contentBelowTitle="false">-->
+
+    <!--        <androidx.appcompat.widget.AppCompatTextView-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="160dp"-->
+    <!--            android:background="#FFEB3B"-->
+    <!--            android:gravity="center"-->
+    <!--            android:text="content"-->
+    <!--            app:childType="contentView" />-->
+
+    <!--        <androidx.appcompat.widget.AppCompatTextView-->
+    <!--            android:layout_width="120dp"-->
+    <!--            android:layout_height="40dp"-->
+    <!--            android:layout_gravity="center_horizontal"-->
+    <!--            android:background="#E91E63"-->
+    <!--            android:text="contentDecorations2222"-->
+    <!--            app:childType="contentDecorations"-->
+    <!--            app:hierarchy="2" />-->
+
+    <!--        <androidx.appcompat.widget.AppCompatTextView-->
+    <!--            android:layout_width="120dp"-->
+    <!--            android:layout_height="110dp"-->
+    <!--            android:layout_gravity="center_horizontal"-->
+    <!--            android:background="#4CAF50"-->
+    <!--            android:text="contentDecorations1111"-->
+    <!--            app:childType="contentDecorations" />-->
+
+    <!--        <androidx.appcompat.widget.AppCompatTextView-->
+    <!--            android:layout_width="60dp"-->
+    <!--            android:layout_height="120dp"-->
+    <!--            android:layout_gravity="left"-->
+    <!--            android:background="#673AB7"-->
+    <!--            android:text="pageDecoration1111"-->
+    <!--            app:childType="pageDecoration" />-->
+
+    <!--        <androidx.appcompat.widget.AppCompatTextView-->
+    <!--            android:layout_width="60dp"-->
+    <!--            android:layout_height="120dp"-->
+    <!--            android:layout_gravity="right"-->
+    <!--            android:background="#673AB7"-->
+    <!--            android:text="pageDecoration222"-->
+    <!--            app:childType="pageDecoration" />-->
+    <!--    </com.zpf.support.view.ContainerRootLayout>-->
 
 </LinearLayout>
