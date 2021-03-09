@@ -20,7 +20,7 @@ public class MyApp extends Application {
     public void onCreate() {
         super.onCreate();
         if (PublicUtil.isPackageProcess(this)) {
-            registerActivityLifecycleCallbacks(AppStackUtil.get());
+            AppStackUtil.init(this);
             CacheMap.setLocalStorageManager(SpUtil.get());
             ClassLoaderImpl.get().add(new MainClassLoader());
             GlobalConfigImpl.get().init(this, new RealGlobalConfig());

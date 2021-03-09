@@ -1,6 +1,7 @@
 package com.zpf.refresh.util;
 
 import android.graphics.Rect;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
@@ -14,7 +15,29 @@ import java.lang.reflect.Field;
 
 public class ViewBorderUtil {
     public static boolean isViewToTop(View view) {
-        return view != null && view.getScrollY() == 0;
+        if (view == null) {
+            return false;
+        }
+        if (view instanceof ViewGroup) {
+            int childCount = ((ViewGroup) view).getChildCount();
+            View child = null;
+            int index = 0;
+            while (index < childCount) {
+                child = ((ViewGroup) view).getChildAt(index);
+                if (child != null && child.getVisibility() != View.GONE) {
+                    break;
+                } else {
+                    child = null;
+                    index++;
+                }
+            }
+            if (child != null) {
+                Log.e("TAG", "child.getTop=" + child.getTop() + ";view.getTop=" + view.getTop() + ";canScrollVertically=" + view.canScrollVertically(1) + ";getScrollY=" + view.getScrollY());
+                return child.getTop() >= view.getTop();
+            }
+            return true;
+        }
+        return view.getScrollY() == 0 && !view.canScrollVertically(1);
     }
 
     public static boolean isAbsListViewToTop(AbsListView absListView) {
@@ -121,8 +144,31 @@ public class ViewBorderUtil {
      * 即view.getChildAt(0).getHeight() 大于 view.getMeasuredHeight()
      */
     public static boolean isViewGroupToBottom(ViewGroup view) {
-        return view != null && view.getChildAt(0) != null &&
-                view.getScrollY() >= view.getChildAt(0).getMeasuredHeight() - view.getHeight();
+        if (view == null) {
+            return false;
+        }
+        int childCount = view.getChildCount();
+        if (childCount == 0) {
+            return true;
+        } else if (childCount == 1) {
+            return view.getScrollY() >= view.getChildAt(0).getMeasuredHeight() - view.getHeight();
+        }
+        View child = null;
+        while (childCount > 0) {
+            child = view.getChildAt(childCount - 1);
+            if (child != null && child.getVisibility() != View.GONE) {
+                break;
+            } else {
+                child = null;
+                childCount--;
+            }
+        }
+        if (child != null) {
+            Log.e("TAG", "child.getBottom=" + child.getBottom() + ";view.getBottom=" + view.getBottom() + ";canScrollVertically=" + view.canScrollVertically(-1) + ";getScrollY=" + view.getScrollY());
+
+            return child.getBottom() <= view.getMeasuredHeight() && !view.canScrollVertically(-1);
+        }
+        return true;
     }
 
     public static boolean isWebViewToBottom(WebView view) {

@@ -23,7 +23,7 @@ public class StartScreenView extends ViewProcessor {
         super.onCreate(savedInstanceState);
         mRootLayout.getStatusBar().setVisibility(View.GONE);
         mTitleBar.getLayout().setVisibility(View.GONE);
-        loadLayout.setType(RefreshLayoutType.BOTH_UP_DOWN);
+        loadLayout.setType(RefreshLayoutType.ONLY_PULL_DOWN);
         loadLayout.setListener(new OnRefreshListener() {
             @Override
             public void onRefresh() {

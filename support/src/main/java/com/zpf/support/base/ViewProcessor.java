@@ -508,23 +508,24 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
                 return mContainer.getNavigator().pollUntil(target, data);
             } else {
                 final String targetName = target.getName();
-                if (AppStackUtil.get().finishAboveName(targetName) >= 0) {
-                    final Intent intent = data;
-                    //传递data
-                    MainHandler.get().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            IStackItem topStackItem = AppStackUtil.get().getTopStackInfo();
-                            if (topStackItem != null && targetName.equals(topStackItem.getName())) {
-                                Activity activity = topStackItem.getStackActivity();
-                                if (activity instanceof OnActivityResultListener) {
-                                    ((OnActivityResultListener) activity).onActivityResult(AppConst.POLL_BACK_REQUEST_CODE, AppConst.POLL_BACK_RESULT_CODE, intent);
-                                }
+                if (!AppStackUtil.finishUntilName(targetName)) {
+                    push(target);
+                }
+                final Intent intent = data;
+                //传递data
+                MainHandler.get().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        IStackItem topStackItem = AppStackUtil.getTopStackInfo();
+                        if (topStackItem != null && targetName.equals(topStackItem.getName())) {
+                            Activity activity = topStackItem.getStackActivity();
+                            if (activity instanceof OnActivityResultListener) {
+                                ((OnActivityResultListener) activity).onActivityResult(AppConst.POLL_BACK_REQUEST_CODE, AppConst.POLL_BACK_RESULT_CODE, intent);
                             }
                         }
-                    }, 50);
-                    return true;
-                }
+                    }
+                }, 100);
+                return true;
             }
         }
         return false;
@@ -541,7 +542,7 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
             if (mContainer.getNavigator() != null) {
                 return mContainer.getNavigator().remove(target);
             } else {
-                return AppStackUtil.get().finishByName(target.getName());
+                return AppStackUtil.finishByName(target.getName());
             }
         }
         return false;

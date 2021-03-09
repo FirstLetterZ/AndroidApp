@@ -355,11 +355,11 @@ public class LoadLayout extends ViewGroup {
             lastLayoutTime = System.currentTimeMillis();
             return;
         }
-        if (type != RefreshLayoutType.ONLY_PULL_UP && headLayout.getDistHeight() > 0) {
+        if (headLayout.getDistHeight() > 0) {
             headLayout.layout(0, (int) (pullY - headLayout.getMeasuredHeight()), getMeasuredWidth(),
                     (int) (pullY));
         }
-        if (type != RefreshLayoutType.ONLY_PULL_DOWN && footLayout.getDistHeight() > 0) {
+        if (footLayout.getDistHeight() > 0) {
             footLayout.layout(0, (int) (pullY + getMeasuredHeight()), getMeasuredWidth(),
                     (int) (pullY + getMeasuredHeight() + footLayout.getMeasuredHeight()));
         }

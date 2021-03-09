@@ -83,7 +83,7 @@ public class ViewModelHelper {
     public static LifecycleOwner getLifecycleOwner(@Nullable Object obj) {
         LifecycleOwner result = null;
         if (obj == null) {
-            obj = AppStackUtil.get().getTopActivity();
+            obj = AppStackUtil.getTopActivity();
         }
         while (obj != null) {
             if (obj instanceof LifecycleOwner) {
@@ -107,7 +107,7 @@ public class ViewModelHelper {
     public static ViewModelStoreOwner getViewModelStoreOwner(@Nullable Object obj) {
         ViewModelStoreOwner result = null;
         if (obj == null) {
-            obj = AppStackUtil.get().getTopActivity();
+            obj = AppStackUtil.getTopActivity();
         }
         while (obj != null) {
             if (obj instanceof ViewModelStoreOwner) {

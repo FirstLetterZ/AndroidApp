@@ -14,6 +14,7 @@ import java.util.List;
 public class LogUtil implements ILogger {
     private boolean logOut = false;
     private final List<ILogger> realLoggerList = new LinkedList<>();
+    private int logPriority = -99;
     private static String TAG = "AppLogUtil";
     private static volatile LogUtil mInstance;
 
@@ -63,6 +64,14 @@ public class LogUtil implements ILogger {
         get().realLoggerList.add(realLogger);
     }
 
+    public static void setLogPriority(int logPriority) {
+        get().logPriority = logPriority;
+    }
+
+    public static int getLogPriority() {
+        return get().logPriority;
+    }
+
     public static String getTAG() {
         return TAG;
     }
@@ -73,7 +82,7 @@ public class LogUtil implements ILogger {
 
     @Override
     public void log(int priority, String tag, String content) {
-        if (get().logOut && content != null) {
+        if (get().logOut && priority >= logPriority && content != null) {
             if (realLoggerList.size() > 0) {
                 if (TextUtils.isEmpty(tag)) {
                     tag = TAG;
