@@ -19,6 +19,7 @@ import android.view.Window;
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IEvent;
+import com.zpf.api.IEventManager;
 import com.zpf.api.IFunction1;
 import com.zpf.api.ILayoutId;
 import com.zpf.api.IManager;
@@ -42,7 +43,6 @@ import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.MainHandler;
-import com.zpf.tool.expand.util.EventManagerImpl;
 import com.zpf.tool.permission.PermissionDescription;
 import com.zpf.tool.stack.AppStackUtil;
 import com.zpf.tool.stack.IStackItem;
@@ -64,6 +64,7 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
             ViewProcessor.this.onClick(v);
         }
     };
+    protected IEventManager eventManager;
 
     public ViewProcessor() {
         this.mContainer = ContainerController.mInitingViewContainer;
@@ -94,7 +95,9 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
     @Override
     @CallSuper
     public void onDestroy() {
-        EventManagerImpl.get().unregister(getClass().getName());
+        if (eventManager != null) {
+            eventManager.unregister(getClass().getName());
+        }
     }
 
     @Override
@@ -102,12 +105,15 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
     public void onCreate(@Nullable Bundle savedInstanceState) {
         bindTitleBar(mRootLayout);
         GlobalConfigImpl.get().onObjectInit(this);
-        EventManagerImpl.get().register(getClass().getName(), new IFunction1<IEvent<?>>() {
-            @Override
-            public void func(IEvent<?> iEvent) {
-                handleEvent(iEvent);
-            }
-        });
+        eventManager = GlobalConfigImpl.get().getGlobalInstance(IEventManager.class);
+        if (eventManager != null) {
+            eventManager.register(getClass().getName(), new IFunction1<IEvent<?>>() {
+                @Override
+                public void func(IEvent<?> iEvent) {
+                    handleEvent(iEvent);
+                }
+            });
+        }
     }
 
     @Override

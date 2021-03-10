@@ -1,9 +1,11 @@
 package com.zpf.support.util;
 
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.zpf.api.IClassLoader;
 import com.zpf.frame.IContainerHelper;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
@@ -32,7 +34,11 @@ public class ContainerController {
             if (targetClass == null) {
                 String targetClassName = params.getString(AppConst.TARGET_VIEW_CLASS_NAME);
                 if (targetClassName != null) {
-                    targetClass = ClassLoaderImpl.get().getClass(targetClassName);
+                    IClassLoader classLoader = GlobalConfigImpl.get().getGlobalInstance(IClassLoader.class);
+                    if (classLoader == null) {
+                        classLoader = ClassLoaderImpl.get();
+                    }
+                    targetClass = classLoader.getClass(targetClassName);
                 }
                 if (targetClass == null) {
                     targetClass = defViewClass;
