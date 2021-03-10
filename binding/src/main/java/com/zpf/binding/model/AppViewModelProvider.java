@@ -1,11 +1,9 @@
-package com.zpf.support.model;
+package com.zpf.binding.model;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStore;
-
-import com.zpf.support.util.ViewModelHelper;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -14,7 +12,7 @@ public class AppViewModelProvider extends ViewModelProvider {
 
     private final HashMap<String, WeakReference<ViewModel>> mMap = new HashMap<>();
     private final ViewModelProvider.Factory factory = AppViewModelFactory.getInstance();
-    private static final ViewModelStore viewModelStore = new ViewModelStore();
+    private static final ViewModelStore viewModelStore = new ViewModelStore();//只用来初始化，实际不使用
 
     public static AppViewModelProvider get() {
         return AppViewModelProvider.Instance.provider;

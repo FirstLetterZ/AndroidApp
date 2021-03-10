@@ -1,4 +1,4 @@
-package com.zpf.support.util;
+package com.zpf.binding.model;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;

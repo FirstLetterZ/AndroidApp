@@ -1,4 +1,4 @@
-package com.zpf.support.util;
+package com.zpf.binding.model;
 
 import android.app.Dialog;
 import android.content.ContextWrapper;
@@ -14,9 +14,6 @@ import androidx.lifecycle.ViewModelStoreOwner;
 
 import com.zpf.api.Initializer;
 import com.zpf.api.OnDestroyListener;
-import com.zpf.support.model.AppViewModelFactory;
-import com.zpf.support.model.AppViewModelProvider;
-import com.zpf.tool.stack.AppStackUtil;
 
 import java.lang.reflect.Method;
 
@@ -80,11 +77,9 @@ public class ViewModelHelper {
         }
     }
 
-    public static LifecycleOwner getLifecycleOwner(@Nullable Object obj) {
+    @Nullable
+    public static LifecycleOwner getLifecycleOwner(Object obj) {
         LifecycleOwner result = null;
-        if (obj == null) {
-            obj = AppStackUtil.getTopActivity();
-        }
         while (obj != null) {
             if (obj instanceof LifecycleOwner) {
                 result = ((LifecycleOwner) obj);
@@ -104,11 +99,9 @@ public class ViewModelHelper {
         return result;
     }
 
-    public static ViewModelStoreOwner getViewModelStoreOwner(@Nullable Object obj) {
+    @Nullable
+    public static ViewModelStoreOwner getViewModelStoreOwner(Object obj) {
         ViewModelStoreOwner result = null;
-        if (obj == null) {
-            obj = AppStackUtil.getTopActivity();
-        }
         while (obj != null) {
             if (obj instanceof ViewModelStoreOwner) {
                 result = ((ViewModelStoreOwner) obj);
