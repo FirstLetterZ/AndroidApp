@@ -72,7 +72,7 @@ public class CacheMap {
         return getValue(key, DataDefault.DEF_INT);
     }
 
-    @Deprecated
+    @Nullable
     public synchronized static <T> T getValue(int key, @NonNull Class<T> cls) {
         Object value = null;
         try {
@@ -113,9 +113,7 @@ public class CacheMap {
         return result;
     }
 
-    /**
-     * 推荐使用
-     */
+    @NonNull
     public synchronized static <T> T getValue(int key, @NonNull T defaultValue) {
         T result = defaultValue;
         Object value = null;
