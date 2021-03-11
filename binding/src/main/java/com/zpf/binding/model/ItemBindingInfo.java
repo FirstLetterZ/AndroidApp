@@ -1,6 +1,6 @@
 package com.zpf.binding.model;
 
-import com.zpf.frame.IModelProcessor;
+import com.zpf.binding.interfaces.IModelProcessor;
 
 /**
  * @author Created by ZPF on 2021/3/10.

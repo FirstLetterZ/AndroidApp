@@ -5,25 +5,25 @@ import android.view.View;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.zpf.binding.interfaces.BindingViewHolder;
+import com.zpf.binding.interfaces.IBindingViewHolder;
+import com.zpf.binding.interfaces.IModelProcessor;
 import com.zpf.binding.model.BaseViewModel;
 import com.zpf.binding.model.ViewModelHelper;
-import com.zpf.frame.IModelProcessor;
 
 /**
  * @author Created by ZPF on 2021/3/10.
  */
-public class BaseRecyclerHolder extends RecyclerView.ViewHolder implements BindingViewHolder {
+public class BindingViewHolder implements IBindingViewHolder {
+    private final View itemView;
     private final int variableId;
     private boolean lastBindSuccess = false;
     private final ViewDataBinding itemBinder;
     protected BaseViewModel<?> itemViewModel;
     protected IModelProcessor itemProcessor;
 
-    public BaseRecyclerHolder(View itemView, int variableId) {
-        super(itemView);
+    public BindingViewHolder(View itemView, int variableId) {
+        this.itemView = itemView;
         this.variableId = variableId;
         itemBinder = DataBindingUtil.getBinding(itemView);
         LifecycleOwner lifecycleOwner;
@@ -35,7 +35,7 @@ public class BaseRecyclerHolder extends RecyclerView.ViewHolder implements Bindi
     @Override
     public <T extends IModelProcessor> void bindModel(Class<? extends BaseViewModel<T>> modelClass, T processor) {
         itemProcessor = processor;
-        if (modelClass != null && (itemViewModel == null || modelClass != itemViewModel.getClass())) {
+        if (modelClass != null && (itemViewModel == null || itemViewModel.getClass() != modelClass)) {
             BaseViewModel<T> model = null;
             try {
                 model = ViewModelHelper.createModel(

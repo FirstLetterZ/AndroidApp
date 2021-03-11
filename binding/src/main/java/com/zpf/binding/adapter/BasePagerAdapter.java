@@ -20,12 +20,12 @@ import com.zpf.api.ItemTypeManager;
 import com.zpf.api.ItemViewCreator;
 import com.zpf.api.OnItemClickListener;
 import com.zpf.api.OnItemViewClickListener;
-import com.zpf.binding.holder.BaseViewHolder;
-import com.zpf.binding.interfaces.BindingViewHolder;
+import com.zpf.binding.holder.BindingViewHolder;
 import com.zpf.binding.interfaces.IBindingListAdapter;
+import com.zpf.binding.interfaces.IBindingViewHolder;
+import com.zpf.binding.interfaces.IModelProcessor;
 import com.zpf.binding.model.BaseViewModel;
 import com.zpf.binding.model.ItemBindingInfo;
-import com.zpf.frame.IModelProcessor;
 import com.zpf.rvexpand.ItemClickHelper;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class BasePagerAdapter<T, P extends IModelProcessor> extends PagerAdapter
     private ItemTypeManager itemTypeManager = null;
     private P itemProcessor = null;
     private final SparseArray<ItemBindingInfo<P>> typeInfo = new SparseArray<>();
-    protected final SparseArray<IHolder<?>> holderCache =new SparseArray<>();
+    protected final SparseArray<IHolder<?>> holderCache = new SparseArray<>();
     protected boolean rebuildAllView = false;
 
     @Override
@@ -57,6 +57,7 @@ public class BasePagerAdapter<T, P extends IModelProcessor> extends PagerAdapter
     @NonNull
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
+        //TODO
         int itemType = getItemViewType(position);
         ItemBindingInfo<P> bindInfo = typeInfo.get(itemType);
         Object itemHolder = null;
@@ -68,16 +69,16 @@ public class BasePagerAdapter<T, P extends IModelProcessor> extends PagerAdapter
                     container,
                     false
             );
-            itemHolder = new BaseViewHolder(itemBinding.getRoot(), bindLayoutId);
+            itemHolder = new BindingViewHolder(itemBinding.getRoot(), bindLayoutId);
         } else if (itemViewCreator != null) {
             itemHolder = itemViewCreator.onCreateView(container, position, itemType);
         }
         View itemView = null;
-        if (itemHolder instanceof BindingViewHolder) {
+        if (itemHolder instanceof IBindingViewHolder) {
             Class<? extends BaseViewModel<P>> modelClass = bindInfo != null ? bindInfo.itemModelClass : null;
-            ((BindingViewHolder) itemHolder).bindModel(modelClass, itemProcessor);
-            ((BindingViewHolder) itemHolder).bindVariable(getDataAt(position), position);
-            itemView = (View) ((BindingViewHolder) itemHolder).getRoot();
+            ((IBindingViewHolder) itemHolder).bindModel(modelClass, itemProcessor);
+            ((IBindingViewHolder) itemHolder).bindVariable(getDataAt(position), position);
+            itemView = (View) ((IBindingViewHolder) itemHolder).getRoot();
         } else if (itemHolder instanceof IHolder) {
             IHolder<View> realHolder = (IHolder<View>) itemHolder;
             itemView = (View) realHolder.getRoot();
@@ -108,6 +109,7 @@ public class BasePagerAdapter<T, P extends IModelProcessor> extends PagerAdapter
 
     @Override
     public int getItemPosition(@NonNull Object object) {
+        //TODO
 //        return if (itemTypeManager != null) {
 //            itemTypeManager !!.getItemId(position)
 //        } else position.toLong()
@@ -115,7 +117,7 @@ public class BasePagerAdapter<T, P extends IModelProcessor> extends PagerAdapter
     }
 
     public void notifyDataSetChanged(boolean rebuildAllView) {
-        this.rebuildAllView=rebuildAllView;
+        this.rebuildAllView = rebuildAllView;
         super.notifyDataSetChanged();
     }
 

@@ -9,12 +9,12 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.zpf.binding.holder.BaseRecyclerHolder;
-import com.zpf.binding.interfaces.BindingViewHolder;
+import com.zpf.binding.holder.BindingRecyclerHolder;
+import com.zpf.binding.interfaces.IBindingViewHolder;
 import com.zpf.binding.interfaces.IBindingListAdapter;
+import com.zpf.binding.interfaces.IModelProcessor;
 import com.zpf.binding.model.BaseViewModel;
 import com.zpf.binding.model.ItemBindingInfo;
-import com.zpf.frame.IModelProcessor;
 import com.zpf.rvexpand.RecyclerViewAdapter;
 
 /**
@@ -36,7 +36,7 @@ public class BaseRecyclerAdapter<T, P extends IModelProcessor> extends RecyclerV
                     parent,
                     false
             );
-            holder = new BaseRecyclerHolder(itemBinding.getRoot(), bindInfo.itemBrId);
+            holder = new BindingRecyclerHolder(itemBinding.getRoot(), bindInfo.itemBrId);
         }
         if (holder == null) {
             holder = super.onCreateViewHolder(parent, viewType);
@@ -46,11 +46,11 @@ public class BaseRecyclerAdapter<T, P extends IModelProcessor> extends RecyclerV
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if (holder instanceof BindingViewHolder) {
+        if (holder instanceof IBindingViewHolder) {
             ItemBindingInfo<P> bindInfo = typeInfo.get(getItemViewType(position));
             Class<? extends BaseViewModel<P>> modelClass = bindInfo != null ? bindInfo.itemModelClass : null;
-            ((BindingViewHolder) holder).bindModel(modelClass, itemProcessor);
-            ((BindingViewHolder) holder).bindVariable(getDataAt(position), position);
+            ((IBindingViewHolder) holder).bindModel(modelClass, itemProcessor);
+            ((IBindingViewHolder) holder).bindVariable(getDataAt(position), position);
         }
         super.onBindViewHolder(holder, position);
     }

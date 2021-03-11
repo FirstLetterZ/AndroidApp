@@ -2,7 +2,6 @@ package com.zpf.binding.interfaces;
 
 import com.zpf.api.ItemListAdapter;
 import com.zpf.binding.model.BaseViewModel;
-import com.zpf.frame.IModelProcessor;
 
 /**
  * @author Created by ZPF on 2021/3/10.

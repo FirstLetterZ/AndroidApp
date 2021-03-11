@@ -20,11 +20,9 @@ android {
 }
 
 dependencies {
-    compileOnly('androidx.lifecycle:lifecycle-viewmodel:2.2.0')
-    compileOnly('androidx.lifecycle:lifecycle-livedata:2.2.0')
-    compileOnly('androidx.viewpager:viewpager:1.0.0')
+    compileOnly(rootProject.ext.dependencies.appcompat)
     compileOnly(rootProject.ext.dependencies.rvexpand)
     compileOnly(rootProject.ext.dependencies.recyclerview)
-    compileOnly(rootProject.ext.dependencies.frame)
+    compileOnly(rootProject.ext.dependencies.api)
 }
 apply from: "../bintrayUpload.gradle"

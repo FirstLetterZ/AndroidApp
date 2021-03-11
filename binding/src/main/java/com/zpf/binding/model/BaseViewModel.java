@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.zpf.api.IGroup;
 import com.zpf.api.OnDestroyListener;
-import com.zpf.frame.IModelProcessor;
+import com.zpf.binding.interfaces.IModelProcessor;
 
 import java.util.HashSet;
 
