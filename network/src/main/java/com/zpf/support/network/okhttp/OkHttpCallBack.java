@@ -1,6 +1,7 @@
 package com.zpf.support.network.okhttp;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.zpf.api.ICancelable;
 import com.zpf.api.IManager;
@@ -19,7 +20,7 @@ import okhttp3.ResponseBody;
 /**
  * Created by ZPF .
  */
-public abstract class OkHttpCallBack extends BaseCallBack<String> implements Callback {
+public abstract class OkHttpCallBack<T> extends BaseCallBack<T> implements Callback {
     private Call call;
 
     public OkHttpCallBack() {
@@ -39,7 +40,7 @@ public abstract class OkHttpCallBack extends BaseCallBack<String> implements Cal
     }
 
     @Override
-    public void onResponse(@NonNull Call call, final Response response) {
+    public void onResponse(@NonNull Call call, @NonNull final Response response) {
         if (isCancelled() || call.isCanceled()) {
             return;
         }
@@ -58,15 +59,22 @@ public abstract class OkHttpCallBack extends BaseCallBack<String> implements Cal
                 try {
                     bodyString = body.string();
                 } catch (IOException e) {
-                    fail(response.code(), getString(R.string.network_parse_error));
+                    fail(ErrorCode.PARSE_ERROR, getString(R.string.network_parse_error));
                     return;
                 }
             } else {
                 bodyString = "{\"subType\":\"" + subType + "\"}";
             }
-            if (checkResponse(bodyString)) {
+            T result;
+            try {
+                result = parseData(bodyString);
+            } catch (Exception e) {
+                fail(ErrorCode.PARSE_ERROR, getString(R.string.network_parse_error));
+                return;
+            }
+            if (checkResponse(result)) {
                 try {
-                    handleResponse(body);
+                    handleResponse(body, result);
                 } catch (Throwable e) {
                     handleError(e);
                     return;
@@ -95,15 +103,16 @@ public abstract class OkHttpCallBack extends BaseCallBack<String> implements Cal
     }
 
     @Override
-    public void onFailure(Call call, IOException e) {
+    public void onFailure(@NonNull Call call, @NonNull IOException e) {
         if (isCancelled() || call.isCanceled()) {
             return;
         }
+        removeObservable();
         handleError(e);
     }
 
     @Override
-    public OkHttpCallBack toBind(IManager<ICancelable> manager) {
+    public OkHttpCallBack<T> toBind(IManager<ICancelable> manager) {
         super.toBind(manager);
         return this;
     }
@@ -132,8 +141,9 @@ public abstract class OkHttpCallBack extends BaseCallBack<String> implements Cal
         }
     }
 
-    //默认在子线程运行
-    protected void handleResponse(ResponseBody responseBody) throws Throwable {
+    public abstract T parseData(String bodyString);
+
+    protected void handleResponse(@NonNull ResponseBody responseBody, @Nullable T parseData) throws Throwable {
 
     }
 

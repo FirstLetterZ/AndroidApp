@@ -5,7 +5,6 @@ import android.net.ParseException;
 import android.os.Looper;
 import android.text.TextUtils;
 
-import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 
 import com.zpf.api.ICancelable;
@@ -13,8 +12,9 @@ import com.zpf.api.IManager;
 import com.zpf.api.INeedManage;
 import com.zpf.api.IResultBean;
 import com.zpf.support.network.model.CustomException;
+import com.zpf.support.network.model.RequestType;
 import com.zpf.support.network.model.ResponseResult;
-import com.zpf.tool.config.AppContext;
+import com.zpf.support.network.util.Util;
 import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.config.MainHandler;
 import com.zpf.util.network.R;
@@ -37,12 +37,7 @@ import retrofit2.HttpException;
  * Created by ZPF on 2018/7/26.
  */
 public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICancelable> {
-    protected int[] type = new int[]{0, 0, 0, 0};//{不弹出错误提示，结果可为空，预留，预留}
-
-    public static final int NOTTOAST = 1;
-    public static final int NULLABLE = 2;
-    public static final int NULLABLE_NOTTOAST = 3;
-
+    protected int type;//二进制开关
     private volatile boolean isCancel = false;
     protected IManager<ICancelable> manager;
     protected long bindId;
@@ -54,23 +49,7 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
     }
 
     public BaseCallBack(int type) {
-        setType(type);
-    }
-
-    public void setType(@IntRange(from = 0, to = 16) int type) {
-        int a = type * 2;
-        int b;
-        int n = 0;
-        do {
-            a = a / 2;
-            b = a % 2;
-            if (b > 0) {
-                this.type[n] = 1;
-            } else {
-                this.type[n] = 0;
-            }
-            n++;
-        } while (a != 0 && n != this.type.length);
+        this.type = type;
     }
 
     @Override
@@ -101,11 +80,12 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
     }
 
     protected void handleError(Throwable e) {
-        removeObservable();
-        e.printStackTrace();
         String description;
         int code;
-        if (e instanceof HttpException) {
+        if (e instanceof NullPointerException) {
+            description = getString(R.string.network_data_null);
+            code = ErrorCode.DATA_NULL;
+        } else if (e instanceof HttpException) {
             HttpException exception = (HttpException) e;
             description = exception.message();
             code = exception.code();
@@ -176,7 +156,7 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
                     complete(false, responseResult);
                     return;
                 }
-                if (showHint() && showHint(code, message) && responseHandler != null) {
+                if (!RequestType.checkFlag(type, RequestType.FLAG_NO_TOAST) && !showCustomHint(code, message) && responseHandler != null) {
                     responseHandler.showHint(code, message);
                 }
                 complete(false, responseResult);
@@ -194,10 +174,12 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
     }
 
     /**
-     * 控制弹窗是否弹出
+     * 弹出自定义弹窗
+     *
+     * @return true--弹出了自定义弹窗；false--没有弹出弹窗
      */
-    protected boolean showHint(int code, String message) {
-        return true;
+    protected boolean showCustomHint(int code, String message) {
+        return false;
     }
 
     /**
@@ -212,32 +194,30 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
             responseResult.setCode(((IResultBean<?>) result).getCode());
             responseResult.setMessage(((IResultBean<?>) result).getMessage());
         }
-        if (check && checkDataNull(result)) {
-            check = isNullable();
-            if (!check) {
-                responseResult.setCode(ErrorCode.DATA_NULL);
-                responseResult.setMessage(getString(R.string.network_data_null));
+        if (check) {
+            if (!RequestType.checkFlag(type, RequestType.FLAG_NULLABLE)) {//内容不能为空
+                boolean isNull = result == null;
+                if (!isNull) {
+                    if (result instanceof IResultBean) {
+                        isNull = ((IResultBean<?>) result).getData() == null;
+                    } else {
+                        isNull = responseHandler != null && responseHandler.checkDataNull(result);
+                    }
+                }
+                if (isNull) {
+                    responseResult.setCode(ErrorCode.DATA_NULL);
+                    responseResult.setMessage(getString(R.string.network_data_null));
+                    check = false;
+                }
             }
         }
         responseResult.setData(result);
         return check;
     }
 
-    protected boolean checkDataNull(T result) {
-        if (result == null) {
-            return true;
-        } else if (result instanceof IResultBean) {
-            return ((IResultBean<?>) result).getData() == null;
-        } else {
-            return responseHandler != null && responseHandler.checkDataNull(result);
-        }
-    }
-
-
     /**
      * 当返回数据为空或者解析为空
      */
-
     protected final void onDataNull() {
         fail(ErrorCode.DATA_NULL, getString(R.string.network_data_null));
     }
@@ -254,27 +234,8 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
     }
 
     protected final String getString(int id) {
-        try {
-            return AppContext.get().getString(id);
-        } catch (Exception e) {
-            return "";
-        }
+        return Util.getString(id);
     }
-
-    /**
-     * 检查是否弹窗
-     */
-    protected final boolean showHint() {
-        return type[0] == 0;
-    }
-
-    /**
-     * 检查是否数据内容可为空
-     */
-    protected final boolean isNullable() {
-        return type[1] == 1;
-    }
-
 
     @Override
     public boolean isCancelled() {

@@ -6,6 +6,6 @@ package com.zpf.support.network.base;
 public interface OnResponseListener<T> {
     void onLoading(boolean loadingData);
 
-    void onResponse(int code, T data, String msg);
+    void onResponse(boolean success,int code, T data, String msg);
 
 }

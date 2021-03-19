@@ -3,6 +3,8 @@ package com.zpf.support.network.util;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.zpf.tool.config.AppContext;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -62,4 +64,13 @@ public class Util {
         }
         return responseMediaType.subtype();
     }
+
+    public static String getString(int id) {
+        try {
+            return AppContext.get().getString(id);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
 }

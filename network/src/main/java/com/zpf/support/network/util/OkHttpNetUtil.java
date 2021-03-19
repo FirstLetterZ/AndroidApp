@@ -14,7 +14,6 @@ import com.zpf.support.network.interceptor.DownLoadInterceptor;
 import com.zpf.support.network.model.ClientBuilder;
 import com.zpf.support.network.model.ResponseResult;
 import com.zpf.support.network.okhttp.OkHttpCallBack;
-import com.zpf.tool.config.AppContext;
 import com.zpf.util.network.R;
 
 import java.io.File;
@@ -71,7 +70,6 @@ public class OkHttpNetUtil {
         cacheMap.put(cacheKey, cacheInfo);
         call.enqueue(newCallback(cacheKey, type));
     }
-
 
     public static void requestGetCall(@NonNull String url, @Nullable Map<String, String> params,
                                       @Nullable OnDataResultListener<IResultBean<String>> resultListener,
@@ -173,12 +171,11 @@ public class OkHttpNetUtil {
                                 int type, @Nullable OnDataResultListener<IResultBean<String>> resultListener,
                                 @Nullable OnProgressListener progressListener,
                                 @Nullable IManager<ICancelable> manager) {
-
         if (!file.exists()) {
             if (resultListener != null) {
                 resultListener.onResult(false,
                         new ResponseResult<String>(ErrorCode.SAVE_LOCAL_FAIL,
-                                AppContext.get().getString(R.string.file_not_find)));
+                                Util.getString(R.string.file_not_find)));
             }
             return;
         }
@@ -216,11 +213,15 @@ public class OkHttpNetUtil {
         updateCacheController(cacheInfo, cacheKey, manager);
         cacheMap.put(cacheKey, cacheInfo);
         call.enqueue(newDownloadCallback(cacheKey, type));
-
     }
 
     private static Callback newCallback(final String key, int type) {
-        return new OkHttpCallBack(type) {
+        return new OkHttpCallBack<String>(type) {
+
+            @Override
+            public String parseData(String bodyString) {
+                return bodyString;
+            }
 
             @Override
             protected void complete(boolean success, @NonNull IResultBean<String> responseResult) {
@@ -230,20 +231,22 @@ public class OkHttpNetUtil {
                 }
                 cacheMap.remove(key);
             }
-
         };
     }
 
-
     private static Callback newDownloadCallback(final String key, int type) {
-        return new OkHttpCallBack(type) {
+        return new OkHttpCallBack<String>(type) {
+            @Override
+            public String parseData(String bodyString) {
+                return bodyString;
+            }
 
             @Override
-            protected void handleResponse(ResponseBody response) throws Throwable {
+            protected void handleResponse(@NonNull ResponseBody responseBody, String parseData) throws Throwable {
                 byte[] buf = new byte[2048];
                 int len;
                 FileOutputStream fos = null;
-                InputStream inputStream = response.byteStream();
+                InputStream inputStream = responseBody.byteStream();
                 try {
                     fos = new FileOutputStream(key);
                     while ((len = inputStream.read(buf)) != -1) {

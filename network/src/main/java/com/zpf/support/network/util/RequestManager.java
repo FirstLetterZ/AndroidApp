@@ -1,237 +1,95 @@
 package com.zpf.support.network.util;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.zpf.api.ICancelable;
-import com.zpf.api.IGroup;
-import com.zpf.api.IResultBean;
-import com.zpf.api.OnDestroyListener;
 import com.zpf.support.network.base.OnResponseListener;
-import com.zpf.support.network.base.ErrorCode;
-import com.zpf.support.network.base.ILocalCacheManager;
 import com.zpf.support.network.base.INetworkCallCreator;
-import com.zpf.support.network.model.RequestType;
-import com.zpf.support.network.retrofit.ResponseCallBack;
-import com.zpf.tool.config.MainHandler;
+import com.zpf.support.network.model.NetCall;
+import com.zpf.support.network.model.ProxyResponseListener;
+import com.zpf.support.network.retrofit.RetrofitNetCall;
 
-import retrofit2.Call;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class RequestManager<T> implements OnDestroyListener, ICancelable {
-    private boolean destroyed = false;
-    private T resultData = null;
-    private volatile boolean done = true;
-    private Call<T> call;
-    public INetworkCallCreator<T> callNetworkManager;
-    public OnResponseListener<T> responseListener;
-    public ILocalCacheManager<T> localCacheManager;
-    private volatile long lastIgnore = 0;
+public class RequestManager {
 
-    public static <T> RequestManager<T> create(INetworkCallCreator<T> creator
+    public static <T> RetrofitNetCall<T> create(INetworkCallCreator<retrofit2.Call<T>> creator
             , OnResponseListener<T> listener) {
-        RequestManager<T> manager = new RequestManager<T>();
-        manager.setCallCreator(creator).setResponseListener(listener);
-        return manager;
+        RetrofitNetCall<T> retrofitCall = new RetrofitNetCall<T>();
+        retrofitCall.setCallCreator(creator).setResponseListener(listener);
+        return retrofitCall;
     }
 
-    protected T searchLocal() {
-        if (localCacheManager == null) {
-            return null;
-        }
-        return localCacheManager.searchLocal();
-    }
+    private final HashMap<NetCall<?>, Cache<?>> calls = new HashMap<>();
+    private final AtomicInteger requestCount = new AtomicInteger(0);
+    private final AtomicInteger failCount = new AtomicInteger(0);
 
-    protected void saveToLocal(T data) {
-        if (localCacheManager != null) {
-            localCacheManager.saveToLocal(data);
-        }
-    }
-
-    protected void notifyLoading(final boolean loading) {
-        if (responseListener != null) {
-            MainHandler.runOnMainTread(new Runnable() {
+    public <T> void merge(NetCall<T> netCall, int loadFlags) {
+        final Cache<T> cache = new Cache<>(loadFlags);
+        OnResponseListener<T> responseListener = netCall.getResponseListener();
+        if(!(responseListener instanceof ProxyResponseListener)){
+            netCall.setResponseListener(new ProxyResponseListener<T>(responseListener) {
                 @Override
-                public void run() {
-                    if (responseListener != null) {
-                        responseListener.onLoading(loading);
+                public void onLoading(boolean loadingData) {
+                    if (loadingData) {
+                        requestCount.incrementAndGet();
+                    } else {
+                        if (requestCount.decrementAndGet() == 0) {
+                            onComplete();
+                        }
+                    }
+                }
+
+                @Override
+                public void onResponse(boolean success, int code, T data, String msg) {
+                    super.onResponse(success, code, data, msg);
+                    if (!success) {
+                        failCount.incrementAndGet();
                     }
                 }
             });
         }
+        calls.put(netCall, cache);
     }
 
-    protected void notifyResponse(final int code, final String msg, final T data) {
-        if (responseListener != null) {
-            MainHandler.runOnMainTread(new Runnable() {
-                @Override
-                public void run() {
-                    if (responseListener != null) {
-                        responseListener.onResponse(code, data, msg);
-                    }
-                }
-            });
-        }
-    }
-
-    protected Call<T> callNetwork() {
-        if (callNetworkManager == null) {
-            return null;
-        }
-        return callNetworkManager.callNetwork();
-    }
-
-    @Nullable
-    public T getResultData() {
-        return resultData;
-    }
-
-    @Override
-    public void onDestroy() {
-        destroyed = true;
-        cancel();
-    }
-
-    public RequestManager<T> setCallCreator(INetworkCallCreator<T> callCreator) {
-        this.callNetworkManager = callCreator;
-        return this;
-    }
-
-    public RequestManager<T> setResponseListener(OnResponseListener<T> responseListener) {
-        this.responseListener = responseListener;
-        return this;
-    }
-
-    public RequestManager<T> setCacheManager(ILocalCacheManager<T> cacheManager) {
-        localCacheManager = cacheManager;
-        return this;
-    }
-
-    public RequestManager<T> bindController(IGroup<OnDestroyListener> controller) {
-        controller.add(this);
-        return this;
-    }
-
-    public void reset() {
-        destroyed = false;
-    }
-
-    public boolean isEnable() {
-        return !destroyed;
-    }
-
-    public void cancel() {
-        if (call != null && !call.isCanceled()) {
-            call.cancel();
-            call = null;
-        }
-        done = true;
-    }
-
-    public boolean isDone() {
-        return done;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return call != null && call.isCanceled();
-    }
-
-    public void load() {
-        load(RequestType.DEF_TYPE, null);
-    }
-
-    public void load(RequestType type) {
-        load(type, null);
-    }
-
-    public void load(@Nullable INetworkCallCreator<T> callCreator) {
-        load(RequestType.DEF_TYPE, callCreator);
-    }
-
-    public void load(RequestType type, @Nullable INetworkCallCreator<T> callCreator) {
-        if (destroyed) {
-            done = true;
-            return;
-        }
-        if (type == null) {
-            type = RequestType.DEF_TYPE;
-        }
-        if (!done && call != null && !call.isCanceled()) {
-            if (!type.ignore_loading) {
-                return;
-            } else if (System.currentTimeMillis() - lastIgnore > 160) {
-                cancel();
-                lastIgnore = System.currentTimeMillis();
-            } else {
-                return;
+    public void startLoad() {
+        failCount.set(0);
+        requestCount.set(0);
+        for (Map.Entry<NetCall<?>, Cache<?>> entry : calls.entrySet()) {
+            NetCall<?> netCall = entry.getKey();
+            final Cache<?> cache = entry.getValue();
+            if (netCall != null && netCall.isEnable()) {
+                netCall.load(cache.loadType);
             }
         }
-        call = null;
-        resultData = null;
-        if (type.check_local) {
-            try {
-                resultData = searchLocal();
-            } catch (Exception e) {
-                //
-            }
-        }
-        if (resultData != null) {
-            if (type.auto_update) {
-                notifyResponse(ErrorCode.LOAD_LOCAL_DATA, null, resultData);
-                loadDataFromNetwork(type, callCreator);
-            } else {
-                done = true;
-                notifyResponse(ErrorCode.LOAD_LOCAL_DATA, null, resultData);
-                notifyLoading(false);
-            }
-        } else {
-            loadDataFromNetwork(type, callCreator);
+        if (requestCount.decrementAndGet() == 0) {
+            onComplete();
         }
     }
 
-    private synchronized void loadDataFromNetwork(RequestType type, @Nullable INetworkCallCreator<T> callCreator) {
-        if (destroyed || type == null) {
-            done = true;
-            return;
+    public void onComplete() {
+        for (Map.Entry<NetCall<?>, Cache<?>> entry : calls.entrySet()) {
+            final Cache<?> cache = entry.getValue();
+            cache.postResult();
         }
-        done = false;
-        if (callCreator != null) {
-            call = callCreator.callNetwork();
-        }
-        if (call == null) {
-            call = callNetwork();
-        }
-        if (call == null || destroyed) {
-            done = true;
-            return;
-        }
-        notifyLoading(true);
-        int requestType = 0;
-        if (!type.auto_toast) {
-            requestType = (requestType | 1);
-        }
-        if (!type.non_null) {
-            requestType = (requestType | 2);
-        }
-        call.enqueue(new ResponseCallBack<T>(requestType) {
-            @Override
-            protected void complete(boolean success, @NonNull IResultBean<T> responseResult) {
-                done = true;
-                notifyResponse(responseResult.getCode(), responseResult.getMessage(), responseResult.getData());
-                notifyLoading(true);
-                call = null;
-            }
+    }
 
-            @Override
-            protected void handleResponse(T response) {
-                resultData = response;
-                try {
-                    saveToLocal(response);
-                } catch (Exception e) {
-                    //
-                }
+    static class Cache<T> {
+        int loadType;
+        boolean success;
+        int code;
+        T data;
+        String msg;
+        OnResponseListener<T> listener;
+
+        public Cache(int loadType) {
+            this.loadType = loadType;
+        }
+
+        public void postResult() {
+            if (listener != null) {
+                listener.onResponse(success, code, data, msg);
             }
-        });
+        }
     }
 
 }
