@@ -215,18 +215,19 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
         return result;
     }
 
-    protected void bindAllChildren(View target) {
+    protected void bindAllChildren(View target, @Nullable Class<?> viewType) {
         ViewGroup parent;
         if (target instanceof ViewGroup) {
             parent = ((ViewGroup) target);
             View child;
             for (int i = 0; i < parent.getChildCount(); i++) {
                 child = parent.getChildAt(i);
-                if (child.isClickable() && child.getId() != View.NO_ID) {
+                if (child.isClickable() && child.getId() != View.NO_ID &&
+                        (viewType == null || viewType.isAssignableFrom(child.getClass()))) {
                     child.setOnClickListener(safeClickListener);
                 }
                 if (child instanceof ViewGroup) {
-                    bindAllChildren((ViewGroup) child);
+                    bindAllChildren((ViewGroup) child, viewType);
                 }
             }
         }

@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import android.view.View;
 
 import com.zpf.api.ILayoutId;
+import com.zpf.app.activity.NetView;
 import com.zpf.refresh.util.OnRefreshListener;
 import com.zpf.refresh.util.RefreshLayoutType;
 import com.zpf.refresh.view.LoadLayout;
@@ -45,19 +46,20 @@ public class StartScreenView extends ViewProcessor {
                 }, 5000);
             }
         });
+
     }
-//
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        MainHandler.get().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                Bundle params = new Bundle();
-////                params.putSerializable(AppConst.TARGET_CONTAINER_CLASS, CompatSinglePageActivity.class);
-//                push(LoginView.class, params);
-//                remove(StartScreenView.class);
-//            }
-//        }, 2000);
-//    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MainHandler.get().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Bundle params = new Bundle();
+//                params.putSerializable(AppConst.TARGET_CONTAINER_CLASS, CompatSinglePageActivity.class);
+                push(NetView.class, params);
+                remove(StartScreenView.class);
+            }
+        }, 2000);
+    }
 }

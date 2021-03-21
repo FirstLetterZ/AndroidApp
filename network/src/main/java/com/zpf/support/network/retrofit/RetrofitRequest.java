@@ -1,23 +1,25 @@
-package com.zpf.support.network.okhttp;
+package com.zpf.support.network.retrofit;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.zpf.api.IResultBean;
 import com.zpf.support.network.base.INetworkCallCreator;
-import com.zpf.support.network.model.NetCall;
+import com.zpf.support.network.model.NetRequest;
 
-import okhttp3.Call;
-import okhttp3.ResponseBody;
+import retrofit2.Call;
 
 /**
  * @author Created by ZPF on 2021/3/18.
  */
-public class OkHttpNetCall extends NetCall<String> {
-    private Call call;
-    protected INetworkCallCreator<Call> networkCallCreator;
+public class RetrofitRequest<T> extends NetRequest<T> {
+    private Call<T> call;
+    protected INetworkCallCreator<Call<T>> networkCallCreator;
 
-    public NetCall<String> setCallCreator(INetworkCallCreator<Call> callCreator) {
+    public RetrofitRequest(INetworkCallCreator<Call<T>> networkCallCreator) {
+        this.networkCallCreator = networkCallCreator;
+    }
+
+    public NetRequest<T> setCallCreator(INetworkCallCreator<Call<T>> callCreator) {
         this.networkCallCreator = callCreator;
         return this;
     }
@@ -51,15 +53,9 @@ public class OkHttpNetCall extends NetCall<String> {
             return;
         }
         notifyLoading(true);
-        call.enqueue(new OkHttpCallBack<String>(typeFlags) {
-
+        call.enqueue(new ResponseCallBack<T>(typeFlags) {
             @Override
-            public String parseData(String bodyString) {
-                return bodyString;
-            }
-
-            @Override
-            protected void complete(boolean success, @NonNull IResultBean<String> responseResult) {
+            protected void complete(boolean success, @NonNull IResultBean<T> responseResult) {
                 done = true;
                 notifyResponse(success, responseResult.getCode(), responseResult.getData(), responseResult.getMessage());
                 notifyLoading(false);
@@ -67,11 +63,11 @@ public class OkHttpNetCall extends NetCall<String> {
             }
 
             @Override
-            protected void handleResponse(@NonNull ResponseBody responseBody, @Nullable String parseData) throws Throwable {
-                resultData = parseData;
+            protected void handleResponse(T response) {
+                resultData = response;
                 if (localCacheManager != null) {
                     try {
-                        localCacheManager.saveToLocal(parseData);
+                        localCacheManager.saveToLocal(response);
                     } catch (Exception e) {
                         //
                     }

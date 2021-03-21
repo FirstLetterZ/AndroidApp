@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv01"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:background="#80D8FF" />
+
+    <TextView
+        android:id="@+id/tv02"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:background="#80D8FF" />
+
+    <TextView
+        android:id="@+id/tv03"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:background="#80D8FF" />
+
+    <Button
+        android:id="@+id/btn_load1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="load:-1" />
+
+    <Button
+        android:id="@+id/btn_load2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="load:0" />
+
+
+    <Button
+        android:id="@+id/btn_load3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="load:1" />
+</LinearLayout>

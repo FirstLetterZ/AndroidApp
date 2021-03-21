@@ -24,7 +24,6 @@ dependencies {
     compileOnly rootProject.ext.dependencies.api
     compileOnly rootProject.ext.dependencies.global
     compileOnly rootProject.ext.dependencies.annotations
-    compileOnly rootProject.ext.dependencies.dataparser
 }
 
 apply from: "../bintrayUpload.gradle"

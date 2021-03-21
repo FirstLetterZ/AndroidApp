@@ -259,11 +259,13 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     @Override
     public void startActivityForResult(Intent intent, int requestCode) {
         super.startActivityForResult(intent, requestCode);
+        StackAnimUtil.onPush(this, intent.getIntExtra(AppConst.ANIM_TYPE, 0));
     }
 
     @SuppressLint("RestrictedApi")
     @Override
     public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
+        super.startActivityForResult(intent, requestCode, options);
         StackAnimUtil.onPush(this, intent.getIntExtra(AppConst.ANIM_TYPE, 0));
     }
 

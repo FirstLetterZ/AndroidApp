@@ -1,21 +1,27 @@
-package com.zpf.support.network.retrofit;
+package com.zpf.support.network.okhttp;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.zpf.api.IResultBean;
 import com.zpf.support.network.base.INetworkCallCreator;
-import com.zpf.support.network.model.NetCall;
+import com.zpf.support.network.model.NetRequest;
 
-import retrofit2.Call;
+import okhttp3.Call;
+import okhttp3.ResponseBody;
 
 /**
  * @author Created by ZPF on 2021/3/18.
  */
-public class RetrofitNetCall<T> extends NetCall<T> {
-    private Call<T> call;
-    protected INetworkCallCreator<Call<T>> networkCallCreator;
+public abstract class OkHttpRequest<T> extends NetRequest<T> {
+    private Call call;
+    protected INetworkCallCreator<Call> networkCallCreator;
 
-    public NetCall<T> setCallCreator(INetworkCallCreator<Call<T>> callCreator) {
+    public OkHttpRequest(INetworkCallCreator<Call> networkCallCreator) {
+        this.networkCallCreator = networkCallCreator;
+    }
+
+    public NetRequest<T> setCallCreator(INetworkCallCreator<Call> callCreator) {
         this.networkCallCreator = callCreator;
         return this;
     }
@@ -49,7 +55,13 @@ public class RetrofitNetCall<T> extends NetCall<T> {
             return;
         }
         notifyLoading(true);
-        call.enqueue(new ResponseCallBack<T>(typeFlags) {
+        call.enqueue(new OkHttpCallBack<T>(typeFlags) {
+
+            @Override
+            public T parseData(String bodyString) {
+                return OkHttpRequest.this.parseData(bodyString);
+            }
+
             @Override
             protected void complete(boolean success, @NonNull IResultBean<T> responseResult) {
                 done = true;
@@ -59,11 +71,11 @@ public class RetrofitNetCall<T> extends NetCall<T> {
             }
 
             @Override
-            protected void handleResponse(T response) {
-                resultData = response;
+            protected void handleResponse(@NonNull ResponseBody responseBody, @Nullable T parseData) throws Throwable {
+                resultData = parseData;
                 if (localCacheManager != null) {
                     try {
-                        localCacheManager.saveToLocal(response);
+                        localCacheManager.saveToLocal(parseData);
                     } catch (Exception e) {
                         //
                     }
@@ -71,5 +83,7 @@ public class RetrofitNetCall<T> extends NetCall<T> {
             }
         });
     }
+
+    public abstract T parseData(String bodyString);
 
 }

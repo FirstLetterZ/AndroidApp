@@ -258,6 +258,7 @@ public class ContainerActivity extends Activity implements IViewContainer, IView
     @Override
     public void startActivityForResult(Intent intent, int requestCode) {
         super.startActivityForResult(intent, requestCode);
+        StackAnimUtil.onPush(this, intent.getIntExtra(AppConst.ANIM_TYPE, 0));
     }
 
     @SuppressLint("RestrictedApi")

@@ -5,10 +5,11 @@ import com.zpf.api.IGroup;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.support.network.base.ErrorCode;
 import com.zpf.support.network.base.ILocalCacheManager;
+import com.zpf.support.network.base.OnLoadingListener;
 import com.zpf.support.network.base.OnResponseListener;
 import com.zpf.tool.config.MainHandler;
 
-public abstract class NetCall<T> implements OnDestroyListener, ICancelable {
+public abstract class NetRequest<T> implements OnDestroyListener, ICancelable {
     protected boolean destroyed = false;
     protected volatile boolean done = true;
     private volatile long lastIgnore = 0;
@@ -23,12 +24,12 @@ public abstract class NetCall<T> implements OnDestroyListener, ICancelable {
     }
 
     protected void notifyLoading(final boolean loading) {
-        if (responseListener != null) {
+        if (responseListener instanceof OnLoadingListener) {
             MainHandler.runOnMainTread(new Runnable() {
                 @Override
                 public void run() {
-                    if (responseListener != null) {
-                        responseListener.onLoading(loading);
+                    if (responseListener instanceof OnLoadingListener) {
+                        ((OnLoadingListener) responseListener).onLoading(loading);
                     }
                 }
             });
@@ -60,7 +61,7 @@ public abstract class NetCall<T> implements OnDestroyListener, ICancelable {
         return !destroyed;
     }
 
-    public NetCall<T> setResponseListener(OnResponseListener<T> responseListener) {
+    public NetRequest<T> setResponseListener(OnResponseListener<T> responseListener) {
         if (this.responseListener instanceof ProxyResponseListener) {
             ((ProxyResponseListener<T>) this.responseListener).realListener = responseListener;
         } else {
@@ -73,12 +74,12 @@ public abstract class NetCall<T> implements OnDestroyListener, ICancelable {
         return responseListener;
     }
 
-    public NetCall<T> setCacheManager(ILocalCacheManager<T> cacheManager) {
+    public NetRequest<T> setCacheManager(ILocalCacheManager<T> cacheManager) {
         localCacheManager = cacheManager;
         return this;
     }
 
-    public NetCall<T> bindController(IGroup<OnDestroyListener> controller) {
+    public NetRequest<T> bindController(IGroup<OnDestroyListener> controller) {
         controller.add(this);
         return this;
     }

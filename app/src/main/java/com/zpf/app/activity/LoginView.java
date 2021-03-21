@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -43,7 +44,7 @@ public class LoginView extends ViewProcessor {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mTitleBar.getTitle().setText("测试");
-        bindAllChildren(mRootLayout.getContentView());
+        bindAllChildren(mRootLayout.getContentView(), Button.class);
         loadListener = new AsyncLoadListener() {
             @Override
             public void onState(int sateCode, @NonNull String targetName, @Nullable PluginApkBean apkBean) {
@@ -167,6 +168,9 @@ public class LoginView extends ViewProcessor {
                 Bundle params = new Bundle();
                 params.putString(AppConst.INTENT_KEY, "234");
                 push(TestView.class, params);
+                break;
+            case R.id.btn_custom:
+                push(NetView.class);
                 break;
         }
     }
