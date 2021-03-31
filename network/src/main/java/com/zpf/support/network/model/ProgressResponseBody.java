@@ -2,6 +2,7 @@ package com.zpf.support.network.model;
 
 import android.os.Handler;
 import android.os.Looper;
+
 import androidx.annotation.NonNull;
 
 import com.zpf.api.OnProgressListener;
@@ -63,7 +64,7 @@ public class ProgressResponseBody extends ResponseBody {
                     @Override
                     public void run() {
                         if (mListener != null) {
-                            mListener.onChanged(bytesReaded, contentLength());
+                            mListener.onChanged(contentLength(), bytesReaded);
                         }
                     }
                 });
