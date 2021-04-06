@@ -25,7 +25,7 @@ import com.zpf.api.OnDestroyListener;
 import com.zpf.tool.stack.LifecycleState;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -33,29 +33,29 @@ import java.util.List;
  */
 public class ContainerListenerController implements ILifecycleMonitor, IFullLifecycle, OnActivityResultListener,
         OnPermissionResultListener, OnTouchKeyListener, IBackPressInterceptor, IViewStateListener {
-    private final List<OnDestroyListener> mDestroyListenerList = new ArrayList<>();
-    private final List<IFullLifecycle> mLifecycleList = new ArrayList<>();
-    private final List<OnActivityResultListener> mActivityResultCallBackList = new ArrayList<>();
-    private final List<OnPermissionResultListener> mPermissionCallBackList = new ArrayList<>();
-    private final List<IBackPressInterceptor> mBackPressInterceptor = new ArrayList<>();
-    private final List<OnTouchKeyListener> mTouchKeyListener = new ArrayList<>();
-    private final List<IViewStateListener> mViewStateList = new ArrayList<>();
-    private final DialogController mDialogController = new DialogController();
-    private final CancelableManager mCallBackManager = new CancelableManager();
+    private List<OnDestroyListener> mDestroyListenerList;
+    private List<OnActivityResultListener> mActivityResultCallBackList;
+    private List<OnPermissionResultListener> mPermissionCallBackList;
+    private List<IBackPressInterceptor> mBackPressInterceptor;
+    private List<OnTouchKeyListener> mTouchKeyListener;
+    private List<IViewStateListener> mViewStateList;
+    private DialogController mDialogController;
+    private CancelableManager mCancelableManager;
+    private final List<IFullLifecycle> mLifecycleList = new LinkedList<>();
     private final OnLifecycleStateListener mStateListener = new OnLifecycleStateListener();
     private PermissionChecker<?> mPermissionChecker;
     private boolean visible = false;
 
     public ContainerListenerController() {
         mLifecycleList.add(mStateListener);
-        mDestroyListenerList.add(mCallBackManager);
-        mDestroyListenerList.add(mDialogController);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        for (OnActivityResultListener listener : mActivityResultCallBackList) {
-            listener.onActivityResult(requestCode, resultCode, data);
+        if (mActivityResultCallBackList != null) {
+            for (OnActivityResultListener listener : mActivityResultCallBackList) {
+                listener.onActivityResult(requestCode, resultCode, data);
+            }
         }
     }
 
@@ -64,17 +64,21 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
         if (mPermissionChecker != null) {
             mPermissionChecker.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
-        for (OnPermissionResultListener listener : mPermissionCallBackList) {
-            listener.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (mPermissionCallBackList != null) {
+            for (OnPermissionResultListener listener : mPermissionCallBackList) {
+                listener.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            }
         }
     }
 
     @Override
     public boolean onInterceptBackPress() {
         boolean result = false;
-        for (IBackPressInterceptor listener : mBackPressInterceptor) {
-            if (listener.onInterceptBackPress()) {
-                result = true;
+        if (mBackPressInterceptor != null) {
+            for (IBackPressInterceptor listener : mBackPressInterceptor) {
+                if (listener.onInterceptBackPress()) {
+                    result = true;
+                }
             }
         }
         return result;
@@ -83,10 +87,12 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean result = false;
-        for (OnTouchKeyListener listener : mTouchKeyListener) {
-            if (listener.onKeyDown(keyCode, event)) {
-                result = true;
-                break;
+        if (mTouchKeyListener != null) {
+            for (OnTouchKeyListener listener : mTouchKeyListener) {
+                if (listener.onKeyDown(keyCode, event)) {
+                    result = true;
+                    break;
+                }
             }
         }
         return result;
@@ -95,10 +101,12 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         boolean result = false;
-        for (OnTouchKeyListener listener : mTouchKeyListener) {
-            if (listener.onKeyUp(keyCode, event)) {
-                result = true;
-                break;
+        if (mTouchKeyListener != null) {
+            for (OnTouchKeyListener listener : mTouchKeyListener) {
+                if (listener.onKeyUp(keyCode, event)) {
+                    result = true;
+                    break;
+                }
             }
         }
         return result;
@@ -162,14 +170,22 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
 
     @Override
     public void onDestroy() {
+        if (mCancelableManager != null) {
+            mCancelableManager.onDestroy();
+        }
+        if (mDialogController != null) {
+            mDialogController.onDestroy();
+        }
+        if (mDestroyListenerList != null) {
+            for (OnDestroyListener listener : mDestroyListenerList) {
+                listener.onDestroy();
+            }
+            mDestroyListenerList.clear();
+        }
         for (IFullLifecycle lifecycle : mLifecycleList) {
             lifecycle.onDestroy();
         }
-        for (OnDestroyListener listener : mDestroyListenerList) {
-            listener.onDestroy();
-        }
         mLifecycleList.clear();
-        mDestroyListenerList.clear();
         if (mPermissionChecker != null) {
             mPermissionChecker = null;
         }
@@ -199,18 +215,27 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
 
     @Override
     public void show(ICustomWindow window) {
+        if (mDialogController == null) {
+            mDialogController = new DialogController();
+        }
         window.toBind(mDialogController);
     }
 
 
     @Override
     public boolean close() {
+        if (mDialogController == null) {
+            return false;
+        }
         return mDialogController.execute(-1);
     }
 
     @Override
-    public CancelableManager getCancelableManager() {
-        return mCallBackManager;
+    public synchronized CancelableManager getCancelableManager() {
+        if (mCancelableManager == null) {
+            mCancelableManager = new CancelableManager();
+        }
+        return mCancelableManager;
     }
 
     @Override
@@ -223,36 +248,54 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
                 }
                 result = true;
             } else if ((listenerClass == null || listenerClass == OnDestroyListener.class) && listener instanceof OnDestroyListener) {
+                if (mDestroyListenerList == null) {
+                    mDestroyListenerList = new LinkedList<>();
+                }
                 if (mDestroyListenerList.size() == 0 || !mDestroyListenerList.contains(listener)) {
                     mDestroyListenerList.add((OnDestroyListener) listener);
                 }
                 result = true;
             }
             if ((listenerClass == null || listenerClass == OnActivityResultListener.class) && listener instanceof OnActivityResultListener) {
+                if (mActivityResultCallBackList == null) {
+                    mActivityResultCallBackList = new LinkedList<>();
+                }
                 if (mActivityResultCallBackList.size() == 0 || !mActivityResultCallBackList.contains(listener)) {
                     mActivityResultCallBackList.add((OnActivityResultListener) listener);
                 }
                 result = true;
             }
             if ((listenerClass == null || listenerClass == OnPermissionResultListener.class) && listener instanceof OnPermissionResultListener) {
+                if (mPermissionCallBackList == null) {
+                    mPermissionCallBackList = new LinkedList<>();
+                }
                 if (mPermissionCallBackList.size() == 0 || !mPermissionCallBackList.contains(listener)) {
                     mPermissionCallBackList.add((OnPermissionResultListener) listener);
                 }
                 result = true;
             }
             if ((listenerClass == null || listenerClass == IBackPressInterceptor.class) && listener instanceof IBackPressInterceptor) {
+                if (mBackPressInterceptor == null) {
+                    mBackPressInterceptor = new LinkedList<>();
+                }
                 if (mBackPressInterceptor.size() == 0 || !mBackPressInterceptor.contains(listener)) {
                     mBackPressInterceptor.add((IBackPressInterceptor) listener);
                 }
                 result = true;
             }
             if ((listenerClass == null || listenerClass == OnTouchKeyListener.class) && listener instanceof OnTouchKeyListener) {
+                if (mTouchKeyListener == null) {
+                    mTouchKeyListener = new LinkedList<>();
+                }
                 if (mTouchKeyListener.size() == 0 || !mTouchKeyListener.contains(listener)) {
                     mTouchKeyListener.add((OnTouchKeyListener) listener);
                 }
                 result = true;
             }
             if ((listenerClass == null || listenerClass == IViewStateListener.class) && listener instanceof IViewStateListener) {
+                if (mViewStateList == null) {
+                    mViewStateList = new LinkedList<>();
+                }
                 if (mViewStateList.size() == 0 || !mViewStateList.contains(listener)) {
                     mViewStateList.add((IViewStateListener) listener);
                 }
@@ -269,19 +312,22 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
             if ((listenerClass == null || listenerClass == IFullLifecycle.class) && listener instanceof IFullLifecycle) {
                 result = mLifecycleList.remove(listener);
             } else if ((listenerClass == null || listenerClass == OnDestroyListener.class) && listener instanceof OnDestroyListener) {
-                result = mDestroyListenerList.remove(listener);
+                result = mDestroyListenerList != null && mDestroyListenerList.remove(listener);
             }
             if ((listenerClass == null || listenerClass == OnActivityResultListener.class) && listener instanceof OnActivityResultListener) {
-                result = mActivityResultCallBackList.remove(listener) || result;
+                result = (mActivityResultCallBackList != null && mActivityResultCallBackList.remove(listener)) || result;
             }
             if ((listenerClass == null || listenerClass == OnPermissionResultListener.class) && listener instanceof OnPermissionResultListener) {
-                result = mPermissionCallBackList.remove(listener) || result;
+                result = (mPermissionCallBackList != null && mPermissionCallBackList.remove(listener)) || result;
             }
             if ((listenerClass == null || listenerClass == IBackPressInterceptor.class) && listener instanceof IBackPressInterceptor) {
-                result = mBackPressInterceptor.remove(listener) || result;
+                result = (mBackPressInterceptor != null && mBackPressInterceptor.remove(listener)) || result;
+            }
+            if ((listenerClass == null || listenerClass == OnTouchKeyListener.class) && listener instanceof OnTouchKeyListener) {
+                result = (mTouchKeyListener != null && mTouchKeyListener.remove(listener)) || result;
             }
             if ((listenerClass == null || listenerClass == IViewStateListener.class) && listener instanceof IViewStateListener) {
-                result = mViewStateList.remove(listener) || result;
+                result = (mViewStateList != null && mViewStateList.remove(listener)) || result;
             }
         }
         return result;
@@ -289,24 +335,29 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
 
     @Override
     public void onParamChanged(Bundle newParams) {
-        for (IViewStateListener listener : mViewStateList) {
-            listener.onParamChanged(newParams);
+        if (mViewStateList != null) {
+            for (IViewStateListener listener : mViewStateList) {
+                listener.onParamChanged(newParams);
+            }
         }
-
     }
 
     @Override
     public void onVisibleChanged(boolean visible) {
         this.visible = visible;
-        for (IViewStateListener listener : mViewStateList) {
-            listener.onVisibleChanged(visible);
+        if (mViewStateList != null) {
+            for (IViewStateListener listener : mViewStateList) {
+                listener.onVisibleChanged(visible);
+            }
         }
     }
 
     @Override
     public void onActivityChanged(boolean activity) {
-        for (IViewStateListener listener : mViewStateList) {
-            listener.onActivityChanged(activity);
+        if (mViewStateList != null) {
+            for (IViewStateListener listener : mViewStateList) {
+                listener.onActivityChanged(activity);
+            }
         }
     }
 

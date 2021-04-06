@@ -19,9 +19,9 @@ import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
 import com.zpf.api.IPermissionResult;
 import com.zpf.api.OnActivityResultListener;
+import com.zpf.api.OnAttachListener;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.frame.ILoadingManager;
-import com.zpf.frame.ILoadingStateListener;
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewLinker;
@@ -321,18 +321,8 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
     }
 
     @Override
-    public void addStateListener(ILoadingStateListener listener) {
-        mParentContainer.addStateListener(listener);
-    }
-
-    @Override
-    public void removeStateListener(ILoadingStateListener listener) {
-        mParentContainer.removeStateListener(listener);
-    }
-
-    @Override
-    public Object getLoadingView() {
-        return mParentContainer.getLoadingView();
+    public void setLoadingListener(OnAttachListener onAttachListener) {
+            mParentContainer.setLoadingListener(onAttachListener);
     }
 
     @Override

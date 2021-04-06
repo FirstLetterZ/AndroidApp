@@ -2,19 +2,19 @@ package com.zpf.support.util;
 
 import android.content.Context;
 
+import com.zpf.api.OnAttachListener;
 import com.zpf.frame.ILoadingManager;
-import com.zpf.frame.ILoadingStateListener;
 import com.zpf.support.view.ProgressDialog;
 
-import java.util.HashSet;
+import android.view.WindowManager;
 
 /**
  * loading弹窗管理
  * Created by ZPF on 2019/3/20.
  */
 public class LoadingManagerImpl implements ILoadingManager {
-    private ProgressDialog progressDialog;
-    private HashSet<ILoadingStateListener> listeners = new HashSet<>();
+    private final ProgressDialog progressDialog;
+    private OnAttachListener attachListener;
 
     public LoadingManagerImpl(Context context) {
         progressDialog = new ProgressDialog(context);
@@ -22,6 +22,7 @@ public class LoadingManagerImpl implements ILoadingManager {
 
     @Override
     public void showLoading() {
+        progressDialog.getWindow().setType(WindowManager.LayoutParams.LAST_SUB_WINDOW);
         this.showLoading(null);
     }
 
@@ -34,8 +35,8 @@ public class LoadingManagerImpl implements ILoadingManager {
         }
         if (!progressDialog.isShowing()) {
             progressDialog.show();
-            for (ILoadingStateListener l : listeners) {
-                l.onState(true);
+            if (attachListener != null) {
+                attachListener.onAttached();
             }
         }
     }
@@ -43,32 +44,17 @@ public class LoadingManagerImpl implements ILoadingManager {
     @Override
     public boolean hideLoading() {
         if (progressDialog.isShowing()) {
-            for (ILoadingStateListener l : listeners) {
-                l.onState(false);
-            }
             progressDialog.dismiss();
+            if (attachListener != null) {
+                attachListener.onDetached();
+            }
             return true;
         }
         return false;
     }
 
     @Override
-    public void addStateListener(ILoadingStateListener listener) {
-        if (listener != null) {
-            listeners.add(listener);
-        }
+    public void setLoadingListener(OnAttachListener onAttachListener) {
+        this.attachListener = onAttachListener;
     }
-
-    @Override
-    public void removeStateListener(ILoadingStateListener listener) {
-        if (listener != null) {
-            listeners.remove(listener);
-        }
-    }
-
-    @Override
-    public Object getLoadingView() {
-        return progressDialog;
-    }
-
 }

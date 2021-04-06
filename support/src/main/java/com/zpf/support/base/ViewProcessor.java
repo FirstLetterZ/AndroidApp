@@ -25,13 +25,11 @@ import com.zpf.api.ILayoutId;
 import com.zpf.api.IManager;
 import com.zpf.api.IPermissionResult;
 import com.zpf.api.IconText;
-import com.zpf.api.OnActivityResultListener;
-import com.zpf.frame.IContainerHelper;
-import com.zpf.frame.INavigator;
 import com.zpf.frame.IRootLayout;
 import com.zpf.frame.ITitleBar;
 import com.zpf.frame.IViewLinker;
 import com.zpf.support.constant.AppConst;
+import com.zpf.support.model.ContainerNavigator;
 import com.zpf.support.model.SimpleEvent;
 import com.zpf.support.model.IconTextEntry;
 import com.zpf.support.model.TitleBarEntry;
@@ -42,10 +40,7 @@ import com.zpf.tool.SafeClickListener;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewContainer;
 import com.zpf.tool.config.GlobalConfigImpl;
-import com.zpf.tool.config.MainHandler;
 import com.zpf.tool.permission.PermissionDescription;
-import com.zpf.tool.stack.AppStackUtil;
-import com.zpf.tool.stack.IStackItem;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -54,10 +49,11 @@ import java.util.List;
  * 视图处理
  * Created by ZPF on 2018/6/14.
  */
-public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends IViewProcessor>> {
+public class ViewProcessor implements IViewProcessor {
     protected final IViewContainer mContainer;
     protected final ITitleBar mTitleBar;
     protected final IRootLayout mRootLayout;
+    protected final ContainerNavigator mNavigator;
     protected final SafeClickListener safeClickListener = new SafeClickListener() {
         @Override
         public void click(View v) {
@@ -86,6 +82,7 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
                 mRootLayout.setContentView(layoutId);
             }
         }
+        mNavigator = new ContainerNavigator(mContainer);
     }
 
     protected IRootLayout onCreateRootLayout(Context context) {
@@ -432,127 +429,6 @@ public class ViewProcessor implements IViewProcessor, INavigator<Class<? extends
     @Override
     public boolean removeListener(Object listener, @Nullable Type listenerClass) {
         return mContainer.removeListener(listener, listenerClass);
-    }
-
-    @Override
-    public void push(@NonNull Class<? extends IViewProcessor> target, Bundle params, int requestCode) {
-        if (getContext() != null && living()) {
-            if (mContainer.getNavigator() != null) {
-                mContainer.getNavigator().push(target, params, requestCode);
-            } else {
-                Intent intent = new Intent();
-                Context context = getContext();
-                Class<?> defContainerClass = null;
-                IContainerHelper helper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
-                if (helper != null) {
-                    defContainerClass = helper.getDefContainerClassByType(mContainer.getContainerType());
-                }
-                if (defContainerClass == null) {
-                    defContainerClass = CompatContainerActivity.class;
-                }
-                if (params == null) {
-                    intent.setClass(context, defContainerClass);
-                    intent.putExtra(AppConst.TARGET_VIEW_CLASS_NAME, target.getName());
-                    intent.putExtra(AppStackUtil.STACK_ITEM_NAME, target.getName());
-                } else {
-                    Class<?> containerClass = null;
-                    try {
-                        containerClass = (Class<?>) params.getSerializable(AppConst.TARGET_CONTAINER_CLASS);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    if (containerClass == null) {
-                        intent.setClass(context, defContainerClass);
-                    } else {
-                        intent.setClass(context, containerClass);
-                    }
-                    String containerAction = params.getString(AppConst.TARGET_CONTAINER_ACTION, null);
-                    if (!TextUtils.isEmpty(containerAction)) {
-                        intent.setAction(containerAction);
-
-                    }
-                    params.remove(AppConst.TARGET_CONTAINER_CLASS);
-                    params.remove(AppConst.TARGET_CONTAINER_ACTION);
-                    intent.putExtras(params);
-                    intent.setExtrasClassLoader(params.getClassLoader());
-                }
-                intent.putExtra(AppConst.TARGET_VIEW_CLASS, target);
-                mContainer.startActivityForResult(intent, requestCode);
-            }
-        }
-    }
-
-    @Override
-    public void push(@NonNull Class<? extends IViewProcessor> target, Bundle params) {
-        this.push(target, params, AppConst.DEF_REQUEST_CODE);
-    }
-
-    @Override
-    public void push(@NonNull Class<? extends IViewProcessor> target) {
-        this.push(target, null, AppConst.DEF_REQUEST_CODE);
-    }
-
-    @Override
-    public void poll(int resultCode, Intent data) {
-        if (living() && getContext() != null) {
-            if (mContainer.getNavigator() != null) {
-                mContainer.getNavigator().poll(resultCode, data);
-            } else {
-                mContainer.finishWithResult(resultCode, data);
-            }
-        }
-    }
-
-    @Override
-    public void poll() {
-        this.poll(AppConst.DEF_RESULT_CODE, null);
-    }
-
-    @Override
-    public boolean pollUntil(@NonNull Class<? extends IViewProcessor> target, Intent data) {
-        if (living() && getContext() != null) {
-            if (mContainer.getNavigator() != null) {
-                return mContainer.getNavigator().pollUntil(target, data);
-            } else {
-                final String targetName = target.getName();
-                if (!AppStackUtil.finishUntilName(targetName)) {
-                    push(target);
-                }
-                final Intent intent = data;
-                //传递data
-                MainHandler.get().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        IStackItem topStackItem = AppStackUtil.getTopStackInfo();
-                        if (topStackItem != null && targetName.equals(topStackItem.getName())) {
-                            Activity activity = topStackItem.getStackActivity();
-                            if (activity instanceof OnActivityResultListener) {
-                                ((OnActivityResultListener) activity).onActivityResult(AppConst.POLL_BACK_REQUEST_CODE, AppConst.POLL_BACK_RESULT_CODE, intent);
-                            }
-                        }
-                    }
-                }, 100);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean pollUntil(@NonNull Class<? extends IViewProcessor> target) {
-        return this.pollUntil(target, null);
-    }
-
-    @Override
-    public boolean remove(@NonNull Class<? extends IViewProcessor> target) {
-        if (living() && getContext() != null) {
-            if (mContainer.getNavigator() != null) {
-                return mContainer.getNavigator().remove(target);
-            } else {
-                return AppStackUtil.finishByName(target.getName());
-            }
-        }
-        return false;
     }
 
     @Override

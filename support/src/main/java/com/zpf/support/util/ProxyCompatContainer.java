@@ -19,8 +19,8 @@ import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
 import com.zpf.api.IPermissionResult;
+import com.zpf.api.OnAttachListener;
 import com.zpf.frame.ILoadingManager;
-import com.zpf.frame.ILoadingStateListener;
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewLinker;
 import com.zpf.frame.IViewProcessor;
@@ -218,22 +218,10 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public void addStateListener(ILoadingStateListener listener) {
+    public void setLoadingListener(OnAttachListener onAttachListener) {
         if (loadingManager != null) {
-            loadingManager.addStateListener(listener);
+            loadingManager.setLoadingListener(onAttachListener);
         }
-    }
-
-    @Override
-    public void removeStateListener(ILoadingStateListener listener) {
-        if (loadingManager != null) {
-            loadingManager.removeStateListener(listener);
-        }
-    }
-
-    @Override
-    public Object getLoadingView() {
-        return loadingManager == null ? null : loadingManager.getLoadingView();
     }
 
     @Override
