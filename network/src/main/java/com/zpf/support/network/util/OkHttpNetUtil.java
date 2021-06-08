@@ -99,6 +99,8 @@ public class OkHttpNetUtil {
             for (Map.Entry<String, String> p : params.entrySet()) {
                 if (i > 0) {
                     stringBuilder.append("&");
+                } else {
+                    stringBuilder.append("?");
                 }
                 stringBuilder.append(p.getKey())
                         .append("=")
@@ -198,7 +200,7 @@ public class OkHttpNetUtil {
             }
         }
         OkHttpClient client = ClientBuilder.createOkHttpClientBuilder(null)
-                .addInterceptor(new DownLoadInterceptor(new OnProgressListener() {
+                .addNetworkInterceptor(new DownLoadInterceptor(new OnProgressListener() {
                     @Override
                     public void onChanged(long total, long current) {
                         CacheInfo cacheInfo = cacheMap.get(cacheKey);

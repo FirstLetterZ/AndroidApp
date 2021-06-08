@@ -10,8 +10,5 @@ android {
 }
 
 dependencies {
-    compileOnly rootProject.ext.dependencies.api
-    compileOnly rootProject.ext.dependencies.dataparser
-    compileOnly rootProject.ext.dependencies.annotations
 }
 apply from: "../bintrayUpload.gradle"

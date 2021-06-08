@@ -38,7 +38,7 @@ public class BottomDialog extends CustomDialog {
     private List<MenuItemInfo> menuList;
     private OnItemClickListener listener;
     private int listTextColor;
-    private RecyclerView.Adapter menuAdapter;
+    private RecyclerView.Adapter<?> menuAdapter;
     private float density;
     private int rootViewHeight = -1;
 

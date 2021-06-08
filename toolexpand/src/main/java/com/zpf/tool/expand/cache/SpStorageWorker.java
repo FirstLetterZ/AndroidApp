@@ -190,7 +190,6 @@ public class SpStorageWorker implements IStorageManager<String> {
     @Override
     public IStorageManager<String> save(String name, Object value) {
         put(name, value);
-        put(name, value);
         return this;
     }
 

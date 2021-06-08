@@ -1,6 +1,7 @@
 package com.zpf.app.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -140,11 +141,11 @@ public class LoginView extends ViewProcessor {
     }
 
     private void jumpToLayout(String targetName, Class<?> targetClass) {
-        Bundle params = new Bundle();
-        params.setClassLoader(targetClass.getClassLoader());
-        params.putString(AppConst.INTENT_KEY, "123");
-        params.putString(AppConst.TARGET_VIEW_CLASS_NAME, targetName);
-        push((Class<? extends IViewProcessor>) targetClass, params);
+        Intent params = new Intent();
+        params.setExtrasClassLoader(targetClass.getClassLoader());
+        params.putExtra(AppConst.INTENT_KEY, "123");
+        params.putExtra(AppConst.TARGET_VIEW_CLASS_NAME, targetName);
+        mNavigator.push((Class<? extends IViewProcessor>) targetClass, params);
     }
 
     @Override
@@ -165,12 +166,12 @@ public class LoginView extends ViewProcessor {
                 }
                 break;
             case R.id.btn_cancel:
-                Bundle params = new Bundle();
-                params.putString(AppConst.INTENT_KEY, "234");
-                push(TestView.class, params);
+                Intent params = new Intent();
+                params.putExtra(AppConst.INTENT_KEY, "234");
+                mNavigator.push(TestView.class, params);
                 break;
             case R.id.btn_custom:
-                push(NetView.class);
+                mNavigator.push(NetView.class);
                 break;
         }
     }

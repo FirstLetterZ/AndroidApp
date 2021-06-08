@@ -44,7 +44,7 @@ public class CacheMap {
         if (key > 0 && localStorageManager != null) {
             Object oldValue = cacheValue.get(CACHE_STORAGE_KEY + key);
             putValue(key, value);
-            if (value != oldValue) {
+            if (value != oldValue || (value != null && !value.equals(oldValue))) {
                 localStorageManager.save(CACHE_STORAGE_KEY + key, value);
             }
         } else {

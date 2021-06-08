@@ -55,10 +55,11 @@ public class StartScreenView extends ViewProcessor {
         MainHandler.get().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Bundle params = new Bundle();
+
 //                params.putSerializable(AppConst.TARGET_CONTAINER_CLASS, CompatSinglePageActivity.class);
-                push(NetView.class, params);
-                remove(StartScreenView.class);
+
+                mNavigator.push(NetView.class, null);
+                mNavigator.remove(StartScreenView.class);
             }
         }, 2000);
     }

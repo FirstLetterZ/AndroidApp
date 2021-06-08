@@ -48,6 +48,7 @@ public class PhotoUtil {
         if (activity != null && PermissionUtil.get()
                 .checkPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)) {
             Intent capIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            capIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             capIntent.putExtra(MediaStore.EXTRA_OUTPUT, FileUtil.getUri(activity, filePath));
             activity.startActivityForResult(capIntent, requestCode);
             return true;
@@ -59,6 +60,7 @@ public class PhotoUtil {
         if (fragment != null && PermissionUtil.get()
                 .checkPermission(fragment, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)) {
             Intent capIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            capIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             capIntent.putExtra(MediaStore.EXTRA_OUTPUT, FileUtil.getUri(fragment.getContext(), filePath));
             fragment.startActivityForResult(capIntent, requestCode);
             return true;
@@ -70,6 +72,7 @@ public class PhotoUtil {
         if (fragment != null && PermissionUtil.get()
                 .checkPermission(fragment, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)) {
             Intent capIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            capIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             capIntent.putExtra(MediaStore.EXTRA_OUTPUT, FileUtil.getUri(fragment.getActivity(), filePath));
             fragment.startActivityForResult(capIntent, requestCode);
             return true;

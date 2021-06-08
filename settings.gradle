@@ -1,3 +1,4 @@
+include ':event'
 include ':binding'
 include ':app', ':network', ':webview', ':refresh', ':toolexpand', ':gsonParse',
         ':support', ':glideutil', ':aplugin'

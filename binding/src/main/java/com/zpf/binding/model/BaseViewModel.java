@@ -20,7 +20,7 @@ public class BaseViewModel<T extends IModelProcessor> extends ViewModel implemen
 
     private volatile boolean destroy = false;
 
-    private LiveDataHelper liveDataHelper = new LiveDataHelper(this);
+    private final LiveDataHelper liveDataHelper = new LiveDataHelper(this);
 
     public void setProcessor(T p) {
         mProcessor = p;
@@ -74,6 +74,7 @@ public class BaseViewModel<T extends IModelProcessor> extends ViewModel implemen
     @Override
     public void onCleared() {
         destroy = true;
+        mProcessor = null;
         super.onCleared();
         for (OnDestroyListener mListener : mListeners) {
             mListener.onDestroy();
