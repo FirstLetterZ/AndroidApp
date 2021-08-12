@@ -3,7 +3,7 @@ package com.zpf.support.network.util;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.zpf.tool.config.AppContext;
+import com.zpf.tool.global.CentralManager;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -67,7 +67,7 @@ public class Util {
 
     public static String getString(int id) {
         try {
-            return AppContext.get().getString(id);
+            return CentralManager.getAppContext().getString(id);
         } catch (Exception e) {
             return "";
         }

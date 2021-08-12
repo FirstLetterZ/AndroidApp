@@ -151,7 +151,10 @@ public class OkHttpNetUtil {
             }
         }
         Request.Builder requestBuilder = new Request.Builder();
-        requestBuilder.post(body).url(url);
+        if (body != null) {
+            requestBuilder.post(body);
+        }
+        requestBuilder.url(url);
         if (heads != null && heads.size() > 0) {
             for (Map.Entry<String, String> p : heads.entrySet()) {
                 requestBuilder.addHeader(p.getKey(), p.getValue());
@@ -202,10 +205,10 @@ public class OkHttpNetUtil {
         OkHttpClient client = ClientBuilder.createOkHttpClientBuilder(null)
                 .addNetworkInterceptor(new DownLoadInterceptor(new OnProgressListener() {
                     @Override
-                    public void onChanged(long total, long current) {
+                    public void onProgress(long total, long current) {
                         CacheInfo cacheInfo = cacheMap.get(cacheKey);
                         if (cacheInfo != null && cacheInfo.progressListener != null) {
-                            cacheInfo.progressListener.onChanged(total, current);
+                            cacheInfo.progressListener.onProgress(total, current);
                         }
                     }
                 }))

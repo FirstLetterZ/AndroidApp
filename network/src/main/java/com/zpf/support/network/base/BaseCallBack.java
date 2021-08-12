@@ -2,7 +2,6 @@ package com.zpf.support.network.base;
 
 import android.accounts.AccountsException;
 import android.net.ParseException;
-import android.os.Looper;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
@@ -15,8 +14,7 @@ import com.zpf.support.network.model.CustomException;
 import com.zpf.support.network.model.RequestType;
 import com.zpf.support.network.model.ResponseResult;
 import com.zpf.support.network.util.Util;
-import com.zpf.tool.config.GlobalConfigImpl;
-import com.zpf.tool.config.MainHandler;
+import com.zpf.tool.global.CentralManager;
 import com.zpf.util.network.R;
 
 import org.json.JSONException;
@@ -41,7 +39,7 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
     private volatile boolean isCancel = false;
     protected IManager<ICancelable> manager;
     protected long bindId;
-    private final IResponseHandler responseHandler = GlobalConfigImpl.get().getGlobalInstance(IResponseHandler.class);
+    private final IResponseHandler responseHandler = CentralManager.getInstance(IResponseHandler.class);
     protected ResponseResult<T> responseResult = new ResponseResult<>();
 
     public BaseCallBack() {
@@ -226,11 +224,7 @@ public abstract class BaseCallBack<T> implements ICancelable, INeedManage<ICance
         if (runnable == null || isCancel) {
             return;
         }
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            runnable.run();
-        } else {
-            MainHandler.get().post(runnable);
-        }
+        CentralManager.runOnMainTread(runnable);
     }
 
     protected final String getString(int id) {

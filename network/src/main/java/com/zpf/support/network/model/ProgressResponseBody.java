@@ -64,7 +64,7 @@ public class ProgressResponseBody extends ResponseBody {
                     @Override
                     public void run() {
                         if (mListener != null) {
-                            mListener.onChanged(contentLength(), bytesReaded);
+                            mListener.onProgress(contentLength(), bytesReaded);
                         }
                     }
                 });

@@ -53,7 +53,7 @@ public class GsonUtil implements JsonParserInterface {
     }
 
     private static class Instance {
-        private static GsonUtil mInstance = new GsonUtil();
+        private static final GsonUtil mInstance = new GsonUtil();
     }
 
     public static GsonUtil get() {

@@ -1,4 +1,10 @@
-include ':event'
-include ':binding'
-include ':app', ':network', ':webview', ':refresh', ':toolexpand', ':gsonParse',
-        ':support', ':glideutil', ':aplugin'
+//include ':aplugin',
+//        ':app',
+include  ':gsonParse',
+        //':binding',
+        ':network',
+        ':webview',
+        ':refresh',
+//        ':support',
+        ':glideutil',
+        ':toolexpand'

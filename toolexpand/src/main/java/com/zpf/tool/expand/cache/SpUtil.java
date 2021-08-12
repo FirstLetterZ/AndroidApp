@@ -1,8 +1,11 @@
 package com.zpf.tool.expand.cache;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import androidx.annotation.NonNull;
 
-import com.zpf.tool.config.SpInstance;
+import com.zpf.tool.global.CentralManager;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by ZPF on 2017/9/29.
  */
 public class SpUtil {
+    public final String DEF_SP_FILE_NAME = "default_sp_file_name";
     private final SpStorageWorker defWorker;
     private final ConcurrentHashMap<String, SpStorageWorker> spMap;
 
@@ -19,8 +23,9 @@ public class SpUtil {
 
     private SpUtil() {
         spMap = new ConcurrentHashMap<>();
-        defWorker = new SpStorageWorker();
-        spMap.put(SpInstance.SP_FILE_NAME, defWorker);
+        SharedPreferences sp = CentralManager.getAppContext().getSharedPreferences(DEF_SP_FILE_NAME, Context.MODE_PRIVATE);
+        defWorker = new SpStorageWorker(sp);
+        spMap.put(DEF_SP_FILE_NAME, defWorker);
     }
 
     public static SpStorageWorker get() {

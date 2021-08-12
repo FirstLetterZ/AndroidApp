@@ -8,24 +8,18 @@ import androidx.annotation.NonNull;
 import com.zpf.api.IStorageManager;
 import com.zpf.api.IStorageQueue;
 import com.zpf.api.dataparser.JsonParserInterface;
-import com.zpf.tool.config.AppContext;
-import com.zpf.tool.config.GlobalConfigImpl;
-import com.zpf.tool.config.SpInstance;
+import com.zpf.tool.global.CentralManager;
 
 public class SpStorageWorker implements IStorageManager<String> {
     private final SharedPreferences mSP;
     private JsonParserInterface jsonParser;
-
-    public SpStorageWorker() {
-        mSP = SpInstance.get();
-    }
 
     public SpStorageWorker(SharedPreferences sharedPreferences) {
         mSP = sharedPreferences;
     }
 
     public SpStorageWorker(String name) {
-        mSP = AppContext.get().getSharedPreferences(name, Context.MODE_PRIVATE);
+        mSP = CentralManager.getAppContext().getSharedPreferences(name, Context.MODE_PRIVATE);
     }
 
     public void put(@NonNull String key, Object value) {
@@ -163,7 +157,7 @@ public class SpStorageWorker implements IStorageManager<String> {
 
     protected JsonParserInterface getJsonParser() {
         if (jsonParser == null) {
-            jsonParser = GlobalConfigImpl.get().getGlobalInstance(JsonParserInterface.class);
+            jsonParser = CentralManager.getInstance(JsonParserInterface.class);
         }
         return jsonParser;
     }

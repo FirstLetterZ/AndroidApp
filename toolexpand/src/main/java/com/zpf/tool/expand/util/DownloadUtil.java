@@ -11,7 +11,7 @@ import android.net.Uri;
 
 import com.zpf.api.OnDataResultListener;
 import com.zpf.api.OnProgressListener;
-import com.zpf.tool.config.MainHandler;
+import com.zpf.tool.global.CentralManager;
 
 /**
  * @author Created by ZPF on 2021/2/19.
@@ -96,7 +96,7 @@ public class DownloadUtil {
             loadState[0] = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
             loadState[1] = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
             loadState[2] = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS));
-            MainHandler.runOnMainTread(stateCallback);
+            CentralManager.runOnMainTread(stateCallback);
         }
         if (c != null && !c.isClosed()) {
             c.close();
@@ -120,7 +120,7 @@ public class DownloadUtil {
             default: {
                 if (current != lastDown) {
                     lastDown = current;
-                    downloadListener.onChanged(total, current);
+                    downloadListener.onProgress(total, current);
                 }
             }
         }

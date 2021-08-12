@@ -7,7 +7,7 @@ import com.zpf.api.IStorageChangedListener;
 import com.zpf.api.IStorageManager;
 import com.zpf.api.IStorageQueue;
 import com.zpf.api.dataparser.JsonParserInterface;
-import com.zpf.tool.config.GlobalConfigImpl;
+import com.zpf.tool.global.CentralManager;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -99,8 +99,7 @@ public class CacheMap {
                     //
                 }
             } else {
-                JsonParserInterface jsonParser =
-                        GlobalConfigImpl.get().getGlobalInstance(JsonParserInterface.class);
+                JsonParserInterface jsonParser = CentralManager.getInstance(JsonParserInterface.class);
                 if (jsonParser != null) {
                     try {
                         result = jsonParser.fromJson(value, cls);
@@ -140,8 +139,7 @@ public class CacheMap {
                     //
                 }
             } else {
-                JsonParserInterface jsonParser =
-                        GlobalConfigImpl.get().getGlobalInstance(JsonParserInterface.class);
+                JsonParserInterface jsonParser = CentralManager.getInstance(JsonParserInterface.class);
                 if (jsonParser != null) {
                     try {
                         result = jsonParser.fromJson(value, defaultValue.getClass());
@@ -169,8 +167,7 @@ public class CacheMap {
                     //
                 }
             } else {
-                JsonParserInterface jsonParser =
-                        GlobalConfigImpl.get().getGlobalInstance(JsonParserInterface.class);
+                JsonParserInterface jsonParser = CentralManager.getInstance(JsonParserInterface.class);
                 if (jsonParser != null) {
                     result = jsonParser.fromJsonList(value, cls);
                     if (result != null && result.size() > 0) {

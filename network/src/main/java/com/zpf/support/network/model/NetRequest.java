@@ -7,7 +7,7 @@ import com.zpf.support.network.base.ErrorCode;
 import com.zpf.support.network.base.ILocalCacheManager;
 import com.zpf.support.network.base.OnLoadingListener;
 import com.zpf.support.network.base.OnResponseListener;
-import com.zpf.tool.config.MainHandler;
+import com.zpf.tool.global.CentralManager;
 
 public abstract class NetRequest<T> implements OnDestroyListener, ICancelable {
     protected boolean destroyed = false;
@@ -25,7 +25,7 @@ public abstract class NetRequest<T> implements OnDestroyListener, ICancelable {
 
     protected void notifyLoading(final boolean loading) {
         if (responseListener instanceof OnLoadingListener) {
-            MainHandler.runOnMainTread(new Runnable() {
+            CentralManager.runOnMainTread(new Runnable() {
                 @Override
                 public void run() {
                     if (responseListener instanceof OnLoadingListener) {
@@ -38,7 +38,7 @@ public abstract class NetRequest<T> implements OnDestroyListener, ICancelable {
 
     protected void notifyResponse(final boolean success, final int code, final T data, final String msg) {
         if (responseListener != null) {
-            MainHandler.runOnMainTread(new Runnable() {
+            CentralManager.runOnMainTread(new Runnable() {
                 @Override
                 public void run() {
                     if (responseListener != null) {
