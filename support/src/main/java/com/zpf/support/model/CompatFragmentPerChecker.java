@@ -11,7 +11,7 @@ import java.lang.ref.WeakReference;
 /**
  * @author Created by ZPF on 2021/8/13.
  */
-public class CompatFragmentPermissionChecker implements IPermissionChecker {
+public class CompatFragmentPerChecker implements IPermissionChecker {
     private WeakReference<Fragment> mReference;
 
     @Override

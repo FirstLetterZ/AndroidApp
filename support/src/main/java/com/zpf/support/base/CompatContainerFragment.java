@@ -29,7 +29,7 @@ import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewStateListener;
 import com.zpf.support.R;
 import com.zpf.support.constant.ContainerType;
-import com.zpf.support.model.CompatFragmentPermissionChecker;
+import com.zpf.support.model.CompatFragmentPerChecker;
 import com.zpf.support.single.base.CompatSinglePageActivity;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
@@ -47,7 +47,7 @@ import java.lang.reflect.Type;
  */
 public class CompatContainerFragment extends Fragment implements IViewContainer, IViewStateListener, OnActivityResultListener {
    static {
-       PermissionManager.get().addChecker(Fragment.class,new CompatFragmentPermissionChecker());
+       PermissionManager.get().addChecker(Fragment.class,new CompatFragmentPerChecker());
    }
     protected final ContainerListenerController mController = new ContainerListenerController();
     private ILoadingManager loadingManager;
