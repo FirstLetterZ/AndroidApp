@@ -6,27 +6,24 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
-import com.zpf.api.IPermissionResult;
 import com.zpf.api.OnAttachListener;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.INavigator;
+import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewLinker;
 import com.zpf.frame.IViewProcessor;
-import com.zpf.frame.IViewContainer;
 import com.zpf.support.R;
 import com.zpf.support.constant.ContainerType;
-import com.zpf.tool.permission.PermissionChecker;
 import com.zpf.tool.stack.LifecycleState;
 
 import java.lang.reflect.Type;
@@ -325,28 +322,6 @@ public class ProxyContainer extends Fragment implements IViewContainer {
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         checkVisibleChange(isVisibleToUser);
-    }
-
-    @Override
-    public boolean checkPermissions(String... permissions) {
-        return mController.getFragmentPermissionChecker().checkPermissions(this, permissions);
-    }
-
-    @Override
-    public boolean checkPermissions(int requestCode, String... permissions) {
-        return mController.getFragmentPermissionChecker().checkPermissions(this, requestCode, permissions);
-    }
-
-    @Override
-    public void checkPermissions(IPermissionResult permissionResult, String... permissions) {
-        mController.getFragmentPermissionChecker().checkPermissions(
-                this, PermissionChecker.REQ_PERMISSION_CODE, permissionResult, permissions);
-    }
-
-    @Override
-    public void checkPermissions(IPermissionResult permissionResult, int requestCode, String... permissions) {
-        mController.getFragmentPermissionChecker().checkPermissions(
-                this, requestCode, permissionResult, permissions);
     }
 
     @Override

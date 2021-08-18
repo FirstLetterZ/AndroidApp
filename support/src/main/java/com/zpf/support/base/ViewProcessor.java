@@ -4,43 +4,44 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.CallSuper;
-import androidx.annotation.IdRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
+import androidx.annotation.CallSuper;
+import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
-import com.zpf.api.IEvent;
-import com.zpf.api.IEventManager;
-import com.zpf.api.IFunction1;
 import com.zpf.api.ILayoutId;
 import com.zpf.api.IManager;
-import com.zpf.api.IPermissionResult;
+import com.zpf.api.IReceiver;
+import com.zpf.api.ITransRecord;
 import com.zpf.api.IconText;
 import com.zpf.frame.IRootLayout;
 import com.zpf.frame.ITitleBar;
+import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewLinker;
+import com.zpf.frame.IViewProcessor;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.model.ContainerNavigator;
-import com.zpf.support.model.SimpleEvent;
 import com.zpf.support.model.IconTextEntry;
 import com.zpf.support.model.TitleBarEntry;
-import com.zpf.support.view.ContainerRootLayout;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.PermissionUtil;
+import com.zpf.support.view.ContainerRootLayout;
 import com.zpf.tool.SafeClickListener;
-import com.zpf.frame.IViewProcessor;
-import com.zpf.frame.IViewContainer;
-import com.zpf.tool.config.GlobalConfigImpl;
-import com.zpf.tool.permission.PermissionDescription;
+import com.zpf.tool.expand.event.EventManager;
+import com.zpf.tool.expand.event.IEvent;
+import com.zpf.tool.expand.event.SimpleEvent;
+import com.zpf.tool.global.CentralManager;
+import com.zpf.tool.permission.PermissionManager;
+import com.zpf.tool.permission.interfaces.IPermissionResultListener;
+import com.zpf.tool.permission.model.PermissionDescription;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -60,7 +61,22 @@ public class ViewProcessor implements IViewProcessor {
             ViewProcessor.this.onClick(v);
         }
     };
-    protected IEventManager eventManager;
+
+    protected final IReceiver<IEvent> receiver = new IReceiver<IEvent>() {
+
+        @NonNull
+        @Override
+        public String name() {
+            return getClass().getName();
+        }
+
+        @Override
+        public void onReceive(@NonNull IEvent event, @NonNull ITransRecord record) {
+            if (living()) {
+                handleEvent(event, record);
+            }
+        }
+    };
 
     public ViewProcessor() {
         this.mContainer = ContainerController.mInitingViewContainer;
@@ -92,25 +108,15 @@ public class ViewProcessor implements IViewProcessor {
     @Override
     @CallSuper
     public void onDestroy() {
-        if (eventManager != null) {
-            eventManager.unregister(getClass().getName());
-        }
+        EventManager.get().unregister(receiver.name());
     }
 
     @Override
     @CallSuper
     public void onCreate(@Nullable Bundle savedInstanceState) {
         bindTitleBar(mRootLayout);
-        GlobalConfigImpl.get().onObjectInit(this);
-        eventManager = GlobalConfigImpl.get().getGlobalInstance(IEventManager.class);
-        if (eventManager != null) {
-            eventManager.register(getClass().getName(), new IFunction1<IEvent<?>>() {
-                @Override
-                public void func(IEvent<?> iEvent) {
-                    handleEvent(iEvent);
-                }
-            });
-        }
+        CentralManager.onObjectInit(this);
+        EventManager.get().register(receiver);
     }
 
     @Override
@@ -180,10 +186,9 @@ public class ViewProcessor implements IViewProcessor {
 
     @Override
     public void runWithPermission(final Runnable runnable, String... permissions) {
-        mContainer.checkPermissions(new IPermissionResult() {
+        PermissionManager.get().checkPermission(mContainer, 0, new IPermissionResultListener() {
             @Override
-            public void onPermissionChecked(boolean formResult, int requestCode,
-                                            String[] requestPermissions, @Nullable List<String> missPermissions) {
+            public void onPermissionChecked(boolean formResult, int requestCode, String[] requestPermissions, @Nullable List<String> missPermissions) {
                 if (missPermissions == null || missPermissions.size() == 0) {
                     runnable.run();
                 } else {
@@ -192,11 +197,6 @@ public class ViewProcessor implements IViewProcessor {
                 }
             }
         }, permissions);
-    }
-
-
-    public void runWithPermission(IPermissionResult result, String... permissions) {
-        mContainer.checkPermissions(result, permissions);
     }
 
     public <T extends View> T bind(@IdRes int viewId) {
@@ -245,9 +245,8 @@ public class ViewProcessor implements IViewProcessor {
         return mContainer.getContext();
     }
 
-    @Override
-    public boolean handleEvent(IEvent<?> event) {
-        return !living();
+    protected void handleEvent(IEvent event, ITransRecord record) {
+
     }
 
     @Override
@@ -281,7 +280,7 @@ public class ViewProcessor implements IViewProcessor {
                 rootLayout.getTitleBar().getLeftLayout().setOnClickListener(new SafeClickListener() {
                     @Override
                     public void click(View v) {
-                        handleEvent(new SimpleEvent<>(titleBarEntry.leftLayoutAction));
+                        handleEvent(new SimpleEvent(-1, null, titleBarEntry.leftLayoutAction),null);
                     }
                 });
             }
@@ -289,7 +288,7 @@ public class ViewProcessor implements IViewProcessor {
                 rootLayout.getTitleBar().getRightLayout().setOnClickListener(new SafeClickListener() {
                     @Override
                     public void click(View v) {
-                        handleEvent(new SimpleEvent<>(titleBarEntry.rightLayoutAction));
+                        handleEvent(new SimpleEvent(-1, null, titleBarEntry.rightLayoutAction),null);
                     }
                 });
             }

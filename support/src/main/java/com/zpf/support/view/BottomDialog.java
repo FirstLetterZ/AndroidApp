@@ -4,12 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -21,10 +15,16 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TextView;
 
-import com.zpf.tool.expand.view.CustomDialog;
-import com.zpf.support.R;
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.zpf.api.OnItemClickListener;
+import com.zpf.support.R;
 import com.zpf.tool.SafeClickListener;
+import com.zpf.tool.expand.view.CustomDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -252,7 +252,7 @@ public class BottomDialog extends CustomDialog {
     }
 
     public static class BaseMenuItemInfo implements MenuItemInfo {
-        private String display;
+        private final String display;
 
         public BaseMenuItemInfo(String display) {
             this.display = display;

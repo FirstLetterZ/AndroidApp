@@ -9,7 +9,7 @@ import com.zpf.frame.IContainerHelper;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.base.CompatContainerFragment;
 import com.zpf.support.base.ContainerFragment;
-import com.zpf.tool.config.GlobalConfigImpl;
+import com.zpf.tool.global.CentralManager;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class FragmentHelper {
     public static CompatContainerFragment createCompatFragment(@Nullable Bundle args) {
-        IContainerHelper helper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
+        IContainerHelper helper = CentralManager.getInstance(IContainerHelper.class);
         if (helper != null) {
             IViewContainer container = helper.createFragmentContainer(args);
             if (container instanceof CompatContainerFragment) {
@@ -31,7 +31,7 @@ public class FragmentHelper {
     }
 
     public static ContainerFragment createFragment(@Nullable Bundle args) {
-        IContainerHelper helper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
+        IContainerHelper helper = CentralManager.getInstance(IContainerHelper.class);
         if (helper != null) {
             IViewContainer container = helper.createFragmentContainer(args);
             if (container instanceof ContainerFragment) {
@@ -44,14 +44,14 @@ public class FragmentHelper {
     }
 
     public static android.app.FragmentManager getParentManager(IViewContainer container) {
-        if (container != null && container instanceof android.app.Fragment) {
+        if (container instanceof android.app.Fragment) {
             return ((android.app.Fragment) container).getFragmentManager();
         }
         return null;
     }
 
     public static androidx.fragment.app.FragmentManager getCompatParentManager(IViewContainer container) {
-        if (container != null && container instanceof androidx.fragment.app.Fragment) {
+        if (container instanceof androidx.fragment.app.Fragment) {
             return ((androidx.fragment.app.Fragment) container).getFragmentManager();
         }
         return null;

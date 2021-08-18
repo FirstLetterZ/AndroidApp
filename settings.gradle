@@ -1,10 +1,10 @@
 //include ':aplugin',
 //        ':app',
 include  ':gsonParse',
-        //':binding',
+//        ':binding',
         ':network',
         ':webview',
         ':refresh',
-//        ':support',
+        ':support',
         ':glideutil',
         ':toolexpand'

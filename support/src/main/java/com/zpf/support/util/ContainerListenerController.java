@@ -11,17 +11,14 @@ import com.zpf.api.IBackPressInterceptor;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IFullLifecycle;
 import com.zpf.api.OnActivityResultListener;
+import com.zpf.api.OnDestroyListener;
 import com.zpf.api.OnPermissionResultListener;
 import com.zpf.api.OnTouchKeyListener;
 import com.zpf.frame.ILifecycleMonitor;
 import com.zpf.frame.IViewStateListener;
 import com.zpf.tool.expand.util.CancelableManager;
-import com.zpf.tool.permission.ActivityPermissionChecker;
-import com.zpf.tool.compat.permission.CompatPermissionChecker;
-import com.zpf.tool.permission.FragmentPermissionChecker;
-import com.zpf.tool.permission.PermissionChecker;
 import com.zpf.tool.expand.util.DialogController;
-import com.zpf.api.OnDestroyListener;
+import com.zpf.tool.permission.PermissionManager;
 import com.zpf.tool.stack.LifecycleState;
 
 import java.lang.reflect.Type;
@@ -43,7 +40,6 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
     private CancelableManager mCancelableManager;
     private final List<IFullLifecycle> mLifecycleList = new LinkedList<>();
     private final OnLifecycleStateListener mStateListener = new OnLifecycleStateListener();
-    private PermissionChecker<?> mPermissionChecker;
     private boolean visible = false;
 
     public ContainerListenerController() {
@@ -61,9 +57,7 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (mPermissionChecker != null) {
-            mPermissionChecker.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
+        PermissionManager.get().onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (mPermissionCallBackList != null) {
             for (OnPermissionResultListener listener : mPermissionCallBackList) {
                 listener.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -186,9 +180,6 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
             lifecycle.onDestroy();
         }
         mLifecycleList.clear();
-        if (mPermissionChecker != null) {
-            mPermissionChecker = null;
-        }
     }
 
     @Override
@@ -359,33 +350,6 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
                 listener.onActivityChanged(activity);
             }
         }
-    }
-
-    public ActivityPermissionChecker getActivityPermissionChecker() {
-        if (mPermissionChecker == null) {
-            mPermissionChecker = new ActivityPermissionChecker();
-        } else if (!(mPermissionChecker instanceof ActivityPermissionChecker)) {
-            mPermissionChecker = new ActivityPermissionChecker();
-        }
-        return (ActivityPermissionChecker) mPermissionChecker;
-    }
-
-    public FragmentPermissionChecker getFragmentPermissionChecker() {
-        if (mPermissionChecker == null) {
-            mPermissionChecker = new FragmentPermissionChecker();
-        } else if (!(mPermissionChecker instanceof FragmentPermissionChecker)) {
-            mPermissionChecker = new FragmentPermissionChecker();
-        }
-        return (FragmentPermissionChecker) mPermissionChecker;
-    }
-
-    public CompatPermissionChecker getSupportFragmentPermissionChecker() {
-        if (mPermissionChecker == null) {
-            mPermissionChecker = new CompatPermissionChecker();
-        } else if (!(mPermissionChecker instanceof CompatPermissionChecker)) {
-            mPermissionChecker = new CompatPermissionChecker();
-        }
-        return (CompatPermissionChecker) mPermissionChecker;
     }
 
 }

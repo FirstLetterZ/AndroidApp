@@ -1,13 +1,14 @@
 package com.zpf.support.view;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.zpf.support.R;
 import com.zpf.tool.expand.view.CustomDialog;

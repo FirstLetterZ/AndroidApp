@@ -1,8 +1,6 @@
 package com.zpf.support.view;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.annotation.StyleRes;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -11,14 +9,17 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.zpf.tool.expand.view.CustomDialog;
+import androidx.annotation.NonNull;
+import androidx.annotation.StyleRes;
+
 import com.zpf.support.R;
+import com.zpf.tool.expand.view.CustomDialog;
 
 /**
  * @author ZPF
  * 2018/07/10.
  */
-public class CommonDialog extends CustomDialog {
+public final class CommonDialog extends CustomDialog {
     private ImageView ivIcon;
     private TextView tvMessage;
     private TextView tvCancel;

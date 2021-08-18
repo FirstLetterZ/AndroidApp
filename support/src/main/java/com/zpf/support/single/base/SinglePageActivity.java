@@ -2,20 +2,19 @@ package com.zpf.support.single.base;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
+import androidx.annotation.Nullable;
 
 import com.zpf.frame.IViewProcessor;
 import com.zpf.support.base.ContainerActivity;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
-import com.zpf.support.single.stack.FragmentStackManager;
 import com.zpf.support.single.OnStackEmptyListener;
+import com.zpf.support.single.stack.FragmentStackManager;
 
 /**
  * Created by ZPF on 2019/5/20.
@@ -57,7 +56,7 @@ public class SinglePageActivity extends ContainerActivity {
     @Override
     public void onBackPressed() {
         if (!mController.onInterceptBackPress() && !close()) {
-            fragmentStackManager.poll();
+            fragmentStackManager.pop();
         }
     }
 

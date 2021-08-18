@@ -3,17 +3,16 @@ package com.zpf.support.view.banner;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Scroller;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import com.zpf.api.OnItemViewClickListener;
 import com.zpf.support.R;
@@ -284,13 +283,13 @@ public class BannerPagerView extends ViewPager {
     }
 
     //初始化
-    public void init(BannerViewCreator viewCreator) {
+    public void init(BannerViewCreator creator) {
         pause();
-        this.viewCreator = viewCreator;
-        if (viewCreator == null) {
+        viewCreator = creator;
+        if (creator == null) {
             resetSize(0, false);
         } else {
-            resetSize(viewCreator.getSize(), false);
+            resetSize(creator.getSize(), false);
         }
     }
 

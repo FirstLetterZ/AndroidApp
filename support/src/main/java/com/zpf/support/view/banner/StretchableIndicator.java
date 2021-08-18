@@ -54,12 +54,12 @@ public class StretchableIndicator extends RelativeLayout implements BannerIndica
         LayoutParams dotsParams = new LayoutParams(
                 LayoutParams.WRAP_CONTENT, dotHeight);
         dotsParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
-        this.addView(dotsLayout, dotsParams);
+        addView(dotsLayout, dotsParams);
         indicator = new View(context);  //前方指示点
         indicator.setBackground(dotFront);
         indicatorParams = new LayoutParams(dotWidth, dotHeight);
         indicatorParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
-        this.addView(indicator, indicatorParams);
+        addView(indicator, indicatorParams);
         initDots();
     }
 

@@ -1,25 +1,23 @@
 package com.zpf.support.single.stack;
 
 import android.annotation.TargetApi;
-import android.content.Intent;
-import android.os.Build;
-import android.os.Bundle;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
+import android.os.Build;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-
-import android.text.TextUtils;
 
 import com.zpf.frame.INavigator;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.single.OnStackEmptyListener;
 import com.zpf.support.util.FragmentHelper;
-import com.zpf.tool.config.MainHandler;
+import com.zpf.tool.global.CentralManager;
 import com.zpf.tool.stack.StackElementState;
 
 import java.util.LinkedList;
@@ -45,15 +43,15 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
-    public void push(Class<? extends ViewProcessor> target, Bundle params, int requestCode) {
+    public void push(Class<? extends ViewProcessor> target, Intent params, int requestCode) {
         String tag = target.getName();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         Fragment targetFragment = null;
         if (params == null) {
-            params = new Bundle();
-            params.putSerializable(AppConst.TARGET_VIEW_CLASS, target);
+            params = new Intent();
+            params.putExtra(AppConst.TARGET_VIEW_CLASS, target);
         }
-        params.putInt(AppConst.REQUEST_CODE, requestCode);
+        params.putExtra(AppConst.REQUEST_CODE, requestCode);
         List<Fragment> fragmentList = fragmentManager.getFragments();
         if (fragmentList != null && fragmentList.size() > 0) {
             for (Fragment f : fragmentList) {
@@ -69,10 +67,10 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
             }
         }
         if (targetFragment == null) {
-            targetFragment = FragmentHelper.createFragment(params);
+            targetFragment = FragmentHelper.createFragment(params.getExtras());
             transaction.add(viewId, targetFragment, tag);
         } else {
-            targetFragment.setArguments(params);
+            targetFragment.setArguments(params.getExtras());
         }
         synchronized (stackList) {
             boolean contain = false;
@@ -106,7 +104,7 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
 
     @TargetApi(Build.VERSION_CODES.O)
     @Override
-    public void push(@NonNull Class<? extends ViewProcessor> target, Bundle params) {
+    public void push(@NonNull Class<? extends ViewProcessor> target, Intent params) {
         this.push(target, params, AppConst.DEF_REQUEST_CODE);
     }
 
@@ -117,7 +115,7 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
     }
 
     @Override
-    public void poll(int resultCode, Intent data) {
+    public void pop(int resultCode, Intent data) {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         int pollTime = 0;
         FragmentElementInfo lastElementInfo;
@@ -155,7 +153,7 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
             lastElementInfo.instance.onActivityResult(requestCode, resultCode, data);
         } else {
             final Intent c = data;
-            MainHandler.get().postDelayed(new Runnable() {
+            CentralManager.runDelayed(new Runnable() {
                 @Override
                 public void run() {
                     if (stackList.size() == 0 && emptyListener != null) {
@@ -167,12 +165,35 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
     }
 
     @Override
-    public void poll() {
-        this.poll(AppConst.DEF_RESULT_CODE, null);
+    public void pop() {
+        this.pop(AppConst.DEF_RESULT_CODE, null);
     }
 
     @Override
-    public boolean pollUntil(@NonNull Class<? extends ViewProcessor> target, @Nullable Intent data) {
+    public void popToRoot(@Nullable Intent data) {
+        if (stackList.size() <= 1) {
+            return;
+        }
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        FragmentElementInfo lastElementInfo;
+        synchronized (stackList) {
+            while ((lastElementInfo = stackList.pollLast()) != null) {
+                if (stackList.size() == 0) {
+                    lastElementInfo.instance.onActivityResult(AppConst.POLL_BACK_REQUEST_CODE, AppConst.POLL_BACK_RESULT_CODE, data);
+                    lastElementInfo.state = StackElementState.STACK_TOP;
+                    transaction.show(lastElementInfo.instance);
+                    stackList.add(lastElementInfo);
+                    break;
+                }
+                lastElementInfo.state = StackElementState.STACK_OUTSIDE;
+                transaction.remove(lastElementInfo.instance);
+            }
+        }
+        transaction.commitAllowingStateLoss();
+    }
+
+    @Override
+    public boolean popTo(@NonNull Class<? extends ViewProcessor> target, @Nullable Intent data) {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         FragmentElementInfo lastElementInfo;
         synchronized (stackList) {
@@ -197,7 +218,7 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
             lastElementInfo.instance.onActivityResult(AppConst.POLL_BACK_REQUEST_CODE, AppConst.POLL_BACK_RESULT_CODE, data);
         } else {
             final Intent c = data;
-            MainHandler.get().postDelayed(new Runnable() {
+            CentralManager.runDelayed(new Runnable() {
                 @Override
                 public void run() {
                     if (stackList.size() == 0 && emptyListener != null) {
@@ -210,8 +231,9 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
     }
 
     @Override
-    public boolean pollUntil(@NonNull Class<? extends ViewProcessor> target) {
-        return this.pollUntil(target, null);
+    public void replace(@NonNull Class<? extends ViewProcessor> target, @Nullable Intent params) {
+        this.pop();
+        push(target, params);
     }
 
     @Override
@@ -220,7 +242,7 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
         synchronized (stackList) {
             FragmentElementInfo lastElementInfo = stackList.peekLast();
             if (lastElementInfo != null && TextUtils.equals(lastElementInfo.tag, target.getName())) {
-                poll();
+                pop();
                 result = true;
             } else {
                 for (FragmentElementInfo elementInfo : stackList) {
@@ -238,7 +260,7 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
     static class FragmentElementInfo {
         String tag;
         Fragment instance;
-        Bundle params;
+        Intent params;
         int requestCode;
         int resultCode;
         Intent resultData;

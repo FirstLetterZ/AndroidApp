@@ -2,10 +2,11 @@ package com.zpf.support.single.base;
 
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
+import androidx.annotation.Nullable;
 
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewProcessor;
@@ -13,13 +14,13 @@ import com.zpf.support.base.CompatContainerActivity;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
-import com.zpf.support.single.stack.CompatFragmentStackManager;
 import com.zpf.support.single.OnStackEmptyListener;
+import com.zpf.support.single.stack.CompatFragmentStackManager;
 
 /**
  * Created by ZPF on 2019/5/20.
  */
-public class CompatSinglePageActivity extends CompatContainerActivity {
+public abstract class CompatSinglePageActivity extends CompatContainerActivity {
     private CompatFragmentStackManager fragmentStackManager;
 
     @Override
@@ -56,7 +57,7 @@ public class CompatSinglePageActivity extends CompatContainerActivity {
     @Override
     public void onBackPressed() {
         if (!mController.onInterceptBackPress() && !close()) {
-            fragmentStackManager.poll();
+            fragmentStackManager.pop();
         }
     }
 

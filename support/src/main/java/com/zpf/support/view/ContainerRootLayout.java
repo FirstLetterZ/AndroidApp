@@ -18,8 +18,8 @@ import androidx.annotation.Nullable;
 import com.zpf.frame.IRootLayout;
 import com.zpf.frame.ITitleBar;
 import com.zpf.support.R;
-import com.zpf.tool.ViewUtil;
-import com.zpf.tool.config.GlobalConfigImpl;
+import com.zpf.tool.StatusBarUtil;
+import com.zpf.tool.global.CentralManager;
 
 import java.util.LinkedList;
 
@@ -57,7 +57,7 @@ public class ContainerRootLayout extends ViewGroup implements IRootLayout {
         defStatusBar = new View(context);
         statusBar = defStatusBar;
         super.addView(defStatusBar, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewUtil.getStatusBarHeight(context)));
+                StatusBarUtil.getStatusBarHeight(context)));
         defTitleBar = new TitleBar(context);
         titleBar = defTitleBar;
         super.addView(defTitleBar);
@@ -67,7 +67,7 @@ public class ContainerRootLayout extends ViewGroup implements IRootLayout {
             contentBelowTitle = array.getBoolean(R.styleable.ContainerRootLayout_contentBelowTitle, true);
             array.recycle();
         }
-        GlobalConfigImpl.get().onObjectInit(this);
+        CentralManager.onObjectInit(this);
     }
 
     @Override

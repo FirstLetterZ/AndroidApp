@@ -14,8 +14,8 @@ import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.support.base.CompatContainerActivity;
 import com.zpf.support.constant.AppConst;
-import com.zpf.tool.config.GlobalConfigImpl;
-import com.zpf.tool.config.MainHandler;
+import com.zpf.tool.global.CentralManager;
+import com.zpf.tool.global.MainHandler;
 import com.zpf.tool.stack.AppStackUtil;
 
 /**
@@ -45,12 +45,11 @@ public class ContainerNavigator implements INavigator<Class<? extends IViewProce
         if (viewContainer == null || viewContainer.living()) {
             return;
         }
-        Intent intent;
+        Intent intent = new Intent();
         Class<?> containerClass = null;
         Context context = viewContainer.getContext();
         if (params == null) {
-            intent = new Intent();
-            IContainerHelper helper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
+            IContainerHelper helper = CentralManager.getInstance(IContainerHelper.class);
             if (helper != null) {
                 containerClass = helper.getDefContainerClassByType(viewContainer.getContainerType());
             }
@@ -62,6 +61,7 @@ public class ContainerNavigator implements INavigator<Class<? extends IViewProce
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            intent.replaceExtras(params);
         }
         if (containerClass == null) {
             containerClass = CompatContainerActivity.class;

@@ -1,12 +1,11 @@
 package com.zpf.support.util;
 
 import android.content.Context;
+import android.view.WindowManager;
 
 import com.zpf.api.OnAttachListener;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.support.view.ProgressDialog;
-
-import android.view.WindowManager;
 
 /**
  * loading弹窗管理

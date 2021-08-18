@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.os.Looper;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -16,12 +15,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
-import com.zpf.api.IPermissionResult;
 import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnAttachListener;
 import com.zpf.frame.IContainerHelper;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.INavigator;
+import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewLinker;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.frame.IViewStateListener;
@@ -30,14 +29,11 @@ import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
-import com.zpf.frame.IViewContainer;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.StackAnimUtil;
-import com.zpf.tool.ViewUtil;
-import com.zpf.tool.config.GlobalConfigImpl;
-import com.zpf.tool.config.MainHandler;
+import com.zpf.tool.StatusBarUtil;
 import com.zpf.tool.expand.util.LogUtil;
-import com.zpf.tool.permission.PermissionChecker;
+import com.zpf.tool.global.CentralManager;
 import com.zpf.tool.stack.AppStackUtil;
 import com.zpf.tool.stack.LifecycleState;
 
@@ -271,16 +267,12 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     @Override
     public void show(final ICustomWindow window) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            mController.show(window);
-        } else {
-            MainHandler.get().post(new Runnable() {
-                @Override
-                public void run() {
-                    mController.show(window);
-                }
-            });
-        }
+        CentralManager.runOnMainTread(new Runnable() {
+            @Override
+            public void run() {
+                mController.show(window);
+            }
+        });
     }
 
     @Override
@@ -342,29 +334,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         }
     }
 
-    @Override
-    public boolean checkPermissions(String... permissions) {
-        return mController.getActivityPermissionChecker().checkPermissions(this, permissions);
-    }
-
-    @Override
-    public boolean checkPermissions(int requestCode, String... permissions) {
-        return mController.getActivityPermissionChecker().checkPermissions(this, requestCode, permissions);
-    }
-
-    @Override
-    public void checkPermissions(IPermissionResult permissionResult, String... permissions) {
-        mController.getActivityPermissionChecker().checkPermissions(
-                this, PermissionChecker.REQ_PERMISSION_CODE, permissionResult, permissions);
-    }
-
-    @Override
-    public void checkPermissions(IPermissionResult permissionResult, int requestCode, String... permissions) {
-        mController.getActivityPermissionChecker().checkPermissions(
-                this, requestCode, permissionResult, permissions);
-    }
-
-    @Override
+     @Override
     public Object invoke(String name, Object params) {
         return null;
     }
@@ -384,7 +354,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
             }
         }
         if (isLauncher) {
-            IContainerHelper containerHelper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
+            IContainerHelper containerHelper = CentralManager.getInstance(IContainerHelper.class);
             Class<?> launcherClass = null;
             if (containerHelper != null) {
                 launcherClass = containerHelper.getLaunchProcessorClass(null);
@@ -468,7 +438,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
             //
         }
         if (getParams().getBoolean(AppConst.TARGET_STATUS_TRANSLUCENT, true)) {
-            ViewUtil.setStatusBarTranslucent(getWindow());
+            StatusBarUtil.setStatusBarTranslucent(getWindow());
         }
     }
 

@@ -47,7 +47,6 @@ public class GsonUtil implements JsonParserInterface {
             })
             .create();
     private Gson mGson;
-    private final JsonParser mJsonParser = new JsonParser();
 
     private GsonUtil() {
     }
@@ -93,14 +92,14 @@ public class GsonUtil implements JsonParserInterface {
                 if (object instanceof JsonElement) {
                     jsonElement = (JsonElement) object;
                 } else if (object instanceof Reader) {
-                    jsonElement = mJsonParser.parse((Reader) object);
+                    jsonElement = JsonParser.parseReader((Reader) object);
                 } else if (object instanceof JsonReader) {
-                    jsonElement = mJsonParser.parse((JsonReader) object);
+                    jsonElement = JsonParser.parseReader((JsonReader) object);
                 } else {
-                    jsonElement = mJsonParser.parse(toString(object));
+                    jsonElement = JsonParser.parseString(toString(object));
                 }
                 if (jsonElement != null && !jsonElement.isJsonNull()) {
-                    T eleResult = null;
+                    T eleResult;
                     if (jsonElement.isJsonArray()) {
                         JsonArray array = jsonElement.getAsJsonArray();
                         for (final JsonElement elem : array) {
@@ -242,7 +241,7 @@ public class GsonUtil implements JsonParserInterface {
     }
 
     public JsonElement getJsonElementByName(JsonElement jsonElement, String name) {
-        JsonElement result = new JsonNull();
+        JsonElement result = JsonNull.INSTANCE;
         if (jsonElement != null) {
             if (jsonElement.isJsonObject()) {
                 JsonObject jsonObject = jsonElement.getAsJsonObject();

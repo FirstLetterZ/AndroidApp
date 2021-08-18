@@ -1,6 +1,5 @@
 package com.zpf.support.constant;
 
-
 /**
  * 全局常量
  * Created by ZPF on 2018/6/13.

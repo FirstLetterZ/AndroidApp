@@ -3,35 +3,28 @@ package com.zpf.support.util;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.graphics.Color;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import android.text.TextUtils;
 import android.view.View;
 
-import com.zpf.api.IPermissionResult;
-import com.zpf.support.view.CommonDialog;
-import com.zpf.tool.permission.ActivityPermissionChecker;
-import com.zpf.tool.permission.PermissionChecker;
-import com.zpf.tool.permission.PermissionDescription;
-import com.zpf.tool.permission.PermissionInfo;
-import com.zpf.tool.permission.PermissionManager;
-import com.zpf.tool.config.AppContext;
-import com.zpf.tool.PublicUtil;
+import androidx.annotation.Nullable;
 
-import java.lang.ref.SoftReference;
+import com.zpf.support.view.CommonDialog;
+import com.zpf.tool.PublicUtil;
+import com.zpf.tool.global.CentralManager;
+import com.zpf.tool.permission.PermissionSettingManager;
+import com.zpf.tool.permission.interfaces.IPermissionResultListener;
+import com.zpf.tool.permission.model.PermissionDescription;
+import com.zpf.tool.permission.model.PermissionInfo;
+import com.zpf.tool.stack.AppStackUtil;
+
 import java.util.List;
 
 /**
  * Created by ZPF on 2018/7/26.
  */
-public class PermissionUtil implements IPermissionResult {
-    private final String appName = PublicUtil.getAppName(AppContext.get());
+public class PermissionUtil implements IPermissionResultListener {
+    private final String appName = PublicUtil.getAppName(CentralManager.getAppContext());
     private static volatile PermissionUtil instance;
-    private final PermissionManager permissionManager = new PermissionManager();
-    private final ActivityPermissionChecker activityChecker = new ActivityPermissionChecker();
-    private SoftReference<Activity> softReference = null;
 
     public static PermissionUtil get() {
         if (instance == null) {
@@ -44,53 +37,12 @@ public class PermissionUtil implements IPermissionResult {
         return instance;
     }
 
-    public boolean checkPermission(@NonNull androidx.fragment.app.Fragment fragment, @NonNull String... permission) {
-        Activity activity = fragment.getActivity();
-        if (activity == null) {
-            return false;
-        } else {
-            return checkPermission(activity, permission);
-        }
-    }
-
-    public boolean checkPermission(@NonNull android.app.Fragment fragment, @NonNull String... permission) {
-        Activity activity = fragment.getActivity();
-        if (activity == null) {
-            return false;
-        } else {
-            return checkPermission(activity, permission);
-        }
-    }
-
-    public boolean checkPermission(@NonNull Activity activity, @NonNull String... permission) {
-        softReference = new SoftReference<>(activity);
-        return activityChecker.checkPermissions(activity, PermissionChecker.REQ_PERMISSION_CODE,
-                this, permission);
-    }
-
     @Override
     public void onPermissionChecked(boolean formResult, int requestCode, String[] requestPermissions, @Nullable List<String> missPermissions) {
-        final SoftReference<Activity> activityReference = softReference;
-        softReference = null;
-        if (activityReference != null) {
-            showPermissionRationaleDialog(activityReference.get(), PermissionDescription.get().queryMissInfo(missPermissions));
+        Activity topActivity = AppStackUtil.getTopActivity();
+        if (topActivity != null) {
+            showPermissionRationaleDialog(topActivity, PermissionDescription.get().queryMissInfo(missPermissions));
         }
-    }
-
-    public ActivityPermissionChecker getChecker() {
-        return activityChecker;
-    }
-
-    public PermissionManager getPermissionManager() {
-        return permissionManager;
-    }
-
-    public boolean checkNoticeEnabled(@NonNull Activity activity, DialogInterface.OnDismissListener listener) {
-        boolean isOpen = PermissionChecker.checkNoticeEnabled(activity);
-        if (!isOpen && listener != null) {
-            showHintDialog(activity, listener);
-        }
-        return isOpen;
     }
 
     public void showHintDialog(Activity activity, DialogInterface.OnDismissListener listener) {
@@ -118,7 +70,7 @@ public class PermissionUtil implements IPermissionResult {
             @Override
             public void onClick(View v) {
                 hintDialog.dismiss();
-                permissionManager.jumpToNoticeSetting(v.getContext());
+                PermissionSettingManager.get().jumpToNoticeSetting(v.getContext());
             }
         });
         hintDialog.setOnDismissListener(listener);
@@ -163,14 +115,14 @@ public class PermissionUtil implements IPermissionResult {
         settingDialog.getConfirm().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                permissionManager.jumpToPermissionSetting(v.getContext());
+                PermissionSettingManager.get().jumpToPermissionSetting(v.getContext());
                 settingDialog.dismiss();
             }
         });
         settingDialog.getCancel().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                permissionManager.jumpToAppSetting(v.getContext());
+                PermissionSettingManager.get().jumpToAppSetting(v.getContext());
                 settingDialog.dismiss();
             }
         });

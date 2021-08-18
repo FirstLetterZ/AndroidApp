@@ -48,11 +48,7 @@ public class SimpleSender<T> {
         return true;
     }
 
-    public boolean unregister(IReceiver<T> receiver) {
-        if (receiver == null) {
-            return false;
-        }
-        String name = receiver.name();
+    public boolean unregister(String name) {
         if (name == null || name.length() == 0) {
             return false;
         }

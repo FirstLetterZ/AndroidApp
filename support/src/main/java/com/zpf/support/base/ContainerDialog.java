@@ -5,19 +5,17 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.zpf.api.IBackPressInterceptor;
 import com.zpf.api.ICancelable;
 import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
-import com.zpf.api.IPermissionResult;
 import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnAttachListener;
 import com.zpf.api.OnDestroyListener;
@@ -31,8 +29,8 @@ import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
-import com.zpf.tool.config.MainHandler;
 import com.zpf.tool.expand.util.LogUtil;
+import com.zpf.tool.global.CentralManager;
 import com.zpf.tool.stack.LifecycleState;
 
 import java.lang.reflect.Type;
@@ -270,7 +268,7 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
 
     @Override
     public void show(final ICustomWindow window) {
-        MainHandler.runOnMainTread(new Runnable() {
+        CentralManager.runOnMainTread(new Runnable() {
             @Override
             public void run() {
                 if (mParentContainer != null) {
@@ -333,26 +331,6 @@ public class ContainerDialog extends Dialog implements ICustomWindow, IViewConta
     @Override
     public void showLoading(Object msg) {
         mParentContainer.showLoading(msg);
-    }
-
-    @Override
-    public boolean checkPermissions(String... permissions) {
-        return mParentContainer.checkPermissions(permissions);
-    }
-
-    @Override
-    public boolean checkPermissions(int requestCode, String... permissions) {
-        return mParentContainer.checkPermissions(requestCode, permissions);
-    }
-
-    @Override
-    public void checkPermissions(IPermissionResult permissionResult, String... permissions) {
-        mParentContainer.checkPermissions(permissionResult, permissions);
-    }
-
-    @Override
-    public void checkPermissions(IPermissionResult permissionResult, int requestCode, String... permissions) {
-        mParentContainer.checkPermissions(permissionResult, requestCode, permissions);
     }
 
     @Override

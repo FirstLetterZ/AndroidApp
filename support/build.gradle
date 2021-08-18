@@ -7,21 +7,14 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
     }
-    repositories {
-        flatDir {
-            dirs 'libs'
-        }
-    }
 }
 
 dependencies {
     compileOnly(rootProject.ext.dependencies.appcompat)
     compileOnly(rootProject.ext.dependencies.recyclerview)
-    api(rootProject.ext.dependencies.frame)
-            {
-                exclude(group: 'com.zpf.api')
-            }
     api rootProject.ext.dependencies.api
+    api rootProject.ext.dependencies.frame
+    api rootProject.ext.dependencies.file
     api rootProject.ext.dependencies.appstack
     api rootProject.ext.dependencies.compatPermission
     api rootProject.ext.dependencies.toolExpand

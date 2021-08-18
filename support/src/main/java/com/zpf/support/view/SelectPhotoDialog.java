@@ -5,17 +5,17 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
-import android.text.TextUtils;
-
+import com.zpf.api.OnItemClickListener;
+import com.zpf.file.FileUriUtil;
+import com.zpf.file.FileUtil;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.R;
 import com.zpf.support.util.PhotoUtil;
-import com.zpf.tool.FileUtil;
-import com.zpf.api.OnItemClickListener;
 import com.zpf.tool.PublicUtil;
 import com.zpf.tool.expand.cache.SpUtil;
 
@@ -24,7 +24,6 @@ import java.io.File;
 /**
  * Created by ZPF on 2018/6/22.
  */
-
 public class SelectPhotoDialog extends BottomDialog {
     public static int BOTH = 0;
     public static final String PHOTO_PATH = "photo_path";
@@ -105,16 +104,17 @@ public class SelectPhotoDialog extends BottomDialog {
 
     private void takePhoto() {
         String name = "photoCache" + System.currentTimeMillis() + ".jpg";
-        File photoFile = FileUtil.getFileOrCreate(FileUtil.getCameraCachePath(), name);
+        File photoFile = FileUtil.getFileOrCreate(
+                getContext().getExternalCacheDir().getAbsolutePath() + File.separator + "CameraCache", name);
         SpUtil.put(PHOTO_PATH, photoFile.getAbsolutePath());
         if (viewContainer != null) {
-            PhotoUtil.takePhoto(viewContainer, photoFile.getAbsolutePath(), REQ_CAMERA);
+            PhotoUtil.takePhoto(viewContainer, photoFile, REQ_CAMERA);
         } else if (activity != null) {
-            PhotoUtil.takePhoto(activity, photoFile.getAbsolutePath(), REQ_CAMERA);
+            PhotoUtil.takePhoto(activity, photoFile, REQ_CAMERA);
         } else if (fragment != null) {
-            PhotoUtil.takePhoto(fragment, photoFile.getAbsolutePath(), REQ_CAMERA);
+            PhotoUtil.takePhoto(fragment, photoFile, REQ_CAMERA);
         } else if (compatFragment != null) {
-            PhotoUtil.takePhoto(compatFragment, photoFile.getAbsolutePath(), REQ_CAMERA);
+            PhotoUtil.takePhoto(compatFragment, photoFile, REQ_CAMERA);
         }
     }
 
@@ -138,7 +138,7 @@ public class SelectPhotoDialog extends BottomDialog {
         String path = null;
         if (data != null) {
             Uri uriAlbum = data.getData();
-            path = FileUtil.getPath(getContext(), uriAlbum);
+            path = FileUriUtil.uriToPath(getContext(), uriAlbum);
         }
         if (TextUtils.isEmpty(path)) {
             path = "";

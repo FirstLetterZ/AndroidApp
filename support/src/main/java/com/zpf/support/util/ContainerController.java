@@ -10,13 +10,12 @@ import com.zpf.frame.IContainerHelper;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.support.constant.AppConst;
-import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.expand.util.ClassLoaderImpl;
+import com.zpf.tool.global.CentralManager;
 
 /**
  * Created by ZPF on 2019/3/1.
  */
-
 public class ContainerController {
 
     public static volatile IViewContainer mInitingViewContainer;
@@ -34,7 +33,7 @@ public class ContainerController {
             if (targetClass == null) {
                 String targetClassName = params.getString(AppConst.TARGET_VIEW_CLASS_NAME);
                 if (targetClassName != null) {
-                    IClassLoader classLoader = GlobalConfigImpl.get().getGlobalInstance(IClassLoader.class);
+                    IClassLoader classLoader = CentralManager.getInstance(IClassLoader.class);
                     if (classLoader == null) {
                         classLoader = ClassLoaderImpl.get();
                     }
@@ -50,7 +49,7 @@ public class ContainerController {
             targetViewClass = (Class<? extends IViewProcessor>) targetClass;
         } catch (Exception e) {
             e.printStackTrace();
-            IContainerHelper containerHelper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
+            IContainerHelper containerHelper = CentralManager.getInstance(IContainerHelper.class);
             if (containerHelper != null) {
                 targetViewClass = containerHelper.getErrorProcessorClass(null);
             }
@@ -73,7 +72,7 @@ public class ContainerController {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            IContainerHelper containerHelper = GlobalConfigImpl.get().getGlobalInstance(IContainerHelper.class);
+            IContainerHelper containerHelper = CentralManager.getInstance(IContainerHelper.class);
             if (containerHelper != null) {
                 targetViewClass = containerHelper.getErrorProcessorClass(targetViewClass);
             }
