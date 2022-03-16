@@ -1,19 +1,19 @@
 package com.zpf.app.plugin;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.zpf.api.IClassLoader;
 import com.zpf.api.dataparser.JsonParserInterface;
-import com.zpf.tool.FileUtil;
-import com.zpf.tool.config.AppContext;
-import com.zpf.tool.config.GlobalConfigImpl;
+import com.zpf.file.FileUtil;
 import com.zpf.tool.expand.cache.SpStorageWorker;
 import com.zpf.tool.expand.cache.SpUtil;
 import com.zpf.tool.expand.util.ClassLoaderImpl;
 import com.zpf.tool.expand.util.LogUtil;
+import com.zpf.tool.global.CentralManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,7 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 
-public class PluginController {
+public final class PluginController {
     private final ArrayMap<String, PluginApkBean> pluginInfoMap = new ArrayMap<>();
     private final ArrayMap<String, ClassLoader> pluginClassLoaderMap = new ArrayMap<>();
     private final SpStorageWorker spWorker = SpUtil.get("sp_plugin_config_file");
@@ -44,14 +44,14 @@ public class PluginController {
             pluginApkBean = pluginInfoMap.get(pluginApkName);
         }
         if (pluginApkBean == null) {
-            JsonParserInterface jsonParser = GlobalConfigImpl.get().getGlobalInstance(JsonParserInterface.class);
+            JsonParserInterface jsonParser = CentralManager.getInstance(JsonParserInterface.class);
             if (jsonParser != null) {
                 String fileConfig = spWorker.getString(pluginApkName);
                 if (!TextUtils.isEmpty(fileConfig)) {
                     pluginApkBean = jsonParser.fromJson(fileConfig, PluginApkBean.class);
                 }
                 if (pluginApkBean == null && copyApk(pluginApkName)) {
-                    fileConfig = FileUtil.readAssetFile(AppContext.get(), "plugin/" + pluginApkName + "_config.json");
+                    fileConfig = FileUtil.readAssetFile(CentralManager.getAppContext(), "plugin/" + pluginApkName + "_config.json");
                     pluginApkBean = jsonParser.fromJson(fileConfig, PluginApkBean.class);
                     if (pluginApkBean != null) {
                         ApkInfo apkInfo = new ApkInfo();
@@ -100,8 +100,8 @@ public class PluginController {
             result = ClassLoaderImpl.get().getClass(name);
         } else {
             //初始化加载
-            classLoader = PluginUtil.loadPlugin(AppContext.get(), pluginPath,
-                    FileUtil.getAppCachePath(), AppContext.get().getClassLoader());
+            classLoader = PluginUtil.loadPlugin(CentralManager.getAppContext(), pluginPath,
+                    FileUtil.getAppCachePath(), CentralManager.getAppContext().getClassLoader());
             pluginClassLoaderMap.put(pluginPath, classLoader);
         }
         if (result == null && classLoader != null) {
@@ -172,7 +172,7 @@ public class PluginController {
         InputStream in = null;
         OutputStream out = null;
         try {
-            in = AppContext.get().getAssets().open(assetFileName);
+            in = CentralManager.getAppContext().getAssets().open(assetFileName);
             out = new FileOutputStream(targetFilePath);
             byte[] bytes = new byte[1024];
             int i;

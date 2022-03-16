@@ -44,6 +44,9 @@ android {
     dataBinding {
         enabled = true
     }
+    configurations.all {
+        resolutionStrategy project.unify
+    }
 //    修改资源id
 //    aaptOptions {
 //        additionalParameters '--allow-reserved-package-id','--package-id','0x70'
@@ -51,40 +54,16 @@ android {
 }
 
 dependencies {
-    api project(':support')
+//    api project(':support')
+    api rootProject.ext.dependencies.support
     api project(':refresh')
     api project(':network')
     api rootProject.ext.dependencies.gson
     api rootProject.ext.dependencies.okhttp
     api rootProject.ext.dependencies.retrofit
     api rootProject.ext.dependencies.retrofitGsonConverter
-    api(rootProject.ext.dependencies.appcompat)
-            {
-                exclude group: 'androidx.activity'
-                exclude group: 'androidx.fragment'
-                exclude group: 'androidx.core'
-                exclude group: 'androidx.lifecycle'
-                exclude group: 'androidx.customview'
-            }
-    api(rootProject.ext.dependencies.collection)
-    api(rootProject.ext.dependencies.versionedparcelable)
-    api(rootProject.ext.dependencies.core) {
-        exclude group: 'androidx.arch.core'
-        exclude group: 'androidx.collection'
-        exclude group: 'androidx.lifecycle'
-        exclude group: 'androidx.versionedparcelable'
-    }
-    api(rootProject.ext.dependencies.fragment) {
-        exclude group: 'androidx.core'
-    }
-    api(rootProject.ext.dependencies.recyclerview)
-            {
-                exclude group: 'androidx.annotation'
-                exclude group: 'androidx.core'
-                exclude group: 'androidx.collection'
-                exclude group: 'androidx.lifecycle'
-            }
-//    api rootProject.ext.dependencies.support
+    api rootProject.ext.dependencies.appcompat
+    api rootProject.ext.dependencies.recyclerview
     api rootProject.ext.dependencies.gsonParse
 //    api rootProject.ext.dependencies.network
     api 'androidx.coordinatorlayout:coordinatorlayout:1.1.0'

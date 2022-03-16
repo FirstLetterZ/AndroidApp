@@ -39,9 +39,9 @@ import com.zpf.tool.expand.event.EventManager;
 import com.zpf.tool.expand.event.IEvent;
 import com.zpf.tool.expand.event.SimpleEvent;
 import com.zpf.tool.global.CentralManager;
+import com.zpf.tool.permission.PermissionDescription;
 import com.zpf.tool.permission.PermissionManager;
 import com.zpf.tool.permission.interfaces.IPermissionResultListener;
-import com.zpf.tool.permission.model.PermissionDescription;
 
 import java.lang.reflect.Type;
 import java.util.List;

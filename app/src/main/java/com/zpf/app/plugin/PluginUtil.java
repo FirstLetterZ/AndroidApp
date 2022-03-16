@@ -51,15 +51,17 @@ public class PluginUtil {
     @SuppressLint("SoonBlockedPrivateApi")
     public static int addAssetPath(AssetManager assetManager, String filePath) {
         int index = -1;
+        Object result;
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                index = (int) AssetManager.class.getDeclaredMethod("addAssetPathInternal",
+                result = AssetManager.class.getDeclaredMethod("addAssetPathInternal",
                         String.class, boolean.class, boolean.class)
                         .invoke(assetManager, filePath, false, false);
             } else {
-                index = (int) AssetManager.class.getDeclaredMethod("addAssetPath", String.class)
+                result = AssetManager.class.getDeclaredMethod("addAssetPath", String.class)
                         .invoke(assetManager, filePath);
             }
+            index = (int) result;
         } catch (Exception e) {
             e.printStackTrace();
         }

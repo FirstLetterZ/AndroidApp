@@ -1,26 +1,23 @@
-package com.zpf.refresh.view;
+package com.zpf.views.bounce;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.zpf.refresh.util.HeadFootInterface;
-
 /**
- * Created by ZPF on 2018/11/27.
+ * @author Created by ZPF on 2022/3/15.
  */
-public class HeadFootLayout extends LinearLayout {
+class BothEndsLayout extends LinearLayout {
     protected boolean isFootLayout;
-    private HeadFootInterface headFootInterface;
+    private IBothEndsViewHandler headFootView;
 
-    public HeadFootLayout(Context context) {
+    public BothEndsLayout(Context context) {
         this(context, false);
     }
 
-    public HeadFootLayout(Context context, boolean isFootLayout) {
+    public BothEndsLayout(Context context, boolean isFootLayout) {
         super(context);
         this.isFootLayout = isFootLayout;
         setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -33,13 +30,12 @@ public class HeadFootLayout extends LinearLayout {
         }
     }
 
-    public void setHeadFootInterface(HeadFootInterface headFootInterface) {
-        this.headFootInterface = headFootInterface;
+    public void setContentView(IBothEndsViewHandler bothEndsView) {
+        this.headFootView = bothEndsView;
         removeAllViews();
-        if (headFootInterface != null) {
-            View view = headFootInterface.onCreateView(this, isFootLayout);
+        if (bothEndsView != null) {
+            View view = bothEndsView.onCreateView(this, isFootLayout);
             if (view != null) {
-                view.setBackgroundColor(Color.GREEN);
                 addView(view);
             }
         }
@@ -50,20 +46,20 @@ public class HeadFootLayout extends LinearLayout {
     }
 
     public void changeState(int sate) {
-        if (headFootInterface != null) {
-            headFootInterface.onStateChange(sate);
+        if (headFootView != null) {
+            headFootView.onStateChange(sate);
         }
     }
 
     public void setType(int type) {
-        if (headFootInterface != null) {
-            headFootInterface.onTypeChange(type);
+        if (headFootView != null) {
+            headFootView.onTypeChange(type);
         }
     }
 
     public int getDistHeight() {
-        if (headFootInterface != null) {
-            return headFootInterface.getDistHeight();
+        if (headFootView != null) {
+            return headFootView.getDistHeight();
         }
         return 0;
     }

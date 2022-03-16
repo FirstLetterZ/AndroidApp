@@ -11,9 +11,9 @@ import com.zpf.file.FileUriUtil;
 import com.zpf.frame.IViewContainer;
 import com.zpf.support.R;
 import com.zpf.tool.PublicUtil;
+import com.zpf.tool.permission.PermissionDescription;
 import com.zpf.tool.permission.PermissionManager;
 import com.zpf.tool.permission.interfaces.IPermissionResultListener;
-import com.zpf.tool.permission.model.PermissionDescription;
 
 import java.io.File;
 import java.lang.ref.WeakReference;

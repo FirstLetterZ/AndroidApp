@@ -11,9 +11,9 @@ import androidx.annotation.Nullable;
 import com.zpf.support.view.CommonDialog;
 import com.zpf.tool.PublicUtil;
 import com.zpf.tool.global.CentralManager;
+import com.zpf.tool.permission.PermissionDescription;
 import com.zpf.tool.permission.PermissionSettingManager;
 import com.zpf.tool.permission.interfaces.IPermissionResultListener;
-import com.zpf.tool.permission.model.PermissionDescription;
 import com.zpf.tool.permission.model.PermissionInfo;
 import com.zpf.tool.stack.AppStackUtil;
 

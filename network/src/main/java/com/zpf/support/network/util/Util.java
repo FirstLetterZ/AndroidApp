@@ -37,7 +37,7 @@ public class Util {
                 BufferedSource source = body.source();
                 source.request(Long.MAX_VALUE); // Buffer the entire body.
                 Buffer buffer = source.getBuffer();
-                Charset charset = Util.checkCharset(body.contentType());
+                Charset charset = checkCharset(body.contentType());
                 bodyString = buffer.clone().readString(charset);
             } catch (IOException e) {
                 //

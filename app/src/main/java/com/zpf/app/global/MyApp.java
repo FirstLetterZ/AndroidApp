@@ -2,14 +2,11 @@ package com.zpf.app.global;
 
 import android.app.Application;
 
-import com.zpf.api.IClassLoader;
-import com.zpf.app.plugin.MainClassLoader;
 import com.zpf.tool.PublicUtil;
-import com.zpf.tool.config.GlobalConfigImpl;
 import com.zpf.tool.expand.cache.CacheMap;
 import com.zpf.tool.expand.cache.SpUtil;
-import com.zpf.tool.expand.util.ClassLoaderImpl;
 import com.zpf.tool.expand.util.LogUtil;
+import com.zpf.tool.global.CentralManager;
 import com.zpf.tool.stack.AppStackUtil;
 
 /**
@@ -22,10 +19,8 @@ public class MyApp extends Application {
         if (PublicUtil.isPackageProcess(this)) {
             AppStackUtil.init(this);
             CacheMap.setLocalStorageManager(SpUtil.get());
-            ClassLoaderImpl.get().add(new MainClassLoader());
-            GlobalConfigImpl.get().init(this, new RealGlobalConfig());
-            LogUtil.setLogOut(GlobalConfigImpl.get().isDebug());
-            GlobalConfigImpl.get().getGlobalInstance(IClassLoader.class).getClass("aaa");
+            CentralManager.init(this, new RealGlobalConfig());
+            LogUtil.setLogOut(CentralManager.debuggable());
         }
     }
 }

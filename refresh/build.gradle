@@ -10,25 +10,5 @@ android {
 }
 
 dependencies {
-    compileOnly rootProject.ext.dependencies.api
-    compileOnly(rootProject.ext.dependencies.recyclerview)
-            {
-                exclude group: 'androidx.annotation'
-                exclude group: 'androidx.core'
-                exclude group: 'androidx.arch.core'
-                exclude group: 'androidx.collection'
-                exclude group: 'androidx.lifecycle'
-            }
-    compileOnly rootProject.ext.dependencies.viewPager
-    compileOnly(rootProject.ext.dependencies.collection)
-    compileOnly(rootProject.ext.dependencies.versionedparcelable)
-    compileOnly(rootProject.ext.dependencies.core) {
-        exclude group: 'androidx.arch.core'
-        exclude group: 'androidx.collection'
-        exclude group: 'androidx.lifecycle'
-        exclude group: 'androidx.versionedparcelable'
-    }
-    compileOnly(rootProject.ext.dependencies.fragment){
-        exclude group: 'androidx.core'
-    }
+    compileOnly rootProject.ext.dependencies.annotations
 }

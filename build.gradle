@@ -1,13 +1,13 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.5.0-M1'
+    ext.kotlin_version = '1.5.20'
 
     repositories {
-        google()
-        maven { url "https://jitpack.io" }
         maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
         mavenCentral()
+        google()
+        maven { url "https://jitpack.io" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.2'
@@ -19,10 +19,10 @@ buildscript {
 
 allprojects {
     repositories {
-        google()
-        maven { url "https://jitpack.io" }
         maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
         mavenCentral()
+        google()
+        maven { url "https://jitpack.io" }
     }
 }
 
@@ -33,6 +33,29 @@ ext {
     targetSdkVersion = 29
     versionCode = 1
     versionName = "0.0.1"
+
+    unify = {
+        force 'com.github.bumptech.glide:glide:4.12.0'
+        force 'androidx.appcompat:appcompat:1.3.0'
+        force 'androidx.annotation:annotation:1.2.0'
+        force 'androidx.activity:activity:1.2.3'
+        force 'androidx.arch.core:core-common:2.1.0'
+        force 'androidx.arch.core:core-runtime:2.1.0'
+        force 'androidx.core:core:1.5.0'
+        force 'androidx.collection:collection:1.1.0'
+        force 'androidx.coordinatorlayout:coordinatorlayout:1.1.0'
+        force 'androidx.fragment:fragment:1.3.4'
+        force 'androidx.lifecycle:lifecycle-common:2.3.1'
+        force 'androidx.lifecycle:lifecycle-livedata:2.3.1'
+        force 'androidx.lifecycle:lifecycle-livedata-core:2.3.1'
+        force 'androidx.lifecycle:lifecycle-runtime:2.3.1'
+        force 'androidx.lifecycle:lifecycle-viewmodel:2.3.1'
+        force 'androidx.vectordrawable:vectordrawable:1.1.0'
+        force 'androidx.vectordrawable:vectordrawable-animated:1.1.0'
+        force 'androidx.versionedparcelable:versionedparcelable:1.1.1'
+        force 'androidx.recyclerview:recyclerview:1.2.0'
+        force 'com.google.material:material:1.2.0'
+    }
 
     dependencies = [
             annotations          : 'androidx.annotation:annotation:1.1.0',
@@ -55,7 +78,7 @@ ext {
 //            webview              : 'com.zpf.android:bridgeWebview:2.0.1',
 //            refresh              : 'com.zpf.android:pullRefresh:1.1.0',
             network              : 'io.github.firstletterz:tool-retrofit:0.1.0',
-            support              : 'com.zpf.android:tool-support:1.3.4',
+            support              : 'io.github.firstletterz:support:0.1.0-SNAPSHOT',
             gsonParse            : 'io.github.firstletterz:tool-gson:1.0.1',
 //            glideutil            : 'com.zpf.android:util-glide:1.1.0',
             /* ============================== 项目内依赖工具库 ================================ */

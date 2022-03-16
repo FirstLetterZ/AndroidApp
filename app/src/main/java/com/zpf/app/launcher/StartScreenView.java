@@ -1,19 +1,18 @@
 package com.zpf.app.launcher;
 
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import android.view.View;
-
 import com.zpf.api.ILayoutId;
+import com.zpf.app.R;
 import com.zpf.app.activity.NetView;
 import com.zpf.refresh.util.OnRefreshListener;
 import com.zpf.refresh.util.RefreshLayoutType;
 import com.zpf.refresh.view.LoadLayout;
 import com.zpf.support.base.ViewProcessor;
-import com.zpf.app.R;
-import com.zpf.tool.config.MainHandler;
+import com.zpf.tool.global.MainHandler;
 
 @ILayoutId(value = R.layout.layout_start)
 public class StartScreenView extends ViewProcessor {
