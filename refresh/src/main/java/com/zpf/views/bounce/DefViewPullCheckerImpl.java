@@ -35,6 +35,9 @@ public class DefViewPullCheckerImpl implements IViewPullChecker {
         if (handler != null) {
             return handler.checkPullUp(view);
         }
+        if (view instanceof IViewPullChecker) {
+            return ((IViewPullChecker) view).checkPullUp(view);
+        }
         if (view instanceof WebView) {
             return ViewBorderUtil.isWebViewToBottom((WebView) view);
         }
@@ -56,6 +59,9 @@ public class DefViewPullCheckerImpl implements IViewPullChecker {
         IViewPullChecker handler = handlerHashMap.get(view.getClass());
         if (handler != null) {
             return handler.checkPullDown(view);
+        }
+        if (view instanceof IViewPullChecker) {
+            return ((IViewPullChecker) view).checkPullDown(view);
         }
         if (view instanceof AbsListView) {
             return ViewBorderUtil.isAbsListViewToTop((AbsListView) view);

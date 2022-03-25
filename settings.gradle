@@ -8,3 +8,4 @@ include ':aplugin',
         ':support',
         ':glideutil',
         ':toolexpand'
+include ':rvexpand'

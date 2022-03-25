@@ -16,7 +16,7 @@ public class BounceLayout extends ViewGroup {
     private int type = BounceLayoutType.ONLY_STRETCHY;//当前类型
     private final BothEndsLayout headLayout;
     private final BothEndsLayout footLayout;
-    private View bodyLayout;
+    protected View bodyLayout;
     private float pullY = 0f;//Y轴变化量
     private float lastX = -1f;
     private float lastY = -1f;
@@ -40,7 +40,7 @@ public class BounceLayout extends ViewGroup {
         super(context, attrs, defStyleAttr);
         headLayout = new BothEndsLayout(context);
         footLayout = new BothEndsLayout(context, true);
-        super.setPadding(0, 0, 0, 0);
+        initConfig(context, attrs, defStyleAttr);
     }
 
     @Override
@@ -51,6 +51,10 @@ public class BounceLayout extends ViewGroup {
     @Override
     public void setPaddingRelative(int start, int top, int end, int bottom) {
         //不支持padding
+    }
+
+    protected void initConfig(Context context, AttributeSet attrs, int defStyleAttr) {
+        super.setPadding(0, 0, 0, 0);
     }
 
     @Override
@@ -255,11 +259,22 @@ public class BounceLayout extends ViewGroup {
             case MotionEvent.ACTION_OUTSIDE:
                 lastX = -1;
                 lastY = -1;
-                //根据pullY更新状态
-                if (state == BounceLayoutState.TO_REFRESH &&
+                if (state == BounceLayoutState.REFRESHING) {
+                    if (pullY > (headLayout.getDistHeight() * 0.5f)) {
+                        rollBack(BounceLayoutState.REFRESHING, headLayout.getDistHeight(), 0);
+                    } else {
+                        rollBack(BounceLayoutState.REFRESHING, 0, 0);
+                    }
+                } else if (state == BounceLayoutState.LOADING) {
+                    if (-pullY > (footLayout.getDistHeight() * 0.5f)) {
+                        rollBack(BounceLayoutState.LOADING, -footLayout.getDistHeight(), 0);
+                    } else {
+                        rollBack(BounceLayoutState.LOADING, 0, 0);
+                    }
+                } else if ((state == BounceLayoutState.TO_REFRESH) &&
                         (type == BounceLayoutType.ONLY_PULL_DOWN || type == BounceLayoutType.BOTH_UP_DOWN)) {
                     rollBack(BounceLayoutState.REFRESHING, headLayout.getDistHeight(), 0);
-                } else if (state == BounceLayoutState.TO_LOAD &&
+                } else if ((state == BounceLayoutState.TO_LOAD) &&
                         (type == BounceLayoutType.ONLY_PULL_UP || type == BounceLayoutType.BOTH_UP_DOWN)) {
                     rollBack(BounceLayoutState.LOADING, -footLayout.getDistHeight(), 0);
                 } else {
@@ -283,6 +298,10 @@ public class BounceLayout extends ViewGroup {
 
     public void setListener(OnLoadListener mListener) {
         this.mListener = mListener;
+    }
+
+    public void setBodyLayout(View bodyLayout) {
+        this.bodyLayout = bodyLayout;
     }
 
     public void setHeadAndFoot(IBothEndsViewHandler head, IBothEndsViewHandler foot) {
@@ -355,6 +374,9 @@ public class BounceLayout extends ViewGroup {
     }
 
     private void rollBack(final int endState, final float endY, long delay) {
+        if (rollBackAnimator != null) {
+            rollBackAnimator.cancel();
+        }
         if (pullY == endY) {
             changeState(endState);
             return;
@@ -409,13 +431,14 @@ public class BounceLayout extends ViewGroup {
                 && !(state == BounceLayoutState.TO_REFRESH || state == BounceLayoutState.REFRESHING)) {
             footLayout.changeState(state);
         }
+        int oldState = this.state;
         this.state = state;
         if (state == BounceLayoutState.REFRESHING) {
-            if (mListener != null) {
+            if (oldState != state && mListener != null) {
                 mListener.onRefresh();
             }
         } else if (state == BounceLayoutState.LOADING) {
-            if (mListener != null) {
+            if (oldState != state && mListener != null) {
                 mListener.onLoadMore();
             }
         } else if (state == BounceLayoutState.SUCCEED || state == BounceLayoutState.FAIL) {
