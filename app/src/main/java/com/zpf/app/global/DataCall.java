@@ -1,12 +1,13 @@
 package com.zpf.app.global;
 
-import com.google.gson.Gson;
-import com.zpf.support.network.header.HeaderCarrier;
-import com.zpf.support.network.model.ClientBuilder;
+
+import com.zpf.tool.network.header.HeaderCarrier;
+import com.zpf.tool.network.util.OkHttpNetUtil;
 
 import java.util.HashMap;
 
-import retrofit2.converter.gson.GsonConverterFactory;
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
 
 /**
  * @author Created by ZPF on 2021/3/19.
@@ -17,9 +18,10 @@ public final class DataCall {
     public static synchronized <T> T getApi(Class<T> apiClass) {
         T result = (T) apiMap.get(apiClass);
         if (result == null) {
-            ClientBuilder clientBuilder = ClientBuilder.createDefBuilder(new HeaderCarrier());
-            clientBuilder.retrofitBuilder().addConverterFactory(GsonConverterFactory.create(new Gson()));
-            result = clientBuilder.build("http://api.test.com", apiClass);
+            OkHttpClient.Builder clientBuilder = OkHttpNetUtil.createOkHttpClientBuilder(new HeaderCarrier());
+            Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
+            retrofitBuilder.client(clientBuilder.build()).baseUrl("http://api.test.com");
+            result = retrofitBuilder.build().create(apiClass);
             apiMap.put(apiClass, result);
         }
         return result;

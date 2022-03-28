@@ -1,7 +1,7 @@
 package com.zpf.app.global;
 
 import com.google.gson.JsonElement;
-import com.zpf.support.network.model.ResponseResult;
+import com.zpf.tool.network.model.ResponseResult;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

@@ -7,5 +7,6 @@ include ':aplugin',
         ':refresh',
         ':support',
         ':glideutil',
-        ':toolexpand'
-include ':rvexpand'
+        ':toolexpand',
+        ':rvexpand',
+        ':request'

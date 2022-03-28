@@ -51,6 +51,6 @@ dependencies {
     api(rootProject.ext.dependencies.fragment){
         exclude group: 'androidx.core'
     }
-//    api rootProject.ext.dependencies.support
+    api rootProject.ext.dependencies.rvexpand
     api project(':support')
 }

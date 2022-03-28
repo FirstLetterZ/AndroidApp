@@ -12,14 +12,14 @@ import com.zpf.app.R;
 import com.zpf.app.global.DataCall;
 import com.zpf.app.global.NetApi;
 import com.zpf.support.base.ViewProcessor;
-import com.zpf.support.network.base.INetworkCallCreator;
-import com.zpf.support.network.base.OnLoadingListener;
-import com.zpf.support.network.base.OnResponseListener;
-import com.zpf.support.network.model.MergeRequest;
-import com.zpf.support.network.model.NetRequest;
-import com.zpf.support.network.model.RequestType;
-import com.zpf.support.network.model.ResponseResult;
-import com.zpf.support.network.retrofit.RetrofitRequest;
+import com.zpf.tool.network.base.INetworkCallCreator;
+import com.zpf.tool.network.base.OnLoadingListener;
+import com.zpf.tool.network.base.OnResponseListener;
+import com.zpf.tool.network.model.RequestType;
+import com.zpf.tool.network.model.ResponseResult;
+import com.zpf.tool.network.request.MergeRequest;
+import com.zpf.tool.network.request.NetRequest;
+import com.zpf.tool.network.retrofit.RetrofitRequest;
 
 import retrofit2.Call;
 
