@@ -16,7 +16,7 @@ import com.zpf.tool.network.interceptor.HeaderInterceptor;
 import com.zpf.tool.network.interceptor.NetLogInterceptor;
 import com.zpf.tool.network.model.ResponseResult;
 import com.zpf.tool.global.CentralManager;
-import com.zpf.util.network.R;
+import com.zpf.tool.network.R;
 
 import java.io.File;
 import java.io.FileOutputStream;
