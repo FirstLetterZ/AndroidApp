@@ -3,14 +3,14 @@ package com.zpf.tool.network.request;
 import androidx.annotation.CallSuper;
 
 import com.zpf.api.OnResultListener;
-import com.zpf.tool.network.base.OnLoadResponseListener;
+import com.zpf.tool.network.base.OnRequestListener;
 import com.zpf.tool.network.base.OnLoadingListener;
 import com.zpf.tool.network.base.OnResponseListener;
 
 /**
  * @author Created by ZPF on 2021/3/18.
  */
-final class ProxyResponseListener<T> implements OnLoadResponseListener<T> {
+final class ProxyResponseListener<T> implements OnRequestListener<T> {
     OnResponseListener<T> realListener;
     OnLoadingListener loadingListener;
     OnResultListener resultListener;

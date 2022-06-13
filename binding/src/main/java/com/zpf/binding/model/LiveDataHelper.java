@@ -13,14 +13,14 @@ import java.util.Map;
 public class LiveDataHelper {
     private final HashMap<LiveData<?>, HashSet<Observer<?>>> observerMap = new HashMap<>();
 
-    public LiveDataHelper(IGroup<OnDestroyListener> destroyGroup) {
+    public LiveDataHelper(IGroup destroyGroup) {
         if (destroyGroup != null) {
             destroyGroup.add(new OnDestroyListener() {
                 @Override
                 public void onDestroy() {
                     clearAll();
                 }
-            });
+            }, OnDestroyListener.class);
         }
     }
 

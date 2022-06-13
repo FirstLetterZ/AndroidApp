@@ -1,43 +1,32 @@
-package com.zpf.binding.adapter;
+package com.zpf.tool.expand.adapter;
 
 import android.util.SparseArray;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.databinding.DataBindingUtil;
-import androidx.databinding.ViewDataBinding;
 
 import com.zpf.api.IHolder;
 import com.zpf.api.ItemListAdapter;
 import com.zpf.api.ItemTypeManager;
 import com.zpf.api.ItemViewCreator;
 import com.zpf.api.OnItemClickListener;
-import com.zpf.api.OnItemViewClickListener;
-import com.zpf.binding.holder.BindingViewHolder;
-import com.zpf.binding.interfaces.IBindingListAdapter;
-import com.zpf.binding.interfaces.IBindingViewHolder;
-import com.zpf.binding.interfaces.IModelProcessor;
-import com.zpf.binding.model.BaseViewModel;
-import com.zpf.binding.model.ItemBindingInfo;
-import com.zpf.rvexpand.ItemClickHelper;
+import com.zpf.tool.expand.util.ItemClickHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Created by ZPF on 2021/3/10.
+ * @author Created by ZPF on 2021/3/2.
  */
-public class BaseListAdapter<T, P extends IModelProcessor> extends BaseAdapter implements IBindingListAdapter<T, P> {
-    private final ArrayList<T> dataList = new ArrayList<T>();
+public class ListAdapter<T> extends BaseAdapter implements ItemListAdapter<T> {
+    private final ArrayList<T> dataList = new ArrayList<>();
     private final ItemClickHelper clickHelper = new ItemClickHelper();
-    private ItemViewCreator itemViewCreator = null;
-    private ItemTypeManager itemTypeManager = null;
-    private P itemProcessor = null;
-    private final SparseArray<ItemBindingInfo<P>> typeInfo = new SparseArray<>();
+    private final SparseArray<Object> itemListeners = new SparseArray<>();
+    private ItemViewCreator itemViewCreator;
+    private ItemTypeManager itemTypeManager;
 
     @Override
     public int getCount() {
@@ -61,40 +50,27 @@ public class BaseListAdapter<T, P extends IModelProcessor> extends BaseAdapter i
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         int itemType = getItemViewType(position);
-        ItemBindingInfo<P> bindInfo = typeInfo.get(itemType);
-        Object itemHolder;
-        if (convertView == null) {
-            itemHolder = null;
-        } else {
+        Object itemHolder = null;
+        if (convertView != null) {
             itemHolder = convertView.getTag();
         }
-        if (itemHolder == null) {
-            int bindLayoutId = bindInfo != null ? bindInfo.itemBrId : 0;
-            if (bindLayoutId != 0) {
-                ViewDataBinding itemBinding = DataBindingUtil.inflate(
-                        LayoutInflater.from(parent.getContext()),
-                        bindLayoutId,
-                        parent,
-                        false
-                );
-                itemHolder = new BindingViewHolder(itemBinding.getRoot(), bindLayoutId);
-            } else if (itemViewCreator != null) {
-                itemHolder = itemViewCreator.onCreateView(parent, position, itemType);
+        if (itemHolder == null && itemViewCreator != null) {
+            itemHolder = itemViewCreator.onCreateView(parent, itemType);
+        }
+        View itemView = null;
+        if (itemHolder instanceof IHolder) {
+            IHolder<View> realHolder = (IHolder<View>) itemHolder;
+            Object data = getDataAt(position);
+            itemView = (View) realHolder.getRoot();
+            for (int i = 0; i < itemListeners.size(); i++) {
+                realHolder.onReceiveListener(itemListeners.valueAt(i), itemListeners.keyAt(i));
+            }
+            realHolder.onBindData(data, position);
+            if (itemViewCreator != null) {
+                itemViewCreator.onBindView(realHolder, getItemViewType(position), position, data);
             }
         }
-        View itemView;
-        if (itemHolder instanceof IBindingViewHolder) {
-            Class<? extends BaseViewModel<P>> modelClass = bindInfo != null ? bindInfo.itemModelClass : null;
-            ((IBindingViewHolder) itemHolder).bindModel(modelClass, itemProcessor);
-            ((IBindingViewHolder) itemHolder).bindVariable(getDataAt(position), position);
-            itemView = (View) ((IBindingViewHolder) itemHolder).getRoot();
-        } else if (itemHolder instanceof IHolder) {
-            IHolder<View> realHolder = (IHolder<View>) itemHolder;
-            itemView = (View) realHolder.getRoot();
-            if (itemViewCreator != null) {
-                itemViewCreator.onBindView(realHolder, position, getDataAt(position));
-            }
-        } else {
+        if (itemView == null) {
             itemView = convertView;
         }
         if (itemView != null) {
@@ -102,18 +78,6 @@ public class BaseListAdapter<T, P extends IModelProcessor> extends BaseAdapter i
         }
         clickHelper.bindItemClick(itemView, position);
         return itemView;
-    }
-
-    @Override
-    public IBindingListAdapter<T, P> bindItemByType(int itemType, int itemBrId, int itemViewId, Class<? extends BaseViewModel<P>> itemModelClass) {
-        typeInfo.put(itemType, new ItemBindingInfo<>(itemBrId, itemViewId, itemModelClass));
-        return this;
-    }
-
-    @Override
-    public IBindingListAdapter<T, P> bindProcessor(P processor) {
-        itemProcessor = processor;
-        return this;
     }
 
     @Override
@@ -128,8 +92,8 @@ public class BaseListAdapter<T, P extends IModelProcessor> extends BaseAdapter i
     }
 
     @Override
-    public ItemListAdapter<T> setItemViewClickListener(@Nullable OnItemViewClickListener itemViewClickListener) {
-        clickHelper.itemViewClickListener = itemViewClickListener;
+    public ItemListAdapter<T> addItemListener(int type, @Nullable Object listener) {
+        itemListeners.put(type, listener);
         return this;
     }
 

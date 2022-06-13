@@ -5,11 +5,12 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 
-import com.zpf.frame.IShadowLine;
 import com.zpf.support.R;
 import com.zpf.tool.PublicUtil;
+import com.zpf.views.LinearShadowLine;
+import com.zpf.views.type.IShadowLine;
 
-public class ShadowRootLayout extends ContainerRootLayout {
+public class ShadowRootLayout extends PhonePageLayout {
     private LinearShadowLine linearShadowLine;
 
     public ShadowRootLayout(Context context) {
@@ -22,16 +23,7 @@ public class ShadowRootLayout extends ContainerRootLayout {
 
     public ShadowRootLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-    }
-
-    @Override
-    protected void initConfig(Context context, AttributeSet attrs) {
-        linearShadowLine = new LinearShadowLine(context);
-        linearShadowLine.setElevation(2);
-        linearShadowLine.setShadowColor(PublicUtil.getColor(R.color.bottom_shadow));
-        addContentDecoration(linearShadowLine, -1, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-        super.initConfig(context, attrs);
+        addDecoration(linearShadowLine);
     }
 
     public IShadowLine getShadowLine() {

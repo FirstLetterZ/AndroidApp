@@ -1,11 +1,8 @@
 package com.zpf.tool.network.model;
-
-import android.os.Handler;
-import android.os.Looper;
-
 import androidx.annotation.NonNull;
 
 import com.zpf.api.OnProgressListener;
+import com.zpf.tool.global.MainHandler;
 
 import java.io.IOException;
 
@@ -23,14 +20,12 @@ import okio.Source;
  */
 public class ProgressResponseBody extends ResponseBody {
     private final ResponseBody responseBody;
-    private final Handler myHandler;
     private BufferedSource bufferedSource;
     private final OnProgressListener mListener;
 
     public ProgressResponseBody(ResponseBody responseBody, OnProgressListener listener) {
         this.responseBody = responseBody;
         mListener = listener;
-        myHandler = new Handler(Looper.getMainLooper());
     }
 
     @Override
@@ -60,11 +55,11 @@ public class ProgressResponseBody extends ResponseBody {
             public long read(@NonNull Buffer sink, long byteCount) throws IOException {
                 long bytesRead = super.read(sink, byteCount);
                 bytesReaded += bytesRead == -1 ? 0 : bytesRead;
-                myHandler.post(new Runnable() {
+                MainHandler.get().post(new Runnable() {
                     @Override
                     public void run() {
                         if (mListener != null) {
-                            mListener.onProgress(contentLength(), bytesReaded);
+                            mListener.onProgress(contentLength(), bytesReaded, null);
                         }
                     }
                 });

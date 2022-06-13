@@ -11,21 +11,22 @@ import java.util.List;
 /**
  * Created by ZPF on 2018/4/16.
  */
-public class LogUtil implements ILogger {
+public class Logger implements ILogger {
     private boolean logOut = false;
     private final List<ILogger> realLoggerList = new LinkedList<>();
     private int logPriority = -99;
     private static String TAG = "AppLogUtil";
-    private static volatile LogUtil mInstance;
+    private static volatile Logger mInstance;
+    private static final int MAX_LEN = 2000;
 
-    public LogUtil() {
+    private Logger() {
     }
 
-    private static LogUtil get() {
+    public static Logger get() {
         if (mInstance == null) {
-            synchronized (LogUtil.class) {
+            synchronized (Logger.class) {
                 if (mInstance == null) {
-                    mInstance = new LogUtil();
+                    mInstance = new Logger();
                 }
             }
         }
@@ -77,31 +78,34 @@ public class LogUtil implements ILogger {
     }
 
     public static void setTAG(String TAG) {
-        LogUtil.TAG = TAG;
+        Logger.TAG = TAG;
     }
 
     @Override
     public void log(int priority, String tag, String content) {
-        if (get().logOut && priority >= logPriority && content != null) {
+        int realPriority = priority;
+        if (priority > Log.ASSERT) {
+            realPriority = Math.max(Log.VERBOSE, priority % (Log.ASSERT + 1));
+        }
+        if (get().logOut && realPriority >= logPriority && content != null) {
             if (realLoggerList.size() > 0) {
                 if (TextUtils.isEmpty(tag)) {
                     tag = TAG;
                 }
                 for (ILogger logger : realLoggerList) {
-                    logger.log(priority, tag, content);
+                    logger.log(realPriority, tag, content);
                 }
             } else {
-                final int maxLen = 2000;
-                if (content.length() > maxLen) {
-                    for (int i = 0; i < content.length(); i += maxLen) {
-                        if (i + maxLen < content.length())
-                            Log.println(priority, tag, content.substring(i, i + maxLen));
+                if (content.length() > MAX_LEN) {
+                    for (int i = 0; i < content.length(); i += MAX_LEN) {
+                        if (i + MAX_LEN < content.length())
+                            Log.println(realPriority, tag, content.substring(i, i + MAX_LEN));
                         else {
-                            Log.println(priority, tag, content.substring(i));
+                            Log.println(realPriority, tag, content.substring(i));
                         }
                     }
                 } else {
-                    Log.println(priority, tag, content);
+                    Log.println(realPriority, tag, content);
                 }
             }
         }

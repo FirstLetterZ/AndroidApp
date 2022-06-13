@@ -1,5 +1,6 @@
 package com.zpf.rvexpand;
 
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -8,12 +9,12 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.zpf.api.IHolder;
+import com.zpf.api.Identification;
 import com.zpf.api.ItemListAdapter;
 import com.zpf.api.ItemTypeManager;
 import com.zpf.api.ItemViewCreator;
 import com.zpf.api.OnAttachListener;
 import com.zpf.api.OnItemClickListener;
-import com.zpf.api.OnItemViewClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
 
     private final ArrayList<T> dataList = new ArrayList<>();
     private final ItemClickHelper clickHelper = new ItemClickHelper();
+    private final SparseArray<Object> itemListeners = new SparseArray<>();
     private boolean holderRecyclable = true;
     private ItemViewCreator itemViewCreator;
     private ItemTypeManager itemTypeManager;
@@ -49,7 +51,7 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public void onViewAttachedToWindow(@NonNull RecyclerView.ViewHolder holder) {
-        if(holder instanceof OnAttachListener){
+        if (holder instanceof OnAttachListener) {
             ((OnAttachListener) holder).onAttached();
         }
         super.onViewAttachedToWindow(holder);
@@ -57,7 +59,7 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
-        if(holder instanceof OnAttachListener){
+        if (holder instanceof OnAttachListener) {
             ((OnAttachListener) holder).onDetached();
         }
         super.onViewDetachedFromWindow(holder);
@@ -68,7 +70,7 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         RecyclerView.ViewHolder holder = null;
         if (itemViewCreator != null) {
-            IHolder<View> item = itemViewCreator.onCreateView(parent, -1, viewType);
+            IHolder<View> item = itemViewCreator.onCreateView(parent, viewType);
             if (item instanceof RecyclerView.ViewHolder) {
                 holder = (RecyclerView.ViewHolder) item;
             } else {
@@ -86,12 +88,15 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
         if (holder instanceof EmptyHolder) {
             return;
         }
-        if (holder instanceof IHolder && itemViewCreator != null) {
-            try {
-                IHolder<View> tagHolder = ((IHolder<View>) holder);
-                itemViewCreator.onBindView(tagHolder, position, getDataAt(position));
-            } catch (Exception e) {
-                //
+        if (holder instanceof ItemHolder) {
+            ItemHolder itemHolder = ((ItemHolder) holder);
+            Object data = getDataAt(position);
+            for (int i = 0; i < itemListeners.size(); i++) {
+                itemHolder.onReceiveListener(itemListeners.valueAt(i), itemListeners.keyAt(i));
+            }
+            itemHolder.onBindData(data, position);
+            if (itemViewCreator != null) {
+                itemViewCreator.onBindView(itemHolder, getItemViewType(position), position, data);
             }
         }
         holder.setIsRecyclable(holderRecyclable);
@@ -113,8 +118,9 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
         return this;
     }
 
-    public RecyclerViewAdapter<T> setItemViewClickListener(@Nullable OnItemViewClickListener itemViewClickListener) {
-        clickHelper.itemViewClickListener = itemViewClickListener;
+    @Override
+    public ItemListAdapter<T> addItemListener(int type, @Nullable Object listener) {
+        itemListeners.put(type, listener);
         return this;
     }
 
@@ -169,6 +175,10 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
         if (itemTypeManager != null) {
             return itemTypeManager.getItemType(position);
         }
+        Object itemData = dataList.get(position);
+        if (itemData instanceof ItemTypeManager) {
+            return ((ItemTypeManager) itemData).getItemType(position);
+        }
         return super.getItemViewType(position);
     }
 
@@ -176,6 +186,10 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
     public long getItemId(int position) {
         if (itemTypeManager != null) {
             return itemTypeManager.getItemId(position);
+        }
+        Object itemData = dataList.get(position);
+        if (itemData instanceof ItemTypeManager) {
+            return ((ItemTypeManager) itemData).getItemId(position);
         }
         return super.getItemId(position);
     }
@@ -193,5 +207,4 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
     protected boolean isHolderRecyclable() {
         return holderRecyclable;
     }
-
 }

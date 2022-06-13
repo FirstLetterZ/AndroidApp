@@ -6,8 +6,10 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
+import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.zpf.api.OnItemClickListener;
@@ -24,7 +26,7 @@ import java.io.File;
 /**
  * Created by ZPF on 2018/6/22.
  */
-public class SelectPhotoDialog extends BottomDialog {
+public class SelectPhotoDialog extends BottomMenuDialog {
     public static int BOTH = 0;
     public static final String PHOTO_PATH = "photo_path";
     private int type = BOTH;
@@ -36,7 +38,7 @@ public class SelectPhotoDialog extends BottomDialog {
     private androidx.fragment.app.Fragment compatFragment;
 
     public SelectPhotoDialog(@NonNull IViewContainer viewContainer) {
-        super(viewContainer.getContext());
+        super(viewContainer.getCurrentActivity());
         this.viewContainer = viewContainer;
     }
 
@@ -56,7 +58,6 @@ public class SelectPhotoDialog extends BottomDialog {
         this.compatFragment = fragment;
     }
 
-
     @Override
     protected void initView() {
         super.initView();
@@ -67,7 +68,7 @@ public class SelectPhotoDialog extends BottomDialog {
         setListTextColor(Color.BLACK);
         setItemClickListener(new OnItemClickListener() {
             @Override
-            public void onItemClick(int position) {
+            public void onItemClick(int position, @Nullable View view) {
                 switch (position) {
                     case 0://拍照
                         takePhoto();

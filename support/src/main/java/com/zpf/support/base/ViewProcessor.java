@@ -34,6 +34,7 @@ import com.zpf.support.model.TitleBarEntry;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.PermissionUtil;
 import com.zpf.support.view.ContainerRootLayout;
+import com.zpf.support.view.PhonePageLayout;
 import com.zpf.tool.SafeClickListener;
 import com.zpf.tool.expand.event.EventManager;
 import com.zpf.tool.expand.event.IEvent;
@@ -42,6 +43,7 @@ import com.zpf.tool.global.CentralManager;
 import com.zpf.tool.permission.PermissionDescription;
 import com.zpf.tool.permission.PermissionManager;
 import com.zpf.tool.permission.interfaces.IPermissionResultListener;
+import com.zpf.views.type.ITopBar;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -52,8 +54,8 @@ import java.util.List;
  */
 public class ViewProcessor implements IViewProcessor {
     protected final IViewContainer mContainer;
-    protected final ITitleBar mTitleBar;
-    protected final IRootLayout mRootLayout;
+    protected final ITopBar mTitleBar;
+    protected final PhonePageLayout mRootLayout;
     protected final ContainerNavigator mNavigator;
     protected final SafeClickListener safeClickListener = new SafeClickListener() {
         @Override

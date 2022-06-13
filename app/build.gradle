@@ -44,9 +44,7 @@ android {
     dataBinding {
         enabled = true
     }
-    configurations.all {
-        resolutionStrategy project.unify
-    }
+
 //    修改资源id
 //    aaptOptions {
 //        additionalParameters '--allow-reserved-package-id','--package-id','0x70'
@@ -54,8 +52,8 @@ android {
 }
 
 dependencies {
-//    api project(':support')
-    api rootProject.ext.dependencies.support
+    api project(':support')
+//    api rootProject.ext.dependencies.support
     api project(':refresh')
     api project(':network')
     api rootProject.ext.dependencies.gson

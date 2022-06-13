@@ -11,8 +11,8 @@ import android.widget.Button;
 import com.zpf.api.ILayoutId;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.support.view.CommonDialog;
-import com.zpf.tool.config.AppContext;
-import com.zpf.tool.permission.PermissionChecker;
+//import com.zpf.tool.config.AppContext;
+//import com.zpf.tool.permission.PermissionChecker;
 import com.zpf.tool.toast.ToastUtil;
 import com.zpf.tool.toast.ToastWindow;
 
@@ -26,9 +26,9 @@ public class TestSecondLayout extends ViewProcessor {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (PermissionChecker.checkDrawOverlays(getCurrentActivity())) {
-            ToastUtil.setToaster(new ToastWindow(AppContext.get()));
-        }
+//        if (PermissionChecker.checkDrawOverlays(getCurrentActivity())) {
+//            ToastUtil.setToaster(new ToastWindow(AppContext.get()));
+//        }
         button.setText(R.string.test_text01);
         CommonDialog dialog = new CommonDialog(getContext());
         dialog.getTitle().setVisibility(View.VISIBLE);

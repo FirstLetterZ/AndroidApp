@@ -1,5 +1,6 @@
 package com.zpf.binding.model;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
@@ -9,18 +10,22 @@ import com.zpf.api.IGroup;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.binding.interfaces.IModelProcessor;
 
+import java.lang.reflect.Type;
 import java.util.HashSet;
 
 /**
  * @author Created by ZPF on 2021/3/10.
  */
-public class BaseViewModel<T extends IModelProcessor> extends ViewModel implements IGroup<OnDestroyListener> {
+public class BaseViewModel<T extends IModelProcessor> extends ViewModel implements IGroup {
     protected T mProcessor;
     private final HashSet<OnDestroyListener> mListeners = new HashSet<>();
-
     private volatile boolean destroy = false;
-
     private final LiveDataHelper liveDataHelper = new LiveDataHelper(this);
+
+    public void unsafeSetProcessor(IModelProcessor p) throws ClassCastException {
+        T unsafe = ((T) p);
+        setProcessor(unsafe);
+    }
 
     public void setProcessor(T p) {
         mProcessor = p;
@@ -42,34 +47,9 @@ public class BaseViewModel<T extends IModelProcessor> extends ViewModel implemen
         liveDataHelper.bindObserver(liveData, observer);
     }
 
-    @Override
-    public void add(OnDestroyListener listener) {
-        if (destroy) {
-            return;
-        }
-        mListeners.add(listener);
-    }
-
-    @Override
-    public void remove(OnDestroyListener listener) {
-        if (destroy) {
-            return;
-        }
-        synchronized (mListeners) {
-            mListeners.remove(listener);
-        }
-    }
-
-
-    @Override
-    public int size() {
-        return mListeners.size();
-    }
-
     public void reset() {
         destroy = false;
     }
-
 
     @Override
     public void onCleared() {
@@ -81,5 +61,38 @@ public class BaseViewModel<T extends IModelProcessor> extends ViewModel implemen
         }
         mListeners.clear();
         liveDataHelper.clearAll();
+    }
+
+    @Override
+    public boolean remove(@NonNull Object obj, @Nullable Type asType) {
+        if (destroy) {
+            return false;
+        }
+        if (asType == OnDestroyListener.class && obj instanceof OnDestroyListener) {
+            synchronized (mListeners) {
+                mListeners.remove((OnDestroyListener) obj);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean add(@NonNull Object obj, @Nullable Type asType) {
+        if (destroy) {
+            return false;
+        }
+        if (asType == OnDestroyListener.class && obj instanceof OnDestroyListener) {
+            synchronized (mListeners) {
+                mListeners.add((OnDestroyListener) obj);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int size(@Nullable Type asType) {
+        return mListeners.size();
     }
 }

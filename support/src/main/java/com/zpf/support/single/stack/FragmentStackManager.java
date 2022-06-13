@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import com.zpf.frame.INavigator;
+import com.zpf.api.INavigator;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.single.OnStackEmptyListener;

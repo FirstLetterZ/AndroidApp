@@ -80,8 +80,8 @@ public abstract class NetRequest<T> implements OnDestroyListener, ICancelable {
         return this;
     }
 
-    public NetRequest<T> bindController(IGroup<OnDestroyListener> controller) {
-        controller.add(this);
+    public NetRequest<T> bindController(IGroup controller) {
+        controller.add(this, OnDestroyListener.class);
         return this;
     }
 

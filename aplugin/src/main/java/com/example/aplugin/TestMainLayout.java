@@ -17,7 +17,7 @@ public class TestMainLayout extends ViewProcessor {
 
         @Override
         public void click(View v) {
-            push(TestSecondLayout.class);
+//            push(TestSecondLayout.class);
         }
     };
 

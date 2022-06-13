@@ -8,18 +8,19 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.zpf.api.IBackPressInterceptor;
-import com.zpf.api.ICustomWindow;
 import com.zpf.api.IFullLifecycle;
+import com.zpf.api.IGroup;
 import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnDestroyListener;
 import com.zpf.api.OnPermissionResultListener;
 import com.zpf.api.OnTouchKeyListener;
-import com.zpf.frame.ILifecycleMonitor;
-import com.zpf.frame.IViewStateListener;
+import com.zpf.api.OnViewStateChangedListener;
+import com.zpf.frame.IListenerSet;
+import com.zpf.frame.IViewState;
 import com.zpf.tool.expand.util.CancelableManager;
-import com.zpf.tool.expand.util.DialogController;
 import com.zpf.tool.permission.PermissionManager;
 import com.zpf.tool.stack.LifecycleState;
+import com.zpf.views.window.CustomWindowManagerImpl;
 
 import java.lang.reflect.Type;
 import java.util.LinkedList;
@@ -28,18 +29,20 @@ import java.util.List;
 /**
  * Created by ZPF on 2018/6/28.
  */
-public class ContainerListenerController implements ILifecycleMonitor, IFullLifecycle, OnActivityResultListener,
-        OnPermissionResultListener, OnTouchKeyListener, IBackPressInterceptor, IViewStateListener {
+public class ContainerListenerController implements IListenerSet, IGroup, IViewState {
     private List<OnDestroyListener> mDestroyListenerList;
     private List<OnActivityResultListener> mActivityResultCallBackList;
     private List<OnPermissionResultListener> mPermissionCallBackList;
     private List<IBackPressInterceptor> mBackPressInterceptor;
     private List<OnTouchKeyListener> mTouchKeyListener;
-    private List<IViewStateListener> mViewStateList;
-    private DialogController mDialogController;
-    private CancelableManager mCancelableManager;
+    private List<OnViewStateChangedListener> mViewStateList;
     private final List<IFullLifecycle> mLifecycleList = new LinkedList<>();
     private final OnLifecycleStateListener mStateListener = new OnLifecycleStateListener();
+
+    private  final Object lock = new Object();
+    private volatile CustomWindowManagerImpl mWindowManager;
+    private volatile CancelableManager mCancelableManager;
+
     private boolean visible = false;
 
     public ContainerListenerController() {
@@ -167,9 +170,9 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
         if (mCancelableManager != null) {
             mCancelableManager.onDestroy();
         }
-        if (mDialogController != null) {
-            mDialogController.onDestroy();
-        }
+//        if (mDialogController != null) {
+//            mDialogController.onDestroy();
+//        }
         if (mDestroyListenerList != null) {
             for (OnDestroyListener listener : mDestroyListenerList) {
                 listener.onDestroy();
@@ -182,152 +185,168 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
         mLifecycleList.clear();
     }
 
-    @Override
-    @LifecycleState
-    public int getState() {
-        return mStateListener.getState();
-    }
 
-    @Override
-    public boolean living() {
-        return mStateListener.getState() >= LifecycleState.BEFORE_CREATE
-                && mStateListener.getState() < LifecycleState.AFTER_DESTROY;
-    }
-
-    @Override
-    public boolean interactive() {
-        return mStateListener.getState() == LifecycleState.AFTER_RESUME;
-    }
-
-    @Override
-    public boolean visible() {
-        return visible;
-    }
-
-    @Override
-    public void show(ICustomWindow window) {
-        if (mDialogController == null) {
-            mDialogController = new DialogController();
-        }
-        window.toBind(mDialogController);
-    }
-
-
-    @Override
-    public boolean close() {
-        if (mDialogController == null) {
-            return false;
-        }
-        return mDialogController.execute(-1);
-    }
-
-    @Override
-    public synchronized CancelableManager getCancelableManager() {
+    //    @Override
+//    public void show(ICustomWindow window) {
+//        if (mDialogController == null) {
+//            mDialogController = new DialogController();
+//        }
+//        window.toBind(mDialogController);
+//    }
+//
+//
+//    @Override
+//    public boolean close() {
+//        if (mDialogController == null) {
+//            return false;
+//        }
+//        return mDialogController.execute(-1);
+//    }
+//
+    public CancelableManager getCancelableManager() {
         if (mCancelableManager == null) {
-            mCancelableManager = new CancelableManager();
+            synchronized (lock) {
+                if (mCancelableManager == null) {
+                    mCancelableManager = new CancelableManager();
+                }
+            }
         }
         return mCancelableManager;
     }
 
+    public CustomWindowManagerImpl getCustomWindowManager() {
+        if (mWindowManager == null) {
+            synchronized (lock) {
+                if (mWindowManager == null) {
+                    mWindowManager = new CustomWindowManagerImpl();
+                }
+            }
+        }
+        return mWindowManager;
+    }
     @Override
-    public boolean addListener(Object listener, @Nullable Type listenerClass) {
+    public boolean add(@NonNull Object listener, @Nullable Type listenerClass) {
         boolean result = false;
-        if (listener != null) {
-            if ((listenerClass == null || listenerClass == IFullLifecycle.class) && listener instanceof IFullLifecycle) {
-                if (mLifecycleList.size() == 0 || !mLifecycleList.contains(listener)) {
-                    mLifecycleList.add((IFullLifecycle) listener);
-                }
-                result = true;
-            } else if ((listenerClass == null || listenerClass == OnDestroyListener.class) && listener instanceof OnDestroyListener) {
-                if (mDestroyListenerList == null) {
-                    mDestroyListenerList = new LinkedList<>();
-                }
-                if (mDestroyListenerList.size() == 0 || !mDestroyListenerList.contains(listener)) {
-                    mDestroyListenerList.add((OnDestroyListener) listener);
-                }
-                result = true;
+        if ((listenerClass == null || listenerClass == IFullLifecycle.class) && listener instanceof IFullLifecycle) {
+            if (mLifecycleList.size() == 0 || !mLifecycleList.contains(listener)) {
+                mLifecycleList.add((IFullLifecycle) listener);
             }
-            if ((listenerClass == null || listenerClass == OnActivityResultListener.class) && listener instanceof OnActivityResultListener) {
-                if (mActivityResultCallBackList == null) {
-                    mActivityResultCallBackList = new LinkedList<>();
-                }
-                if (mActivityResultCallBackList.size() == 0 || !mActivityResultCallBackList.contains(listener)) {
-                    mActivityResultCallBackList.add((OnActivityResultListener) listener);
-                }
-                result = true;
+            result = true;
+        } else if ((listenerClass == null || listenerClass == OnDestroyListener.class) && listener instanceof OnDestroyListener) {
+            if (mDestroyListenerList == null) {
+                mDestroyListenerList = new LinkedList<>();
             }
-            if ((listenerClass == null || listenerClass == OnPermissionResultListener.class) && listener instanceof OnPermissionResultListener) {
-                if (mPermissionCallBackList == null) {
-                    mPermissionCallBackList = new LinkedList<>();
-                }
-                if (mPermissionCallBackList.size() == 0 || !mPermissionCallBackList.contains(listener)) {
-                    mPermissionCallBackList.add((OnPermissionResultListener) listener);
-                }
-                result = true;
+            if (mDestroyListenerList.size() == 0 || !mDestroyListenerList.contains(listener)) {
+                mDestroyListenerList.add((OnDestroyListener) listener);
             }
-            if ((listenerClass == null || listenerClass == IBackPressInterceptor.class) && listener instanceof IBackPressInterceptor) {
-                if (mBackPressInterceptor == null) {
-                    mBackPressInterceptor = new LinkedList<>();
-                }
-                if (mBackPressInterceptor.size() == 0 || !mBackPressInterceptor.contains(listener)) {
-                    mBackPressInterceptor.add((IBackPressInterceptor) listener);
-                }
-                result = true;
+            result = true;
+        }
+        if ((listenerClass == null || listenerClass == OnActivityResultListener.class) && listener instanceof OnActivityResultListener) {
+            if (mActivityResultCallBackList == null) {
+                mActivityResultCallBackList = new LinkedList<>();
             }
-            if ((listenerClass == null || listenerClass == OnTouchKeyListener.class) && listener instanceof OnTouchKeyListener) {
-                if (mTouchKeyListener == null) {
-                    mTouchKeyListener = new LinkedList<>();
-                }
-                if (mTouchKeyListener.size() == 0 || !mTouchKeyListener.contains(listener)) {
-                    mTouchKeyListener.add((OnTouchKeyListener) listener);
-                }
-                result = true;
+            if (mActivityResultCallBackList.size() == 0 || !mActivityResultCallBackList.contains(listener)) {
+                mActivityResultCallBackList.add((OnActivityResultListener) listener);
             }
-            if ((listenerClass == null || listenerClass == IViewStateListener.class) && listener instanceof IViewStateListener) {
-                if (mViewStateList == null) {
-                    mViewStateList = new LinkedList<>();
-                }
-                if (mViewStateList.size() == 0 || !mViewStateList.contains(listener)) {
-                    mViewStateList.add((IViewStateListener) listener);
-                }
-                result = true;
+            result = true;
+        }
+        if ((listenerClass == null || listenerClass == OnPermissionResultListener.class) && listener instanceof OnPermissionResultListener) {
+            if (mPermissionCallBackList == null) {
+                mPermissionCallBackList = new LinkedList<>();
             }
+            if (mPermissionCallBackList.size() == 0 || !mPermissionCallBackList.contains(listener)) {
+                mPermissionCallBackList.add((OnPermissionResultListener) listener);
+            }
+            result = true;
+        }
+        if ((listenerClass == null || listenerClass == IBackPressInterceptor.class) && listener instanceof IBackPressInterceptor) {
+            if (mBackPressInterceptor == null) {
+                mBackPressInterceptor = new LinkedList<>();
+            }
+            if (mBackPressInterceptor.size() == 0 || !mBackPressInterceptor.contains(listener)) {
+                mBackPressInterceptor.add((IBackPressInterceptor) listener);
+            }
+            result = true;
+        }
+        if ((listenerClass == null || listenerClass == OnTouchKeyListener.class) && listener instanceof OnTouchKeyListener) {
+            if (mTouchKeyListener == null) {
+                mTouchKeyListener = new LinkedList<>();
+            }
+            if (mTouchKeyListener.size() == 0 || !mTouchKeyListener.contains(listener)) {
+                mTouchKeyListener.add((OnTouchKeyListener) listener);
+            }
+            result = true;
+        }
+        if ((listenerClass == null || listenerClass == OnViewStateChangedListener.class) && listener instanceof OnViewStateChangedListener) {
+            if (mViewStateList == null) {
+                mViewStateList = new LinkedList<>();
+            }
+            if (mViewStateList.size() == 0 || !mViewStateList.contains(listener)) {
+                mViewStateList.add((OnViewStateChangedListener) listener);
+            }
+            result = true;
         }
         return result;
     }
 
     @Override
-    public boolean removeListener(Object listener, @Nullable Type listenerClass) {
+    public boolean remove(@NonNull Object listener, @Nullable Type listenerClass) {
         boolean result = false;
-        if (listener != null) {
-            if ((listenerClass == null || listenerClass == IFullLifecycle.class) && listener instanceof IFullLifecycle) {
-                result = mLifecycleList.remove(listener);
-            } else if ((listenerClass == null || listenerClass == OnDestroyListener.class) && listener instanceof OnDestroyListener) {
-                result = mDestroyListenerList != null && mDestroyListenerList.remove(listener);
-            }
-            if ((listenerClass == null || listenerClass == OnActivityResultListener.class) && listener instanceof OnActivityResultListener) {
-                result = (mActivityResultCallBackList != null && mActivityResultCallBackList.remove(listener)) || result;
-            }
-            if ((listenerClass == null || listenerClass == OnPermissionResultListener.class) && listener instanceof OnPermissionResultListener) {
-                result = (mPermissionCallBackList != null && mPermissionCallBackList.remove(listener)) || result;
-            }
-            if ((listenerClass == null || listenerClass == IBackPressInterceptor.class) && listener instanceof IBackPressInterceptor) {
-                result = (mBackPressInterceptor != null && mBackPressInterceptor.remove(listener)) || result;
-            }
-            if ((listenerClass == null || listenerClass == OnTouchKeyListener.class) && listener instanceof OnTouchKeyListener) {
-                result = (mTouchKeyListener != null && mTouchKeyListener.remove(listener)) || result;
-            }
-            if ((listenerClass == null || listenerClass == IViewStateListener.class) && listener instanceof IViewStateListener) {
-                result = (mViewStateList != null && mViewStateList.remove(listener)) || result;
-            }
+        if ((listenerClass == null || listenerClass == IFullLifecycle.class) && listener instanceof IFullLifecycle) {
+            result = mLifecycleList.remove(listener);
+        } else if ((listenerClass == null || listenerClass == OnDestroyListener.class) && listener instanceof OnDestroyListener) {
+            result = mDestroyListenerList != null && mDestroyListenerList.remove(listener);
+        }
+        if ((listenerClass == null || listenerClass == OnActivityResultListener.class) && listener instanceof OnActivityResultListener) {
+            result = (mActivityResultCallBackList != null && mActivityResultCallBackList.remove(listener)) || result;
+        }
+        if ((listenerClass == null || listenerClass == OnPermissionResultListener.class) && listener instanceof OnPermissionResultListener) {
+            result = (mPermissionCallBackList != null && mPermissionCallBackList.remove(listener)) || result;
+        }
+        if ((listenerClass == null || listenerClass == IBackPressInterceptor.class) && listener instanceof IBackPressInterceptor) {
+            result = (mBackPressInterceptor != null && mBackPressInterceptor.remove(listener)) || result;
+        }
+        if ((listenerClass == null || listenerClass == OnTouchKeyListener.class) && listener instanceof OnTouchKeyListener) {
+            result = (mTouchKeyListener != null && mTouchKeyListener.remove(listener)) || result;
+        }
+        if ((listenerClass == null || listenerClass == OnViewStateChangedListener.class) && listener instanceof OnViewStateChangedListener) {
+            result = (mViewStateList != null && mViewStateList.remove(listener)) || result;
         }
         return result;
+    }
+
+    @Override
+    public int size(@Nullable Type listenerClass) {
+        if (listenerClass == null) {
+            return 0;
+        }
+        if (listenerClass == IFullLifecycle.class) {
+            return mLifecycleList.size();
+        } else if (listenerClass == OnDestroyListener.class) {
+            return mDestroyListenerList.size();
+        }
+        if (listenerClass == OnActivityResultListener.class) {
+            return mActivityResultCallBackList.size();
+        }
+        if (listenerClass == OnPermissionResultListener.class) {
+            return mPermissionCallBackList.size();
+        }
+        if (listenerClass == IBackPressInterceptor.class) {
+            return mBackPressInterceptor.size();
+        }
+        if (listenerClass == OnTouchKeyListener.class) {
+            return mTouchKeyListener.size();
+        }
+        if (listenerClass == OnViewStateChangedListener.class) {
+            return mViewStateList.size();
+        }
+        return 0;
     }
 
     @Override
     public void onParamChanged(Bundle newParams) {
         if (mViewStateList != null) {
-            for (IViewStateListener listener : mViewStateList) {
+            for (OnViewStateChangedListener listener : mViewStateList) {
                 listener.onParamChanged(newParams);
             }
         }
@@ -337,19 +356,30 @@ public class ContainerListenerController implements ILifecycleMonitor, IFullLife
     public void onVisibleChanged(boolean visible) {
         this.visible = visible;
         if (mViewStateList != null) {
-            for (IViewStateListener listener : mViewStateList) {
+            for (OnViewStateChangedListener listener : mViewStateList) {
                 listener.onVisibleChanged(visible);
             }
         }
     }
 
     @Override
-    public void onActivityChanged(boolean activity) {
-        if (mViewStateList != null) {
-            for (IViewStateListener listener : mViewStateList) {
-                listener.onActivityChanged(activity);
-            }
-        }
+    public int getStateCode() {
+        return mStateListener.getState();
     }
 
+    @Override
+    public boolean isLiving() {
+        return mStateListener.getState() >= LifecycleState.BEFORE_CREATE
+                && mStateListener.getState() < LifecycleState.AFTER_DESTROY;
+    }
+
+    @Override
+    public boolean isInteractive() {
+        return mStateListener.getState() == LifecycleState.AFTER_RESUME;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return visible;
+    }
 }

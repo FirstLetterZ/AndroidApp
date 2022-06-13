@@ -1,15 +1,17 @@
 package com.zpf.support.model;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.zpf.api.IDataCallback;
+import com.zpf.api.INavigator;
 import com.zpf.api.OnActivityResultListener;
 import com.zpf.frame.IContainerHelper;
-import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.support.base.CompatContainerActivity;
@@ -21,7 +23,7 @@ import com.zpf.tool.stack.AppStackUtil;
 /**
  * @author Created by ZPF on 2021/4/2.
  */
-public class ContainerNavigator implements INavigator<Class<? extends IViewProcessor>> {
+public class ContainerNavigator implements INavigator<Class<? extends IViewProcessor>, Intent, Intent> {
 
     private IViewContainer mContainer;
 
@@ -31,18 +33,18 @@ public class ContainerNavigator implements INavigator<Class<? extends IViewProce
 
     @Override
     public void push(@NonNull Class<? extends IViewProcessor> target) {
-        this.push(target, null, AppConst.DEF_REQUEST_CODE);
+        this.push(target, null, null);
     }
 
     @Override
     public void push(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params) {
-        this.push(target, params, AppConst.DEF_REQUEST_CODE);
+        this.push(target, params, null);
     }
 
     @Override
-    public void push(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params, int requestCode) {
+    public void push(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params, @NonNull IDataCallback<Intent> callback) {
         final IViewContainer viewContainer = mContainer;
-        if (viewContainer == null || viewContainer.living()) {
+        if (viewContainer == null || !viewContainer.getState().isLiving()) {
             return;
         }
         Intent intent = new Intent();
@@ -70,7 +72,13 @@ public class ContainerNavigator implements INavigator<Class<? extends IViewProce
         intent.putExtra(AppStackUtil.STACK_ITEM_NAME, target.getName());
         intent.putExtra(AppConst.TARGET_VIEW_CLASS_NAME, target.getName());
         intent.putExtra(AppConst.TARGET_VIEW_CLASS, target);
-        viewContainer.startActivityForResult(intent, requestCode);
+
+        if (viewContainer instanceof Fragment) {
+
+        } else if (viewContainer instanceof androidx.fragment.app.Fragment) {
+
+        }
+        viewContainer.startActivityForResult(intent, AppConst.DEF_REQUEST_CODE);
     }
 
     @Override

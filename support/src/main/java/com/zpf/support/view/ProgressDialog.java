@@ -11,13 +11,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.zpf.support.R;
-import com.zpf.tool.expand.view.CustomDialog;
+import com.zpf.views.window.AbsCustomDialog;
 
 /**
  * 默认的等待弹窗
  * Created by ZPF on 2018/6/14.
  */
-public class ProgressDialog extends CustomDialog {
+public class ProgressDialog extends AbsCustomDialog {
 
     protected TextView textView;
     private long minCancelTime = 3000;//时间内不能被取消

@@ -24,7 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.zpf.api.OnItemClickListener;
 import com.zpf.support.R;
 import com.zpf.tool.SafeClickListener;
-import com.zpf.tool.expand.view.CustomDialog;
+import com.zpf.views.window.AbsCustomDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * Created by ZPF on 2018/6/18.
  */
-public class BottomDialog extends CustomDialog {
+public class BottomMenuDialog extends AbsCustomDialog {
     private TextView tvBottom;
     private LinearLayout rootView;
     private List<MenuItemInfo> menuList;
@@ -42,15 +42,15 @@ public class BottomDialog extends CustomDialog {
     private float density;
     private int rootViewHeight = -1;
 
-    public BottomDialog(@NonNull Context context) {
+    public BottomMenuDialog(@NonNull Context context) {
         super(context);
     }
 
-    public BottomDialog(@NonNull Context context, int themeResId) {
+    public BottomMenuDialog(@NonNull Context context, int themeResId) {
         super(context, themeResId);
     }
 
-    protected BottomDialog(@NonNull Context context, boolean cancelable, @Nullable DialogInterface.OnCancelListener cancelListener) {
+    protected BottomMenuDialog(@NonNull Context context, boolean cancelable, @Nullable DialogInterface.OnCancelListener cancelListener) {
         super(context, cancelable, cancelListener);
     }
 
@@ -218,7 +218,7 @@ public class BottomDialog extends CustomDialog {
                 public void onClick(View v) {
                     dismiss();
                     if (listener != null) {
-                        listener.onItemClick(n);
+                        listener.onItemClick(n, v);
                     }
                 }
             });

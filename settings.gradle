@@ -10,3 +10,24 @@ include ':aplugin',
         ':toolexpand',
         ':rvexpand',
         ':request'
+// Since 6.8
+// https://docs.gradle.org/current/javadoc/org/gradle/api/initialization/resolve/DependencyResolutionManagement.html
+//dependencyResolutionManagement {
+//    configurations.all {
+//        resolutionStrategy project.unify
+//    }
+//    repositories {
+//        maven { url 'https://maven.aliyun.com/repository/central' }
+//        maven { url 'https://maven.aliyun.com/repository/jcenter' }
+//        maven { url 'https://maven.aliyun.com/repository/google' }
+//        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+//        maven { url 'https://maven.aliyun.com/repository/public' }
+//        maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
+//        mavenCentral()
+//        maven { url 'https://jitpack.io' }
+//        google()
+//    }
+//}
+// 查看依赖详情
+//./gradlew app:dependencies
+include ':viewexpand'

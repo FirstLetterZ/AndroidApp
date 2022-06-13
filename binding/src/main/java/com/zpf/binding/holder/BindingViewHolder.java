@@ -1,12 +1,17 @@
 package com.zpf.binding.holder;
 
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
+import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.zpf.binding.interfaces.IBindingViewHolder;
+import com.zpf.api.IHolder;
 import com.zpf.binding.interfaces.IModelProcessor;
 import com.zpf.binding.model.BaseViewModel;
 import com.zpf.binding.model.ViewModelHelper;
@@ -14,56 +19,64 @@ import com.zpf.binding.model.ViewModelHelper;
 /**
  * @author Created by ZPF on 2021/3/10.
  */
-public class BindingViewHolder implements IBindingViewHolder {
+public class BindingViewHolder implements IHolder<View> {
     private final View itemView;
     private final int variableId;
     private boolean lastBindSuccess = false;
     private final ViewDataBinding itemBinder;
     protected BaseViewModel<?> itemViewModel;
-    protected IModelProcessor itemProcessor;
 
-    public BindingViewHolder(View itemView, int variableId) {
-        this.itemView = itemView;
+    //should be override!
+    public BindingViewHolder(@NonNull ViewGroup parent) {
+        this(parent, 0, 0, null);
+    }
+
+    public BindingViewHolder(@NonNull ViewGroup parent, @LayoutRes int layoutId, int variableId,
+                             Class<? extends BaseViewModel<?>> modelClass) {
+        itemBinder = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), layoutId, parent, false);
+        this.itemView = itemBinder.getRoot();
         this.variableId = variableId;
-        itemBinder = DataBindingUtil.getBinding(itemView);
-        LifecycleOwner lifecycleOwner;
-        if (itemBinder != null && (lifecycleOwner = ViewModelHelper.getLifecycleOwner(itemView)) != null) {
-            itemBinder.setLifecycleOwner(lifecycleOwner);
+        LifecycleOwner lifecycleOwner = ViewModelHelper.getLifecycleOwner(itemView);
+        itemBinder.setLifecycleOwner(lifecycleOwner);
+        itemViewModel = createModel(modelClass);
+    }
+
+    protected BaseViewModel<?> createModel(Class<? extends BaseViewModel<?>> modelClass) {
+        if (modelClass == null) {
+            return null;
+        }
+        try {
+            return ViewModelHelper.createModel(
+                    modelClass,
+                    getClass().getName() + "-" + this.hashCode(),
+                    ViewModelHelper.createViewModelProvider(itemView, null),
+                    null
+            );
+        } catch (Exception e) {
+            return null;
         }
     }
 
     @Override
-    public <T extends IModelProcessor> void bindModel(Class<? extends BaseViewModel<T>> modelClass, T processor) {
-        itemProcessor = processor;
-        if (modelClass != null && (itemViewModel == null || itemViewModel.getClass() != modelClass)) {
-            BaseViewModel<T> model = null;
-            try {
-                model = ViewModelHelper.createModel(
-                        modelClass,
-                        getClass().getName() + "-" + this.hashCode(),
-                        ViewModelHelper.createViewModelProvider(itemView, null),
-                        null
-                );
-                model.setProcessor(processor);
-            } catch (Exception e) {
-                //
-            }
-            if (itemViewModel != model) {
-                lastBindSuccess = false;
-            }
-            itemViewModel = model;
-        }
-    }
-
-    @Override
-    public void bindVariable(Object value, int position) {
+    public void onBindData(@Nullable Object data, int position) {
         if (variableId != 0) {
             if (lastBindSuccess) {
-                if (itemViewModel == null || !itemViewModel.update(value)) {
-                    lastBindSuccess = setVariable(variableId, value);
+                if (itemViewModel == null || !itemViewModel.update(data)) {
+                    lastBindSuccess = setVariable(variableId, data);
                 }
             } else {
-                lastBindSuccess = setVariable(variableId, value);
+                lastBindSuccess = setVariable(variableId, data);
+            }
+        }
+    }
+
+    @Override
+    public void onReceiveListener(@Nullable Object listener, int type) {
+        if (itemViewModel != null && listener instanceof IModelProcessor) {
+            try {
+                itemViewModel.unsafeSetProcessor(((IModelProcessor) listener));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

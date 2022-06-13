@@ -20,8 +20,8 @@ public class DownloadUtil {
     private final DownloadManager downloadManager;
     private final Application application;
     private volatile long downloadId;
-    private final int[] loadState = new int[3];
-    private int lastDown = 0;
+    private final long[] loadState = new long[3];
+    private long lastDown = 0;
     private BroadcastReceiver receiver;
     private DownloadListener downloadListener;
     private Thread checkThread;
@@ -48,7 +48,7 @@ public class DownloadUtil {
         request.setDestinationUri(apkUri);
         lastDown = 0;
         loadState[0] = 0;
-        loadState[1] = Integer.MAX_VALUE;
+        loadState[1] = Long.MAX_VALUE;
         loadState[2] = DownloadManager.STATUS_PENDING;
         if (receiver == null) {
             receiver = new BroadcastReceiver() {
@@ -93,9 +93,18 @@ public class DownloadUtil {
     private void queryState() {
         Cursor c = downloadManager.query(new DownloadManager.Query().setFilterById(downloadId));
         if (c != null && c.moveToFirst()) {
-            loadState[0] = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
-            loadState[1] = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-            loadState[2] = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS));
+            int column = c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);
+            if (column > 0) {
+                loadState[0] = c.getLong(column);
+            }
+            column = c.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES);
+            if (column > 0) {
+                loadState[1] = c.getLong(column);
+            }
+            column = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
+            if (column > 0) {
+                loadState[2] = c.getInt(column);
+            }
             CentralManager.runOnMainTread(stateCallback);
         }
         if (c != null && !c.isClosed()) {
@@ -107,9 +116,9 @@ public class DownloadUtil {
         if (downloadListener == null) {
             return;
         }
-        int current = loadState[0];
-        int total = loadState[1];
-        int status = loadState[2];
+        long current = loadState[0];
+        long total = loadState[1];
+        int status = (int) loadState[2];
         switch (status) {
             case DownloadManager.STATUS_SUCCESSFUL: {
                 onComplete();
@@ -120,7 +129,7 @@ public class DownloadUtil {
             default: {
                 if (current != lastDown) {
                     lastDown = current;
-                    downloadListener.onProgress(total, current);
+                    downloadListener.onProgress(total, current, downloadId);
                 }
             }
         }

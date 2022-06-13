@@ -13,13 +13,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
 
 import com.zpf.support.R;
-import com.zpf.tool.expand.view.CustomDialog;
+import com.zpf.views.window.AbsCustomDialog;
 
 /**
  * @author ZPF
  * 2018/07/10.
  */
-public final class CommonDialog extends CustomDialog {
+public final class CommonDialog extends AbsCustomDialog {
     private ImageView ivIcon;
     private TextView tvMessage;
     private TextView tvCancel;

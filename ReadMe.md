@@ -7,17 +7,18 @@ Android工具库
 工具库发布
 ---------
 #### 单项目发布
-> ./gradlew -p XXX clean install bintrayUpload --info
+> ./gradlew -p XXX clean build publish --info
  
 其中 XXX 为 module库名，详细如下表：
 
->./gradlew -p toolexpand clean install bintrayUpload --info
-./gradlew -p glideutil clean install bintrayUpload --info
-./gradlew -p gsonParse clean install bintrayUpload --info
-./gradlew -p refresh clean install bintrayUpload --info
-./gradlew -p webview clean install bintrayUpload --info
-./gradlew -p support clean install bintrayUpload --info
-./gradlew -p network clean install bintrayUpload --info
+>./gradlew -p toolexpand clean build publish --info
+./gradlew -p glideutil clean build publish --info
+./gradlew -p gsonParse clean build publish --info
+./gradlew -p refresh clean build publish --info
+./gradlew -p webview clean build publish --info
+./gradlew -p support clean build publish --info
+./gradlew -p network clean build publish --info
+./gradlew -p rvexpand clean build publish --info
 
 #### 全部发布
 >./gradlew clean install bintrayUpload --info

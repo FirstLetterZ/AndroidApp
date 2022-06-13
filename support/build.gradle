@@ -13,7 +13,8 @@ dependencies {
     compileOnly(rootProject.ext.dependencies.appcompat)
     compileOnly(rootProject.ext.dependencies.recyclerview)
     api rootProject.ext.dependencies.api
-    api rootProject.ext.dependencies.frame
+//    api rootProject.ext.dependencies.frame
+    api rootProject.ext.dependencies.views
     api rootProject.ext.dependencies.file
     api rootProject.ext.dependencies.appstack
     api rootProject.ext.dependencies.compatPermission

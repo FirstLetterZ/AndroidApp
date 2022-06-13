@@ -1,14 +1,15 @@
 package com.zpf.tool.expand.util;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.zpf.api.IClassLoader;
 import com.zpf.api.IGroup;
-import com.zpf.api.OnDestroyListener;
 
+import java.lang.reflect.Type;
 import java.util.HashSet;
 
-public class ClassLoaderImpl implements IClassLoader, IGroup<IClassLoader>, OnDestroyListener {
+public class ClassLoaderImpl implements IClassLoader, IGroup {
     private ClassLoaderImpl() {
     }
 
@@ -23,25 +24,25 @@ public class ClassLoaderImpl implements IClassLoader, IGroup<IClassLoader>, OnDe
     private final HashSet<IClassLoader> mLoaderSet = new HashSet<>();
 
     @Override
-    public void remove(@NonNull IClassLoader classLoader) {
-        mLoaderSet.remove(classLoader);
+    public boolean remove(@NonNull Object obj, @Nullable Type asType) {
+        if (obj instanceof IClassLoader) {
+            return mLoaderSet.remove(((IClassLoader) obj));
+        }
+        return false;
     }
 
     @Override
-    public void add(@NonNull IClassLoader classLoader) {
-        mLoaderSet.add(classLoader);
+    public boolean add(@NonNull Object obj, @Nullable Type asType) {
+        if (obj instanceof IClassLoader) {
+            return mLoaderSet.add(((IClassLoader) obj));
+        }
+        return false;
     }
 
     @Override
-    public int size() {
+    public int size(@Nullable Type asType) {
         return mLoaderSet.size();
     }
-
-    @Override
-    public void onDestroy() {
-        mLoaderSet.clear();
-    }
-
 
     @Override
     public Object newInstance(String name, Object... args) {

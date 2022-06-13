@@ -3,10 +3,10 @@ package com.zpf.tool.network.model;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.zpf.tool.network.R;
 import com.zpf.tool.network.base.BaseCallBack;
 import com.zpf.tool.network.base.ErrorCode;
 import com.zpf.tool.network.util.Util;
-import com.zpf.util.network.R;
 
 import java.io.IOException;
 

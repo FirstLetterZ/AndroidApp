@@ -1,9 +1,12 @@
 package com.zpf.rvexpand;
 
-import android.util.SparseArray;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.zpf.api.IHolder;
@@ -13,16 +16,41 @@ import com.zpf.api.IHolder;
  */
 public class ItemHolder extends RecyclerView.ViewHolder implements IHolder<View> {
     private final IHolder<View> realHolder;
-    private SparseArray<View> viewCache;
 
     public ItemHolder(@NonNull IHolder<View> holder) {
         super((View) holder.getRoot());
         realHolder = holder;
+        initView();
     }
 
     public ItemHolder(@NonNull View itemView) {
         super(itemView);
         realHolder = null;
+        initView();
+    }
+
+    public ItemHolder(@NonNull ViewGroup parent, @LayoutRes int layoutId) {
+        super(LayoutInflater.from(parent.getContext()).inflate(layoutId, parent, false));
+        realHolder = null;
+        initView();
+    }
+
+    protected void initView() {
+
+    }
+
+    @Override
+    public void onBindData(@Nullable Object data, int position) {
+        if (realHolder != null) {
+            realHolder.onBindData(data, position);
+        }
+    }
+
+    @Override
+    public void onReceiveListener(@Nullable Object listener, int type) {
+        if (realHolder != null) {
+            realHolder.onReceiveListener(listener, type);
+        }
     }
 
     @Override
@@ -35,20 +63,7 @@ public class ItemHolder extends RecyclerView.ViewHolder implements IHolder<View>
         if (realHolder != null) {
             return realHolder.findById(id);
         } else {
-            View view;
-            if (viewCache == null) {
-                viewCache = new SparseArray<>();
-                view =null;
-            } else {
-                view = viewCache.get(id);
-            }
-            if (view == null) {
-                view = itemView.findViewById(id);
-            }
-            if (view != null) {
-                viewCache.get(id, view);
-            }
-            return view;
+            return itemView.findViewById(id);
         }
     }
 

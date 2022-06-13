@@ -273,7 +273,7 @@ public class BridgeWebView extends WebView {
                     initJsBridge();
                 }
                 if (progressChangedListener != null) {
-                    progressChangedListener.onProgress(100, newProgress);
+                    progressChangedListener.onProgress(100, newProgress, view);
                 }
                 super.onProgressChanged(view, newProgress);
             }

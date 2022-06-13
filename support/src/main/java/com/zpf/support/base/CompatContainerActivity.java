@@ -8,22 +8,24 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.KeyEvent;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.zpf.api.ICancelable;
-import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
 import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnAttachListener;
 import com.zpf.frame.IContainerHelper;
+import com.zpf.frame.IDisposable;
 import com.zpf.frame.ILoadingManager;
 import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewLinker;
 import com.zpf.frame.IViewProcessor;
-import com.zpf.frame.IViewStateListener;
+import com.zpf.frame.IViewState;
 import com.zpf.support.R;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
@@ -35,7 +37,7 @@ import com.zpf.tool.StatusBarUtil;
 import com.zpf.tool.expand.util.LogUtil;
 import com.zpf.tool.global.CentralManager;
 import com.zpf.tool.stack.AppStackUtil;
-import com.zpf.tool.stack.LifecycleState;
+import com.zpf.views.window.ICustomWindowManager;
 
 import java.lang.reflect.Type;
 
@@ -43,7 +45,7 @@ import java.lang.reflect.Type;
  * 基于AppCompatActivity的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public class CompatContainerActivity extends AppCompatActivity implements IViewContainer, IViewStateListener, OnActivityResultListener {
+public class CompatContainerActivity extends AppCompatActivity implements IViewContainer {
     protected final ContainerListenerController mController = new ContainerListenerController();
     private ILoadingManager loadingManager;
     private Bundle mParams;
@@ -72,7 +74,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         initWindow();
         mViewProcessor = initViewProcessor();
         if (mViewProcessor != null) {
-            mController.addListener(mViewProcessor, null);
+            mController.add(mViewProcessor, null);
             mViewProcessor.initWindow(getWindow());
             setContentView(mViewProcessor.getView());
         } else {
@@ -101,14 +103,12 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     public void onResume() {
         super.onResume();
         mController.onResume();
-        onActivityChanged(true);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mController.onPause();
-        onActivityChanged(false);
     }
 
     @Override
@@ -149,19 +149,15 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        if (outState != null) {
-            mController.onSaveInstanceState(outState);
-        }
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        mController.onSaveInstanceState(outState);
         super.onSaveInstanceState(outState);
     }
 
     @Override
-    public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
+    public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null) {
-            mController.onRestoreInstanceState(savedInstanceState);
-        }
+        mController.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
@@ -197,34 +193,8 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     @Override
-    @LifecycleState
-    public int getState() {
-        return mController.getState();
-    }
-
-    @Override
-    public boolean living() {
-        return mController.living();
-    }
-
-    @Override
-    public boolean interactive() {
-        return mController.interactive();
-    }
-
-    @Override
-    public boolean visible() {
-        return mController.visible();
-    }
-
-    @Override
     public Context getContext() {
         return this;
-    }
-
-    @Override
-    public Intent getIntent() {
-        return super.getIntent();
     }
 
     @Override
@@ -233,51 +203,25 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     @Override
-    public void startActivity(Intent intent) {
-        super.startActivity(intent);
+    public ICustomWindowManager getCustomWindowManager() {
+        return mController.getCustomWindowManager();
     }
 
     @Override
-    public void startActivity(Intent intent, @Nullable Bundle options) {
-        super.startActivity(intent, options);
-    }
-
-    @Override
-    public void startActivities(Intent[] intents) {
-        super.startActivities(intents);
-    }
-
-    @Override
-    public void startActivities(Intent[] intents, @Nullable Bundle options) {
-        super.startActivities(intents, options);
-    }
-
-    @Override
-    public void startActivityForResult(Intent intent, int requestCode) {
-        super.startActivityForResult(intent, requestCode);
-        StackAnimUtil.onPush(this, intent.getIntExtra(AppConst.ANIM_TYPE, 0));
-    }
-
-    @SuppressLint("RestrictedApi")
-    @Override
-    public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
+    public void startActivityForResult(@NonNull Intent intent, int requestCode, @Nullable Bundle options) {
         super.startActivityForResult(intent, requestCode, options);
         StackAnimUtil.onPush(this, intent.getIntExtra(AppConst.ANIM_TYPE, 0));
     }
 
     @Override
-    public void show(final ICustomWindow window) {
-        CentralManager.runOnMainTread(new Runnable() {
-            @Override
-            public void run() {
-                mController.show(window);
-            }
-        });
+    public void startActivityForResult(@NonNull Intent intent, @NonNull final OnActivityResultListener listener) {
+        add(listener, IDisposable.class);
+        super.startActivityForResult(intent, AppConst.DEF_REQUEST_CODE, null);
     }
 
     @Override
     public boolean close() {
-        return loadingManager != null && loadingManager.hideLoading() || mController.close();
+        return loadingManager != null && loadingManager.hideLoading() || mController.getCustomWindowManager().close();
     }
 
     @Override
@@ -286,25 +230,18 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     @Override
-    public boolean addListener(Object listener, @Nullable Type listenerClass) {
-        return mController.addListener(listener, listenerClass);
+    public boolean add(@NonNull Object listener, @Nullable Type listenerClass) {
+        return mController.add(listener, listenerClass);
     }
 
     @Override
-    public boolean removeListener(Object listener, @Nullable Type listenerClass) {
-        return mController.removeListener(listener, listenerClass);
+    public boolean remove(@NonNull Object listener, @Nullable Type listenerClass) {
+        return mController.remove(listener, listenerClass);
     }
 
     @Override
-    public void finishWithResult(int resultCode, Intent data) {
-        setResult(resultCode, data);
-        this.finish();
-    }
-
-    @Override
-    public void finish() {
-        super.finish();
-        StackAnimUtil.onPoll(this, getIntent().getIntExtra(AppConst.ANIM_TYPE, 0));
+    public int size(@Nullable Type listenerClass) {
+        return mController.size(listenerClass);
     }
 
     @Override
@@ -326,7 +263,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     @Override
     public void showLoading(Object message) {
-        if (living()) {
+        if (mController.isInteractive()) {
             if (loadingManager == null) {
                 loadingManager = new LoadingManagerImpl(getContext());
             }
@@ -334,7 +271,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         }
     }
 
-     @Override
+    @Override
     public Object invoke(String name, Object params) {
         return null;
     }
@@ -406,7 +343,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     @Override
-    public INavigator<Class<? extends IViewProcessor>> getNavigator() {
+    public IViewState getState() {
         return null;
     }
 
@@ -418,11 +355,6 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     @Override
     public void onVisibleChanged(boolean visible) {
         mController.onVisibleChanged(visible);
-    }
-
-    @Override
-    public void onActivityChanged(boolean activity) {
-        mController.onActivityChanged(activity);
     }
 
     protected void initTheme(int themeId) {
