@@ -207,10 +207,10 @@ public class OkHttpNetUtil {
         OkHttpClient client = createOkHttpClientBuilder(null)
                 .addNetworkInterceptor(new DownLoadInterceptor(new OnProgressListener() {
                     @Override
-                    public void onProgress(long total, long current) {
+                    public void onProgress(long total, long current, @Nullable Object target) {
                         CacheInfo cacheInfo = cacheMap.get(cacheKey);
                         if (cacheInfo != null && cacheInfo.progressListener != null) {
-                            cacheInfo.progressListener.onProgress(total, current);
+                            cacheInfo.progressListener.onProgress(total, current, target);
                         }
                     }
                 }))

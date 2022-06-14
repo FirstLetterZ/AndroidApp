@@ -2,26 +2,24 @@ package com.example.aplugin;
 
 
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-
 import android.view.View;
 import android.widget.Button;
 
-import com.zpf.api.ILayoutId;
+import androidx.annotation.Nullable;
+
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.support.view.CommonDialog;
-//import com.zpf.tool.config.AppContext;
-//import com.zpf.tool.permission.PermissionChecker;
 import com.zpf.tool.toast.ToastUtil;
-import com.zpf.tool.toast.ToastWindow;
 
-
-@ILayoutId(R.layout.activity_main)
 public class TestSecondLayout extends ViewProcessor {
     //    TextView textView = (TextView) $(R.id.tv_msg);
     Button button = bind(R.id.btn_test);
     int i = 0;
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.activity_main;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,7 +42,8 @@ public class TestSecondLayout extends ViewProcessor {
             }
         });
         dialog.getViewLine().setVisibility(View.VISIBLE);
-        show(dialog);
+        dialog.setManager(getCustomWindowManager());
+        dialog.show();
     }
 
     @Override

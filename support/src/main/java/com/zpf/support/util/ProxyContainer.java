@@ -44,12 +44,12 @@ public class ProxyContainer extends Fragment implements IViewContainer {
     private Bundle mParams;
     private final ContainerListenerController mController = new ContainerListenerController();
 
-    public void onConditionsCompleted(FragmentActivity activity) {
-        this.activity = activity;
-    }
-
     public void onConditionsCompleted(Fragment fragment) {
         this.fragment = fragment;
+    }
+
+    public void onConditionsCompleted(Activity activity) {
+        this.activity = activity;
     }
 
     @Override

@@ -14,7 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.zpf.api.OnItemViewClickListener;
+import com.zpf.api.OnItemClickListener;
 import com.zpf.support.R;
 import com.zpf.tool.SafeClickListener;
 import com.zpf.tool.ShakeInterceptor;
@@ -46,12 +46,12 @@ public class BannerPagerView extends ViewPager {
     private boolean hasDraw = false;
     private boolean realVisible = false;
     private boolean autoScrollable = true;
-    private OnItemViewClickListener itemViewClickListener;
-    private ShakeInterceptor shakeInterceptor = new ShakeInterceptor();//滚动监听频率控制
+    private OnItemClickListener itemViewClickListener;
+    private final ShakeInterceptor shakeInterceptor = new ShakeInterceptor();//滚动监听频率控制
     private int lastScroll = 0;//滚动监听距离控制
     private View firstView;
     private View lastView;
-    private Runnable changeCurrent = new Runnable() {
+    private final Runnable changeCurrent = new Runnable() {
         @Override
         public void run() {
             setCurrentItem(current.get(), false);
@@ -364,9 +364,9 @@ public class BannerPagerView extends ViewPager {
                         if (itemViewClickListener != null) {
                             int p = getViewPosition(v);
                             if (p < 0) {
-                                itemViewClickListener.onItemViewClick(realPosition, v);
+                                itemViewClickListener.onItemClick(realPosition, v);
                             } else {
-                                itemViewClickListener.onItemViewClick(getRealPosition(p), v);
+                                itemViewClickListener.onItemClick(getRealPosition(p), v);
                             }
                         }
                     }
@@ -466,7 +466,7 @@ public class BannerPagerView extends ViewPager {
         }
     }
 
-    public void setItemViewClickListener(OnItemViewClickListener itemViewClickListener) {
+    public void setItemClickListener(OnItemClickListener itemViewClickListener) {
         this.itemViewClickListener = itemViewClickListener;
     }
 

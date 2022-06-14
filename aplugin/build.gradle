@@ -33,13 +33,6 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    api(rootProject.ext.dependencies.design) {
-        exclude group: 'androidx.appcompat'
-        exclude group: 'androidx.activity'
-        exclude group: 'androidx.fragment'
-        exclude group: 'androidx.core'
-        exclude group: 'androidx.lifecycle'
-    }
     api(rootProject.ext.dependencies.appcompat) {
         exclude group: 'androidx.activity'
         exclude group: 'androidx.fragment'

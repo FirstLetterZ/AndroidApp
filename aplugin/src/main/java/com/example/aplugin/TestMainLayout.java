@@ -5,11 +5,9 @@ import androidx.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
 
-import com.zpf.api.ILayoutId;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.tool.SafeClickListener;
 
-@ILayoutId(R.layout.activity_main)
 public class TestMainLayout extends ViewProcessor {
     Button button = find(R.id.btn_test);
     int i = 0;
@@ -20,6 +18,11 @@ public class TestMainLayout extends ViewProcessor {
 //            push(TestSecondLayout.class);
         }
     };
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.activity_main;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
