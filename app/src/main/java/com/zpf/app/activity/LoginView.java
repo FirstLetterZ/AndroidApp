@@ -15,7 +15,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.zpf.api.ILayoutId;
 import com.zpf.app.plugin.AsyncLoadListener;
 import com.zpf.app.plugin.AsyncLoadState;
 import com.zpf.app.plugin.PluginApkBean;
@@ -24,22 +23,27 @@ import com.zpf.frame.IViewProcessor;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.app.R;
 import com.zpf.support.constant.AppConst;
+import com.zpf.support.util.Navigation;
 import com.zpf.support.view.banner.BannerPagerView;
 import com.zpf.support.view.banner.BannerViewCreator;
 import com.zpf.support.view.banner.StretchableIndicator;
-import com.zpf.tool.expand.util.LogUtil;
+import com.zpf.tool.expand.util.Logger;
 import com.zpf.tool.toast.ToastUtil;
 
 /**
  * Created by ZPF on 2019/3/25.
  */
-@ILayoutId(R.layout.activity_main)
 public class LoginView extends ViewProcessor {
     private AsyncLoadListener loadListener;
     private BannerPagerView bpv = (BannerPagerView) find(R.id.bpv);
     private StretchableIndicator indicator = (StretchableIndicator) bind(R.id.indicator);
     private int pageSize = 8;
     private int d = 1;
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.activity_main;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,7 +81,7 @@ public class LoginView extends ViewProcessor {
                         mContainer.showLoading();
                         break;
                 }
-                LogUtil.w("onState=" + sateCode);
+                Logger.w("onState=" + sateCode);
             }
 
             @Override
@@ -145,7 +149,7 @@ public class LoginView extends ViewProcessor {
         params.setExtrasClassLoader(targetClass.getClassLoader());
         params.putExtra(AppConst.INTENT_KEY, "123");
         params.putExtra(AppConst.TARGET_VIEW_CLASS_NAME, targetName);
-        mNavigator.push((Class<? extends IViewProcessor>) targetClass, params);
+        Navigation.get(mContainer).push((Class<? extends IViewProcessor>) targetClass, params);
     }
 
     @Override
@@ -156,7 +160,7 @@ public class LoginView extends ViewProcessor {
 
     @Override
     public void onClick(View view) {
-        LogUtil.e(view.getClass().getName());
+        Logger.e(view.getClass().getName());
         switch (view.getId()) {
             case R.id.btn_copy:
                 if (PluginController.get().copyApk("plugin_test")) {
@@ -168,10 +172,10 @@ public class LoginView extends ViewProcessor {
             case R.id.btn_cancel:
                 Intent params = new Intent();
                 params.putExtra(AppConst.INTENT_KEY, "234");
-                mNavigator.push(TestView.class, params);
+                Navigation.get(mContainer).push(TestView.class, params);
                 break;
             case R.id.btn_custom:
-                mNavigator.push(NetView.class);
+                Navigation.get(mContainer).push(NetView.class);
                 break;
         }
     }

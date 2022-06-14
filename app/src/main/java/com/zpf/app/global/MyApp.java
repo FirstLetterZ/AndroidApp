@@ -5,7 +5,7 @@ import android.app.Application;
 import com.zpf.tool.PublicUtil;
 import com.zpf.tool.expand.cache.CacheMap;
 import com.zpf.tool.expand.cache.SpUtil;
-import com.zpf.tool.expand.util.LogUtil;
+import com.zpf.tool.expand.util.Logger;
 import com.zpf.tool.global.CentralManager;
 import com.zpf.tool.stack.AppStackUtil;
 
@@ -20,7 +20,7 @@ public class MyApp extends Application {
             AppStackUtil.init(this);
             CacheMap.setLocalStorageManager(SpUtil.get());
             CentralManager.init(this, new RealGlobalConfig());
-            LogUtil.setLogOut(CentralManager.debuggable());
+            Logger.setLogOut(CentralManager.debuggable());
         }
     }
 }

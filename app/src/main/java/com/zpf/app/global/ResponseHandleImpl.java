@@ -1,8 +1,8 @@
 package com.zpf.app.global;
 
 import com.zpf.api.IResultBean;
-import com.zpf.support.network.base.IResponseHandler;
-import com.zpf.support.network.model.ResponseResult;
+import com.zpf.tool.network.base.IResponseHandler;
+import com.zpf.tool.network.model.ResponseResult;
 import com.zpf.tool.toast.ToastUtil;
 
 /**

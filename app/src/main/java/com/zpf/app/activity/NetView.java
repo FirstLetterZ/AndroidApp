@@ -83,9 +83,9 @@ public class NetView extends ViewProcessor {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addListener(netCall1, OnDestroyListener.class);
-        addListener(netCall2, OnDestroyListener.class);
-        addListener(netCall3, OnDestroyListener.class);
+        mContainer.add(netCall1, OnDestroyListener.class);
+        mContainer.add(netCall2, OnDestroyListener.class);
+        mContainer.add(netCall3, OnDestroyListener.class);
         mergeRequest
                 .merge(netCall1, RequestType.TYPE_DEFAULT)
                 .merge(netCall2, RequestType.TYPE_DEFAULT)
