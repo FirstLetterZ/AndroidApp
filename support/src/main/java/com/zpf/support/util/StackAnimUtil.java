@@ -115,7 +115,7 @@ public class StackAnimUtil {
                 transaction.setCustomAnimations(0, R.animator.out_center_zoom);
                 break;
             case StackInAnimType.IN_ZOOM:
-                transaction.setCustomAnimations(0, R.animator.out_center_zoom);
+                transaction.setCustomAnimations(R.animator.in_center_zoom, R.animator.out_center_zoom);
                 break;
             case StackInAnimType.NONE:
                 transaction.setCustomAnimations(0, 0);

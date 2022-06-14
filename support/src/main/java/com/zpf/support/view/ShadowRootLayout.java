@@ -20,6 +20,7 @@ public class ShadowRootLayout extends PhonePageLayout {
     public ShadowRootLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         linearShadowLine = new LinearShadowLine(context);
+        linearShadowLine.setElevation(2);
         addDecoration(linearShadowLine, 1);
     }
 

@@ -5,7 +5,7 @@ import android.view.WindowManager;
 
 import com.zpf.api.OnAttachListener;
 import com.zpf.frame.ILoadingManager;
-import com.zpf.support.view.ProgressDialog;
+import com.zpf.views.window.ProgressDialog;
 
 /**
  * loading弹窗管理

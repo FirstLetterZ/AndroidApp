@@ -19,6 +19,7 @@ Android工具库
 ./gradlew -p support clean build publish --info
 ./gradlew -p network clean build publish --info
 ./gradlew -p rvexpand clean build publish --info
+./gradlew -p binding clean build publish --info
 
 #### 全部发布
 >./gradlew clean install bintrayUpload --info

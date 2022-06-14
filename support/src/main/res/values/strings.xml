@@ -1,9 +1,7 @@
 <resources>
-    <string name="select_photo">选择图片</string>
-    <string name="default_launcher">default_launcher</string>
-    <string name="default_request_loading">&#160;&#160;请求中…</string>
-    <string name="bottom_button_cancel">取消</string>
-    <string name="option_take_photo">拍照</string>
-    <string name="option_photo_album">相册</string>
-
+    <string name="support_select_photo">选择图片</string>
+    <string name="support_request_loading">&#160;&#160;请求中…</string>
+    <string name="support_button_cancel">取消</string>
+    <string name="support_option_take_photo">拍照</string>
+    <string name="support_option_photo_album">相册</string>
 </resources>

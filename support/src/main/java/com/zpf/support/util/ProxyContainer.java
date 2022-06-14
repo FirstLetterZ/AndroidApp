@@ -154,7 +154,7 @@ public class ProxyContainer extends Fragment implements IViewContainer {
 
     @Override
     public void showLoading() {
-        showLoading(getString(R.string.default_request_loading));
+        showLoading(getString(R.string.support_request_loading));
     }
 
     @Override

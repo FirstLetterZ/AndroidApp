@@ -8,8 +8,8 @@ import android.widget.Button;
 import androidx.annotation.Nullable;
 
 import com.zpf.support.base.ViewProcessor;
-import com.zpf.support.view.CommonDialog;
 import com.zpf.tool.toast.ToastUtil;
+import com.zpf.views.window.IosStyleDialog;
 
 public class TestSecondLayout extends ViewProcessor {
     //    TextView textView = (TextView) $(R.id.tv_msg);
@@ -28,7 +28,7 @@ public class TestSecondLayout extends ViewProcessor {
 //            ToastUtil.setToaster(new ToastWindow(AppContext.get()));
 //        }
         button.setText(R.string.test_text01);
-        CommonDialog dialog = new CommonDialog(getContext());
+        IosStyleDialog dialog = new IosStyleDialog(getContext());
         dialog.getTitle().setVisibility(View.VISIBLE);
         dialog.getIcon().setVisibility(View.VISIBLE);
         dialog.getMessage().setVisibility(View.VISIBLE);

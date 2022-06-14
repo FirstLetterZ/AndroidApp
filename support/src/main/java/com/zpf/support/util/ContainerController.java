@@ -20,13 +20,14 @@ public class ContainerController {
 
     public static volatile IViewContainer mInitingViewContainer;
 
-    public static IViewProcessor createViewProcessor(@NonNull IViewContainer viewContainer, @NonNull Bundle params, @Nullable Class defViewClass) {
+    public static IViewProcessor createViewProcessor(
+            @NonNull IViewContainer viewContainer, @NonNull Bundle params, @Nullable Class<? extends IViewProcessor> defViewClass) {
         //获取目标class
         Class<? extends IViewProcessor> targetViewClass = null;
         try {
-            Class targetClass = null;
+            Class<?> targetClass = null;
             try {
-                targetClass = (Class) params.getSerializable(AppConst.TARGET_VIEW_CLASS);
+                targetClass = (Class<?>) params.getSerializable(AppConst.TARGET_VIEW_CLASS);
             } catch (Exception e) {
                 //
             }

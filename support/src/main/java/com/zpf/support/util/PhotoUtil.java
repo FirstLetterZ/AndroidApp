@@ -160,7 +160,7 @@ public abstract class PhotoUtil {
                     try {
                         Intent albumIntent = new Intent(Intent.ACTION_GET_CONTENT);
                         albumIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-                        String title = PublicUtil.getString(R.string.select_photo);
+                        String title = PublicUtil.getString(R.string.support_select_photo);
                         Intent intent = Intent.createChooser(albumIntent, title);
                         container.startActivityForResult(intent, requestCode);
                     } catch (Exception e) {
@@ -190,7 +190,7 @@ public abstract class PhotoUtil {
                     try {
                         Intent albumIntent = new Intent(Intent.ACTION_GET_CONTENT);
                         albumIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-                        String title = PublicUtil.getString(R.string.select_photo);
+                        String title = PublicUtil.getString(R.string.support_select_photo);
                         Intent intent = Intent.createChooser(albumIntent, title);
                         currentActivity.startActivityForResult(intent, requestCode);
                     } catch (Exception e) {
@@ -224,7 +224,7 @@ public abstract class PhotoUtil {
                     try {
                         Intent albumIntent = new Intent(Intent.ACTION_GET_CONTENT);
                         albumIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-                        String title = PublicUtil.getString(R.string.select_photo);
+                        String title = PublicUtil.getString(R.string.support_select_photo);
                         Intent intent = Intent.createChooser(albumIntent, title);
                         currentFragment.startActivityForResult(intent, requestCode);
                     } catch (Exception e) {
@@ -258,7 +258,7 @@ public abstract class PhotoUtil {
                     try {
                         Intent albumIntent = new Intent(Intent.ACTION_GET_CONTENT);
                         albumIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-                        String title = PublicUtil.getString(R.string.select_photo);
+                        String title = PublicUtil.getString(R.string.support_select_photo);
                         Intent intent = Intent.createChooser(albumIntent, title);
                         currentFragment.startActivityForResult(intent, requestCode);
                     } catch (Exception e) {

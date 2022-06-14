@@ -6,7 +6,6 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import com.zpf.app.R;
-import com.zpf.app.activity.NetView;
 import com.zpf.support.base.ViewProcessor;
 import com.zpf.tool.global.MainHandler;
 import com.zpf.views.bounce.BounceLayout;

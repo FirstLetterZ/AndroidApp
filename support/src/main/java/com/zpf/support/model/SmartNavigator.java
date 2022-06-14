@@ -1,14 +1,17 @@
 package com.zpf.support.model;
 
 import android.app.Activity;
+import android.app.Application;
+import android.app.Dialog;
+import android.app.Service;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.view.View;
+import android.widget.PopupWindow;
 
 import androidx.activity.ComponentActivity;
 import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +24,7 @@ import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.support.base.CompatContainerActivity;
 import com.zpf.support.constant.AppConst;
+import com.zpf.tool.expand.util.Logger;
 import com.zpf.tool.global.CentralManager;
 import com.zpf.tool.global.MainHandler;
 import com.zpf.tool.stack.AppStackUtil;
@@ -46,13 +50,19 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
     public void push(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params) {
         Object executor = executorReference.get();
         if (executor == null) {
+            Logger.e("The resources have been released.");
             return;
         }
         Context context = getContext();
         if (context == null) {
+            Logger.e("Unable to find the appropriate context.");
             return;
         }
         Intent intent = buildIntent(target, params, executor, context);
+        if (!(context instanceof Activity)) {
+            Logger.w("The context is not an Activity, should be added flag:Intent.FLAG_ACTIVITY_NEW_TASK");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         context.startActivity(intent);
     }
 
@@ -60,10 +70,12 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
     public void push(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params, @Nullable final IDataCallback<Intent> callback) {
         Object executor = executorReference.get();
         if (executor == null) {
+            Logger.e("The resources have been released.");
             return;
         }
         Context context = getContext();
         if (context == null) {
+            Logger.e("Unable to find the appropriate context.");
             return;
         }
         Intent intent = buildIntent(target, params, executor, context);
@@ -106,8 +118,18 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
                     }
                 });
                 return;
+            } else if (context instanceof ComponentActivity) {
+                final SimpleActivityResultContract resultContract = new SimpleActivityResultContract();
+                ((ComponentActivity) context).registerForActivityResult(resultContract, new ActivityResultCallback<Intent>() {
+                    @Override
+                    public void onActivityResult(Intent result) {
+                        callback.onResult(requestCode, result);
+                    }
+                });
+                return;
             }
         }
+        Logger.w("It is not support to register the result listener.");
         if (executor instanceof Activity) {
             ((Activity) executor).startActivityForResult(intent, requestCode);
         } else if (executor instanceof android.app.Fragment) {
@@ -117,7 +139,9 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
         } else if (context instanceof Activity) {
             ((Activity) context).startActivityForResult(intent, requestCode);
         } else {
-
+            Logger.e("Will open Activity on a new task without requestCode.It's better not to call this method like this.");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
         }
     }
 
@@ -136,6 +160,7 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
     public void pop(int resultCode, @Nullable Intent data) {
         Activity activity = getActivity();
         if (activity == null) {
+            Logger.w("Unable to find the appropriate Activity.");
             return;
         }
         activity.setResult(resultCode, data);
@@ -166,13 +191,8 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
         return AppStackUtil.finishByName(target.getName());
     }
 
-    private void startActivityForResult(Intent intent, @Nullable Intent params, @Nullable final IDataCallback<Intent> callback) {
-
-    }
-
     private Intent buildIntent(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params,
                                @NonNull Object executor, @NonNull Context context) {
-
         Intent intent = new Intent();
         Class<?> containerClass = null;
         if (params == null) {
@@ -231,38 +251,39 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
             return null;
         }
         Object executor = executorReference.get();
-        if (executor == null) {
-            return null;
-        }
-        if (executor instanceof Activity) {
-            return ((Activity) executor);
-        }
-        if (executor instanceof IViewContainer) {
-            return ((IViewContainer) executor).getCurrentActivity();
-        }
-        if (executor instanceof IViewProcessor) {
-            return ((IViewProcessor) executor).getCurrentActivity();
-        }
-        if (executor instanceof android.app.Fragment) {
-            return ((android.app.Fragment) executor).getActivity();
-        }
-        if (executor instanceof androidx.fragment.app.Fragment) {
-            return ((androidx.fragment.app.Fragment) executor).getActivity();
-        }
-        if (executor instanceof View) {
-            executor = ((View) executor).getContext();
-        }
-        if (executor instanceof Activity) {
-            return ((Activity) executor);
-        }
-        if (executor instanceof ContextWrapper) {
-            executor = ((ContextWrapper) executor).getBaseContext();
-        }
-        if (executor instanceof Activity) {
-            return ((Activity) executor);
-        }
-        if (executor instanceof Context) {
-            return ((Context) executor);
+        while (executor != null) {
+            if (executor instanceof Activity) {
+                return ((Activity) executor);
+            }
+            if (executor instanceof IViewContainer) {
+                return ((IViewContainer) executor).getCurrentActivity();
+            }
+            if (executor instanceof IViewProcessor) {
+                return ((IViewProcessor) executor).getCurrentActivity();
+            }
+            if (executor instanceof android.app.Fragment) {
+                return ((android.app.Fragment) executor).getActivity();
+            }
+            if (executor instanceof androidx.fragment.app.Fragment) {
+                return ((androidx.fragment.app.Fragment) executor).getActivity();
+            }
+            if (executor instanceof Application) {
+                return ((Application) executor);
+            } else if (executor instanceof Service) {
+                return ((Service) executor);
+            } else if (executor instanceof View) {
+                executor = ((View) executor).getContext();
+            } else if (executor instanceof Dialog) {
+                executor = ((Dialog) executor).getContext();
+            } else if (executor instanceof PopupWindow) {
+                executor = ((PopupWindow) executor).getContentView();
+            } else if (executor instanceof ContextWrapper) {
+                executor = ((ContextWrapper) executor).getBaseContext();
+            } else if (executor instanceof Context) {
+                return ((Context) executor);
+            } else {
+                break;
+            }
         }
         return null;
     }

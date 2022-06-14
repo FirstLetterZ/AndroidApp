@@ -8,7 +8,6 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import com.zpf.support.view.CommonDialog;
 import com.zpf.tool.PublicUtil;
 import com.zpf.tool.global.CentralManager;
 import com.zpf.tool.permission.PermissionDescription;
@@ -16,6 +15,7 @@ import com.zpf.tool.permission.PermissionSettingManager;
 import com.zpf.tool.permission.interfaces.IPermissionResultListener;
 import com.zpf.tool.permission.model.PermissionInfo;
 import com.zpf.tool.stack.AppStackUtil;
+import com.zpf.views.window.IosStyleDialog;
 
 import java.util.List;
 
@@ -49,7 +49,7 @@ public class PermissionUtil implements IPermissionResultListener {
         if (activity == null || activity.getWindow() == null) {
             return;
         }
-        final CommonDialog hintDialog = new CommonDialog(activity);
+        final IosStyleDialog hintDialog = new IosStyleDialog(activity);
         hintDialog.setCancelable(true);
         hintDialog.setCanceledOnTouchOutside(true);
         hintDialog.getIcon().setVisibility(View.GONE);
@@ -85,7 +85,7 @@ public class PermissionUtil implements IPermissionResultListener {
         if (list == null || list.size() == 0 || activity == null || activity.getWindow() == null) {
             return;
         }
-        final CommonDialog settingDialog = new CommonDialog(activity);
+        final IosStyleDialog settingDialog = new IosStyleDialog(activity);
         settingDialog.getIcon().setVisibility(View.GONE);
         settingDialog.getInput().setVisibility(View.GONE);
         settingDialog.getTitle().setVisibility(View.VISIBLE);

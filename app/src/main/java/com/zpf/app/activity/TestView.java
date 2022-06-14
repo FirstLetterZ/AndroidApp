@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
+import androidx.databinding.library.baseAdapters.DataBinderMapperImpl;
 
 import com.zpf.app.R;
 import com.zpf.support.base.ViewProcessor;
