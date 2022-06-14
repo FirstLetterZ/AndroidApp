@@ -8,7 +8,6 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 
-import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.support.base.CompatContainerActivity;
 import com.zpf.support.base.ViewProcessor;
@@ -40,7 +39,8 @@ public abstract class CompatSinglePageActivity extends CompatContainerActivity {
         fragmentStackManager.setEmptyListener(new OnStackEmptyListener() {
             @Override
             public void onEmpty(Intent data) {
-                finishWithResult(AppConst.POLL_BACK_RESULT_CODE, data);
+                setResult(AppConst.POLL_BACK_RESULT_CODE, data);
+                finish();
             }
         });
         Class<? extends ViewProcessor> targetViewClass = null;
@@ -64,11 +64,6 @@ public abstract class CompatSinglePageActivity extends CompatContainerActivity {
     @Override
     public int getContainerType() {
         return ContainerType.CONTAINER_SINGLE_COMPAT_ACTIVITY;
-    }
-
-    @Override
-    public INavigator<Class<? extends IViewProcessor>> getNavigator() {
-        return fragmentStackManager;
     }
 
 }

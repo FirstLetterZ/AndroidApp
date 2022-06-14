@@ -18,6 +18,7 @@ import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnPermissionResultListener;
 import com.zpf.api.OnTouchKeyListener;
 import com.zpf.api.OnViewStateChangedListener;
+import com.zpf.tool.stack.LifecycleState;
 import com.zpf.views.window.ICustomWindowManager;
 
 /**
@@ -25,6 +26,8 @@ import com.zpf.views.window.ICustomWindowManager;
  */
 public interface IViewProcessor extends IListenerSet {
     void runWithPermission(Runnable runnable, String... permissions);
+
+    void runAfterVisible(Runnable runnable, boolean nextTime);
 
     <T extends View> T bind(@IdRes int viewId, View.OnClickListener clickListener);
 

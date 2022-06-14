@@ -15,17 +15,18 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import com.zpf.api.ICancelable;
-import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
+import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnAttachListener;
 import com.zpf.frame.ILoadingManager;
-import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewLinker;
 import com.zpf.frame.IViewProcessor;
+import com.zpf.frame.IViewState;
 import com.zpf.support.R;
+import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
-import com.zpf.tool.stack.LifecycleState;
+import com.zpf.views.window.ICustomWindowManager;
 
 import java.lang.reflect.Type;
 
@@ -39,7 +40,6 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     private Fragment fragment;
     private ILoadingManager loadingManager;
     private boolean isVisible;
-    private boolean isActivity;
     private Bundle mParams;
     private final ContainerListenerController mController = new ContainerListenerController();
 
@@ -52,43 +52,11 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    @LifecycleState
-    public int getState() {
-        return mController.getState();
-    }
-
-    @Override
-    public boolean living() {
-        return mController.living();
-    }
-
-    @Override
-    public boolean interactive() {
-        return mController.interactive();
-    }
-
-    @Override
-    public boolean visible() {
-        return mController.visible();
-    }
-
-    @Override
     public Context getContext() {
         if (activity != null) {
             return activity;
         } else if (fragment != null) {
             return fragment.getContext();
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public Intent getIntent() {
-        if (activity != null) {
-            return activity.getIntent();
-        } else if (fragment != null && fragment.getActivity() != null) {
-            return fragment.getActivity().getIntent();
         } else {
             return null;
         }
@@ -106,48 +74,25 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public void startActivity(Intent intent) {
-        if (activity != null) {
-            activity.startActivity(intent);
-        } else if (fragment != null) {
-            fragment.startActivity(intent);
-        }
+    public ICustomWindowManager getCustomWindowManager() {
+        return mController.getCustomWindowManager();
     }
 
     @Override
-    public void startActivity(Intent intent, @Nullable Bundle options) {
-        if (activity != null) {
-            activity.startActivity(intent, options);
-        } else if (fragment != null) {
-            fragment.startActivity(intent, options);
-        }
+    public IViewState getState() {
+        return mController;
     }
 
     @Override
-    public void startActivities(Intent[] intents) {
-        if (activity != null) {
-            activity.startActivities(intents);
-        } else if (fragment != null && fragment.getActivity() != null) {
-            fragment.getActivity().startActivities(intents);
-        }
+    public void startActivityForResult(@NonNull Intent intent, int requestCode) {
+        this.startActivityForResult(intent, requestCode, null);
     }
 
     @Override
-    public void startActivities(Intent[] intents, @Nullable Bundle options) {
-        if (activity != null) {
-            activity.startActivities(intents, options);
-        } else if (fragment != null && fragment.getActivity() != null) {
-            fragment.getActivity().startActivities(intents, options);
-        }
-    }
+    public void startActivityForResult(@NonNull Intent intent, @NonNull OnActivityResultListener listener) {
+        mController.addDisposable(listener, OnActivityResultListener.class);
+        this.startActivityForResult(intent, intent.getIntExtra(AppConst.REQUEST_CODE, AppConst.DEF_REQUEST_CODE), null);
 
-    @Override
-    public void startActivityForResult(Intent intent, int requestCode) {
-        if (activity != null) {
-            activity.startActivityForResult(intent, requestCode);
-        } else if (fragment != null) {
-            fragment.startActivityForResult(intent, requestCode);
-        }
     }
 
     @SuppressLint("RestrictedApi")
@@ -161,13 +106,8 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public void show(ICustomWindow window) {
-        mController.show(window);
-    }
-
-    @Override
     public boolean close() {
-        return loadingManager != null && loadingManager.hideLoading() || mController.close();
+        return loadingManager != null && loadingManager.hideLoading() || mController.getCustomWindowManager().close();
     }
 
     @Override
@@ -176,34 +116,20 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     }
 
     @Override
-    public boolean addListener(Object listener, @Nullable Type listenerClass) {
-        return mController.addListener(listener, listenerClass);
+    public boolean add(@NonNull Object listener, @Nullable Type listenerClass) {
+        return mController.add(listener, listenerClass);
     }
 
     @Override
-    public boolean removeListener(Object listener, @Nullable Type listenerClass) {
-        return mController.removeListener(listener, listenerClass);
+    public boolean remove(@NonNull Object listener, @Nullable Type listenerClass) {
+        return mController.remove(listener, listenerClass);
     }
 
     @Override
-    public void finishWithResult(int resultCode, Intent data) {
-        if (activity != null) {
-            activity.setResult(resultCode, data);
-            activity.finish();
-        } else if (fragment != null && fragment.getActivity() != null) {
-            fragment.getActivity().setResult(resultCode, data);
-            fragment.getActivity().finish();
-        }
+    public int size(@Nullable Type listenerClass) {
+        return mController.size(listenerClass);
     }
 
-    @Override
-    public void finish() {
-        if (activity != null) {
-            activity.finish();
-        } else if (fragment != null && fragment.getActivity() != null) {
-            fragment.getActivity().finish();
-        }
-    }
 
     @Override
     public boolean hideLoading() {
@@ -211,7 +137,7 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
         if (activity instanceof IViewContainer) {
             return ((IViewContainer) activity).hideLoading();
         }
-        return loadingManager != null && loadingManager.hideLoading() || mController.close();
+        return loadingManager != null && loadingManager.hideLoading() || mController.getCustomWindowManager().close();
     }
 
     @Override
@@ -232,7 +158,7 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
         if (activity != null) {
             if (activity instanceof IViewContainer) {
                 ((IViewContainer) activity).showLoading(message);
-            } else if (living()) {
+            } else if (mController.isLiving()) {
                 if (loadingManager == null) {
                     loadingManager = new LoadingManagerImpl(getContext());
                 }
@@ -259,14 +185,12 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
     public void onResume() {
         super.onResume();
         mController.onResume();
-        checkActivity(true);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mController.onPause();
-        checkActivity(false);
     }
 
     @Override
@@ -364,30 +288,23 @@ public class ProxyCompatContainer extends Fragment implements IViewContainer {
         return null;
     }
 
-    @Override
-    public INavigator<Class<? extends IViewProcessor>> getNavigator() {
-        return null;
-    }
-
     private void checkVisibleChange(boolean changeTo) {
         boolean newVisible = changeTo
                 && FragmentHelper.checkFragmentVisible(this)
                 && FragmentHelper.checkParentFragmentVisible(this);
         if (newVisible != this.isVisible) {
             this.isVisible = newVisible;
-            mController.onVisibleChanged(newVisible);
-            checkActivity(mController.interactive());
+            onVisibleChanged(newVisible);
         }
     }
 
-    private void checkActivity(boolean changeTo) {
-        if (!isVisible) {
-            changeTo = false;
-        }
-        if (isActivity != changeTo) {
-            isActivity = changeTo;
-            mController.onActivityChanged(changeTo);
-        }
+    @Override
+    public void onParamChanged(Bundle newParams) {
+        mController.onParamChanged(newParams);
     }
 
+    @Override
+    public void onVisibleChanged(boolean visible) {
+        mController.onVisibleChanged(visible);
+    }
 }

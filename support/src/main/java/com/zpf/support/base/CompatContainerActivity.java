@@ -1,6 +1,5 @@
 package com.zpf.support.base;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -8,8 +7,6 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.KeyEvent;
 
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,9 +16,7 @@ import com.zpf.api.IManager;
 import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnAttachListener;
 import com.zpf.frame.IContainerHelper;
-import com.zpf.frame.IDisposable;
 import com.zpf.frame.ILoadingManager;
-import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewLinker;
 import com.zpf.frame.IViewProcessor;
@@ -34,7 +29,7 @@ import com.zpf.support.util.ContainerListenerController;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.StackAnimUtil;
 import com.zpf.tool.StatusBarUtil;
-import com.zpf.tool.expand.util.LogUtil;
+import com.zpf.tool.expand.util.Logger;
 import com.zpf.tool.global.CentralManager;
 import com.zpf.tool.stack.AppStackUtil;
 import com.zpf.views.window.ICustomWindowManager;
@@ -78,7 +73,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
             mViewProcessor.initWindow(getWindow());
             setContentView(mViewProcessor.getView());
         } else {
-            LogUtil.w("IViewProcessor is null!");
+            Logger.w("IViewProcessor is null!");
         }
         initView(savedInstanceState);
         mController.onCreate(savedInstanceState);
@@ -90,7 +85,6 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
         mController.onRestart();
         onVisibleChanged(true);
     }
-
 
     @Override
     public void onStart() {
@@ -208,15 +202,20 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     }
 
     @Override
-    public void startActivityForResult(@NonNull Intent intent, int requestCode, @Nullable Bundle options) {
-        super.startActivityForResult(intent, requestCode, options);
-        StackAnimUtil.onPush(this, intent.getIntExtra(AppConst.ANIM_TYPE, 0));
+    public void startActivityForResult(@NonNull Intent intent, int requestCode) {
+        this.startActivityForResult(intent, requestCode, null);
     }
 
     @Override
     public void startActivityForResult(@NonNull Intent intent, @NonNull final OnActivityResultListener listener) {
-        add(listener, IDisposable.class);
-        super.startActivityForResult(intent, AppConst.DEF_REQUEST_CODE, null);
+        mController.addDisposable(listener, OnActivityResultListener.class);
+        this.startActivityForResult(intent, intent.getIntExtra(AppConst.REQUEST_CODE, AppConst.DEF_REQUEST_CODE), null);
+    }
+
+    @Override
+    public void startActivityForResult(@NonNull Intent intent, int requestCode, @Nullable Bundle options) {
+        super.startActivityForResult(intent, requestCode, options);
+        StackAnimUtil.onPush(this, intent.getIntExtra(AppConst.ANIM_TYPE, 0));
     }
 
     @Override
@@ -263,7 +262,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     @Override
     public void showLoading(Object message) {
-        if (mController.isInteractive()) {
+        if (mController.isLiving()) {
             if (loadingManager == null) {
                 loadingManager = new LoadingManagerImpl(getContext());
             }
@@ -344,7 +343,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     @Override
     public IViewState getState() {
-        return null;
+        return mController;
     }
 
     @Override

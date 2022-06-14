@@ -14,13 +14,14 @@ import com.zpf.api.IManager;
 import com.zpf.api.INavigator;
 import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnViewStateChangedListener;
+import com.zpf.tool.stack.LifecycleState;
 import com.zpf.views.window.ICustomWindowManager;
 
 /**
  * 替代activity与fragment
  * Created by ZPF on 2018/3/22.
  */
-public interface IViewContainer extends ILoadingManager, IGroup, OnViewStateChangedListener{
+public interface IViewContainer extends ILoadingManager, IGroup, OnViewStateChangedListener {
 
     Object invoke(String name, Object params);
 
@@ -36,7 +37,7 @@ public interface IViewContainer extends ILoadingManager, IGroup, OnViewStateChan
     @Nullable
     IViewProcessor getViewProcessor();
 
-    void startActivityForResult(@NonNull Intent intent, int requestCode, @Nullable Bundle options);
+    void startActivityForResult(@NonNull Intent intent, int requestCode);
 
     void startActivityForResult(@NonNull Intent intent, @NonNull OnActivityResultListener listener);
 

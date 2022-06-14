@@ -16,18 +16,17 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.zpf.api.IBackPressInterceptor;
 import com.zpf.api.ICancelable;
-import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
 import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnAttachListener;
 import com.zpf.api.OnTouchKeyListener;
 import com.zpf.frame.ILoadingManager;
-import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewLinker;
 import com.zpf.frame.IViewProcessor;
-import com.zpf.frame.IViewStateListener;
+import com.zpf.frame.IViewState;
 import com.zpf.support.R;
+import com.zpf.support.constant.AppConst;
 import com.zpf.support.constant.ContainerType;
 import com.zpf.support.model.CompatFragmentPerChecker;
 import com.zpf.support.single.base.CompatSinglePageActivity;
@@ -35,9 +34,11 @@ import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.support.util.FragmentHelper;
 import com.zpf.support.util.LoadingManagerImpl;
-import com.zpf.tool.expand.util.LogUtil;
+import com.zpf.support.util.StackAnimUtil;
+import com.zpf.tool.expand.util.Logger;
 import com.zpf.tool.permission.PermissionManager;
 import com.zpf.tool.stack.LifecycleState;
+import com.zpf.views.window.ICustomWindowManager;
 
 import java.lang.reflect.Type;
 
@@ -45,32 +46,32 @@ import java.lang.reflect.Type;
  * 基于androidx.fragment.app.Fragment的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public class CompatContainerFragment extends Fragment implements IViewContainer, IViewStateListener, OnActivityResultListener {
-   static {
-       PermissionManager.get().addChecker(Fragment.class,new CompatFragmentPerChecker());
-   }
+public class CompatContainerFragment extends Fragment implements IViewContainer {
+    static {
+        PermissionManager.get().addChecker(Fragment.class, new CompatFragmentPerChecker());
+    }
+
     protected final ContainerListenerController mController = new ContainerListenerController();
     private ILoadingManager loadingManager;
     private Bundle mParams;
     private boolean isVisible;
-    private boolean isActivity;
     private IViewProcessor mViewProcessor;
     private final IBackPressInterceptor backPressInterceptor = new IBackPressInterceptor() {
         @Override
         public boolean onInterceptBackPress() {
-            return isActivity && (close() || mController.onInterceptBackPress());
+            return mController.isInteractive() && (close() || mController.onInterceptBackPress());
         }
     };
     private final OnTouchKeyListener touchKeyListener = new OnTouchKeyListener() {
 
         @Override
         public boolean onKeyDown(int keyCode, KeyEvent event) {
-            return isActivity && mController.onKeyDown(keyCode, event);
+            return mController.isInteractive() && mController.onKeyDown(keyCode, event);
         }
 
         @Override
         public boolean onKeyUp(int keyCode, KeyEvent event) {
-            return isActivity && mController.onKeyUp(keyCode, event);
+            return mController.isInteractive() && mController.onKeyUp(keyCode, event);
         }
     };
 
@@ -81,16 +82,16 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
         if (mViewProcessor == null) {
             mViewProcessor = initViewProcessor();
             if (mViewProcessor != null) {
-                mController.addListener(mViewProcessor, null);
+                mController.add(mViewProcessor, null);
                 theView = mViewProcessor.getView();
             } else {
-                LogUtil.w("IViewProcessor is null!");
+                Logger.w("IViewProcessor is null!");
             }
         }
         IViewContainer parentContainer = getParentContainer();
         if (parentContainer != null) {
-            parentContainer.addListener(backPressInterceptor, IBackPressInterceptor.class);
-            parentContainer.addListener(touchKeyListener, OnTouchKeyListener.class);
+            parentContainer.add(backPressInterceptor, IBackPressInterceptor.class);
+            parentContainer.add(touchKeyListener, OnTouchKeyListener.class);
         }
         initView(savedInstanceState);
         return theView;
@@ -112,14 +113,12 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
     public void onResume() {
         super.onResume();
         mController.onResume();
-        checkActivity(true);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mController.onPause();
-        checkActivity(false);
     }
 
     @Override
@@ -143,12 +142,12 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
     }
 
     private void checkToDestroy() {
-        if (mController.getState() < LifecycleState.AFTER_DESTROY) {
+        if (mController.getStateCode() < LifecycleState.AFTER_DESTROY) {
             mController.onDestroy();
             IViewContainer parentContainer = getParentContainer();
             if (parentContainer != null) {
-                parentContainer.removeListener(backPressInterceptor, IBackPressInterceptor.class);
-                parentContainer.removeListener(touchKeyListener, OnTouchKeyListener.class);
+                parentContainer.remove(backPressInterceptor, IBackPressInterceptor.class);
+                parentContainer.remove(touchKeyListener, OnTouchKeyListener.class);
             }
         }
     }
@@ -192,38 +191,8 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
     }
 
     @Override
-    @LifecycleState
-    public int getState() {
-        return mController.getState();
-    }
-
-    @Override
-    public boolean living() {
-        return mController.living();
-    }
-
-    @Override
-    public boolean interactive() {
-        return mController.interactive();
-    }
-
-    @Override
-    public boolean visible() {
-        return mController.visible();
-    }
-
-    @Override
     public Context getContext() {
         return super.getContext();
-    }
-
-    @Override
-    public Intent getIntent() {
-        if (getActivity() != null) {
-            return getActivity().getIntent();
-        } else {
-            return null;
-        }
     }
 
     @Override
@@ -232,45 +201,33 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
     }
 
     @Override
-    public void startActivity(Intent intent) {
-        super.startActivity(intent);
+    public ICustomWindowManager getCustomWindowManager() {
+        return mController.getCustomWindowManager();
     }
 
     @Override
-    public void startActivity(Intent intent, @Nullable Bundle options) {
-        super.startActivity(intent, options);
+    public void startActivityForResult(@NonNull Intent intent, int requestCode) {
+        this.startActivityForResult(intent, requestCode, null);
     }
 
     @Override
-    public void startActivities(Intent[] intents) {
-        this.startActivities(intents, null);
-    }
-
-    @Override
-    public void startActivities(Intent[] intents, @Nullable Bundle options) {
-        if (getActivity() != null) {
-            getActivity().startActivities(intents, options);
-        }
-    }
-
-    @Override
-    public void startActivityForResult(Intent intent, int requestCode) {
-        super.startActivityForResult(intent, requestCode);
+    public void startActivityForResult(@NonNull Intent intent, @NonNull final OnActivityResultListener listener) {
+        mController.addDisposable(listener, OnActivityResultListener.class);
+        this.startActivityForResult(intent, intent.getIntExtra(AppConst.REQUEST_CODE, AppConst.DEF_REQUEST_CODE), null);
     }
 
     @Override
     public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
         super.startActivityForResult(intent, requestCode, options);
-    }
-
-    @Override
-    public void show(ICustomWindow window) {
-        mController.show(window);
+        Activity activity = getActivity();
+        if (!(activity instanceof IViewContainer)) {
+            StackAnimUtil.onPush(getActivity(), intent.getIntExtra(AppConst.ANIM_TYPE, 0));
+        }
     }
 
     @Override
     public boolean close() {
-        return loadingManager != null && loadingManager.hideLoading() || mController.close();
+        return loadingManager != null && loadingManager.hideLoading() || mController.getCustomWindowManager().close();
     }
 
     @Override
@@ -279,28 +236,18 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
     }
 
     @Override
-    public boolean addListener(Object listener, @Nullable Type listenerClass) {
-        return mController.addListener(listener, listenerClass);
+    public boolean add(@NonNull Object listener, @Nullable Type listenerClass) {
+        return mController.add(listener, listenerClass);
     }
 
     @Override
-    public boolean removeListener(Object listener, @Nullable Type listenerClass) {
-        return mController.removeListener(listener, listenerClass);
+    public boolean remove(@NonNull Object listener, @Nullable Type listenerClass) {
+        return mController.remove(listener, listenerClass);
     }
 
     @Override
-    public void finishWithResult(int resultCode, Intent data) {
-        if (getActivity() != null) {
-            getActivity().setResult(resultCode, data);
-            getActivity().finish();
-        }
-    }
-
-    @Override
-    public void finish() {
-        if (getActivity() != null) {
-            getActivity().finish();
-        }
+    public int size(@Nullable Type listenerClass) {
+        return mController.size(listenerClass);
     }
 
     @Override
@@ -330,7 +277,7 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
         if (activity != null) {
             if (activity instanceof IViewContainer) {
                 ((IViewContainer) activity).showLoading(message);
-            } else if (living()) {
+            } else if (mController.isLiving()) {
                 if (loadingManager == null) {
                     loadingManager = new LoadingManagerImpl(getContext());
                 }
@@ -419,12 +366,8 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
     }
 
     @Override
-    public INavigator<Class<? extends IViewProcessor>> getNavigator() {
-        Activity parentActivity = getActivity();
-        if (parentActivity instanceof IViewContainer) {
-            return ((IViewContainer) parentActivity).getNavigator();
-        }
-        return null;
+    public IViewState getState() {
+        return mController;
     }
 
     @Override
@@ -437,11 +380,6 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
         mController.onVisibleChanged(visible);
     }
 
-    @Override
-    public void onActivityChanged(boolean activity) {
-        mController.onActivityChanged(activity);
-    }
-
     private void checkVisibleChange(boolean changeTo, boolean notifyChildren) {
         boolean newVisible = changeTo
                 && FragmentHelper.checkFragmentVisible(this)
@@ -452,17 +390,6 @@ public class CompatContainerFragment extends Fragment implements IViewContainer,
             if (notifyChildren) {
                 FragmentHelper.notifyChildrenFragmentVisible(this, newVisible);
             }
-            checkActivity(mController.interactive());
-        }
-    }
-
-    private void checkActivity(boolean changeTo) {
-        if (!isVisible) {
-            changeTo = false;
-        }
-        if (isActivity != changeTo) {
-            isActivity = changeTo;
-            onActivityChanged(changeTo);
         }
     }
 

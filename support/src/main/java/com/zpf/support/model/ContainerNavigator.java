@@ -1,7 +1,6 @@
 package com.zpf.support.model;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 
@@ -20,15 +19,16 @@ import com.zpf.tool.global.CentralManager;
 import com.zpf.tool.global.MainHandler;
 import com.zpf.tool.stack.AppStackUtil;
 
+import java.lang.ref.WeakReference;
+
 /**
  * @author Created by ZPF on 2021/4/2.
  */
 public class ContainerNavigator implements INavigator<Class<? extends IViewProcessor>, Intent, Intent> {
+    private WeakReference<IViewContainer> mContainer;
 
-    private IViewContainer mContainer;
-
-    public ContainerNavigator(IViewContainer mContainer) {
-        this.mContainer = mContainer;
+    public void setContainer(IViewContainer container) {
+        this.mContainer = new WeakReference<>(container);
     }
 
     @Override
@@ -42,9 +42,9 @@ public class ContainerNavigator implements INavigator<Class<? extends IViewProce
     }
 
     @Override
-    public void push(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params, @NonNull IDataCallback<Intent> callback) {
-        final IViewContainer viewContainer = mContainer;
-        if (viewContainer == null || !viewContainer.getState().isLiving()) {
+    public void push(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params, @Nullable final IDataCallback<Intent> callback) {
+        IViewContainer viewContainer = getLivingContainer();
+        if (viewContainer == null) {
             return;
         }
         Intent intent = new Intent();
@@ -72,13 +72,16 @@ public class ContainerNavigator implements INavigator<Class<? extends IViewProce
         intent.putExtra(AppStackUtil.STACK_ITEM_NAME, target.getName());
         intent.putExtra(AppConst.TARGET_VIEW_CLASS_NAME, target.getName());
         intent.putExtra(AppConst.TARGET_VIEW_CLASS, target);
-
-        if (viewContainer instanceof Fragment) {
-
-        } else if (viewContainer instanceof androidx.fragment.app.Fragment) {
-
+        if (callback == null) {
+            viewContainer.startActivityForResult(intent, AppConst.DEF_REQUEST_CODE);
+        } else {
+            viewContainer.startActivityForResult(intent, new OnActivityResultListener() {
+                @Override
+                public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+                    callback.onResult(resultCode, data);
+                }
+            });
         }
-        viewContainer.startActivityForResult(intent, AppConst.DEF_REQUEST_CODE);
     }
 
     @Override
@@ -94,11 +97,13 @@ public class ContainerNavigator implements INavigator<Class<? extends IViewProce
 
     @Override
     public void pop(int resultCode, @Nullable Intent data) {
-        final IViewContainer viewContainer = mContainer;
-        if (viewContainer == null || viewContainer.living()) {
+        final IViewContainer viewContainer = getLivingContainer();
+        Activity activity;
+        if (viewContainer == null || (activity = viewContainer.getCurrentActivity()) == null) {
             return;
         }
-        viewContainer.finishWithResult(resultCode, data);
+        activity.setResult(resultCode, data);
+        activity.finish();
     }
 
     @Override
@@ -125,15 +130,7 @@ public class ContainerNavigator implements INavigator<Class<? extends IViewProce
         return AppStackUtil.finishByName(target.getName());
     }
 
-    public void setContainer(IViewContainer container) {
-        this.mContainer = container;
-    }
-
-    public IViewContainer getContainer() {
-        return mContainer;
-    }
-
-    public void postData(final Intent data, final String targetName) {
+    private void postData(final Intent data, final String targetName) {
         if (data == null || targetName == null) {
             return;
         }
@@ -149,5 +146,16 @@ public class ContainerNavigator implements INavigator<Class<? extends IViewProce
                 }
             }
         }, 100);
+    }
+
+    private IViewContainer getLivingContainer() {
+        if (mContainer == null) {
+            return null;
+        }
+        final IViewContainer viewContainer = mContainer.get();
+        if (viewContainer == null || !viewContainer.getState().isLiving()) {
+            return null;
+        }
+        return viewContainer;
     }
 }

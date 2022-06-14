@@ -15,20 +15,23 @@ import com.zpf.api.OnDestroyListener;
 import com.zpf.api.OnPermissionResultListener;
 import com.zpf.api.OnTouchKeyListener;
 import com.zpf.api.OnViewStateChangedListener;
+
 import com.zpf.frame.IListenerSet;
 import com.zpf.frame.IViewState;
 import com.zpf.tool.expand.util.CancelableManager;
 import com.zpf.tool.permission.PermissionManager;
 import com.zpf.tool.stack.LifecycleState;
-import com.zpf.views.window.CustomWindowManagerImpl;
+import com.zpf.views.window.CustomWindowManager;
 
 import java.lang.reflect.Type;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Created by ZPF on 2018/6/28.
  */
+//TODO 添加用后即抛的监听管理,添加指定生命周期后执行的事件
 public class ContainerListenerController implements IListenerSet, IGroup, IViewState {
     private List<OnDestroyListener> mDestroyListenerList;
     private List<OnActivityResultListener> mActivityResultCallBackList;
@@ -38,10 +41,10 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
     private List<OnViewStateChangedListener> mViewStateList;
     private final List<IFullLifecycle> mLifecycleList = new LinkedList<>();
     private final OnLifecycleStateListener mStateListener = new OnLifecycleStateListener();
-
-    private  final Object lock = new Object();
-    private volatile CustomWindowManagerImpl mWindowManager;
+    private final Object lock = new Object();
+    private volatile CustomWindowManager mWindowManager;
     private volatile CancelableManager mCancelableManager;
+    private final HashSet<Object> disposableListeners = new HashSet<>();
 
     private boolean visible = false;
 
@@ -167,12 +170,10 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
 
     @Override
     public void onDestroy() {
+        disposableListeners.clear();
         if (mCancelableManager != null) {
             mCancelableManager.onDestroy();
         }
-//        if (mDialogController != null) {
-//            mDialogController.onDestroy();
-//        }
         if (mDestroyListenerList != null) {
             for (OnDestroyListener listener : mDestroyListenerList) {
                 listener.onDestroy();
@@ -185,24 +186,6 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
         mLifecycleList.clear();
     }
 
-
-    //    @Override
-//    public void show(ICustomWindow window) {
-//        if (mDialogController == null) {
-//            mDialogController = new DialogController();
-//        }
-//        window.toBind(mDialogController);
-//    }
-//
-//
-//    @Override
-//    public boolean close() {
-//        if (mDialogController == null) {
-//            return false;
-//        }
-//        return mDialogController.execute(-1);
-//    }
-//
     public CancelableManager getCancelableManager() {
         if (mCancelableManager == null) {
             synchronized (lock) {
@@ -214,16 +197,22 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
         return mCancelableManager;
     }
 
-    public CustomWindowManagerImpl getCustomWindowManager() {
+    public CustomWindowManager getCustomWindowManager() {
         if (mWindowManager == null) {
             synchronized (lock) {
                 if (mWindowManager == null) {
-                    mWindowManager = new CustomWindowManagerImpl();
+                    mWindowManager = new CustomWindowManager();
                 }
             }
         }
         return mWindowManager;
     }
+
+    public void addDisposable(@NonNull Object listener, @Nullable Type listenerClass) {
+        disposableListeners.add(listener);
+        add(listener, listenerClass);
+    }
+
     @Override
     public boolean add(@NonNull Object listener, @Nullable Type listenerClass) {
         boolean result = false;
@@ -347,6 +336,9 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
     public void onParamChanged(Bundle newParams) {
         if (mViewStateList != null) {
             for (OnViewStateChangedListener listener : mViewStateList) {
+                if (disposableListeners.contains(listener)) {
+
+                }
                 listener.onParamChanged(newParams);
             }
         }
@@ -375,7 +367,7 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
 
     @Override
     public boolean isInteractive() {
-        return mStateListener.getState() == LifecycleState.AFTER_RESUME;
+        return visible && mStateListener.getState() == LifecycleState.AFTER_RESUME;
     }
 
     @Override

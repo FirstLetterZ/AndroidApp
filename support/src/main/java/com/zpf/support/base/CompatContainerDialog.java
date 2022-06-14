@@ -1,6 +1,5 @@
 package com.zpf.support.base;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,26 +11,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialog;
 
-import com.zpf.api.IBackPressInterceptor;
 import com.zpf.api.ICancelable;
-import com.zpf.api.ICustomWindow;
 import com.zpf.api.IManager;
 import com.zpf.api.OnActivityResultListener;
 import com.zpf.api.OnAttachListener;
 import com.zpf.api.OnDestroyListener;
+import com.zpf.api.OnPermissionResultListener;
 import com.zpf.frame.ILoadingManager;
-import com.zpf.frame.INavigator;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewLinker;
 import com.zpf.frame.IViewProcessor;
-import com.zpf.frame.IViewStateListener;
-import com.zpf.support.constant.AppConst;
+import com.zpf.frame.IViewState;
 import com.zpf.support.constant.ContainerType;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
-import com.zpf.tool.expand.util.LogUtil;
-import com.zpf.tool.global.CentralManager;
-import com.zpf.tool.stack.LifecycleState;
+import com.zpf.tool.expand.util.Logger;
+import com.zpf.views.window.ICustomWindow;
+import com.zpf.views.window.ICustomWindowManager;
 
 import java.lang.reflect.Type;
 
@@ -39,14 +35,13 @@ import java.lang.reflect.Type;
  * 基于AppCompatDialog的视图容器层
  * Created by ZPF on 2018/6/14.
  */
-public class CompatContainerDialog extends AppCompatDialog implements ICustomWindow, IViewContainer, IViewStateListener,
-        OnDestroyListener, OnActivityResultListener {
+public class CompatContainerDialog extends AppCompatDialog implements IViewContainer, ICustomWindow
+        , OnDestroyListener, OnActivityResultListener, OnPermissionResultListener {
     protected final ContainerListenerController mController = new ContainerListenerController();
     private Bundle mParams;
     private IViewProcessor mViewProcessor;
     private final IViewContainer mParentContainer;
-    protected IManager<ICustomWindow> listener;
-    protected long bindId = -1;
+    private ICustomWindowManager mWindowManager;
 
     public CompatContainerDialog(@NonNull IViewContainer viewContainer, Class<? extends IViewProcessor> targetClass) {
         this(viewContainer, 0, targetClass, null);
@@ -62,13 +57,12 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
         super(viewContainer.getCurrentActivity(), themeResId);
         mParentContainer = viewContainer;
         mParams = params;
-        mParentContainer.addListener(this, IBackPressInterceptor.class);
         if (mViewProcessor == null) {
             mViewProcessor = ContainerController.createViewProcessor(this, targetClass);
             if (mViewProcessor != null) {
-                mController.addListener(mViewProcessor, null);
+                mController.add(mViewProcessor, null);
             } else {
-                LogUtil.w("IViewProcessor is null!");
+                Logger.w("IViewProcessor is null!");
             }
         }
         Window window = getWindow();
@@ -102,31 +96,6 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
     }
 
     @Override
-    public void show() {
-        show(this);
-    }
-
-    @Override
-    public CompatContainerDialog toBind(IManager<ICustomWindow> manager) {
-        this.listener = manager;
-        if (manager != null) {
-            bindId = manager.bind(this);
-        } else {
-            bindId = -1;
-        }
-        return this;
-    }
-
-    @Override
-    public boolean unBind(long bindId) {
-        if (listener != null) {
-            listener.remove(bindId);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mController.onCreate(savedInstanceState);
@@ -135,25 +104,42 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
     @Override
     public void onStart() {
         super.onStart();
+        if (mWindowManager != null) {
+            mWindowManager.onShow(this);
+        }
+        mParentContainer.add(this, OnDestroyListener.class);
+        mParentContainer.add(this, OnActivityResultListener.class);
+        mParentContainer.add(this, OnPermissionResultListener.class);
         mController.onStart();
         onVisibleChanged(true);
-        onActivityChanged(true);
     }
 
     @Override
     public void onStop() {
-        if (listener != null) {
-            listener.remove(bindId);
-        }
         super.onStop();
+        if (mWindowManager != null) {
+            mWindowManager.onClose(this);
+        }
         mController.onStop();
-        onActivityChanged(false);
         onVisibleChanged(false);
+        mParentContainer.remove(this, OnDestroyListener.class);
+        mParentContainer.remove(this, OnActivityResultListener.class);
+        mParentContainer.remove(this, OnPermissionResultListener.class);
     }
 
     @Override
     public void onDestroy() {
         mController.onDestroy();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        mController.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        mController.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
@@ -165,7 +151,7 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mController.onKeyDown(keyCode,event)) {
+        if (mController.onKeyDown(keyCode, event)) {
             return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -173,7 +159,7 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (mController.onKeyUp(keyCode,event)) {
+        if (mController.onKeyUp(keyCode, event)) {
             return true;
         }
         return super.onKeyUp(keyCode, event);
@@ -194,89 +180,41 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
     }
 
     @Override
-    public void cancel() {
-        mParentContainer.close();
-    }
-
-    @Override
-    @LifecycleState
-    public int getState() {
-        return mController.getState();
-    }
-
-    @Override
-    public boolean living() {
-        return mController.living();
-    }
-
-    @Override
-    public boolean interactive() {
-        return mController.interactive();
-    }
-
-    @Override
-    public boolean visible() {
-        return mController.visible();
-    }
-
-    @Override
-    public Intent getIntent() {
-        return mParentContainer.getIntent();
-    }
-
-    @Override
     public Activity getCurrentActivity() {
         return mParentContainer.getCurrentActivity();
     }
 
     @Override
-    public void startActivity(Intent intent) {
-        mParentContainer.startActivity(intent);
+    public ICustomWindow setManager(ICustomWindowManager iCustomWindowManager) {
+        mWindowManager = iCustomWindowManager;
+        return this;
     }
 
     @Override
-    public void startActivity(Intent intent, @Nullable Bundle options) {
-        mParentContainer.startActivity(intent, options);
+    public ICustomWindowManager getCustomWindowManager() {
+        return mWindowManager;
     }
 
     @Override
-    public void startActivities(Intent[] intents) {
-        mParentContainer.startActivities(intents);
+    public void show() {
+        if (mWindowManager == null || mWindowManager.shouldShowImmediately(this)) {
+            super.show();
+        }
     }
 
     @Override
-    public void startActivities(Intent[] intents, @Nullable Bundle options) {
-        mParentContainer.startActivities(intents, options);
-    }
-
-    @Override
-    public void startActivityForResult(Intent intent, int requestCode) {
+    public void startActivityForResult(@NonNull Intent intent, int requestCode) {
         mParentContainer.startActivityForResult(intent, requestCode);
     }
 
-    @SuppressLint("RestrictedApi")
     @Override
-    public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
-        mParentContainer.startActivityForResult(intent, requestCode, options);
+    public void startActivityForResult(@NonNull Intent intent, @NonNull OnActivityResultListener listener) {
+        mParentContainer.startActivityForResult(intent, listener);
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        mController.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
-    public void show(final ICustomWindow window) {
-        CentralManager.runOnMainTread(new Runnable() {
-            @Override
-            public void run() {
-                if (mParentContainer != null) {
-                    mParentContainer.show(window);
-                } else {
-                    mController.show(window);
-                }
-            }
-        });
+    public IViewState getState() {
+        return mController;
     }
 
     @Override
@@ -290,26 +228,18 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
     }
 
     @Override
-    public boolean addListener(Object listener, @Nullable Type listenerClass) {
-        return mController.addListener(listener, listenerClass);
+    public boolean add(@NonNull Object listener, @Nullable Type listenerClass) {
+        return mController.add(listener, listenerClass);
     }
 
     @Override
-    public boolean removeListener(Object listener, @Nullable Type listenerClass) {
-        return mController.removeListener(listener, listenerClass);
+    public boolean remove(@NonNull Object listener, @Nullable Type listenerClass) {
+        return mController.remove(listener, listenerClass);
     }
 
     @Override
-    public void finishWithResult(int resultCode, Intent data) {
-        super.dismiss();
-        if (mParentContainer instanceof OnActivityResultListener) {
-            ((OnActivityResultListener) mParentContainer).onActivityResult(AppConst.DEF_REQUEST_CODE, resultCode, data);
-        }
-    }
-
-    @Override
-    public void finish() {
-        super.dismiss();
+    public int size(@Nullable Type asType) {
+        return mController.size(asType);
     }
 
     @Override
@@ -378,11 +308,6 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
     }
 
     @Override
-    public INavigator<Class<? extends IViewProcessor>> getNavigator() {
-        return null;
-    }
-
-    @Override
     public void onParamChanged(Bundle newParams) {
         mController.onParamChanged(newParams);
     }
@@ -390,11 +315,6 @@ public class CompatContainerDialog extends AppCompatDialog implements ICustomWin
     @Override
     public void onVisibleChanged(boolean visible) {
         mController.onVisibleChanged(visible);
-    }
-
-    @Override
-    public void onActivityChanged(boolean activity) {
-        mController.onActivityChanged(activity);
     }
 
     public void setArguments(@Nullable Bundle args) {

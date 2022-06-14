@@ -16,24 +16,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.zpf.api.ICancelable;
-import com.zpf.api.ICustomWindow;
-import com.zpf.api.ILayoutId;
 import com.zpf.api.IManager;
 import com.zpf.api.IReceiver;
 import com.zpf.api.ITransRecord;
-import com.zpf.api.IconText;
-import com.zpf.frame.IRootLayout;
-import com.zpf.frame.ITitleBar;
 import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewLinker;
 import com.zpf.frame.IViewProcessor;
+import com.zpf.frame.IViewState;
 import com.zpf.support.constant.AppConst;
-import com.zpf.support.model.ContainerNavigator;
 import com.zpf.support.model.IconTextEntry;
 import com.zpf.support.model.TitleBarEntry;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.PermissionUtil;
-import com.zpf.support.view.ContainerRootLayout;
 import com.zpf.support.view.PhonePageLayout;
 import com.zpf.tool.SafeClickListener;
 import com.zpf.tool.expand.event.EventManager;
@@ -44,8 +38,10 @@ import com.zpf.tool.permission.PermissionDescription;
 import com.zpf.tool.permission.PermissionManager;
 import com.zpf.tool.permission.interfaces.IPermissionResultListener;
 import com.zpf.views.type.ITopBar;
+import com.zpf.views.type.IconText;
+import com.zpf.views.window.ICustomWindowManager;
 
-import java.lang.reflect.Type;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -54,15 +50,16 @@ import java.util.List;
  */
 public class ViewProcessor implements IViewProcessor {
     protected final IViewContainer mContainer;
+    @Nullable
     protected final ITopBar mTitleBar;
     protected final PhonePageLayout mRootLayout;
-    protected final ContainerNavigator mNavigator;
     protected final SafeClickListener safeClickListener = new SafeClickListener() {
         @Override
         public void click(View v) {
             ViewProcessor.this.onClick(v);
         }
     };
+    private LinkedList<Runnable> waitRunList;
 
     protected final IReceiver<IEvent> receiver = new IReceiver<IEvent>() {
 
@@ -74,7 +71,7 @@ public class ViewProcessor implements IViewProcessor {
 
         @Override
         public void onReceive(@NonNull IEvent event, @NonNull ITransRecord record) {
-            if (living()) {
+            if (mContainer.getState().isLiving()) {
                 handleEvent(event, record);
             }
         }
@@ -83,28 +80,20 @@ public class ViewProcessor implements IViewProcessor {
     public ViewProcessor() {
         this.mContainer = ContainerController.mInitingViewContainer;
         mRootLayout = onCreateRootLayout(getContext());
-        mTitleBar = mRootLayout.getTitleBar();
+        mTitleBar = mRootLayout.getTopBar();
         View layoutView = getLayoutView(getContext());
         if (layoutView != null) {
             mRootLayout.setContentView(layoutView);
         } else {
-            int layoutId = 0;
-            ILayoutId iLayoutId = getClass().getAnnotation(ILayoutId.class);
-            if (iLayoutId != null) {
-                layoutId = iLayoutId.value();
-            }
-            if (layoutId == 0) {
-                layoutId = getLayoutId();
-            }
+            int layoutId = getLayoutId();
             if (layoutId != 0) {
                 mRootLayout.setContentView(layoutId);
             }
         }
-        mNavigator = new ContainerNavigator(mContainer);
     }
 
-    protected IRootLayout onCreateRootLayout(Context context) {
-        return new ContainerRootLayout(context);
+    protected PhonePageLayout onCreateRootLayout(Context context) {
+        return new PhonePageLayout(context);
     }
 
     @Override
@@ -172,13 +161,14 @@ public class ViewProcessor implements IViewProcessor {
     }
 
     @Override
+    @CallSuper
     public void onVisibleChanged(boolean visibility) {
-
-    }
-
-    @Override
-    public void onActivityChanged(boolean activity) {
-
+        if (visibility && waitRunList != null) {
+            for (Runnable runnable : waitRunList) {
+                runnable.run();
+            }
+            waitRunList.clear();
+        }
     }
 
     @Override
@@ -201,13 +191,30 @@ public class ViewProcessor implements IViewProcessor {
         }, permissions);
     }
 
+    @Override
+    public void runAfterVisible(Runnable runnable, boolean nextTime) {
+        if (runnable == null) {
+            return;
+        }
+        if (nextTime || !mContainer.getState().isVisible()) {
+            LinkedList<Runnable> list = waitRunList;
+            if (list == null) {
+                list = new LinkedList<>();
+                waitRunList = list;
+            }
+            list.add(runnable);
+        } else {
+            runnable.run();
+        }
+    }
+
     public <T extends View> T bind(@IdRes int viewId) {
         return bind(viewId, safeClickListener);
     }
 
     @Override
     public <T extends View> T bind(@IdRes int viewId, View.OnClickListener clickListener) {
-        T result = mRootLayout.getLayout().findViewById(viewId);
+        T result = mRootLayout.getRootView().findViewById(viewId);
         if (result != null) {
             result.setOnClickListener(clickListener);
         }
@@ -234,12 +241,12 @@ public class ViewProcessor implements IViewProcessor {
 
     @Override
     public <T extends View> T find(@IdRes int viewId) {
-        return mRootLayout.getLayout().findViewById(viewId);
+        return mRootLayout.getRootView().findViewById(viewId);
     }
 
     @Override
     public View getView() {
-        return mRootLayout.getLayout();
+        return mRootLayout.getRootView();
     }
 
     @Override
@@ -262,6 +269,11 @@ public class ViewProcessor implements IViewProcessor {
     }
 
     @Override
+    public IViewState getState() {
+        return mContainer.getState();
+    }
+
+    @Override
     public boolean initWindow(@NonNull Window window) {
         return false;
     }
@@ -272,63 +284,71 @@ public class ViewProcessor implements IViewProcessor {
         return mContainer.getParams();
     }
 
-    protected void bindTitleBar(IRootLayout rootLayout) {
+    @Override
+    public ICustomWindowManager getCustomWindowManager() {
+        return mContainer.getCustomWindowManager();
+    }
+
+    protected void bindTitleBar(PhonePageLayout rootLayout) {
         if (rootLayout == null) {
+            return;
+        }
+        final ITopBar topBar = rootLayout.getTopBar();
+        if (topBar == null) {
             return;
         }
         final TitleBarEntry titleBarEntry = getParams().getParcelable(AppConst.TITLE_ENTRY);
         if (titleBarEntry != null) {
             if (!TextUtils.isEmpty(titleBarEntry.leftLayoutAction)) {
-                rootLayout.getTitleBar().getLeftLayout().setOnClickListener(new SafeClickListener() {
+                topBar.getLeftLayout().setOnClickListener(new SafeClickListener() {
                     @Override
                     public void click(View v) {
-                        handleEvent(new SimpleEvent(-1, null, titleBarEntry.leftLayoutAction),null);
+                        handleEvent(new SimpleEvent(-1, null, titleBarEntry.leftLayoutAction), null);
                     }
                 });
             }
             if (!TextUtils.isEmpty(titleBarEntry.rightLayoutAction)) {
-                rootLayout.getTitleBar().getRightLayout().setOnClickListener(new SafeClickListener() {
+                topBar.getRightLayout().setOnClickListener(new SafeClickListener() {
                     @Override
                     public void click(View v) {
-                        handleEvent(new SimpleEvent(-1, null, titleBarEntry.rightLayoutAction),null);
+                        handleEvent(new SimpleEvent(-1, null, titleBarEntry.rightLayoutAction), null);
                     }
                 });
             }
             if (titleBarEntry.hideStatusBar) {
-                rootLayout.getStatusBar().setVisibility(View.GONE);
+                topBar.getStatusBar().setVisibility(View.GONE);
             } else {
-                rootLayout.getStatusBar().setVisibility(View.VISIBLE);
+                topBar.getStatusBar().setVisibility(View.VISIBLE);
             }
             if (titleBarEntry.hideTitleBar) {
-                rootLayout.getTitleBar().getLayout().setVisibility(View.GONE);
+                topBar.getView().setVisibility(View.GONE);
             } else {
-                rootLayout.getTitleBar().getLayout().setVisibility(View.VISIBLE);
+                topBar.getView().setVisibility(View.VISIBLE);
                 if (titleBarEntry.leftIconEntry != null) {
-                    bindIconText(rootLayout.getTitleBar().getLeftImage(), titleBarEntry.leftIconEntry);
+                    bindIconText(topBar.getLeftImage(), titleBarEntry.leftIconEntry);
                 }
                 if (titleBarEntry.leftTextEntry != null) {
-                    bindIconText(rootLayout.getTitleBar().getLeftText(), titleBarEntry.leftTextEntry);
+                    bindIconText(topBar.getLeftText(), titleBarEntry.leftTextEntry);
                 }
                 if (titleBarEntry.rightIconEntry != null) {
-                    bindIconText(rootLayout.getTitleBar().getRightImage(), titleBarEntry.rightIconEntry);
+                    bindIconText(topBar.getRightImage(), titleBarEntry.rightIconEntry);
                 }
                 if (titleBarEntry.rightTextEntry != null) {
-                    bindIconText(rootLayout.getTitleBar().getRightText(), titleBarEntry.rightTextEntry);
+                    bindIconText(topBar.getRightText(), titleBarEntry.rightTextEntry);
                 }
                 if (titleBarEntry.titleEntry != null) {
-                    bindIconText(rootLayout.getTitleBar().getTitle(), titleBarEntry.titleEntry);
+                    bindIconText(topBar.getTitle(), titleBarEntry.titleEntry);
                 }
                 if (titleBarEntry.subtitleEntry != null) {
-                    bindIconText(rootLayout.getTitleBar().getSubTitle(), titleBarEntry.subtitleEntry);
+                    bindIconText(topBar.getSubTitle(), titleBarEntry.subtitleEntry);
                 }
             }
         } else {
             if (mContainer instanceof Activity) {
-                rootLayout.getTitleBar().getLayout().setVisibility(View.VISIBLE);
-                rootLayout.getStatusBar().setVisibility(View.VISIBLE);
+                topBar.getView().setVisibility(View.VISIBLE);
+                topBar.getStatusBar().setVisibility(View.VISIBLE);
             } else {
-                rootLayout.getTitleBar().getLayout().setVisibility(View.GONE);
-                rootLayout.getStatusBar().setVisibility(View.GONE);
+                topBar.getView().setVisibility(View.GONE);
             }
         }
     }
@@ -388,31 +408,6 @@ public class ViewProcessor implements IViewProcessor {
     }
 
     @Override
-    public int getState() {
-        return mContainer.getState();
-    }
-
-    @Override
-    public boolean living() {
-        return mContainer.living();
-    }
-
-    @Override
-    public boolean interactive() {
-        return mContainer.interactive();
-    }
-
-    @Override
-    public boolean visible() {
-        return mContainer.visible();
-    }
-
-    @Override
-    public void show(ICustomWindow window) {
-        mContainer.show(window);
-    }
-
-    @Override
     public boolean close() {
         return mContainer.close();
     }
@@ -420,16 +415,6 @@ public class ViewProcessor implements IViewProcessor {
     @Override
     public IManager<ICancelable> getCancelableManager() {
         return mContainer.getCancelableManager();
-    }
-
-    @Override
-    public boolean addListener(Object listener, @Nullable Type listenerClass) {
-        return mContainer.addListener(listener, listenerClass);
-    }
-
-    @Override
-    public boolean removeListener(Object listener, @Nullable Type listenerClass) {
-        return mContainer.removeListener(listener, listenerClass);
     }
 
     @Override

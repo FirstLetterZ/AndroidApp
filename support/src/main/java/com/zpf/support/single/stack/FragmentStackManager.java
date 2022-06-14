@@ -1,6 +1,5 @@
 package com.zpf.support.single.stack;
 
-import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -12,8 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
+import com.zpf.api.IDataCallback;
 import com.zpf.api.INavigator;
-import com.zpf.support.base.ViewProcessor;
+import com.zpf.frame.IViewProcessor;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.single.OnStackEmptyListener;
 import com.zpf.support.util.FragmentHelper;
@@ -26,7 +26,8 @@ import java.util.List;
 /**
  * Created by ZPF on 2019/5/20.
  */
-public class FragmentStackManager implements INavigator<Class<? extends ViewProcessor>> {
+@RequiresApi(api = Build.VERSION_CODES.O)
+public class FragmentStackManager implements INavigator<Class<? extends IViewProcessor>, Intent, Intent> {
     private final LinkedList<FragmentElementInfo> stackList = new LinkedList<>();
     private OnStackEmptyListener emptyListener;
     private final FragmentManager fragmentManager;
@@ -41,9 +42,18 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
         this.emptyListener = emptyListener;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
-    public void push(Class<? extends ViewProcessor> target, Intent params, int requestCode) {
+    public void push(@NonNull Class<? extends IViewProcessor> target) {
+        this.push(target, null, null);
+    }
+
+    @Override
+    public void push(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params) {
+        this.push(target, params, null);
+    }
+
+    @Override
+    public void push(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params, @Nullable final IDataCallback<Intent> callback) {
         String tag = target.getName();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         Fragment targetFragment = null;
@@ -51,7 +61,7 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
             params = new Intent();
             params.putExtra(AppConst.TARGET_VIEW_CLASS, target);
         }
-        params.putExtra(AppConst.REQUEST_CODE, requestCode);
+        final int requestCode = params.getIntExtra(AppConst.REQUEST_CODE, AppConst.DEF_REQUEST_CODE);
         List<Fragment> fragmentList = fragmentManager.getFragments();
         if (fragmentList != null && fragmentList.size() > 0) {
             for (Fragment f : fragmentList) {
@@ -100,18 +110,6 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
             }
         }
         transaction.commitNowAllowingStateLoss();
-    }
-
-    @TargetApi(Build.VERSION_CODES.O)
-    @Override
-    public void push(@NonNull Class<? extends ViewProcessor> target, Intent params) {
-        this.push(target, params, AppConst.DEF_REQUEST_CODE);
-    }
-
-    @TargetApi(Build.VERSION_CODES.O)
-    @Override
-    public void push(@NonNull Class<? extends ViewProcessor> target) {
-        this.push(target, null, AppConst.DEF_REQUEST_CODE);
     }
 
     @Override
@@ -193,7 +191,7 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
     }
 
     @Override
-    public boolean popTo(@NonNull Class<? extends ViewProcessor> target, @Nullable Intent data) {
+    public boolean popTo(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent data) {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         FragmentElementInfo lastElementInfo;
         synchronized (stackList) {
@@ -231,13 +229,13 @@ public class FragmentStackManager implements INavigator<Class<? extends ViewProc
     }
 
     @Override
-    public void replace(@NonNull Class<? extends ViewProcessor> target, @Nullable Intent params) {
+    public void replace(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params) {
         this.pop();
         push(target, params);
     }
 
     @Override
-    public boolean remove(@NonNull Class<? extends ViewProcessor> target) {
+    public boolean remove(@NonNull Class<? extends IViewProcessor> target) {
         boolean result = false;
         synchronized (stackList) {
             FragmentElementInfo lastElementInfo = stackList.peekLast();

@@ -77,6 +77,11 @@ public class PhonePageLayout extends ViewGroup implements IDecorative<View>, Vie
         }
     }
 
+    @Nullable
+    public ITopBar getTopBar() {
+        return topBar;
+    }
+
     public View getContentView() {
         return contentView;
     }

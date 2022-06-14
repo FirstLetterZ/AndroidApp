@@ -13,9 +13,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class MergeRequest {
 
-    public static final int RECEIVE_NO_FAIL = 0;
-    public static final int RECEIVE_ALL_SUCCESS = 1;
-    public static final int RECEIVE_ALL_RESULT = -1;
+    @interface ReceiveStrategy {
+        int RECEIVE_NO_FAIL = 0;//只有全部成功才返回响应数据
+        int RECEIVE_ALL_SUCCESS = 1;//返回所有成功接口的响应数据
+        int RECEIVE_ALL_RESULT = -1;//返回所有接口的响应数据，不论是否成功
+    }
 
     private final HashMap<NetRequest<?>, ProxyResponseListener<?>> calls = new HashMap<>();
     private final AtomicInteger requestCount = new AtomicInteger(0);
@@ -64,6 +66,9 @@ public class MergeRequest {
         return this;
     }
 
+    /**
+     * @param receiveStrategy @see {@link MergeRequest.ReceiveStrategy}
+     */
     public void load(int receiveStrategy) {
         if (!done) {
             return;
@@ -118,11 +123,11 @@ public class MergeRequest {
             onlySuccess = true;
         } else {
             //只有全成功才发送
-            if (strategy == RECEIVE_NO_FAIL) {
+            if (strategy == ReceiveStrategy.RECEIVE_NO_FAIL) {
                 onLoadFinish();
                 return;
             }
-            onlySuccess = strategy >= RECEIVE_ALL_SUCCESS;
+            onlySuccess = strategy >= ReceiveStrategy.RECEIVE_ALL_SUCCESS;
         }
         Iterator<Map.Entry<NetRequest<?>, ProxyResponseListener<?>>> iterator = calls.entrySet().iterator();
         while (iterator.hasNext()) {

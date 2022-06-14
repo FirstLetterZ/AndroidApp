@@ -39,7 +39,8 @@ public class SinglePageActivity extends ContainerActivity {
         fragmentStackManager.setEmptyListener(new OnStackEmptyListener() {
             @Override
             public void onEmpty(Intent data) {
-                finishWithResult(AppConst.POLL_BACK_RESULT_CODE, data);
+                setResult(AppConst.POLL_BACK_RESULT_CODE, data);
+                finish();
             }
         });
         Class<? extends ViewProcessor> targetViewClass = null;

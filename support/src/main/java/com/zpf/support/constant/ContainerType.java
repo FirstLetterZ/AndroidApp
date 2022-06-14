@@ -21,6 +21,7 @@ import java.lang.annotation.Target;
         ContainerType.CONTAINER_SINGLE_COMPAT_FRAGMENT,
         ContainerType.CONTAINER_CUSTOM,
         ContainerType.CONTAINER_COMPAT_CUSTOM,
+        ContainerType.CONTAINER_DIALOG,
         ContainerType.CONTAINER_OTHER_CUSTOM
 })
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})

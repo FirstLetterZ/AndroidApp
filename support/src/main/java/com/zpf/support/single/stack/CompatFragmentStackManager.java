@@ -9,7 +9,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.zpf.frame.INavigator;
+import com.zpf.api.IDataCallback;
+import com.zpf.api.INavigator;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.support.constant.AppConst;
 import com.zpf.support.single.OnStackEmptyListener;
@@ -23,7 +24,7 @@ import java.util.List;
 /**
  * Created by ZPF on 2019/5/20.
  */
-public class CompatFragmentStackManager implements INavigator<Class<? extends IViewProcessor>> {
+public class CompatFragmentStackManager implements INavigator<Class<? extends IViewProcessor>, Intent, Intent> {
     private final LinkedList<FragmentElementInfo> stackList = new LinkedList<>();
     private OnStackEmptyListener emptyListener;
     private final FragmentManager fragmentManager;
@@ -39,7 +40,17 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
     }
 
     @Override
-    public void push(Class<? extends IViewProcessor> target, Intent params, int requestCode) {
+    public void push(@NonNull Class<? extends IViewProcessor> target) {
+        this.push(target, null, null);
+    }
+
+    @Override
+    public void push(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params) {
+        this.push(target, params, null);
+    }
+
+    @Override
+    public void push(@NonNull Class<? extends IViewProcessor> target,  @Nullable Intent params, @Nullable final IDataCallback<Intent> callback) {
         String tag = target.getName();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         Fragment targetFragment = null;
@@ -47,7 +58,7 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
             params = new Intent();
             params.putExtra(AppConst.TARGET_VIEW_CLASS, target);
         }
-        params.putExtra(AppConst.REQUEST_CODE, requestCode);
+        final int requestCode=params.getIntExtra(AppConst.REQUEST_CODE, AppConst.DEF_REQUEST_CODE);
         List<Fragment> fragmentList = fragmentManager.getFragments();
         if (fragmentList != null && fragmentList.size() > 0) {
             for (Fragment f : fragmentList) {
@@ -96,16 +107,6 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
             }
         }
         transaction.commitNowAllowingStateLoss();
-    }
-
-    @Override
-    public void push(@NonNull Class<? extends IViewProcessor> target, Intent params) {
-        this.push(target, params, AppConst.DEF_REQUEST_CODE);
-    }
-
-    @Override
-    public void push(@NonNull Class<? extends IViewProcessor> target) {
-        this.push(target, null, AppConst.DEF_REQUEST_CODE);
     }
 
     @Override
