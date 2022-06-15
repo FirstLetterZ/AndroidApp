@@ -48,7 +48,7 @@ public class LoginView extends ViewProcessor {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mTitleBar.getTitle().setText("测试");
+        mTopBar.getTitle().setText("测试");
         bindAllChildren(mRootLayout.getContentView(), Button.class);
         loadListener = new AsyncLoadListener() {
             @Override

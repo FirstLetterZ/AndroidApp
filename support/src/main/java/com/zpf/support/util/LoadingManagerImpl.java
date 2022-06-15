@@ -56,4 +56,5 @@ public class LoadingManagerImpl implements ILoadingManager {
     public void setLoadingListener(OnAttachListener onAttachListener) {
         this.attachListener = onAttachListener;
     }
+
 }

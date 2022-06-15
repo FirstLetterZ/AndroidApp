@@ -52,8 +52,8 @@ android {
 }
 
 dependencies {
-    api project(':support')
-//    api rootProject.ext.dependencies.support
+//    api project(':support')
+    api rootProject.ext.dependencies.support
     api project(':refresh')
     api project(':network')
     api project(':binding')

@@ -10,13 +10,14 @@ import com.zpf.tool.network.base.OnResponseListener;
 import com.zpf.tool.network.model.RequestType;
 import com.zpf.tool.global.CentralManager;
 
-public abstract class NetRequest<T> implements OnDestroyListener, ICancelable {
+public abstract class NetRequest<R, T> implements OnDestroyListener, ICancelable {
     protected boolean destroyed = false;
     protected volatile boolean done = true;
     private volatile long lastIgnore = 0;
+    protected R requestParam = null;
     protected T resultData = null;
     protected OnResponseListener<T> responseListener;
-    protected ILocalCacheManager<T> localCacheManager;
+    protected ILocalCacheManager<R, T> localCacheManager;
 
     @Override
     public void onDestroy() {
@@ -62,7 +63,7 @@ public abstract class NetRequest<T> implements OnDestroyListener, ICancelable {
         return !destroyed;
     }
 
-    public NetRequest<T> setResponseListener(OnResponseListener<T> responseListener) {
+    public NetRequest<R, T> setResponseListener(OnResponseListener<T> responseListener) {
         if (this.responseListener instanceof ProxyResponseListener) {
             ((ProxyResponseListener<T>) this.responseListener).realListener = responseListener;
         } else {
@@ -75,12 +76,12 @@ public abstract class NetRequest<T> implements OnDestroyListener, ICancelable {
         return responseListener;
     }
 
-    public NetRequest<T> setCacheManager(ILocalCacheManager<T> cacheManager) {
+    public NetRequest<R, T> setCacheManager(ILocalCacheManager<R, T> cacheManager) {
         localCacheManager = cacheManager;
         return this;
     }
 
-    public NetRequest<T> bindController(IGroup controller) {
+    public NetRequest<R, T> bindController(IGroup controller) {
         controller.add(this, OnDestroyListener.class);
         return this;
     }
@@ -109,7 +110,7 @@ public abstract class NetRequest<T> implements OnDestroyListener, ICancelable {
         if (RequestType.checkFlag(typeFlags, RequestType.FLAG_USE_CACHE)) {
             if (localCacheManager != null) {
                 try {
-                    resultData = localCacheManager.searchLocal();
+                    resultData = localCacheManager.searchLocal(requestParam);
                 } catch (Exception e) {
                     //
                 }
@@ -118,16 +119,16 @@ public abstract class NetRequest<T> implements OnDestroyListener, ICancelable {
         if (resultData != null) {
             if (RequestType.checkFlag(typeFlags, RequestType.FLAG_UPDATE_CACHE)) {
                 notifyResponse(true, ErrorCode.LOAD_LOCAL_DATA, resultData, null);
-                loadDataFromNetwork(typeFlags);
+                loadDataFromNetwork(requestParam, typeFlags);
             } else {
                 done = true;
                 notifyResponse(true, ErrorCode.LOAD_LOCAL_DATA, resultData, null);
             }
         } else {
-            loadDataFromNetwork(typeFlags);
+            loadDataFromNetwork(requestParam, typeFlags);
         }
     }
 
-    protected abstract void loadDataFromNetwork(int typeFlags);
+    protected abstract void loadDataFromNetwork(R param, int typeFlags);
 
 }

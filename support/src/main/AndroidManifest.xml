@@ -6,25 +6,25 @@
             android:name="com.zpf.support.base.CompatContainerActivity"
             android:configChanges="screenSize|keyboardHidden|orientation"
             android:launchMode="standard"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:theme="@style/CompatContainerActivityStyle"
             />
         <activity
             android:name="com.zpf.support.base.ContainerActivity"
             android:configChanges="screenSize|keyboardHidden|orientation"
             android:launchMode="standard"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar"
+            android:theme="@style/ContainerActivityStyle"
             />
         <activity
             android:name="com.zpf.support.single.base.CompatSinglePageActivity"
             android:configChanges="screenSize|keyboardHidden|orientation"
             android:launchMode="standard"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:theme="@style/CompatContainerActivityStyle"
             />
         <activity
             android:name="com.zpf.support.single.base.SinglePageActivity"
             android:configChanges="screenSize|keyboardHidden|orientation"
             android:launchMode="standard"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar"
+            android:theme="@style/ContainerActivityStyle"
             />
     </application>
 </manifest>

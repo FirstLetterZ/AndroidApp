@@ -11,15 +11,15 @@ import retrofit2.Call;
 /**
  * @author Created by ZPF on 2021/3/18.
  */
-public class RetrofitRequest<T> extends NetRequest<T> {
+public class RetrofitRequest<R, T> extends NetRequest<R, T> {
     private Call<T> call;
-    protected INetworkCallCreator<Call<T>> networkCallCreator;
+    protected INetworkCallCreator<R, Call<T>> networkCallCreator;
 
-    public RetrofitRequest(INetworkCallCreator<Call<T>> networkCallCreator) {
+    public RetrofitRequest(INetworkCallCreator<R, Call<T>> networkCallCreator) {
         this.networkCallCreator = networkCallCreator;
     }
 
-    public NetRequest<T> setCallCreator(INetworkCallCreator<Call<T>> callCreator) {
+    public NetRequest<R, T> setCallCreator(INetworkCallCreator<R, Call<T>> callCreator) {
         this.networkCallCreator = callCreator;
         return this;
     }
@@ -39,14 +39,14 @@ public class RetrofitRequest<T> extends NetRequest<T> {
     }
 
     @Override
-    protected void loadDataFromNetwork(int typeFlags) {
+    protected void loadDataFromNetwork(R param, int typeFlags) {
         if (destroyed || typeFlags < 0) {
             done = true;
             return;
         }
         done = false;
         if (call == null && networkCallCreator != null) {
-            call = networkCallCreator.callNetwork();
+            call = networkCallCreator.callNetwork(param);
         }
         if (call == null || destroyed) {
             done = true;

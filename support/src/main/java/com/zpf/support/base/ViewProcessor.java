@@ -51,7 +51,7 @@ import java.util.List;
 public class ViewProcessor implements IViewProcessor {
     protected final IViewContainer mContainer;
     @Nullable
-    protected final ITopBar mTitleBar;
+    protected final ITopBar mTopBar;
     protected final PhonePageLayout mRootLayout;
     protected final SafeClickListener safeClickListener = new SafeClickListener() {
         @Override
@@ -80,7 +80,7 @@ public class ViewProcessor implements IViewProcessor {
     public ViewProcessor() {
         this.mContainer = ContainerController.mInitingViewContainer;
         mRootLayout = onCreateRootLayout(getContext());
-        mTitleBar = mRootLayout.getTopBar();
+        mTopBar = mRootLayout.getTopBar();
         View layoutView = getLayoutView(getContext());
         if (layoutView != null) {
             mRootLayout.setContentView(layoutView);
@@ -90,6 +90,13 @@ public class ViewProcessor implements IViewProcessor {
                 mRootLayout.setContentView(layoutId);
             }
         }
+        if (mTopBar != null && hideTopBar()) {
+            mTopBar.getView().setVisibility(View.GONE);
+        }
+    }
+
+    protected boolean hideTopBar() {
+        return !(mContainer instanceof Activity);
     }
 
     protected PhonePageLayout onCreateRootLayout(Context context) {

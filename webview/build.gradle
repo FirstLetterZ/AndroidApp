@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-//apply from: '../publish.gradle'
+apply from: '../publish.gradle'
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
@@ -10,6 +10,7 @@ android {
 
 dependencies {
     compileOnly rootProject.ext.dependencies.api
+    compileOnly rootProject.ext.dependencies.central
     compileOnly rootProject.ext.dependencies.dataparser
-    compileOnly rootProject.ext.dependencies.annotations
+    compileOnly rootProject.ext.dependencies.annotation
 }

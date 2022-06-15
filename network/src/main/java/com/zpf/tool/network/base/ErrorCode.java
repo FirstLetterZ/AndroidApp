@@ -5,6 +5,7 @@ package com.zpf.tool.network.base;
  */
 
 public @interface ErrorCode {
+    int RESPONSE_DEFAULT = 0;
     int RESPONSE_SUCCESS = 200;
     int DATA_NULL = 700;
     int NO_SERVER_CODE = 701;

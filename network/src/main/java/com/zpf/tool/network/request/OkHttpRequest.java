@@ -13,15 +13,15 @@ import okhttp3.ResponseBody;
 /**
  * @author Created by ZPF on 2021/3/18.
  */
-public abstract class OkHttpRequest<T> extends NetRequest<T> {
+public abstract class OkHttpRequest<R, T> extends NetRequest<R, T> {
     private Call call;
-    protected INetworkCallCreator<Call> networkCallCreator;
+    protected INetworkCallCreator<R, Call> networkCallCreator;
 
-    public OkHttpRequest(INetworkCallCreator<Call> networkCallCreator) {
+    public OkHttpRequest(INetworkCallCreator<R, Call> networkCallCreator) {
         this.networkCallCreator = networkCallCreator;
     }
 
-    public NetRequest<T> setCallCreator(INetworkCallCreator<Call> callCreator) {
+    public NetRequest<R, T> setCallCreator(INetworkCallCreator<R, Call> callCreator) {
         this.networkCallCreator = callCreator;
         return this;
     }
@@ -41,14 +41,14 @@ public abstract class OkHttpRequest<T> extends NetRequest<T> {
     }
 
     @Override
-    protected void loadDataFromNetwork(int typeFlags) {
+    protected void loadDataFromNetwork(R param, int typeFlags) {
         if (destroyed || typeFlags < 0) {
             done = true;
             return;
         }
         done = false;
         if (call == null && networkCallCreator != null) {
-            call = networkCallCreator.callNetwork();
+            call = networkCallCreator.callNetwork(param);
         }
         if (call == null || destroyed) {
             done = true;

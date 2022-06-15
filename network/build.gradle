@@ -15,5 +15,5 @@ dependencies {
     compileOnly rootProject.ext.dependencies.okhttp
     compileOnly rootProject.ext.dependencies.api
     compileOnly rootProject.ext.dependencies.central
-    compileOnly rootProject.ext.dependencies.annotations
+    compileOnly rootProject.ext.dependencies.annotation
 }

@@ -1,4 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="CompatContainerActivityStyle" parent="Theme.AppCompat.Light.NoActionBar"/>
+
+    <style name="ContainerActivityStyle" parent="@android:style/Theme.Holo.Light.NoActionBar"/>
+
     <style name="bottom_dialog">
         <item name="android:windowEnterAnimation">@anim/in_from_bottom</item>
         <item name="android:windowExitAnimation">@anim/out_to_bottom</item>

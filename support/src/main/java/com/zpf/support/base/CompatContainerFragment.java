@@ -36,6 +36,7 @@ import com.zpf.support.util.FragmentHelper;
 import com.zpf.support.util.LoadingManagerImpl;
 import com.zpf.support.util.StackAnimUtil;
 import com.zpf.tool.expand.util.Logger;
+import com.zpf.tool.global.CentralManager;
 import com.zpf.tool.permission.PermissionManager;
 import com.zpf.tool.stack.LifecycleState;
 import com.zpf.views.window.ICustomWindowManager;
@@ -78,6 +79,7 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        CentralManager.onObjectInit(this);
         View theView = getView();
         if (mViewProcessor == null) {
             mViewProcessor = initViewProcessor();

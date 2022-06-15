@@ -26,6 +26,7 @@ import com.zpf.support.constant.ContainerType;
 import com.zpf.support.util.ContainerController;
 import com.zpf.support.util.ContainerListenerController;
 import com.zpf.tool.expand.util.Logger;
+import com.zpf.tool.global.CentralManager;
 import com.zpf.views.window.ICustomWindow;
 import com.zpf.views.window.ICustomWindowManager;
 
@@ -55,6 +56,7 @@ public class CompatContainerDialog extends AppCompatDialog implements IViewConta
     public CompatContainerDialog(@NonNull IViewContainer viewContainer, int themeResId,
                                  Class<? extends IViewProcessor> targetClass, @Nullable Bundle params) {
         super(viewContainer.getCurrentActivity(), themeResId);
+        CentralManager.onObjectInit(this);
         mParentContainer = viewContainer;
         mParams = params;
         if (mViewProcessor == null) {

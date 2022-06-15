@@ -19,7 +19,7 @@ public class MergeRequest {
         int RECEIVE_ALL_RESULT = -1;//返回所有接口的响应数据，不论是否成功
     }
 
-    private final HashMap<NetRequest<?>, ProxyResponseListener<?>> calls = new HashMap<>();
+    private final HashMap<NetRequest<?, ?>, ProxyResponseListener<?>> calls = new HashMap<>();
     private final AtomicInteger requestCount = new AtomicInteger(0);
     private final AtomicInteger failCount = new AtomicInteger(0);
     private volatile boolean done = true;
@@ -50,7 +50,7 @@ public class MergeRequest {
         this.loadingListener = loadingListener;
     }
 
-    public <T> MergeRequest merge(@NonNull NetRequest<T> netCall, int loadFlags) {
+    public <T> MergeRequest merge(@NonNull NetRequest<?, T> netCall, int loadFlags) {
         OnResponseListener<T> responseListener = netCall.getResponseListener();
         ProxyResponseListener<T> proxyResponseListener;
         if (responseListener instanceof ProxyResponseListener) {
@@ -83,10 +83,10 @@ public class MergeRequest {
         if (loadingListener != null) {
             this.loadingListener.onLoading(true);
         }
-        Iterator<Map.Entry<NetRequest<?>, ProxyResponseListener<?>>> iterator = calls.entrySet().iterator();
+        Iterator<Map.Entry<NetRequest<?, ?>, ProxyResponseListener<?>>> iterator = calls.entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<NetRequest<?>, ProxyResponseListener<?>> entry = iterator.next();
-            NetRequest<?> netCall = entry.getKey();
+            Map.Entry<NetRequest<?, ?>, ProxyResponseListener<?>> entry = iterator.next();
+            NetRequest<?, ?> netCall = entry.getKey();
             ProxyResponseListener<?> listener = entry.getValue();
             if (netCall != null && netCall.isEnable()) {
                 netCall.load(listener.loadType);
@@ -100,10 +100,10 @@ public class MergeRequest {
     }
 
     public void cancel() {
-        Iterator<Map.Entry<NetRequest<?>, ProxyResponseListener<?>>> iterator = calls.entrySet().iterator();
+        Iterator<Map.Entry<NetRequest<?, ?>, ProxyResponseListener<?>>> iterator = calls.entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<NetRequest<?>, ProxyResponseListener<?>> entry = iterator.next();
-            NetRequest<?> netCall = entry.getKey();
+            Map.Entry<NetRequest<?, ?>, ProxyResponseListener<?>> entry = iterator.next();
+            NetRequest<?, ?> netCall = entry.getKey();
             if (netCall != null && netCall.isEnable()) {
                 netCall.cancel();
             } else {
@@ -129,10 +129,10 @@ public class MergeRequest {
             }
             onlySuccess = strategy >= ReceiveStrategy.RECEIVE_ALL_SUCCESS;
         }
-        Iterator<Map.Entry<NetRequest<?>, ProxyResponseListener<?>>> iterator = calls.entrySet().iterator();
+        Iterator<Map.Entry<NetRequest<?, ?>, ProxyResponseListener<?>>> iterator = calls.entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<NetRequest<?>, ProxyResponseListener<?>> entry = iterator.next();
-            NetRequest<?> netCall = entry.getKey();
+            Map.Entry<NetRequest<?, ?>, ProxyResponseListener<?>> entry = iterator.next();
+            NetRequest<?, ?> netCall = entry.getKey();
             ProxyResponseListener<?> listener = entry.getValue();
             if (netCall != null && netCall.isEnable()) {
                 listener.dispatchResult(onlySuccess);

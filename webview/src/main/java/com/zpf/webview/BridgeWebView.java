@@ -42,6 +42,7 @@ import com.zpf.api.OnProgressListener;
 import com.zpf.api.dataparser.JsonParserInterface;
 import com.zpf.api.dataparser.StringParseResult;
 import com.zpf.api.dataparser.StringParseType;
+import com.zpf.tool.global.CentralManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -59,24 +60,23 @@ public class BridgeWebView extends WebView {
     private final String jsFileName = "bridge.js";
     private String jsFileString;
     private final List<WebViewStateListener> stateListenerList = new ArrayList<>();
-    private OnReceivedWebPageListener webPageListener;
-    private WebViewWindowListener windowListener;
-    private WebViewFileChooserListener fileChooserListener;
-    private OnProgressListener progressChangedListener;
-    private IChecker<String> urlInterceptor;//url拦截
-    private JsCallNativeListener jsCallNativeListener;//js调用native的回调
-    private OverrideLoadUrlListener overrideLoadUrlListener;//OverrideLoadUrlListener
+    protected OnReceivedWebPageListener webPageListener;
+    protected WebViewWindowListener windowListener;
+    protected WebViewFileChooserListener fileChooserListener;
+    protected OnProgressListener progressChangedListener;
+    protected IChecker<String> urlInterceptor;//url拦截
+    protected JsCallNativeListener jsCallNativeListener;//js调用native的回调
+    protected OverrideLoadUrlListener overrideLoadUrlListener;//OverrideLoadUrlListener
     private boolean isTraceless;//无痕浏览
     private boolean useWebTitle = true;//使用浏览器标题
     private final WebPageInfo webPageInfo = new WebPageInfo();//当前加载页面
     private final HashMap<String, Boolean> redirectedUrlMap = new HashMap<>();//重定向原始url集合
-    private JsonParserInterface realParser;//json解析
+    private JsonParserInterface realParser = CentralManager.getInstance(JsonParserInterface.class);//json解析
     private View customView = null;
     private WebChromeClient.CustomViewCallback customCallback = null;
     private WebViewScrollListener scrollChangeListener = null;
     private String TAG;
-    private ILogger realLogger = null;
-    private boolean isDebug;
+    private ILogger realLogger = CentralManager.getInstance(ILogger.class);
 
     public BridgeWebView(Context context) {
         super(context);
@@ -106,6 +106,7 @@ public class BridgeWebView extends WebView {
                 getContext().startActivity(intent);
             }
         });
+        CentralManager.onObjectInit(this);
     }
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
@@ -672,7 +673,7 @@ public class BridgeWebView extends WebView {
     }
 
     private void logInfo(String message) {
-        if (isDebug) {
+        if (CentralManager.debuggable()) {
             String realTag = TAG;
             if (realTag == null) {
                 realTag = getClass().getSimpleName();
@@ -739,13 +740,6 @@ public class BridgeWebView extends WebView {
     public void setLogger(String tag, ILogger logger) {
         realLogger = logger;
         TAG = tag;
-    }
-
-    public void setDebug(boolean isDebug) {
-        this.isDebug = isDebug;
-        if (Build.VERSION.SDK_INT >= 19) {
-            WebView.setWebContentsDebuggingEnabled(isDebug);
-        }
     }
 
     public void setJsonParser(JsonParserInterface realParser) {

@@ -66,6 +66,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
             finish();
             return;
         }
+        CentralManager.onObjectInit(this);
         initWindow();
         mViewProcessor = initViewProcessor();
         if (mViewProcessor != null) {

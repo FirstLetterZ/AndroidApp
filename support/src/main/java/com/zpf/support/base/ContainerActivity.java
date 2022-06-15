@@ -65,6 +65,7 @@ public abstract class ContainerActivity extends Activity implements IViewContain
             finish();
             return;
         }
+        CentralManager.onObjectInit(this);
         initWindow();
         mViewProcessor = initViewProcessor();
         if (mViewProcessor != null) {
