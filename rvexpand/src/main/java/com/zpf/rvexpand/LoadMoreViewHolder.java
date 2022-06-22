@@ -3,7 +3,11 @@ package com.zpf.rvexpand;
 import android.view.View;
 
 public interface LoadMoreViewHolder {
-    void onLoading(boolean loading);
+    int HOLDER_TYPE = -99;
+
+    void onLoading();
+
+    void onComplete(boolean hasMore);
 
     View getItemView();
 }

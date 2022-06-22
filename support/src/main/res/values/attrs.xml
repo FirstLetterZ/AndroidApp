@@ -12,5 +12,6 @@
         <attr name="isContentView" format="boolean"/>
         <attr name="hierarchy" format="integer" />
         <attr name="contentBelowTitle" format="boolean" />
+        <attr name="createTopBar" format="boolean" />
     </declare-styleable>
 </resources>

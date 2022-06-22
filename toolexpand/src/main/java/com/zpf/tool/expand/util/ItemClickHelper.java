@@ -15,8 +15,8 @@ public class ItemClickHelper {
     public void bindItemClick(View view, final int position) {
         View targetView = view;
         while (targetView instanceof ViewGroup) {
-            if (((ViewGroup) view).getChildCount() == 1) {
-                targetView = ((ViewGroup) view).getChildAt(0);
+            if (((ViewGroup) targetView).getChildCount() == 1) {
+                targetView = ((ViewGroup) targetView).getChildAt(0);
             } else {
                 break;
             }

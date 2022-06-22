@@ -1,6 +1,7 @@
 package com.zpf.support.util;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.text.TextUtils;
@@ -8,13 +9,11 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import com.zpf.frame.IDialogDelegate;
 import com.zpf.tool.PublicUtil;
 import com.zpf.tool.global.CentralManager;
-import com.zpf.tool.permission.PermissionDescription;
 import com.zpf.tool.permission.PermissionSettingManager;
-import com.zpf.tool.permission.interfaces.IPermissionResultListener;
 import com.zpf.tool.permission.model.PermissionInfo;
-import com.zpf.tool.stack.AppStackUtil;
 import com.zpf.views.window.IosStyleDialog;
 
 import java.util.List;
@@ -22,33 +21,24 @@ import java.util.List;
 /**
  * Created by ZPF on 2018/7/26.
  */
-public class PermissionUtil implements IPermissionResultListener {
-    private final String appName = PublicUtil.getAppName(CentralManager.getAppContext());
-    private static volatile PermissionUtil instance;
+public class PermissionDialogUtil {
+    public static final int DIALOG_TYPE_LACK_PERMISSION = 10;
+    public static final int DIALOG_TYPE_CANNOT_NOTICE = 11;
 
-    public static PermissionUtil get() {
-        if (instance == null) {
-            synchronized (PermissionUtil.class) {
-                if (instance == null) {
-                    instance = new PermissionUtil();
-                }
-            }
-        }
-        return instance;
-    }
-
-    @Override
-    public void onPermissionChecked(boolean formResult, int requestCode, String[] requestPermissions, @Nullable List<String> missPermissions) {
-        Activity topActivity = AppStackUtil.getTopActivity();
-        if (topActivity != null) {
-            showPermissionRationaleDialog(topActivity, PermissionDescription.get().queryMissInfo(missPermissions));
-        }
-    }
-
-    public void showHintDialog(Activity activity, DialogInterface.OnDismissListener listener) {
+    public static void showCannotNoticeDialog(Activity activity, DialogInterface.OnDismissListener listener) {
         if (activity == null || activity.getWindow() == null) {
             return;
         }
+        IDialogDelegate delegate = CentralManager.getInstance(IDialogDelegate.class);
+        if (delegate != null) {
+            Dialog dialog = delegate.createDialog(activity, null, DIALOG_TYPE_CANNOT_NOTICE);
+            if (dialog != null) {
+                dialog.setOnDismissListener(listener);
+                dialog.show();
+                return;
+            }
+        }
+        final String appName = PublicUtil.getAppName(activity);
         final IosStyleDialog hintDialog = new IosStyleDialog(activity);
         hintDialog.setCancelable(true);
         hintDialog.setCanceledOnTouchOutside(true);
@@ -81,10 +71,21 @@ public class PermissionUtil implements IPermissionResultListener {
         }
     }
 
-    public void showPermissionRationaleDialog(Activity activity, List<PermissionInfo> list) {
-        if (list == null || list.size() == 0 || activity == null || activity.getWindow() == null) {
+    public static void showLackPermissionDialog(@Nullable Activity activity, @Nullable List<PermissionInfo> list,
+                                                @Nullable DialogInterface.OnDismissListener listener) {
+        if (activity == null || activity.getWindow() == null || list == null || list.size() == 0) {
             return;
         }
+        IDialogDelegate delegate = CentralManager.getInstance(IDialogDelegate.class);
+        if (delegate != null) {
+            Dialog dialog = delegate.createDialog(activity, list, DIALOG_TYPE_LACK_PERMISSION);
+            if (dialog != null) {
+                dialog.setOnDismissListener(listener);
+                dialog.show();
+                return;
+            }
+        }
+        final String appName = PublicUtil.getAppName(activity);
         final IosStyleDialog settingDialog = new IosStyleDialog(activity);
         settingDialog.getIcon().setVisibility(View.GONE);
         settingDialog.getInput().setVisibility(View.GONE);
@@ -98,6 +99,7 @@ public class PermissionUtil implements IPermissionResultListener {
         settingDialog.getCancel().setTextColor(Color.parseColor("#647bff"));
         settingDialog.getConfirm().setText("去权限列表");
         settingDialog.getConfirm().setTextColor(Color.parseColor("#647bff"));
+        settingDialog.setOnDismissListener(listener);
         StringBuilder builder = new StringBuilder();
         int i = 0;
         for (PermissionInfo permission : list) {

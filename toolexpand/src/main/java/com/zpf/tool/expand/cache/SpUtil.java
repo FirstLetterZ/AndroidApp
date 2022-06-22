@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by ZPF on 2017/9/29.
  */
 public class SpUtil {
-    public final String DEF_SP_FILE_NAME = "default_sp_file_name";
+    public static final String DEF_SP_FILE_NAME = "default_sp_file_name";
     private final SpStorageWorker defWorker;
     private final ConcurrentHashMap<String, SpStorageWorker> spMap;
 

@@ -27,8 +27,6 @@ import okio.Buffer;
  */
 public class NetLogInterceptor implements Interceptor {
     private OnNetLogListener logListener;
-    private final StringBuilder requestBuilder = new StringBuilder(128);
-    private final StringBuilder responseBuilder = new StringBuilder(128);
 
     @Override
     @NonNull
@@ -37,40 +35,48 @@ public class NetLogInterceptor implements Interceptor {
         if (netLogListener == null) {
             return chain.proceed(chain.request());
         }
-        requestBuilder.delete(0, requestBuilder.length());
-        requestBuilder.append("{");
+        StringBuilder builder = new StringBuilder(128);
+        builder.append("{");
         long t1 = System.currentTimeMillis();
         Request request = chain.request();
         HttpUrl httpUrl = request.url();
-        requestBuilder.append("\"url\":\"").append(httpUrl).append("\"");//请求url
-        requestBuilder.append(",\"method\":\"").append(request.method()).append("\"");//请求类型
-        requestBuilder.append(",");
-        addHeads(requestBuilder, request.headers());//请求头
-        requestBuilder.append(",\"params\":");//请求参数
+        builder.append("\"url\":\"").append(httpUrl).append("\"");//请求url
+        builder.append(",\"method\":\"").append(request.method()).append("\"");//请求类型
+        builder.append(",");
+        addHeads(builder, request.headers());//请求头
+        builder.append(",\"params\":");//请求参数
         RequestBody requestBody = request.body();
         if (requestBody != null) {
-            addRequestParams(requestBuilder, requestBody);
+            addRequestParams(builder, requestBody);
         } else {
             int querySize = httpUrl.querySize();
-            requestBuilder.append("{");
+            builder.append("{");
             if (querySize > 0) {
                 for (int i = 0; i < querySize; i++) {
-                    requestBuilder.append("\"").append(httpUrl.queryParameterName(i))
+                    builder.append("\"").append(httpUrl.queryParameterName(i))
                             .append("\":\"").append(httpUrl.queryParameterValue(i)).append("\"");
                     if (i < querySize - 1) {
-                        requestBuilder.append(",");
+                        builder.append(",");
                     }
                 }
             }
-            requestBuilder.append("}");
+            builder.append("}");
         }
-        requestBuilder.append("}");
-        netLogListener.log(t1, true, requestBuilder.toString());
-        responseBuilder.delete(0, responseBuilder.length());
+        builder.append("}");
+        netLogListener.log(t1, true, builder.toString());
+        builder.delete(0, builder.length());
         //返回数据
-        responseBuilder.append("{\"url\":\"").append(httpUrl).append("\"");//请求url
-        responseBuilder.append(",\"response\":");//响应数据
-        Response response = chain.proceed(request);
+        builder.append("{\"url\":\"").append(httpUrl).append("\"");//请求url
+        builder.append(",\"response\":");//响应数据
+        Response response;
+        try {
+            response = chain.proceed(request);
+        } catch (Exception e) {
+            e.printStackTrace();
+            builder.append("{\"error\":\"").append(e).append("\"}");
+            netLogListener.log(t1, false, builder.toString());
+            throw e;
+        }
         String bodyString = null;
         long t2 = System.currentTimeMillis();
         boolean success = response.isSuccessful();
@@ -85,14 +91,14 @@ public class NetLogInterceptor implements Interceptor {
                         "\",\"Content-Length\":\"" + response.headers().get("Content-Length") +
                         "\"}";
             }
-            responseBuilder.append(bodyString);
+            builder.append(bodyString);
         } else {
-            responseBuilder.append("{\"code\":").append(response.code()).append(",\"message\":\"").append(response.message()).append("\"}");
+            builder.append("{\"code\":").append(response.code()).append(",\"message\":\"").append(response.message()).append("\"}");
         }
-        requestBuilder.append(",");
-        addHeads(responseBuilder, response.headers());//请求头
-        responseBuilder.append(",\"time-consuming\":").append((t2 - t1)).append("}");
-        netLogListener.log(t1, success, responseBuilder.toString());
+        builder.append(",");
+        addHeads(builder, response.headers());//响应头
+        builder.append(",\"time-consuming\":").append((t2 - t1)).append("}");
+        netLogListener.log(t1, success, builder.toString());
         return response;
     }
 

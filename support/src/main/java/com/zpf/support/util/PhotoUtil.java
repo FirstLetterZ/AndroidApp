@@ -45,14 +45,14 @@ public abstract class PhotoUtil {
                         e.printStackTrace();
                     }
                 } else {
-                    PermissionUtil.get().showPermissionRationaleDialog(
-                            container.getCurrentActivity(), PermissionDescription.get().queryMissInfo(missPermissions));
+                    PermissionDialogUtil.showLackPermissionDialog(container.getCurrentActivity(),
+                            PermissionDescription.get().queryMissInfo(missPermissions), null);
                 }
             }
         }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA);
     }
 
-    public static boolean takePhoto(Activity activity, final File file, int requestCode) {
+    public static boolean takePhoto(final Activity activity, final File file, int requestCode) {
         if (activity == null) {
             return false;
         }
@@ -73,8 +73,8 @@ public abstract class PhotoUtil {
                         e.printStackTrace();
                     }
                 } else {
-                    PermissionUtil.get().showPermissionRationaleDialog(
-                            currentActivity, PermissionDescription.get().queryMissInfo(missPermissions));
+                    PermissionDialogUtil.showLackPermissionDialog(activity,
+                            PermissionDescription.get().queryMissInfo(missPermissions), null);
                 }
             }
         }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA);
@@ -105,8 +105,8 @@ public abstract class PhotoUtil {
                         e.printStackTrace();
                     }
                 } else {
-                    PermissionUtil.get().showPermissionRationaleDialog(
-                            currentActivity, PermissionDescription.get().queryMissInfo(missPermissions));
+                    PermissionDialogUtil.showLackPermissionDialog(currentActivity,
+                            PermissionDescription.get().queryMissInfo(missPermissions), null);
                 }
             }
         }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA);
@@ -137,8 +137,8 @@ public abstract class PhotoUtil {
                         e.printStackTrace();
                     }
                 } else {
-                    PermissionUtil.get().showPermissionRationaleDialog(
-                            currentActivity, PermissionDescription.get().queryMissInfo(missPermissions));
+                    PermissionDialogUtil.showLackPermissionDialog(currentActivity,
+                            PermissionDescription.get().queryMissInfo(missPermissions), null);
                 }
             }
         }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA);
@@ -167,8 +167,8 @@ public abstract class PhotoUtil {
                         e.printStackTrace();
                     }
                 } else {
-                    PermissionUtil.get().showPermissionRationaleDialog(
-                            container.getCurrentActivity(), PermissionDescription.get().queryMissInfo(missPermissions));
+                    PermissionDialogUtil.showLackPermissionDialog(container.getCurrentActivity(),
+                            PermissionDescription.get().queryMissInfo(missPermissions), null);
                 }
             }
         }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -197,8 +197,8 @@ public abstract class PhotoUtil {
                         e.printStackTrace();
                     }
                 } else {
-                    PermissionUtil.get().showPermissionRationaleDialog(
-                            currentActivity, PermissionDescription.get().queryMissInfo(missPermissions));
+                    PermissionDialogUtil.showLackPermissionDialog(currentActivity,
+                            PermissionDescription.get().queryMissInfo(missPermissions), null);
                 }
             }
         }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -231,8 +231,8 @@ public abstract class PhotoUtil {
                         e.printStackTrace();
                     }
                 } else {
-                    PermissionUtil.get().showPermissionRationaleDialog(
-                            currentActivity, PermissionDescription.get().queryMissInfo(missPermissions));
+                    PermissionDialogUtil.showLackPermissionDialog(currentActivity,
+                            PermissionDescription.get().queryMissInfo(missPermissions), null);
                 }
             }
         }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -265,8 +265,8 @@ public abstract class PhotoUtil {
                         e.printStackTrace();
                     }
                 } else {
-                    PermissionUtil.get().showPermissionRationaleDialog(
-                            currentActivity, PermissionDescription.get().queryMissInfo(missPermissions));
+                    PermissionDialogUtil.showLackPermissionDialog(currentActivity,
+                            PermissionDescription.get().queryMissInfo(missPermissions), null);
                 }
             }
         }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE);

@@ -86,6 +86,10 @@ public abstract class NetRequest<R, T> implements OnDestroyListener, ICancelable
         return this;
     }
 
+    public void setRequestParam(R requestParam) {
+        this.requestParam = requestParam;
+    }
+
     public void load() {
         load(RequestType.TYPE_DEFAULT);
     }

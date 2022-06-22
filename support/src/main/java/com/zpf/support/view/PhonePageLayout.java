@@ -29,9 +29,11 @@ import java.util.List;
  */
 public class PhonePageLayout extends ViewGroup implements IDecorative<View>, ViewGroup.OnHierarchyChangeListener {
     private final ViewNode decorationNodes = new ViewNode(null, 0);
-    private final ITopBar topBar;
+    @Nullable
+    private ITopBar topBar;
     private View contentView;
     private boolean contentBelowTitle;
+    private boolean createTopBar;
 
     public PhonePageLayout(Context context) {
         this(context, null, 0);
@@ -43,23 +45,34 @@ public class PhonePageLayout extends ViewGroup implements IDecorative<View>, Vie
 
     public PhonePageLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        topBar = createTopBar(context, attrs, defStyleAttr);
         TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.PhonePageLayout);
         contentBelowTitle = array.getBoolean(R.styleable.PhonePageLayout_contentBelowTitle, true);
+        createTopBar = array.getBoolean(R.styleable.PhonePageLayout_createTopBar, true);
         array.recycle();
         setOnHierarchyChangeListener(this);
+        initView(context, attrs, defStyleAttr);
         CentralManager.onObjectInit(this);
     }
 
-    protected void initView(Context context, AttributeSet attrs, int defStyleAttr){
-
+    protected void initView(Context context, AttributeSet attrs, int defStyleAttr) {
     }
 
-    protected ITopBar createTopBar(Context context, AttributeSet attrs, int defStyleAttr) {
+    public boolean isCreateTopBar() {
+        return createTopBar;
+    }
+
+    public void setCreateTopBar(boolean createTopBar) {
+        this.createTopBar = createTopBar;
+        if (createTopBar && topBar == null) {
+            topBar = createTopBar(getContext());
+        }
+    }
+
+    protected ITopBar createTopBar(Context context) {
         if (topBar != null) {
             return topBar;
         }
-        return new TopBar(context, attrs, defStyleAttr);
+        return new TopBar(context);
     }
 
     public void setContentView(int viewResId) {
@@ -135,7 +148,7 @@ public class PhonePageLayout extends ViewGroup implements IDecorative<View>, Vie
 
     @Override
     public void onChildViewAdded(View parent, View child) {
-        if (child == null || child == topBar.getView()) {
+        if (child == null || (topBar != null && child == topBar.getView())) {
             return;
         }
         LayoutParams lp = (LayoutParams) child.getLayoutParams();
@@ -172,7 +185,7 @@ public class PhonePageLayout extends ViewGroup implements IDecorative<View>, Vie
 
     @Override
     public void onChildViewRemoved(View parent, View child) {
-        if (child == null || child == topBar.getView()) {
+        if (child == null || (topBar != null && child == topBar.getView())) {
             return;
         }
         if (child == contentView) {
@@ -193,12 +206,21 @@ public class PhonePageLayout extends ViewGroup implements IDecorative<View>, Vie
         }
     }
 
+    @SuppressLint("DrawAllocation")
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int widthUsed = getPaddingLeft() + getPaddingRight();
         int heightUsed = getPaddingTop() + getPaddingBottom();
-        measureChild(topBar.getView(), widthMeasureSpec, widthUsed, heightMeasureSpec, heightUsed);
-        if (contentBelowTitle) {
+        if (createTopBar) {
+            topBar = createTopBar(getContext());
+        }
+        if (topBar != null && createTopBar) {
+            if (topBar.getView().getLayoutParams() == null) {
+                topBar.getView().setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            }
+            measureChild(topBar.getView(), widthMeasureSpec, widthUsed, heightMeasureSpec, heightUsed);
+        }
+        if (contentBelowTitle && topBar != null && createTopBar) {
             heightUsed = heightUsed + topBar.getView().getMeasuredHeight();
         }
         if (contentView != null && contentView.getVisibility() != View.GONE) {
@@ -219,7 +241,10 @@ public class PhonePageLayout extends ViewGroup implements IDecorative<View>, Vie
         final int realTop = t + getPaddingTop();
         final int realRight = r - getPaddingEnd();
         final int realBottom = b - getPaddingBottom();
-        int topBarHeight = layoutChild(topBar.getView(), realLeft, realTop, realRight, realBottom, direction);
+        int topBarHeight = 0;
+        if (topBar != null && createTopBar) {
+            topBarHeight = layoutChild(topBar.getView(), realLeft, realTop, realRight, realBottom, direction);
+        }
         int contentStatTop;
         if (contentBelowTitle) {
             contentStatTop = realTop + topBarHeight;
@@ -253,7 +278,9 @@ public class PhonePageLayout extends ViewGroup implements IDecorative<View>, Vie
             drawChild(canvas, node.view, drawTime);
             node = node.next;
         }
-        drawChild(canvas, topBar.getView(), drawTime);
+        if (topBar != null && createTopBar) {
+            drawChild(canvas, topBar.getView(), drawTime);
+        }
     }
 
     private void measureChild(View child, int parentWidthMeasureSpec, int widthUsed,

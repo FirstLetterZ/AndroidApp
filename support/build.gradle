@@ -6,6 +6,9 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
     }
+    lintOptions {
+        warning 'InvalidPackage'
+    }
 }
 
 dependencies {

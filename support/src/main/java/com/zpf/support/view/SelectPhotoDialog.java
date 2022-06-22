@@ -63,7 +63,7 @@ public class SelectPhotoDialog extends BottomMenuDialog {
         super.initView();
         getTvBottom().setTextColor(Color.RED);
         getTvBottom().setText(R.string.support_button_cancel);
-        setStringMenuList(new String[]{PublicUtil.getString(R.string.support_request_loading),
+        setStringMenuList(new String[]{PublicUtil.getString(R.string.support_option_take_photo),
                 PublicUtil.getString(R.string.support_option_photo_album)});
         setListTextColor(Color.BLACK);
         setItemClickListener(new OnItemClickListener() {

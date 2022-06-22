@@ -27,7 +27,7 @@ import com.zpf.support.constant.AppConst;
 import com.zpf.support.model.IconTextEntry;
 import com.zpf.support.model.TitleBarEntry;
 import com.zpf.support.util.ContainerController;
-import com.zpf.support.util.PermissionUtil;
+import com.zpf.support.util.PermissionDialogUtil;
 import com.zpf.support.view.PhonePageLayout;
 import com.zpf.tool.SafeClickListener;
 import com.zpf.tool.expand.event.EventManager;
@@ -50,8 +50,6 @@ import java.util.List;
  */
 public class ViewProcessor implements IViewProcessor {
     protected final IViewContainer mContainer;
-    @Nullable
-    protected final ITopBar mTopBar;
     protected final PhonePageLayout mRootLayout;
     protected final SafeClickListener safeClickListener = new SafeClickListener() {
         @Override
@@ -80,7 +78,6 @@ public class ViewProcessor implements IViewProcessor {
     public ViewProcessor() {
         this.mContainer = ContainerController.mInitingViewContainer;
         mRootLayout = onCreateRootLayout(getContext());
-        mTopBar = mRootLayout.getTopBar();
         View layoutView = getLayoutView(getContext());
         if (layoutView != null) {
             mRootLayout.setContentView(layoutView);
@@ -90,13 +87,11 @@ public class ViewProcessor implements IViewProcessor {
                 mRootLayout.setContentView(layoutId);
             }
         }
-        if (mTopBar != null && hideTopBar()) {
-            mTopBar.getView().setVisibility(View.GONE);
-        }
+        mRootLayout.setCreateTopBar(hasTopBar());
     }
 
-    protected boolean hideTopBar() {
-        return !(mContainer instanceof Activity);
+    protected boolean hasTopBar() {
+        return mContainer instanceof Activity;
     }
 
     protected PhonePageLayout onCreateRootLayout(Context context) {
@@ -191,8 +186,8 @@ public class ViewProcessor implements IViewProcessor {
                 if (missPermissions == null || missPermissions.size() == 0) {
                     runnable.run();
                 } else {
-                    PermissionUtil.get().showPermissionRationaleDialog(
-                            getCurrentActivity(), PermissionDescription.get().queryMissInfo(missPermissions));
+                    PermissionDialogUtil.showLackPermissionDialog(getCurrentActivity(),
+                            PermissionDescription.get().queryMissInfo(missPermissions), null);
                 }
             }
         }, permissions);
@@ -294,6 +289,11 @@ public class ViewProcessor implements IViewProcessor {
     @Override
     public ICustomWindowManager getCustomWindowManager() {
         return mContainer.getCustomWindowManager();
+    }
+
+    @Nullable
+    public ITopBar getTopBar() {
+        return mRootLayout.getTopBar();
     }
 
     protected void bindTitleBar(PhonePageLayout rootLayout) {
