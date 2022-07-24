@@ -68,7 +68,6 @@ public class BridgeWebView extends WebView {
     protected JsCallNativeListener jsCallNativeListener;//js调用native的回调
     protected OverrideLoadUrlListener overrideLoadUrlListener;//OverrideLoadUrlListener
     private boolean isTraceless;//无痕浏览
-    private boolean useWebTitle = true;//使用浏览器标题
     private final WebPageInfo webPageInfo = new WebPageInfo();//当前加载页面
     private final HashMap<String, Boolean> redirectedUrlMap = new HashMap<>();//重定向原始url集合
     private JsonParserInterface realParser = CentralManager.getInstance(JsonParserInterface.class);//json解析
@@ -235,8 +234,8 @@ public class BridgeWebView extends WebView {
         return new WebChromeClient() {
             @Override
             public void onReceivedTitle(WebView view, String title) {
-                if (webPageInfo.waitInit) {
-                    webPageInfo.waitInit = !initJsBridge();
+                if (webPageInfo.waitBridgeInit) {
+                    webPageInfo.waitBridgeInit = injectBridgeScript();
                 }
                 logInfo("========================onReceivedTitle======================");
                 logInfo("url=" + view.getUrl());
@@ -249,8 +248,8 @@ public class BridgeWebView extends WebView {
 
             @Override
             public void onReceivedIcon(WebView view, Bitmap icon) {
-                if (webPageInfo.waitInit) {
-                    webPageInfo.waitInit = !initJsBridge();
+                if (webPageInfo.waitBridgeInit) {
+                    webPageInfo.waitBridgeInit = injectBridgeScript();
                 }
                 logInfo("========================onReceivedIcon======================");
                 logInfo("url=" + view.getUrl());
@@ -270,8 +269,8 @@ public class BridgeWebView extends WebView {
                 logInfo("========================onProgressChanged======================");
                 logInfo("url=" + view.getUrl());
                 logInfo("newProgress=" + newProgress);
-                if (webPageInfo.waitInit && newProgress > 10) {
-                    initJsBridge();
+                if (webPageInfo.waitBridgeInit && newProgress > 10) {
+                    injectBridgeScript();
                 }
                 if (progressChangedListener != null) {
                     progressChangedListener.onProgress(100, newProgress, view);
@@ -400,7 +399,6 @@ public class BridgeWebView extends WebView {
                 }
                 webPageInfo.finishTime = 0;
                 webPageInfo.webUrl = url;
-                webPageInfo.waitInit = true;
                 if (stateListenerList.size() > 0) {
                     for (WebViewStateListener listener : stateListenerList) {
                         listener.onPageStart(view, url, favicon);
@@ -422,7 +420,7 @@ public class BridgeWebView extends WebView {
                         listener.onPageFinish(view, url);
                     }
                 }
-                webPageInfo.waitInit = false;
+                webPageInfo.waitBridgeInit = false;
                 webPageInfo.loadComplete = true;
                 webPageInfo.finishTime = System.currentTimeMillis();
                 if (webPageListener != null) {
@@ -480,7 +478,7 @@ public class BridgeWebView extends WebView {
                         listener.onPageError(view, failingUrl, errorCode, description);
                     }
                 }
-                webPageInfo.waitInit = false;
+                webPageInfo.waitBridgeInit = false;
                 webPageInfo.loadComplete = true;
                 webPageInfo.finishTime = System.currentTimeMillis();
             }
@@ -545,19 +543,10 @@ public class BridgeWebView extends WebView {
 
     @SuppressLint("JavascriptInterface")
     private class JavaScriptInterface {
-        @JavascriptInterface
-        public void init() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    initJsBridge();
-                }
-            });
-        }
 
         @JavascriptInterface
         public void connect() {
-            webPageInfo.waitInit = false;
+            webPageInfo.waitBridgeInit = false;
             logInfo("========================jsBridge connect======================");
         }
 
@@ -568,7 +557,7 @@ public class BridgeWebView extends WebView {
             logInfo("action=" + action);
             logInfo("params=" + params);
             logInfo("callBackName=" + callBackName);
-            if (jsCallNativeListener == null) {
+            if (jsCallNativeListener == null || TextUtils.isEmpty(action)) {
                 return "";
             }
             Object result;
@@ -628,16 +617,11 @@ public class BridgeWebView extends WebView {
             final String javascript = forebody + result + ")";
             logInfo("======================== onCallBack ======================");
             logInfo("javascript=" + javascript);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                        evaluateJavascript(javascript, null);
-                    } else {
-                        loadUrl(javascript);
-                    }
-                }
-            });
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                evaluateJavascript(javascript, null);
+            } else {
+                loadUrl(javascript);
+            }
         }
     }
 
@@ -650,7 +634,7 @@ public class BridgeWebView extends WebView {
                     BridgeWebView.super.goBack();
                 } else {
                     Context context = getContext();
-                    if (context instanceof ContextWrapper) {
+                    if (!(context instanceof Activity) && context instanceof ContextWrapper) {
                         context = ((ContextWrapper) context).getBaseContext();
                     }
                     if (context instanceof Activity) {
@@ -718,10 +702,14 @@ public class BridgeWebView extends WebView {
         }
     }
 
-    public boolean initJsBridge() {
+    protected boolean injectBridgeScript() {
         if (jsFileString != null) {
             logInfo("start load jsFile");
-            loadUrl("javascript:" + jsFileString);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                evaluateJavascript("javascript:" + jsFileString, null);
+            } else {
+                loadUrl("javascript:" + jsFileString);
+            }
             return true;
         } else {
             logInfo("cannot load jsFile");
@@ -802,11 +790,4 @@ public class BridgeWebView extends WebView {
         isTraceless = traceless;
     }
 
-    public boolean isUseWebTitle() {
-        return useWebTitle;
-    }
-
-    public void setUseWebTitle(boolean useWebTitle) {
-        this.useWebTitle = useWebTitle;
-    }
 }

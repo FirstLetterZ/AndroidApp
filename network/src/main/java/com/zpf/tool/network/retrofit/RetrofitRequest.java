@@ -1,6 +1,7 @@
 package com.zpf.tool.network.retrofit;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.zpf.api.IResultBean;
 import com.zpf.tool.network.base.INetworkCallCreator;
@@ -15,11 +16,14 @@ public class RetrofitRequest<R, T> extends NetRequest<R, T> {
     private Call<T> call;
     protected INetworkCallCreator<R, Call<T>> networkCallCreator;
 
+    public RetrofitRequest() {
+    }
+
     public RetrofitRequest(INetworkCallCreator<R, Call<T>> networkCallCreator) {
         this.networkCallCreator = networkCallCreator;
     }
 
-    public NetRequest<R, T> setCallCreator(INetworkCallCreator<R, Call<T>> callCreator) {
+    public RetrofitRequest<R, T> setCallCreator(INetworkCallCreator<R, Call<T>> callCreator) {
         this.networkCallCreator = callCreator;
         return this;
     }
@@ -45,8 +49,8 @@ public class RetrofitRequest<R, T> extends NetRequest<R, T> {
             return;
         }
         done = false;
-        if (call == null && networkCallCreator != null) {
-            call = networkCallCreator.callNetwork(param);
+        if (call == null) {
+            call = createNewCall(param);
         }
         if (call == null || destroyed) {
             done = true;
@@ -76,4 +80,12 @@ public class RetrofitRequest<R, T> extends NetRequest<R, T> {
         });
     }
 
+    @Nullable
+    protected Call<T> createNewCall(R param) {
+        if (networkCallCreator != null) {
+            return networkCallCreator.callNetwork(param);
+        } else {
+            return null;
+        }
+    }
 }

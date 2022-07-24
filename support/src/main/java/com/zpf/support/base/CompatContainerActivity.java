@@ -209,7 +209,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
 
     @Override
     public void startActivityForResult(@NonNull Intent intent, @NonNull final OnActivityResultListener listener) {
-        mController.addDisposable(listener, OnActivityResultListener.class);
+        mController.addDisposableActivityResultListener(listener);
         this.startActivityForResult(intent, intent.getIntExtra(AppConst.REQUEST_CODE, AppConst.DEF_REQUEST_CODE), null);
     }
 
@@ -217,6 +217,12 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     public void startActivityForResult(@NonNull Intent intent, int requestCode, @Nullable Bundle options) {
         super.startActivityForResult(intent, requestCode, options);
         StackAnimUtil.onPush(this, intent.getIntExtra(AppConst.ANIM_TYPE, 0));
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        StackAnimUtil.onPoll(this, getIntent().getIntExtra(AppConst.ANIM_TYPE, 0));
     }
 
     @Override

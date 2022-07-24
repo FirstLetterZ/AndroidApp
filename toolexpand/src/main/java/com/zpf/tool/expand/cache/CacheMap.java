@@ -10,6 +10,7 @@ import com.zpf.api.dataparser.JsonParserInterface;
 import com.zpf.tool.global.CentralManager;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -41,14 +42,16 @@ public class CacheMap {
     }
 
     public static void put(int key, Object value) {
+        Object oldValue = cacheValue.get(CACHE_STORAGE_KEY + key);
+        putValue(key, value);
+        if (Objects.equals(value, oldValue)) {
+            return;
+        }
+        if (changedListener != null) {
+            changedListener.onStorageChanged(key, value);
+        }
         if (key > 0 && localStorageManager != null) {
-            Object oldValue = cacheValue.get(CACHE_STORAGE_KEY + key);
-            putValue(key, value);
-            if (value != oldValue || (value != null && !value.equals(oldValue))) {
-                localStorageManager.save(CACHE_STORAGE_KEY + key, value);
-            }
-        } else {
-            putValue(key, value);
+            localStorageManager.save(CACHE_STORAGE_KEY + key, value);
         }
     }
 
@@ -200,9 +203,10 @@ public class CacheMap {
     }
 
     private static void putValue(int key, Object value) {
-        cacheValue.put(CACHE_STORAGE_KEY + key, value);
-        if (changedListener != null) {
-            changedListener.onStorageChanged(key, value);
+        if (value == null) {
+            cacheValue.remove(CACHE_STORAGE_KEY + key);
+        } else {
+            cacheValue.put(CACHE_STORAGE_KEY + key, value);
         }
     }
 

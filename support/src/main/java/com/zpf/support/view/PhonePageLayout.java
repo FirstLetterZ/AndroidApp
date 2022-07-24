@@ -72,7 +72,10 @@ public class PhonePageLayout extends ViewGroup implements IDecorative<View>, Vie
         if (topBar != null) {
             return topBar;
         }
-        return new TopBar(context);
+        topBar = new TopBar(context);
+        addView(topBar.getView(), new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        CentralManager.onObjectInit(topBar);
+        return topBar;
     }
 
     public void setContentView(int viewResId) {

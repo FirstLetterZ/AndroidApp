@@ -52,7 +52,7 @@ public abstract class BaseCallBack<T> {
             code = ((CustomException) e).getCode();
             description = e.getMessage();
         } else if (e instanceof UnknownHostException) {
-            code = ErrorCode.HSOT_ERROR;
+            code = ErrorCode.HOST_ERROR;
             description = getString(R.string.network_host_error);
         } else if (e instanceof AccountsException) {
             code = ErrorCode.ACCOUNT_ERROR;

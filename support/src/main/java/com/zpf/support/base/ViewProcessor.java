@@ -58,13 +58,12 @@ public class ViewProcessor implements IViewProcessor {
         }
     };
     private LinkedList<Runnable> waitRunList;
-
-    protected final IReceiver<IEvent> receiver = new IReceiver<IEvent>() {
+    protected IReceiver<IEvent> receiver = new IReceiver<IEvent>() {
 
         @NonNull
         @Override
         public String name() {
-            return getClass().getName();
+            return ViewProcessor.this.getClass().getName();
         }
 
         @Override
@@ -304,58 +303,52 @@ public class ViewProcessor implements IViewProcessor {
         if (topBar == null) {
             return;
         }
-        final TitleBarEntry titleBarEntry = getParams().getParcelable(AppConst.TITLE_ENTRY);
-        if (titleBarEntry != null) {
-            if (!TextUtils.isEmpty(titleBarEntry.leftLayoutAction)) {
-                topBar.getLeftLayout().setOnClickListener(new SafeClickListener() {
-                    @Override
-                    public void click(View v) {
-                        handleEvent(new SimpleEvent(-1, null, titleBarEntry.leftLayoutAction), null);
-                    }
-                });
-            }
-            if (!TextUtils.isEmpty(titleBarEntry.rightLayoutAction)) {
-                topBar.getRightLayout().setOnClickListener(new SafeClickListener() {
-                    @Override
-                    public void click(View v) {
-                        handleEvent(new SimpleEvent(-1, null, titleBarEntry.rightLayoutAction), null);
-                    }
-                });
-            }
-            if (titleBarEntry.hideStatusBar) {
-                topBar.getStatusBar().setVisibility(View.GONE);
-            } else {
-                topBar.getStatusBar().setVisibility(View.VISIBLE);
-            }
-            if (titleBarEntry.hideTitleBar) {
-                topBar.getView().setVisibility(View.GONE);
-            } else {
-                topBar.getView().setVisibility(View.VISIBLE);
-                if (titleBarEntry.leftIconEntry != null) {
-                    bindIconText(topBar.getLeftImage(), titleBarEntry.leftIconEntry);
+        final TitleBarEntry titleBarEntry = getParams().getParcelable(AppConst.PARAMS_TITLE_ENTRY);
+        if (titleBarEntry == null) {
+            return;
+        }
+        if (!TextUtils.isEmpty(titleBarEntry.leftLayoutAction)) {
+            topBar.getLeftLayout().setOnClickListener(new SafeClickListener() {
+                @Override
+                public void click(View v) {
+                    handleEvent(new SimpleEvent(-1, null, titleBarEntry.leftLayoutAction), null);
                 }
-                if (titleBarEntry.leftTextEntry != null) {
-                    bindIconText(topBar.getLeftText(), titleBarEntry.leftTextEntry);
+            });
+        }
+        if (!TextUtils.isEmpty(titleBarEntry.rightLayoutAction)) {
+            topBar.getRightLayout().setOnClickListener(new SafeClickListener() {
+                @Override
+                public void click(View v) {
+                    handleEvent(new SimpleEvent(-1, null, titleBarEntry.rightLayoutAction), null);
                 }
-                if (titleBarEntry.rightIconEntry != null) {
-                    bindIconText(topBar.getRightImage(), titleBarEntry.rightIconEntry);
-                }
-                if (titleBarEntry.rightTextEntry != null) {
-                    bindIconText(topBar.getRightText(), titleBarEntry.rightTextEntry);
-                }
-                if (titleBarEntry.titleEntry != null) {
-                    bindIconText(topBar.getTitle(), titleBarEntry.titleEntry);
-                }
-                if (titleBarEntry.subtitleEntry != null) {
-                    bindIconText(topBar.getSubTitle(), titleBarEntry.subtitleEntry);
-                }
-            }
+            });
+        }
+        if (titleBarEntry.hideStatusBar) {
+            topBar.getStatusBar().setVisibility(View.GONE);
         } else {
-            if (mContainer instanceof Activity) {
-                topBar.getView().setVisibility(View.VISIBLE);
-                topBar.getStatusBar().setVisibility(View.VISIBLE);
-            } else {
-                topBar.getView().setVisibility(View.GONE);
+            topBar.getStatusBar().setVisibility(View.VISIBLE);
+        }
+        if (titleBarEntry.hideTitleBar) {
+            topBar.getView().setVisibility(View.GONE);
+        } else {
+            topBar.getView().setVisibility(View.VISIBLE);
+            if (titleBarEntry.leftIconEntry != null) {
+                bindIconText(topBar.getLeftImage(), titleBarEntry.leftIconEntry);
+            }
+            if (titleBarEntry.leftTextEntry != null) {
+                bindIconText(topBar.getLeftText(), titleBarEntry.leftTextEntry);
+            }
+            if (titleBarEntry.rightIconEntry != null) {
+                bindIconText(topBar.getRightImage(), titleBarEntry.rightIconEntry);
+            }
+            if (titleBarEntry.rightTextEntry != null) {
+                bindIconText(topBar.getRightText(), titleBarEntry.rightTextEntry);
+            }
+            if (titleBarEntry.titleEntry != null) {
+                bindIconText(topBar.getTitle(), titleBarEntry.titleEntry);
+            }
+            if (titleBarEntry.subtitleEntry != null) {
+                bindIconText(topBar.getSubTitle(), titleBarEntry.subtitleEntry);
             }
         }
     }

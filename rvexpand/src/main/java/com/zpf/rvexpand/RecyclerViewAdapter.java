@@ -3,6 +3,7 @@ package com.zpf.rvexpand;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,8 +27,8 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
     private ItemViewCreator itemViewCreator;
     private ItemTypeManager itemTypeManager;
     private LoadMoreController loadMoreController;
-    private View emptyView = null;
-    private boolean showEmpty = false;
+    private RecyclerView.ViewHolder emptyViewHolder = null;
+    public static final int EMPTY_VIEW_TYPE = Integer.MAX_VALUE - 99;
 
     public RecyclerViewAdapter() {
         setHasStableIds(true);
@@ -68,19 +69,30 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (showEmpty) {
-            return new EmptyHolder(emptyView, new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        }
-        if (viewType == LoadMoreViewHolder.HOLDER_TYPE) {
+        if (viewType == EMPTY_VIEW_TYPE) {
+            if (emptyViewHolder != null) {
+                ViewParent itemParent = emptyViewHolder.itemView.getParent();
+                if (itemParent != null) {
+                    ((ViewGroup) itemParent).removeView(emptyViewHolder.itemView);
+                }
+                return emptyViewHolder;
+            } else {
+                return new EmptyHolder(parent.getContext());
+            }
+        } else if (viewType == LoadMoreViewHolder.HOLDER_TYPE) {
             View itemView = loadMoreController.getViewHolder().getItemView();
+            ViewParent itemParent = itemView.getParent();
+            if (itemParent != null) {
+                ((ViewGroup) itemParent).removeView(itemView);
+            }
             ViewGroup.LayoutParams itemLp = itemView.getLayoutParams();
             if (itemLp != null) {
-                new EmptyHolder(itemView, new ViewGroup.LayoutParams(
+                return new EmptyHolder(itemView, new ViewGroup.LayoutParams(
                         itemLp.width, itemLp.height));
+            } else {
+                return new EmptyHolder(itemView, new ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             }
-            return new EmptyHolder(itemView, new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         }
         RecyclerView.ViewHolder holder = null;
         if (itemViewCreator != null) {
@@ -117,22 +129,25 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
         if (holder.isRecyclable() != holderRecyclable) {
             holder.setIsRecyclable(holderRecyclable);
         }
-        clickHelper.bindItemClick(holder.itemView, position);
+        if (holder.getClass().getAnnotation(RefuseItemClick.class) == null) {
+            clickHelper.bindItemClick(holder.itemView, position);
+        }
     }
 
     @Override
     public int getItemCount() {
         int size = dataList.size();
-        showEmpty = size == 0 && emptyView != null;
         if (size > 0) {
             if (loadMoreController != null) {
                 return size + 1;
             } else {
                 return size;
             }
-        } else {
-            return showEmpty ? 1 : 0;
         }
+        if (emptyViewHolder != null) {
+            return 1;
+        }
+        return 0;
     }
 
     public RecyclerViewAdapter<T> setItemClickListener(@Nullable OnItemClickListener itemClickListener) {
@@ -146,12 +161,20 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
         return this;
     }
 
-    public void setLoadMoreController(LoadMoreController loadMoreController) {
+    public ItemListAdapter<T> setLoadMoreController(LoadMoreController loadMoreController) {
         this.loadMoreController = loadMoreController;
+        return this;
     }
 
-    public void setEmptyView(View emptyView) {
-        this.emptyView = emptyView;
+    public ItemListAdapter<T> setEmptyView(View emptyView) {
+        if (emptyView == null) {
+            emptyViewHolder = null;
+        } else {
+            ViewParent parent = emptyView.getParent();
+            emptyViewHolder = new EmptyHolder(emptyView, new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        }
+        return this;
     }
 
     public RecyclerViewAdapter<T> addData(@Nullable T data) {
@@ -202,13 +225,16 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public int getItemViewType(int position) {
+        if (position == 0 && dataList.size() == 0) {
+            return EMPTY_VIEW_TYPE;
+        }
         if (loadMoreController != null && position == getItemCount() - 1) {
             return LoadMoreViewHolder.HOLDER_TYPE;
         }
         if (itemTypeManager != null) {
             return itemTypeManager.getItemType(position);
         }
-        Object itemData = dataList.get(position);
+        Object itemData = getDataAt(position);
         if (itemData instanceof ItemTypeManager) {
             return ((ItemTypeManager) itemData).getItemType(position);
         }
@@ -217,10 +243,13 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public long getItemId(int position) {
+        if (loadMoreController != null && position == getItemCount() - 1) {
+            return LoadMoreViewHolder.HOLDER_ID;
+        }
         if (itemTypeManager != null) {
             return itemTypeManager.getItemId(position);
         }
-        Object itemData = dataList.get(position);
+        Object itemData = getDataAt(position);
         if (itemData instanceof ItemTypeManager) {
             return ((ItemTypeManager) itemData).getItemId(position);
         }

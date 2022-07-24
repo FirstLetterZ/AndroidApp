@@ -213,7 +213,7 @@ public abstract class ContainerActivity extends Activity implements IViewContain
 
     @Override
     public void startActivityForResult(@NonNull Intent intent, @NonNull OnActivityResultListener listener) {
-        mController.addDisposable(listener, OnActivityResultListener.class);
+        mController.addDisposableActivityResultListener(listener);
         this.startActivityForResult(intent, intent.getIntExtra(AppConst.REQUEST_CODE, AppConst.DEF_REQUEST_CODE), null);
     }
 
@@ -221,6 +221,12 @@ public abstract class ContainerActivity extends Activity implements IViewContain
     public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
         super.startActivityForResult(intent, requestCode, options);
         StackAnimUtil.onPush(this, intent.getIntExtra(AppConst.ANIM_TYPE, 0));
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        StackAnimUtil.onPoll(this, getIntent().getIntExtra(AppConst.ANIM_TYPE, 0));
     }
 
     @Override

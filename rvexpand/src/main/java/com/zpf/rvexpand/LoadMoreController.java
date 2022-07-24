@@ -7,6 +7,7 @@ public class LoadMoreController {
     private long lastScrollBottomTime;
     private boolean enable = false;
     private boolean loading = false;
+    private int currentPage = -1;
     private final LoadMoreViewHolder viewHolder;
     private BottomLoadingListener listener;
     private final RecyclerView.OnScrollListener scrollEndListener = new RecyclerView.OnScrollListener() {
@@ -52,7 +53,7 @@ public class LoadMoreController {
                     listener.onLoading();
                 }
             } else {
-                viewHolder.onComplete(enable);
+                viewHolder.onComplete(enable, currentPage);
             }
         }
     }
@@ -61,7 +62,8 @@ public class LoadMoreController {
         changeState(false, enable);
     }
 
-    public void finishLoad(boolean enableLoadMore) {
+    public void finishLoad(boolean enableLoadMore, int pageNumber) {
+        currentPage = pageNumber;
         changeState(false, enableLoadMore);
     }
 

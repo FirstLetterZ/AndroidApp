@@ -2,9 +2,7 @@ package com.zpf.tool.network.retrofit;
 
 import androidx.annotation.NonNull;
 
-import com.zpf.tool.network.R;
 import com.zpf.tool.network.base.BaseCallBack;
-import com.zpf.tool.network.base.ErrorCode;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -64,11 +62,6 @@ public abstract class RetrofitCallBack<T> extends BaseCallBack<T> implements Cal
                     }
                 });
             } else {
-                if (responseResult.getCode() == ErrorCode.RESPONSE_SUCCESS
-                        || responseResult.getCode() == 0) {
-                    responseResult.setCode(ErrorCode.RESPONSE_ILLEGAL);
-                    responseResult.setMessage(getString(R.string.network_illegal_error));
-                }
                 fail(responseResult.getCode(), responseResult.getMessage());
             }
         } else {

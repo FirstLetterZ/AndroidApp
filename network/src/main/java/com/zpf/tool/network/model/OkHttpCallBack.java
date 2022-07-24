@@ -80,11 +80,6 @@ public abstract class OkHttpCallBack<T> extends BaseCallBack<T> implements Callb
                     }
                 });
             } else {
-                if (responseResult.getCode() == ErrorCode.RESPONSE_SUCCESS
-                        || responseResult.getCode() == 0) {
-                    responseResult.setCode(ErrorCode.RESPONSE_ILLEGAL);
-                    responseResult.setMessage(getString(R.string.network_illegal_error));
-                }
                 fail(responseResult.getCode(), responseResult.getMessage());
             }
         } else {

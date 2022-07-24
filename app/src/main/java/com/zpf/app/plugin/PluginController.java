@@ -8,11 +8,12 @@ import androidx.annotation.Nullable;
 
 import com.zpf.api.IClassLoader;
 import com.zpf.api.dataparser.JsonParserInterface;
+import com.zpf.file.FileIOUtil;
 import com.zpf.file.FileUtil;
 import com.zpf.tool.expand.cache.SpStorageWorker;
 import com.zpf.tool.expand.cache.SpUtil;
 import com.zpf.tool.expand.util.ClassLoaderImpl;
-import com.zpf.tool.expand.util.LogUtil;
+import com.zpf.tool.expand.util.Logger;
 import com.zpf.tool.global.CentralManager;
 
 import java.io.File;
@@ -51,11 +52,11 @@ public final class PluginController {
                     pluginApkBean = jsonParser.fromJson(fileConfig, PluginApkBean.class);
                 }
                 if (pluginApkBean == null && copyApk(pluginApkName)) {
-                    fileConfig = FileUtil.readAssetFile(CentralManager.getAppContext(), "plugin/" + pluginApkName + "_config.json");
+                    fileConfig = FileIOUtil.readAssetString(CentralManager.getAppContext(), "plugin/" + pluginApkName + "_config.json");
                     pluginApkBean = jsonParser.fromJson(fileConfig, PluginApkBean.class);
                     if (pluginApkBean != null) {
                         ApkInfo apkInfo = new ApkInfo();
-                        apkInfo.path = FileUtil.getAppDataPath() + "/plugin/" + pluginApkName + ".apk";
+                        apkInfo.path = CentralManager.getAppContext().getFilesDir().getAbsolutePath() + "/plugin/" + pluginApkName + ".apk";
                         pluginApkBean.localApkInfo = apkInfo;
                         spWorker.put(pluginApkName, fileConfig);
                     }
@@ -101,7 +102,8 @@ public final class PluginController {
         } else {
             //初始化加载
             classLoader = PluginUtil.loadPlugin(CentralManager.getAppContext(), pluginPath,
-                    FileUtil.getAppCachePath(), CentralManager.getAppContext().getClassLoader());
+                    CentralManager.getAppContext().getCacheDir().getAbsolutePath(),
+                    CentralManager.getAppContext().getClassLoader());
             pluginClassLoaderMap.put(pluginPath, classLoader);
         }
         if (result == null && classLoader != null) {
@@ -123,7 +125,7 @@ public final class PluginController {
                 //
             }
             if (pluginClassLoader != null) {
-                ClassLoaderImpl.get().add(pluginClassLoader);
+                ClassLoaderImpl.get().add(pluginClassLoader, IClassLoader.class);
                 result = pluginClassLoader.getClass(name);
             }
         }
@@ -164,7 +166,7 @@ public final class PluginController {
     }
 
     public boolean copyApk(String apkName) {
-        File targetFile = FileUtil.getFileOrCreate(FileUtil.getAppDataPath() + "/plugin", apkName + ".apk");
+        File targetFile = FileUtil.getFileOrCreate(CentralManager.getAppContext().getFilesDir().getAbsolutePath() + "/plugin", apkName + ".apk");
         return copyApk("plugin/" + apkName + ".apk", targetFile.getAbsolutePath());
     }
 
@@ -179,7 +181,7 @@ public final class PluginController {
             while ((i = in.read(bytes)) != -1)
                 out.write(bytes, 0, i);
         } catch (IOException e) {
-            LogUtil.e(e.toString());
+            Logger.e(e.toString());
             return false;
         } finally {
             try {
@@ -188,7 +190,7 @@ public final class PluginController {
                 if (out != null)
                     out.close();
             } catch (IOException e) {
-                LogUtil.e(e.toString());
+                Logger.e(e.toString());
             }
 
         }

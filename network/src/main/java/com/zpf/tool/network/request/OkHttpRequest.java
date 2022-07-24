@@ -17,6 +17,9 @@ public abstract class OkHttpRequest<R, T> extends NetRequest<R, T> {
     private Call call;
     protected INetworkCallCreator<R, Call> networkCallCreator;
 
+    public OkHttpRequest() {
+    }
+
     public OkHttpRequest(INetworkCallCreator<R, Call> networkCallCreator) {
         this.networkCallCreator = networkCallCreator;
     }
@@ -47,8 +50,8 @@ public abstract class OkHttpRequest<R, T> extends NetRequest<R, T> {
             return;
         }
         done = false;
-        if (call == null && networkCallCreator != null) {
-            call = networkCallCreator.callNetwork(param);
+        if (call == null) {
+            call = createNewCall(param);
         }
         if (call == null || destroyed) {
             done = true;
@@ -82,6 +85,15 @@ public abstract class OkHttpRequest<R, T> extends NetRequest<R, T> {
                 }
             }
         });
+    }
+
+    @Nullable
+    protected Call createNewCall(R param) {
+        if (networkCallCreator != null) {
+            return networkCallCreator.callNetwork(param);
+        } else {
+            return null;
+        }
     }
 
     public abstract T parseData(String bodyString);

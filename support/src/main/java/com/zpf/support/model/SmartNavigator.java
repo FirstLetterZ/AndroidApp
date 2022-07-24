@@ -24,7 +24,6 @@ import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.support.base.CompatContainerActivity;
 import com.zpf.support.constant.AppConst;
-import com.zpf.tool.ShakeInterceptor;
 import com.zpf.tool.expand.util.Logger;
 import com.zpf.tool.global.CentralManager;
 import com.zpf.tool.global.MainHandler;
@@ -37,7 +36,6 @@ import java.lang.ref.WeakReference;
  */
 public class SmartNavigator implements INavigator<Class<? extends IViewProcessor>, Intent, Intent> {
     private WeakReference<Object> executorReference;
-    private final ShakeInterceptor interceptor = new ShakeInterceptor(50);
 
     public void setExecutor(Object executor) {
         this.executorReference = new WeakReference<>(executor);
@@ -50,9 +48,6 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
 
     @Override
     public void push(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params) {
-        if (!interceptor.checkInterval()) {
-            return;
-        }
         Object executor = executorReference.get();
         if (executor == null) {
             Logger.e("The resources have been released.");
@@ -63,7 +58,6 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
             Logger.e("Unable to find the appropriate context.");
             return;
         }
-        interceptor.record();
         Intent intent = buildIntent(target, params, executor, context);
         if (!(context instanceof Activity)) {
             Logger.w("The context is not an Activity, should be added flag:Intent.FLAG_ACTIVITY_NEW_TASK");
@@ -74,9 +68,6 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
 
     @Override
     public void push(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params, @Nullable final IDataCallback<Intent> callback) {
-        if (!interceptor.checkInterval()) {
-            return;
-        }
         Object executor = executorReference.get();
         if (executor == null) {
             Logger.e("The resources have been released.");
@@ -87,7 +78,6 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
             Logger.e("Unable to find the appropriate context.");
             return;
         }
-        interceptor.record();
         Intent intent = buildIntent(target, params, executor, context);
         final int requestCode = intent.getIntExtra(AppConst.REQUEST_CODE, AppConst.DEF_REQUEST_CODE);
         IViewContainer container = null;
@@ -157,10 +147,6 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
 
     @Override
     public void replace(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params) {
-        if (!interceptor.checkInterval()) {
-            return;
-        }
-        interceptor.record();
         this.pop();
         push(target, params);
     }
@@ -172,25 +158,17 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
 
     @Override
     public void pop(int resultCode, @Nullable Intent data) {
-        if (!interceptor.checkInterval()) {
-            return;
-        }
         Activity activity = getActivity();
         if (activity == null) {
             Logger.w("Unable to find the appropriate Activity.");
             return;
         }
-        interceptor.record();
         activity.setResult(resultCode, data);
         activity.finish();
     }
 
     @Override
     public void popToRoot(@Nullable Intent data) {
-        if (!interceptor.checkInterval()) {
-            return;
-        }
-        interceptor.record();
         AppStackUtil.finishToRoot();
         if (data == null) {
             return;
@@ -200,24 +178,17 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
 
     @Override
     public boolean popTo(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent data) {
-        if (!interceptor.checkInterval()) {
-            return false;
-        }
-        interceptor.record();
         final String targetName = target.getName();
         if (!AppStackUtil.finishUntil(targetName)) {
-            push(target);
+            push(target, data);
+        } else {
+            postData(data, targetName);
         }
-        postData(data, targetName);
         return true;
     }
 
     @Override
     public boolean remove(@NonNull Class<? extends IViewProcessor> target) {
-        if (!interceptor.checkInterval()) {
-            return false;
-        }
-        interceptor.record();
         return AppStackUtil.finishByName(target.getName());
     }
 

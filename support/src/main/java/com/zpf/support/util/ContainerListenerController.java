@@ -25,7 +25,7 @@ import com.zpf.views.window.CustomWindowManager;
 
 import java.lang.reflect.Type;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,7 +39,7 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
     private List<IBackPressInterceptor> mBackPressInterceptor;
     private List<OnTouchKeyListener> mTouchKeyListener;
     private List<OnViewStateChangedListener> mViewStateList;
-    private final List<IFullLifecycle> mLifecycleList = new LinkedList<>();
+    private final List<IFullLifecycle> mLifecycleList = new ArrayList<>();
     private final OnLifecycleStateListener mStateListener = new OnLifecycleStateListener();
     private final Object lock = new Object();
     private volatile CustomWindowManager mWindowManager;
@@ -54,9 +54,14 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (mActivityResultCallBackList != null) {
-            for (OnActivityResultListener listener : mActivityResultCallBackList) {
-                listener.onActivityResult(requestCode, resultCode, data);
+        List<OnActivityResultListener> list = mActivityResultCallBackList;
+        if (list == null) {
+            return;
+        }
+        for (int i = list.size() - 1; i >= 0; i--) {
+            list.get(i).onActivityResult(requestCode, resultCode, data);
+            if (disposableListeners.remove(list.get(i))) {
+                list.remove(i);
             }
         }
     }
@@ -64,9 +69,14 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         PermissionManager.get().onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (mPermissionCallBackList != null) {
-            for (OnPermissionResultListener listener : mPermissionCallBackList) {
-                listener.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        List<OnPermissionResultListener> list = mPermissionCallBackList;
+        if (list == null) {
+            return;
+        }
+        for (int i = list.size() - 1; i >= 0; i--) {
+            list.get(i).onRequestPermissionsResult(requestCode, permissions, grantResults);
+            if (disposableListeners.remove(list.get(i))) {
+                list.remove(i);
             }
         }
     }
@@ -208,9 +218,14 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
         return mWindowManager;
     }
 
-    public void addDisposable(@NonNull Object listener, @Nullable Type listenerClass) {
+    public void addDisposableActivityResultListener(@NonNull OnActivityResultListener listener) {
         disposableListeners.add(listener);
-        add(listener, listenerClass);
+        add(listener, OnActivityResultListener.class);
+    }
+
+    public void addDisposablePermissionResultListener(@NonNull OnPermissionResultListener listener) {
+        disposableListeners.add(listener);
+        add(listener, OnPermissionResultListener.class);
     }
 
     @Override
@@ -223,7 +238,7 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
             result = true;
         } else if ((listenerClass == null || listenerClass == OnDestroyListener.class) && listener instanceof OnDestroyListener) {
             if (mDestroyListenerList == null) {
-                mDestroyListenerList = new LinkedList<>();
+                mDestroyListenerList = new ArrayList<>();
             }
             if (mDestroyListenerList.size() == 0 || !mDestroyListenerList.contains(listener)) {
                 mDestroyListenerList.add((OnDestroyListener) listener);
@@ -232,7 +247,7 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
         }
         if ((listenerClass == null || listenerClass == OnActivityResultListener.class) && listener instanceof OnActivityResultListener) {
             if (mActivityResultCallBackList == null) {
-                mActivityResultCallBackList = new LinkedList<>();
+                mActivityResultCallBackList = new ArrayList<>();
             }
             if (mActivityResultCallBackList.size() == 0 || !mActivityResultCallBackList.contains(listener)) {
                 mActivityResultCallBackList.add((OnActivityResultListener) listener);
@@ -241,7 +256,7 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
         }
         if ((listenerClass == null || listenerClass == OnPermissionResultListener.class) && listener instanceof OnPermissionResultListener) {
             if (mPermissionCallBackList == null) {
-                mPermissionCallBackList = new LinkedList<>();
+                mPermissionCallBackList = new ArrayList<>();
             }
             if (mPermissionCallBackList.size() == 0 || !mPermissionCallBackList.contains(listener)) {
                 mPermissionCallBackList.add((OnPermissionResultListener) listener);
@@ -250,7 +265,7 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
         }
         if ((listenerClass == null || listenerClass == IBackPressInterceptor.class) && listener instanceof IBackPressInterceptor) {
             if (mBackPressInterceptor == null) {
-                mBackPressInterceptor = new LinkedList<>();
+                mBackPressInterceptor = new ArrayList<>();
             }
             if (mBackPressInterceptor.size() == 0 || !mBackPressInterceptor.contains(listener)) {
                 mBackPressInterceptor.add((IBackPressInterceptor) listener);
@@ -259,7 +274,7 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
         }
         if ((listenerClass == null || listenerClass == OnTouchKeyListener.class) && listener instanceof OnTouchKeyListener) {
             if (mTouchKeyListener == null) {
-                mTouchKeyListener = new LinkedList<>();
+                mTouchKeyListener = new ArrayList<>();
             }
             if (mTouchKeyListener.size() == 0 || !mTouchKeyListener.contains(listener)) {
                 mTouchKeyListener.add((OnTouchKeyListener) listener);
@@ -268,7 +283,7 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
         }
         if ((listenerClass == null || listenerClass == OnViewStateChangedListener.class) && listener instanceof OnViewStateChangedListener) {
             if (mViewStateList == null) {
-                mViewStateList = new LinkedList<>();
+                mViewStateList = new ArrayList<>();
             }
             if (mViewStateList.size() == 0 || !mViewStateList.contains(listener)) {
                 mViewStateList.add((OnViewStateChangedListener) listener);
@@ -336,9 +351,6 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
     public void onParamChanged(Bundle newParams) {
         if (mViewStateList != null) {
             for (OnViewStateChangedListener listener : mViewStateList) {
-                if (disposableListeners.contains(listener)) {
-
-                }
                 listener.onParamChanged(newParams);
             }
         }

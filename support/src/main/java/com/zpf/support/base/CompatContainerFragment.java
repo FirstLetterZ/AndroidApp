@@ -214,7 +214,7 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
 
     @Override
     public void startActivityForResult(@NonNull Intent intent, @NonNull final OnActivityResultListener listener) {
-        mController.addDisposable(listener, OnActivityResultListener.class);
+        mController.addDisposableActivityResultListener(listener);
         this.startActivityForResult(intent, intent.getIntExtra(AppConst.REQUEST_CODE, AppConst.DEF_REQUEST_CODE), null);
     }
 

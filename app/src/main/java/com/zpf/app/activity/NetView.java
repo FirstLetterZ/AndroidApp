@@ -1,66 +1,62 @@
 package com.zpf.app.activity;
 
+import android.app.DownloadManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.gson.JsonElement;
-import com.zpf.api.OnDestroyListener;
+import com.zpf.api.IResultBean;
+import com.zpf.api.OnDataResultListener;
 import com.zpf.app.R;
-import com.zpf.app.global.DataCall;
-import com.zpf.app.global.NetApi;
+import com.zpf.file.FileUriUtil;
 import com.zpf.support.base.ViewProcessor;
-import com.zpf.tool.network.base.INetworkCallCreator;
+import com.zpf.tool.expand.download.DownloadListener;
+import com.zpf.tool.expand.download.DownloadUtil;
 import com.zpf.tool.network.base.OnLoadingListener;
-import com.zpf.tool.network.base.OnResponseListener;
-import com.zpf.tool.network.model.RequestType;
-import com.zpf.tool.network.model.ResponseResult;
 import com.zpf.tool.network.request.MergeRequest;
-import com.zpf.tool.network.request.NetRequest;
-import com.zpf.tool.network.retrofit.RetrofitRequest;
+import com.zpf.tool.network.util.OkHttpNetUtil;
 
-import retrofit2.Call;
+import java.io.File;
+import java.util.Map;
 
 /**
  * @author Created by ZPF on 2021/3/19.
  */
 public class NetView extends ViewProcessor {
-    private NetRequest<ResponseResult<JsonElement>> netCall1 = new RetrofitRequest<>(new INetworkCallCreator<Call<ResponseResult<JsonElement>>>() {
+    private final DownloadListener listener01 = new DownloadListener() {
         @Override
-        public Call<ResponseResult<JsonElement>> callNetwork() {
-            return DataCall.getApi(NetApi.class).firstCall();
+        public void onResult(boolean success, @Nullable Uri data) {
+            tv01.setText("success=" + success);
         }
-    }).setResponseListener(new OnResponseListener<ResponseResult<JsonElement>>() {
-        @Override
-        public void onResponse(boolean success, int code, ResponseResult<JsonElement> data, String msg) {
-            tv01.setText(("success=" + success + ";code=" + code));
 
-        }
-    });
-    private NetRequest<ResponseResult<JsonElement>> netCall2 = new RetrofitRequest<>(new INetworkCallCreator<Call<ResponseResult<JsonElement>>>() {
         @Override
-        public Call<ResponseResult<JsonElement>> callNetwork() {
-            return DataCall.getApi(NetApi.class).secondCall();
+        public void onProgress(long total, long current, @Nullable Object target) {
+            tv01.setText("progress=" + (current * 100f / total));
         }
-    }).setResponseListener(new OnResponseListener<ResponseResult<JsonElement>>() {
+    };
+    private final OnDataResultListener<IResultBean<String>> resultListener = new OnDataResultListener<IResultBean<String>>() {
         @Override
-        public void onResponse(boolean success, int code, ResponseResult<JsonElement> data, String msg) {
-            tv02.setText(("success=" + success + ";code=" + code));
+        public void onResult(boolean success, @Nullable @org.jetbrains.annotations.Nullable IResultBean<String> data) {
+            tv01.setText("success=" + success);
         }
-    });
-    private NetRequest<ResponseResult<JsonElement>> netCall3 = new RetrofitRequest<>(new INetworkCallCreator<Call<ResponseResult<JsonElement>>>() {
+    };
+
+    private final DownloadListener listener02 = new DownloadListener() {
         @Override
-        public Call<ResponseResult<JsonElement>> callNetwork() {
-            return DataCall.getApi(NetApi.class).thirdCall();
+        public void onResult(boolean success, @Nullable Uri data) {
+            tv02.setText("success=" + success);
         }
-    }).setResponseListener(new OnResponseListener<ResponseResult<JsonElement>>() {
+
         @Override
-        public void onResponse(boolean success, int code, ResponseResult<JsonElement> data, String msg) {
-            tv03.setText(("success=" + success + ";code=" + code));
+        public void onProgress(long total, long current, @Nullable Object target) {
+            tv02.setText("progress=" + (current * 100f / total));
         }
-    });
+    };
     private TextView tv01 = find(R.id.tv01);
     private TextView tv02 = find(R.id.tv02);
     private TextView tv03 = find(R.id.tv03);
@@ -83,13 +79,6 @@ public class NetView extends ViewProcessor {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContainer.add(netCall1, OnDestroyListener.class);
-        mContainer.add(netCall2, OnDestroyListener.class);
-        mContainer.add(netCall3, OnDestroyListener.class);
-        mergeRequest
-                .merge(netCall1, RequestType.TYPE_DEFAULT)
-                .merge(netCall2, RequestType.TYPE_DEFAULT)
-                .merge(netCall3, RequestType.TYPE_DEFAULT);
         bind(R.id.btn_load1);
         bind(R.id.btn_load2);
         bind(R.id.btn_load3);
@@ -99,15 +88,33 @@ public class NetView extends ViewProcessor {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_load1:
-                toLoad(-1);
+                OkHttpNetUtil.download("https://book.kotlincn.net/kotlincn-docs.pdf",
+                        FileUriUtil.pathToUri(getContext(), new File(getContext().getCacheDir(), "001.pdf")),
+                        null, 0, resultListener, listener01, null);
                 break;
             case R.id.btn_load2:
-                toLoad(0);
+                DownloadUtil.get(getContext()).download(buildRequest("https://book.kotlincn.net/kotlincn-docs.pdf",
+                        "test_download.pdf", null), listener02);
                 break;
             case R.id.btn_load3:
-                toLoad(1);
+//                toLoad(1);
                 break;
         }
+    }
+
+    public DownloadManager.Request buildRequest(
+            @NonNull String url, @NonNull String name, @Nullable Map<String, String> heads) {
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+        if (heads != null && heads.size() > 0) {
+            for (Map.Entry<String, String> entry : heads.entrySet()) {
+                request.addRequestHeader(entry.getKey(), entry.getValue());
+            }
+        }
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN);
+        request.setVisibleInDownloadsUi(false);
+        request.setAllowedOverRoaming(false);
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name);
+        return request;
     }
 
     private void toLoad(int type) {

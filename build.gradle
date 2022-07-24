@@ -4,12 +4,13 @@ buildscript {
     ext.kotlin_version = '1.5.31'
 
     repositories {
+        maven { url 'https://s01.oss.sonatype.org/content/groups/public' }
+        maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
         maven { url 'https://maven.aliyun.com/repository/central' }
         maven { url 'https://maven.aliyun.com/repository/jcenter' }
         maven { url 'https://maven.aliyun.com/repository/google' }
         maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
         maven { url 'https://maven.aliyun.com/repository/public' }
-        maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
         mavenCentral()
         maven { url 'https://jitpack.io' }
         google()
@@ -24,12 +25,13 @@ buildscript {
 
 allprojects {
     repositories {
+        maven { url 'https://s01.oss.sonatype.org/content/groups/public' }
+        maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
         maven { url 'https://maven.aliyun.com/repository/central' }
         maven { url 'https://maven.aliyun.com/repository/jcenter' }
         maven { url 'https://maven.aliyun.com/repository/google' }
         maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
         maven { url 'https://maven.aliyun.com/repository/public' }
-        maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
         mavenCentral()
         maven { url 'https://jitpack.io' }
         google()
@@ -106,17 +108,17 @@ ext {
             okhttp                 : 'com.squareup.okhttp3:okhttp:4.10.0',
             glide                  : 'com.github.bumptech.glide:glide:4.12.0',
             /* ============================== 项目内工具库 ================================ */
-            toolExpand             : 'io.github.firstletterz:tool-expand:0.2.1-SNAPSHOT',
-            webview                : 'com.zpf.android:ui-webview:0.1.2-SNAPSHOT',
+            toolExpand             : 'io.github.firstletterz:tool-expand:0.2.6-SNAPSHOT',
+            webview                : 'com.zpf.android:ui-webview:0.1.1',
 //            refresh              : 'com.zpf.android:pullRefresh:1.1.0',
-            network                : 'io.github.firstletterz:tool-retrofit:0.1.5-SNAPSHOT',
-            support                : 'io.github.firstletterz:support:0.1.6-SNAPSHOT',
+            network                : 'io.github.firstletterz:tool-retrofit:0.1.8-SNAPSHOT',
+            support                : 'io.github.firstletterz:support:0.1.13-SNAPSHOT',
             gsonParse              : 'io.github.firstletterz:tool-gson:1.0.1',
 //            glideutil            : 'com.zpf.android:util-glide:1.1.0',
             binding                : 'io.github.firstletterz:tool-binding:0.0.1-SNAPSHOT',
-            rvexpand               : 'io.github.firstletterz:ui-rv-expand:0.1.10-SNAPSHOT',
+            rvexpand               : 'io.github.firstletterz:ui-rv-expand:0.1.13-SNAPSHOT',
             /* ============================== 项目内依赖工具库 ================================ */
-            api                    : 'io.github.firstletterz:api-base:0.2.5-SNAPSHOT',
+            api                    : 'io.github.firstletterz:api-base:0.2.4',
             dataparser             : 'io.github.firstletterz:api-parse:1.0.0',
             central                : 'io.github.firstletterz:tool-central:1.0.0',
             file                   : 'io.github.firstletterz:tool-file:0.0.2',
@@ -125,9 +127,9 @@ ext {
             permission             : 'io.github.firstletterz:tool-permission:0.1.3',
             appstack               : 'io.github.firstletterz:tool-stack:1.0.0',
             process                : 'io.github.firstletterz:tool-process:0.1.0',
-            views                  : 'io.github.firstletterz:ui-kit:0.2.5-SNAPSHOT',
-            wheelpicker            : 'io.github.firstletterz:ui-picker-wheel:0.1.1-SNAPSHOT',
-            toolkit                : 'io.github.firstletterz:tool-kit:0.1.1-SNAPSHOT',
+            views                  : 'io.github.firstletterz:ui-kit:0.2.8-SNAPSHOT',
+            wheelpicker            : 'io.github.firstletterz:ui-picker-wheel:0.1.1',
+            toolkit                : 'io.github.firstletterz:tool-kit:0.1.1',
             fingerprint            : 'io.github.firstletterz:tool-fingerprint:0.0.1-SNAPSHOT',
             frame                  : 'io.github.firstletterz:api-frame:0.1.3',
             compatPermission       : 'io.github.firstletterz:tool-compat-permission:0.1.2',

@@ -17,9 +17,9 @@ public class MyApp extends Application {
     public void onCreate() {
         super.onCreate();
         if (PublicUtil.isPackageProcess(this)) {
+            CentralManager.init(this, new RealGlobalConfig());
             AppStackUtil.init(this);
             CacheMap.setLocalStorageManager(SpUtil.get());
-            CentralManager.init(this, new RealGlobalConfig());
             Logger.setLogOut(CentralManager.debuggable());
         }
     }

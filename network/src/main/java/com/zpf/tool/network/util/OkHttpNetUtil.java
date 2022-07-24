@@ -1,5 +1,7 @@
 package com.zpf.tool.network.util;
 
+import android.net.Uri;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -8,20 +10,20 @@ import com.zpf.api.IManager;
 import com.zpf.api.IResultBean;
 import com.zpf.api.OnDataResultListener;
 import com.zpf.api.OnProgressListener;
-import com.zpf.tool.network.model.OkHttpCallBack;
+import com.zpf.tool.global.CentralManager;
+import com.zpf.tool.network.R;
 import com.zpf.tool.network.base.ErrorCode;
 import com.zpf.tool.network.header.HeaderCarrier;
 import com.zpf.tool.network.interceptor.DownLoadInterceptor;
 import com.zpf.tool.network.interceptor.HeaderInterceptor;
 import com.zpf.tool.network.interceptor.NetLogInterceptor;
+import com.zpf.tool.network.model.OkHttpCallBack;
 import com.zpf.tool.network.model.ResponseResult;
-import com.zpf.tool.global.CentralManager;
-import com.zpf.tool.network.R;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -174,6 +176,14 @@ public class OkHttpNetUtil {
         }
     }
 
+    public static void download(@NonNull String url, @NonNull Uri fileUri, @Nullable Map<String, String> heads,
+                                int type, @Nullable OnDataResultListener<IResultBean<String>> resultListener,
+                                @Nullable OnProgressListener progressListener,
+                                @Nullable IManager<ICancelable> manager) {
+        final String cacheKey = fileUri.toString();
+        buildDownloadCall(cacheKey, url, fileUri, heads, type, resultListener, progressListener, manager);
+    }
+
     public static void download(@NonNull String url, @NonNull File file, @Nullable Map<String, String> heads,
                                 int type, @Nullable OnDataResultListener<IResultBean<String>> resultListener,
                                 @Nullable OnProgressListener progressListener,
@@ -187,14 +197,21 @@ public class OkHttpNetUtil {
             return;
         }
         final String cacheKey = file.getAbsolutePath();
-        CacheInfo cacheInfo = cacheMap.get(cacheKey);
+        buildDownloadCall(cacheKey, url, null, heads, type, resultListener, progressListener, manager);
+    }
+
+    private static void buildDownloadCall(
+            @NonNull final String key, @NonNull String url, @Nullable Uri fileUri, @Nullable Map<String, String> heads,
+            int type, @Nullable OnDataResultListener<IResultBean<String>> resultListener,
+            @Nullable OnProgressListener progressListener, @Nullable IManager<ICancelable> manager) {
+        CacheInfo cacheInfo = cacheMap.get(key);
         if (cacheInfo == null) {
             cacheInfo = new CacheInfo();
         }
         cacheInfo.resultListener = resultListener;
         cacheInfo.progressListener = progressListener;
         if (cacheInfo.realCall != null) {
-            updateCacheController(cacheInfo, cacheKey, manager);
+            updateCacheController(cacheInfo, key, manager);
             return;
         }
         Request.Builder requestBuilder = new Request.Builder();
@@ -208,7 +225,7 @@ public class OkHttpNetUtil {
                 .addNetworkInterceptor(new DownLoadInterceptor(new OnProgressListener() {
                     @Override
                     public void onProgress(long total, long current, @Nullable Object target) {
-                        CacheInfo cacheInfo = cacheMap.get(cacheKey);
+                        CacheInfo cacheInfo = cacheMap.get(key);
                         if (cacheInfo != null && cacheInfo.progressListener != null) {
                             cacheInfo.progressListener.onProgress(total, current, target);
                         }
@@ -217,9 +234,9 @@ public class OkHttpNetUtil {
                 .build();
         final Call call = client.newCall(requestBuilder.build());
         cacheInfo.realCall = call;
-        updateCacheController(cacheInfo, cacheKey, manager);
-        cacheMap.put(cacheKey, cacheInfo);
-        call.enqueue(newDownloadCallback(cacheKey, type));
+        updateCacheController(cacheInfo, key, manager);
+        cacheMap.put(key, cacheInfo);
+        call.enqueue(newDownloadCallback(key, fileUri, type));
     }
 
     private static Callback newCallback(final String key, int type) {
@@ -241,30 +258,35 @@ public class OkHttpNetUtil {
         };
     }
 
-    private static Callback newDownloadCallback(final String key, int type) {
+    private static Callback newDownloadCallback(final String key, final Uri fileUri, int type) {
         return new OkHttpCallBack<String>(type) {
             @Override
             public String parseData(String bodyString) {
-                return bodyString;
+                return key;
             }
 
             @Override
             protected void handleResponse(@NonNull ResponseBody responseBody, String parseData) throws Throwable {
                 byte[] buf = new byte[2048];
                 int len;
-                FileOutputStream fos = null;
-                InputStream inputStream = responseBody.byteStream();
-                try {
-                    fos = new FileOutputStream(key);
-                    while ((len = inputStream.read(buf)) != -1) {
-                        fos.write(buf, 0, len);
-                        fos.flush();
+                if (fileUri != null) {
+                    try (InputStream inputStream = responseBody.byteStream();
+                         OutputStream fos = CentralManager.getAppContext().getContentResolver().openOutputStream(fileUri)) {
+                        while ((len = inputStream.read(buf)) != -1) {
+                            fos.write(buf, 0, len);
+                            fos.flush();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                } finally {
-                    try {
-                        if (inputStream != null) inputStream.close();
-                        if (fos != null) fos.close();
-                    } catch (IOException e) {
+                } else {
+                    try (FileOutputStream fos = new FileOutputStream(key);
+                         InputStream inputStream = responseBody.byteStream()) {
+                        while ((len = inputStream.read(buf)) != -1) {
+                            fos.write(buf, 0, len);
+                            fos.flush();
+                        }
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -272,11 +294,10 @@ public class OkHttpNetUtil {
 
             @Override
             protected void complete(boolean success, @NonNull IResultBean<String> responseResult) {
-                CacheInfo cacheInfo = cacheMap.get(key);
+                CacheInfo cacheInfo = cacheMap.remove(key);
                 if (cacheInfo != null && cacheInfo.resultListener != null) {
                     cacheInfo.resultListener.onResult(success, responseResult);
                 }
-                cacheMap.remove(key);
             }
         };
     }

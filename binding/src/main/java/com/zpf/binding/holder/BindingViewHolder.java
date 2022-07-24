@@ -60,12 +60,11 @@ public class BindingViewHolder implements IHolder<View> {
     @Override
     public void onBindData(@Nullable Object data, int position) {
         if (variableId != 0) {
-            if (lastBindSuccess) {
-                if (itemViewModel == null || !itemViewModel.update(data)) {
-                    lastBindSuccess = setVariable(variableId, data);
-                }
-            } else {
+            BaseViewModel<?> model = itemViewModel;
+            if (model == null) {
                 lastBindSuccess = setVariable(variableId, data);
+            } else if (!model.update(data) || !lastBindSuccess) {
+                lastBindSuccess = setVariable(variableId, model);
             }
         }
     }

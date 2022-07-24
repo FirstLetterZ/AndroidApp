@@ -12,8 +12,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MergeRequest {
-
-    @interface ReceiveStrategy {
+    public @interface ReceiveStrategy {
         int RECEIVE_NO_FAIL = 0;//只有全部成功才返回响应数据
         int RECEIVE_ALL_SUCCESS = 1;//返回所有成功接口的响应数据
         int RECEIVE_ALL_RESULT = -1;//返回所有接口的响应数据，不论是否成功
