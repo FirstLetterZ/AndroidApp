@@ -51,7 +51,10 @@ public class BasePagerAdapter<T> extends PagerAdapter implements ItemListAdapter
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         int itemType = getItemViewType(position);
         LinkedList<IHolder<View>> caches = holderCache.get(itemType);
-        IHolder<View> itemHolder = caches.pollFirst();
+        IHolder<View> itemHolder = null;
+        if (caches != null) {
+            itemHolder = caches.pollFirst();
+        }
         if (itemHolder == null && itemViewCreator != null) {
             itemHolder = itemViewCreator.onCreateView(container, itemType);
         }

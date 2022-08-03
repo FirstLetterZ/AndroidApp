@@ -111,11 +111,13 @@ public abstract class BaseCallBack<T> {
                 }
                 responseResult.setCode(code);
                 responseResult.setMessage(message);
-                if (responseHandler != null && responseHandler.interceptFailHandle(responseResult)) {
+                if (!RequestType.checkFlag(type, RequestType.FLAG_IGNORE_INTERCEPT)
+                        && responseHandler != null && responseHandler.interceptFailHandle(responseResult)) {
                     complete(false, responseResult);
                     return;
                 }
-                if (!RequestType.checkFlag(type, RequestType.FLAG_NO_TOAST) && !showCustomHint(code, message) && responseHandler != null) {
+                if (!RequestType.checkFlag(type, RequestType.FLAG_NO_TOAST)
+                        && !showCustomHint(code, message) && responseHandler != null) {
                     responseHandler.showHint(code, message);
                 }
                 complete(false, responseResult);

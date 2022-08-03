@@ -41,7 +41,7 @@ import com.zpf.views.type.ITopBar;
 import com.zpf.views.type.IconText;
 import com.zpf.views.window.ICustomWindowManager;
 
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -57,7 +57,7 @@ public class ViewProcessor implements IViewProcessor {
             ViewProcessor.this.onClick(v);
         }
     };
-    private LinkedList<Runnable> waitRunList;
+    private LinkedHashSet<Runnable> waitRunAfterVisible;
     protected IReceiver<IEvent> receiver = new IReceiver<IEvent>() {
 
         @NonNull
@@ -164,11 +164,11 @@ public class ViewProcessor implements IViewProcessor {
     @Override
     @CallSuper
     public void onVisibleChanged(boolean visibility) {
-        if (visibility && waitRunList != null) {
-            for (Runnable runnable : waitRunList) {
+        if (visibility && waitRunAfterVisible != null) {
+            for (Runnable runnable : waitRunAfterVisible) {
                 runnable.run();
             }
-            waitRunList.clear();
+            waitRunAfterVisible.clear();
         }
     }
 
@@ -198,12 +198,12 @@ public class ViewProcessor implements IViewProcessor {
             return;
         }
         if (nextTime || !mContainer.getState().isVisible()) {
-            LinkedList<Runnable> list = waitRunList;
-            if (list == null) {
-                list = new LinkedList<>();
-                waitRunList = list;
+            LinkedHashSet<Runnable> set = waitRunAfterVisible;
+            if (set == null) {
+                set = new LinkedHashSet<>();
+                waitRunAfterVisible = set;
             }
-            list.add(runnable);
+            set.add(runnable);
         } else {
             runnable.run();
         }

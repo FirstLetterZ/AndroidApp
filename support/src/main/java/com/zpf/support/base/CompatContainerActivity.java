@@ -51,14 +51,7 @@ public class CompatContainerActivity extends AppCompatActivity implements IViewC
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         Intent intent = getIntent();
         initTheme(intent.getIntExtra(AppConst.TARGET_VIEW_THEME, -1));
-        String stackItemName = intent.getStringExtra(AppStackUtil.STACK_ITEM_NAME);
-        if ((stackItemName == null || stackItemName.length() == 0) && mViewProcessor != null) {
-            Class<?> cls = (Class<?>) intent.getSerializableExtra(AppConst.TARGET_VIEW_CLASS);
-            if (cls != null) {
-                stackItemName = cls.getName();
-                intent.putExtra(AppStackUtil.STACK_ITEM_NAME, stackItemName);
-            }
-        }
+        ContainerController.initItemStackName(intent);
         super.onCreate(savedInstanceState);
         //防止初次安装从后台返回的重启问题
         isLauncher = (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && Intent.ACTION_MAIN.equals(intent.getAction()));

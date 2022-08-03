@@ -1,5 +1,6 @@
 package com.zpf.support.util;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,6 +13,7 @@ import com.zpf.frame.IViewProcessor;
 import com.zpf.support.constant.AppConst;
 import com.zpf.tool.expand.util.ClassLoaderImpl;
 import com.zpf.tool.global.CentralManager;
+import com.zpf.tool.stack.AppStackUtil;
 
 /**
  * Created by ZPF on 2019/3/1.
@@ -87,6 +89,20 @@ public class ContainerController {
             ContainerController.mInitingViewContainer = null;
         }
         return viewProcessor;
+    }
+
+    public static void initItemStackName(Intent intent) {
+        String stackItemName = intent.getStringExtra(AppStackUtil.STACK_ITEM_NAME);
+        if (stackItemName != null && stackItemName.length() > 0) {
+            return;
+        }
+        Class<?> cls = (Class<?>) intent.getSerializableExtra(AppConst.TARGET_VIEW_CLASS);
+        if (cls == null) {
+            stackItemName = intent.getStringExtra(AppConst.TARGET_VIEW_CLASS_NAME);
+        } else {
+            intent.putExtra(AppStackUtil.STACK_ITEM_NAME, cls.getName());
+        }
+        intent.putExtra(AppStackUtil.STACK_ITEM_NAME, stackItemName);
     }
 
 }
