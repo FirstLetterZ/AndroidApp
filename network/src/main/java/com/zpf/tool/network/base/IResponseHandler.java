@@ -14,7 +14,7 @@ public interface IResponseHandler {
     boolean checkDataNull(Object data);
 
     //拦截callback中的fail方法
-    boolean interceptFailHandle(IResultBean<?> result);
+    boolean interceptFailHandle(int type, IResultBean<?> result);
 
     void showHint(int code, String message);
 

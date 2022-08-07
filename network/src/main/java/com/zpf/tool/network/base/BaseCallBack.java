@@ -112,7 +112,7 @@ public abstract class BaseCallBack<T> {
                 responseResult.setCode(code);
                 responseResult.setMessage(message);
                 if (!RequestType.checkFlag(type, RequestType.FLAG_IGNORE_INTERCEPT)
-                        && responseHandler != null && responseHandler.interceptFailHandle(responseResult)) {
+                        && responseHandler != null && responseHandler.interceptFailHandle(type, responseResult)) {
                     complete(false, responseResult);
                     return;
                 }
