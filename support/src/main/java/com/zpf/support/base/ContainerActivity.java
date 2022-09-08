@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.KeyEvent;
 
@@ -30,7 +32,6 @@ import com.zpf.support.util.StackAnimUtil;
 import com.zpf.tool.StatusBarUtil;
 import com.zpf.tool.expand.util.Logger;
 import com.zpf.tool.global.CentralManager;
-import com.zpf.tool.stack.AppStackUtil;
 import com.zpf.views.window.ICustomWindowManager;
 
 import java.lang.reflect.Type;
@@ -47,9 +48,22 @@ public abstract class ContainerActivity extends Activity implements IViewContain
     private IViewProcessor mViewProcessor;
 
     @Override
+    public Resources getResources() {
+        Resources resources = super.getResources();
+        if (!AppConst.FontScaleWithSystem) {
+            Configuration configuration = resources.getConfiguration();
+            if (configuration.fontScale != 1f) {
+                configuration.fontScale = 1f;
+                resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+            }
+        }
+        return resources;
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         Intent intent = getIntent();
-        initTheme(intent.getIntExtra(AppConst.TARGET_VIEW_THEME, -1));
+        initTheme(intent);
         ContainerController.initItemStackName(intent);
         super.onCreate(savedInstanceState);
         //防止初次安装从后台返回的重启问题
@@ -59,7 +73,6 @@ public abstract class ContainerActivity extends Activity implements IViewContain
             return;
         }
         CentralManager.onObjectInit(this);
-        initWindow();
         mViewProcessor = initViewProcessor();
         if (mViewProcessor != null) {
             mController.add(mViewProcessor, null);
@@ -360,13 +373,11 @@ public abstract class ContainerActivity extends Activity implements IViewContain
         mController.onVisibleChanged(visible);
     }
 
-    protected void initTheme(int themeId) {
+    protected void initTheme(Intent intent) {
+        int themeId = intent.getIntExtra(AppConst.TARGET_VIEW_THEME, -1);
         if (themeId > 0) {
             setTheme(themeId);
         }
-    }
-
-    protected void initWindow() {
         try {
             setRequestedOrientation(getParams().getInt(AppConst.TARGET_VIEW_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
         } catch (Exception e) {

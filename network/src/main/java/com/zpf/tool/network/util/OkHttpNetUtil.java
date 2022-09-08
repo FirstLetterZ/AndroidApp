@@ -276,8 +276,6 @@ public class OkHttpNetUtil {
                             fos.write(buf, 0, len);
                             fos.flush();
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 } else {
                     try (FileOutputStream fos = new FileOutputStream(key);
@@ -286,8 +284,6 @@ public class OkHttpNetUtil {
                             fos.write(buf, 0, len);
                             fos.flush();
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
             }

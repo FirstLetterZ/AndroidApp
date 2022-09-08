@@ -24,6 +24,7 @@ import com.zpf.frame.IViewContainer;
 import com.zpf.frame.IViewProcessor;
 import com.zpf.support.base.CompatContainerActivity;
 import com.zpf.support.constant.AppConst;
+import com.zpf.tool.ShakeInterceptor;
 import com.zpf.tool.expand.util.Logger;
 import com.zpf.tool.global.CentralManager;
 import com.zpf.tool.global.MainHandler;
@@ -36,6 +37,7 @@ import java.lang.ref.WeakReference;
  */
 public class SmartNavigator implements INavigator<Class<? extends IViewProcessor>, Intent, Intent> {
     private WeakReference<Object> executorReference;
+    private final ShakeInterceptor pushShakeInterceptor = new ShakeInterceptor();
 
     public void setExecutor(Object executor) {
         this.executorReference = new WeakReference<>(executor);
@@ -48,6 +50,9 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
 
     @Override
     public void push(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params) {
+        if (!pushShakeInterceptor.checkInterval()) {
+            return;
+        }
         Object executor = executorReference.get();
         if (executor == null) {
             Logger.e("The resources have been released.");
@@ -68,6 +73,9 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
 
     @Override
     public void push(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params, @Nullable final IDataCallback<Intent> callback) {
+        if (!pushShakeInterceptor.checkInterval()) {
+            return;
+        }
         Object executor = executorReference.get();
         if (executor == null) {
             Logger.e("The resources have been released.");
@@ -215,7 +223,7 @@ public class SmartNavigator implements INavigator<Class<? extends IViewProcessor
             containerClass = CompatContainerActivity.class;
         }
         intent.setClass(context, containerClass);
-        intent.putExtra(AppStackUtil.STACK_ITEM_NAME, target.getName());
+        intent.putExtra(AppStackUtil.STACK_ITEM_NAME, AppStackUtil.getNameInStack(target));
         intent.putExtra(AppConst.TARGET_VIEW_CLASS_NAME, target.getName());
         intent.putExtra(AppConst.TARGET_VIEW_CLASS, target);
         return intent;

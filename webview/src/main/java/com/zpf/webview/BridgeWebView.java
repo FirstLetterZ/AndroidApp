@@ -604,25 +604,31 @@ public class BridgeWebView extends WebView {
     }
 
     public void onCallBack(String fucName, Object result) {
-        if (fucName != null && fucName.length() > 0) {
-            String forebody = "javascript:NativeCallBack('" + fucName + "'";
-            if (result == null || "".equals(result)) {
-                result = "";
-            } else {
-                if (result instanceof String) {
-                    result = "'" + result + "'";
-                }
-                forebody = forebody + ",";
-            }
-            final String javascript = forebody + result + ")";
-            logInfo("======================== onCallBack ======================");
-            logInfo("javascript=" + javascript);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                evaluateJavascript(javascript, null);
-            } else {
-                loadUrl(javascript);
-            }
+        if (fucName == null || fucName.length() == 0) {
+            return;
         }
+        String forebody = "javascript:NativeCallBack('" + fucName + "'";
+        if (result == null || "".equals(result)) {
+            result = "";
+        } else {
+            if (result instanceof String) {
+                result = "'" + result + "'";
+            }
+            forebody = forebody + ",";
+        }
+        final String javascript = forebody + result + ")";
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                logInfo("======================== onCallBack ======================");
+                logInfo("javascript=" + javascript);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    evaluateJavascript(javascript, null);
+                } else {
+                    loadUrl(javascript);
+                }
+            }
+        });
     }
 
     @Override
@@ -673,7 +679,7 @@ public class BridgeWebView extends WebView {
     private boolean handleOverrideUrlLoading(WebView webView, final String url) {
         boolean intercept = urlInterceptor != null && urlInterceptor.check(url);
         if (intercept) {
-            return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
+            return interceptOverrideUrlLoading();
         } else if (!url.startsWith("http://") && !url.startsWith("https://")
                 && !url.startsWith("file://") && !url.equals("about:blank")) {
             try {
@@ -683,7 +689,7 @@ public class BridgeWebView extends WebView {
             } catch (ActivityNotFoundException e) {
                 logInfo("activity not found to handle uri scheme for: " + url);
             }
-            return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
+            return interceptOverrideUrlLoading();
         } else {
             runOnUiThread(new Runnable() {
                 @Override
@@ -698,8 +704,12 @@ public class BridgeWebView extends WebView {
                     }
                 }
             });
-            return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
+            return interceptOverrideUrlLoading();
         }
+    }
+
+    protected boolean interceptOverrideUrlLoading() {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
     }
 
     protected boolean injectBridgeScript() {

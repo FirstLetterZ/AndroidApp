@@ -89,6 +89,8 @@ public class CompatContainerFragment extends Fragment implements IViewContainer 
             } else {
                 Logger.w("IViewProcessor is null!");
             }
+        } else {
+            theView = mViewProcessor.getView();
         }
         IViewContainer parentContainer = getParentContainer();
         if (parentContainer != null) {

@@ -133,6 +133,12 @@ public abstract class NetRequest<R, T> implements OnDestroyListener, ICancelable
         }
     }
 
-    protected abstract void loadDataFromNetwork(R param, int typeFlags);
+    public void reset() {
+        cancel();
+        destroyed = false;
+        requestParam = null;
+        resultData = null;
+    }
 
+    protected abstract void loadDataFromNetwork(R param, int typeFlags);
 }

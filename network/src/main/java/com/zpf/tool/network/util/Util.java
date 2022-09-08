@@ -16,6 +16,7 @@ import okio.BufferedSource;
 
 public class Util {
     private static final Charset defCharset = StandardCharsets.UTF_8;
+    private static final long MAX_READ = 1024 * 1024;
 
     @NonNull
     public static Charset checkCharset(@Nullable MediaType type) {
@@ -46,23 +47,33 @@ public class Util {
         return bodyString;
     }
 
-    public static boolean checkMediaSubType(ResponseBody body, String subType) {
-        if (body == null || subType == null) {
-            return false;
-        }
-        MediaType responseMediaType = body.contentType();
-        return (responseMediaType != null && subType.equals(responseMediaType.subtype()));
-    }
-
-    public static String getMediaSubType(ResponseBody body) {
+    @Nullable
+    public static String smartReadBodyString(ResponseBody body) {
         if (body == null) {
             return null;
         }
-        MediaType responseMediaType = body.contentType();
-        if (responseMediaType == null) {
+        if (body.contentLength() >= MAX_READ) {
             return null;
         }
-        return responseMediaType.subtype();
+        MediaType type = body.contentType();
+        String typeString = null;
+        if (type != null) {
+            typeString = type.toString().toLowerCase();
+        }
+        if (typeString != null && !typeString.contains("json") && !typeString.contains("text")) {
+            return null;
+        }
+        String bodyString = null;
+        try {
+            BufferedSource source = body.source();
+            source.request(Long.MAX_VALUE); // Buffer the entire body.
+            Buffer buffer = source.getBuffer();
+            Charset charset = checkCharset(body.contentType());
+            bodyString = buffer.clone().readString(charset);
+        } catch (IOException e) {
+            //
+        }
+        return bodyString;
     }
 
     public static String getString(int id) {

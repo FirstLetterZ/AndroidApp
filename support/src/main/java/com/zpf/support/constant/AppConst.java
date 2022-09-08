@@ -31,7 +31,7 @@ public class AppConst {
     public static final String PARAMS_CODE = "PARAMS_CODE";
     public static final String PARAMS_NAME = "PARAMS_NAME";
     public static final String PARAMS_POSITION = "PARAMS_POSITION";
-    public static final String PARAMS_INDEX= "PARAMS_INDEX";
+    public static final String PARAMS_INDEX = "PARAMS_INDEX";
     public static final String PARAMS_MESSAGE = "PARAMS_MESSAGE";
     public static final String PARAMS_CALL_BACK = "PARAMS_CALL_BACK";
 
@@ -50,4 +50,6 @@ public class AppConst {
     public static final int POLL_BACK_REQUEST_CODE = 65534;
     public static final int DEF_RESULT_CODE = 0;
     public static final int POLL_BACK_RESULT_CODE = 65534;
+
+    public static boolean FontScaleWithSystem = true;
 }

@@ -31,7 +31,6 @@ import java.util.List;
 /**
  * Created by ZPF on 2018/6/28.
  */
-//TODO 添加用后即抛的监听管理,添加指定生命周期后执行的事件
 public class ContainerListenerController implements IListenerSet, IGroup, IViewState {
     private List<OnDestroyListener> mDestroyListenerList;
     private List<OnActivityResultListener> mActivityResultCallBackList;
@@ -45,7 +44,6 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
     private volatile CustomWindowManager mWindowManager;
     private volatile CancelableManager mCancelableManager;
     private final HashSet<Object> disposableListeners = new HashSet<>();
-
     private boolean visible = false;
 
     public ContainerListenerController() {
@@ -358,10 +356,12 @@ public class ContainerListenerController implements IListenerSet, IGroup, IViewS
 
     @Override
     public void onVisibleChanged(boolean visible) {
-        this.visible = visible;
-        if (mViewStateList != null) {
-            for (OnViewStateChangedListener listener : mViewStateList) {
-                listener.onVisibleChanged(visible);
+        if (this.visible != visible) {
+            this.visible = visible;
+            if (mViewStateList != null) {
+                for (OnViewStateChangedListener listener : mViewStateList) {
+                    listener.onVisibleChanged(visible);
+                }
             }
         }
     }

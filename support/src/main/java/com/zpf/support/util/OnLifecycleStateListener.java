@@ -11,7 +11,6 @@ import com.zpf.tool.stack.LifecycleState;
 /**
  * Created by ZPF on 2018/6/28.
  */
-
 public class OnLifecycleStateListener implements IFullLifecycle {
     private int mViewState = LifecycleState.BEFORE_CREATE;
 
@@ -22,7 +21,6 @@ public class OnLifecycleStateListener implements IFullLifecycle {
 
     @Override
     public void onRestart() {
-        mViewState = LifecycleState.AFTER_RESTART;
     }
 
     @Override
@@ -47,12 +45,10 @@ public class OnLifecycleStateListener implements IFullLifecycle {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-
     }
 
     @Override
     public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-
     }
 
     @Override

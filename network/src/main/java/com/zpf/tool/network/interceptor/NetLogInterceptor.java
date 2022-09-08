@@ -77,14 +77,12 @@ public class NetLogInterceptor implements Interceptor {
             netLogListener.log(t1, false, builder.toString());
             throw e;
         }
-        String bodyString = null;
+        String bodyString;
         long t2 = System.currentTimeMillis();
         boolean success = response.isSuccessful();
         if (success) {
             ResponseBody body = response.body();
-            if ("json".equals(Util.getMediaSubType(body))) {
-                bodyString = Util.readResponseString(body);
-            }
+            bodyString = Util.smartReadBodyString(body);
             if (TextUtils.isEmpty(bodyString)) {
                 bodyString = "{\"code\":" + response.code() + ",\"message\":\"" + response.message() +
                         "\",\"Content-Type\":\"" + response.headers().get("Content-Type") +

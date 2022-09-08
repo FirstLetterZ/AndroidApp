@@ -16,7 +16,6 @@ import com.zpf.support.constant.AppConst;
 import com.zpf.support.single.OnStackEmptyListener;
 import com.zpf.support.util.FragmentHelper;
 import com.zpf.tool.global.CentralManager;
-import com.zpf.tool.stack.StackElementState;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -50,7 +49,7 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
     }
 
     @Override
-    public void push(@NonNull Class<? extends IViewProcessor> target,  @Nullable Intent params, @Nullable final IDataCallback<Intent> callback) {
+    public void push(@NonNull Class<? extends IViewProcessor> target, @Nullable Intent params, @Nullable final IDataCallback<Intent> callback) {
         String tag = target.getName();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         Fragment targetFragment = null;
@@ -58,7 +57,7 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
             params = new Intent();
             params.putExtra(AppConst.TARGET_VIEW_CLASS, target);
         }
-        final int requestCode=params.getIntExtra(AppConst.REQUEST_CODE, AppConst.DEF_REQUEST_CODE);
+        final int requestCode = params.getIntExtra(AppConst.REQUEST_CODE, AppConst.DEF_REQUEST_CODE);
         List<Fragment> fragmentList = fragmentManager.getFragments();
         if (fragmentList != null && fragmentList.size() > 0) {
             for (Fragment f : fragmentList) {
@@ -88,12 +87,8 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
                     elementInfo.requestCode = requestCode;
                     elementInfo.instance = targetFragment;
                     elementInfo.params = params;
-                    elementInfo.state = StackElementState.STACK_TOP;
+                    elementInfo.removed = false;
                     stackList.add(elementInfo);
-                } else {
-                    if (elementInfo.state == StackElementState.STACK_TOP) {
-                        elementInfo.state = StackElementState.STACK_INSIDE;
-                    }
                 }
             }
             if (!contain) {
@@ -102,7 +97,7 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
                 newElementInfo.tag = tag;
                 newElementInfo.instance = targetFragment;
                 newElementInfo.params = params;
-                newElementInfo.state = StackElementState.STACK_TOP;
+                newElementInfo.removed = false;
                 stackList.add(newElementInfo);
             }
         }
@@ -118,29 +113,26 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
         synchronized (stackList) {
             while ((lastElementInfo = stackList.pollLast()) != null) {
                 if (pollTime == 0) {
-                    lastElementInfo.state = StackElementState.STACK_OUTSIDE;
+                    lastElementInfo.removed = true;
                     transaction.remove(lastElementInfo.instance);
                     requestCode = lastElementInfo.requestCode;
                     pollTime++;
-                } else if (lastElementInfo.state == StackElementState.STACK_REMOVING) {
-                    lastElementInfo.state = StackElementState.STACK_OUTSIDE;
+                } else if (lastElementInfo.removed) {
                     transaction.remove(lastElementInfo.instance);
                     requestCode = lastElementInfo.requestCode;
                     resultCode = lastElementInfo.resultCode;
                     data = lastElementInfo.resultData;
                     pollTime++;
                 } else {
-                    lastElementInfo.state = StackElementState.STACK_TOP;
-                    stackList.addLast(lastElementInfo);
                     break;
                 }
             }
             for (FragmentElementInfo elementInfo : stackList) {
-                if (elementInfo.state == StackElementState.STACK_TOP) {
-                    transaction.show(elementInfo.instance);
-                } else {
-                    transaction.hide(elementInfo.instance);
-                }
+                transaction.hide(elementInfo.instance);
+            }
+            if (lastElementInfo != null && !lastElementInfo.removed) {
+                stackList.addLast(lastElementInfo);
+                transaction.show(lastElementInfo.instance);
             }
         }
         transaction.commitAllowingStateLoss();
@@ -175,12 +167,12 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
             while ((lastElementInfo = stackList.pollLast()) != null) {
                 if (stackList.size() == 0) {
                     lastElementInfo.instance.onActivityResult(AppConst.POLL_BACK_REQUEST_CODE, AppConst.POLL_BACK_RESULT_CODE, data);
-                    lastElementInfo.state = StackElementState.STACK_TOP;
+                    lastElementInfo.removed = false;
                     transaction.show(lastElementInfo.instance);
                     stackList.add(lastElementInfo);
                     break;
                 }
-                lastElementInfo.state = StackElementState.STACK_OUTSIDE;
+                lastElementInfo.removed = true;
                 transaction.remove(lastElementInfo.instance);
             }
         }
@@ -194,16 +186,16 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
         synchronized (stackList) {
             while ((lastElementInfo = stackList.pollLast()) != null) {
                 if (TextUtils.equals(target.getName(), lastElementInfo.tag)) {
-                    lastElementInfo.state = StackElementState.STACK_OUTSIDE;
+                    lastElementInfo.removed = true;
                     transaction.remove(lastElementInfo.instance);
                     lastElementInfo = stackList.peekLast();
                     if (lastElementInfo != null) {
-                        lastElementInfo.state = StackElementState.STACK_TOP;
+                        lastElementInfo.removed = false;
                         transaction.show(lastElementInfo.instance);
                     }
                     break;
                 } else {
-                    lastElementInfo.state = StackElementState.STACK_OUTSIDE;
+                    lastElementInfo.removed = false;
                     transaction.remove(lastElementInfo.instance);
                 }
             }
@@ -242,7 +234,7 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
             } else {
                 for (FragmentElementInfo elementInfo : stackList) {
                     if (TextUtils.equals(elementInfo.tag, target.getName())) {
-                        elementInfo.state = StackElementState.STACK_REMOVING;
+                        elementInfo.removed = false;
                         result = true;
                         break;
                     }
@@ -259,6 +251,6 @@ public class CompatFragmentStackManager implements INavigator<Class<? extends IV
         int requestCode;
         int resultCode;
         Intent resultData;
-        int state;
+        boolean removed;
     }
 }

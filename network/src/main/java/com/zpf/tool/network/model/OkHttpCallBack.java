@@ -43,18 +43,7 @@ public abstract class OkHttpCallBack<T> extends BaseCallBack<T> implements Callb
                 onDataNull();
                 return;
             }
-            String bodyString;
-            String subType = Util.getMediaSubType(body);
-            if ("json".equals(subType)) {
-                try {
-                    bodyString = body.string();
-                } catch (IOException e) {
-                    fail(ErrorCode.PARSE_ERROR, getString(R.string.network_parse_error));
-                    return;
-                }
-            } else {
-                bodyString = "{\"subType\":\"" + subType + "\"}";
-            }
+            String bodyString = Util.smartReadBodyString(body);
             T result;
             try {
                 result = parseData(bodyString);

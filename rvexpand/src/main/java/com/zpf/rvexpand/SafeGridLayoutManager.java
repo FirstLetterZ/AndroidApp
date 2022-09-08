@@ -3,26 +3,33 @@ package com.zpf.rvexpand;
 import android.content.Context;
 import android.util.AttributeSet;
 
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class SafeLinearLayoutManager extends LinearLayoutManager {
-    public SafeLinearLayoutManager(Context context) {
-        super(context);
-    }
+public class SafeGridLayoutManager extends GridLayoutManager {
 
-    public SafeLinearLayoutManager(Context context, int orientation, boolean reverseLayout) {
-        super(context, orientation, reverseLayout);
-    }
-
-    public SafeLinearLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public SafeGridLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    public SafeGridLayoutManager(Context context, int spanCount) {
+        super(context, spanCount);
+    }
+
+    public SafeGridLayoutManager(Context context, int spanCount, int orientation, boolean reverseLayout) {
+        super(context, spanCount, orientation, reverseLayout);
     }
 
     @Override
     public void onAttachedToWindow(RecyclerView view) {
         view.setItemAnimator(null);
         super.onAttachedToWindow(view);
+    }
+
+    @Override
+    public void onDetachedFromWindow(RecyclerView view, RecyclerView.Recycler recycler) {
+        super.onDetachedFromWindow(view, recycler);
     }
 
     @Override

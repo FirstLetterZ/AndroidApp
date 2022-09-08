@@ -27,6 +27,9 @@ public class MergeRequest {
     private final OnLoadingListener requestLoadListener = new OnLoadingListener() {
         @Override
         public void onLoading(boolean loadingData) {
+            if (done) {
+                return;
+            }
             if (loadingData) {
                 requestCount.incrementAndGet();
             } else {
@@ -39,6 +42,9 @@ public class MergeRequest {
     private final OnResultListener requestResultListener = new OnResultListener() {
         @Override
         public void onResult(boolean success) {
+            if (done) {
+                return;
+            }
             if (!success) {
                 failCount.incrementAndGet();
             }

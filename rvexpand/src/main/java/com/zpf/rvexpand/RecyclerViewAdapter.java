@@ -170,7 +170,6 @@ public class RecyclerViewAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vi
         if (emptyView == null) {
             emptyViewHolder = null;
         } else {
-            ViewParent parent = emptyView.getParent();
             emptyViewHolder = new EmptyHolder(emptyView, new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         }

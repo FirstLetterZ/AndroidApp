@@ -227,11 +227,11 @@ public class PhonePageLayout extends ViewGroup implements IDecorative<View>, Vie
             heightUsed = heightUsed + topBar.getView().getMeasuredHeight();
         }
         if (contentView != null && contentView.getVisibility() != View.GONE) {
-            measureChildWithMargins(contentView, widthMeasureSpec, widthUsed, heightMeasureSpec, heightUsed);
+            measureChild(contentView, widthMeasureSpec, widthUsed, heightMeasureSpec, heightUsed);
         }
         ViewNode node = decorationNodes.next;
         while (node != null) {
-            measureChildWithMargins(node.view, widthMeasureSpec, widthUsed, heightMeasureSpec, heightUsed);
+            measureChild(node.view, widthMeasureSpec, widthUsed, heightMeasureSpec, heightUsed);
             node = node.next;
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);

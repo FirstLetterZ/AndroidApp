@@ -150,10 +150,16 @@ public abstract class BaseCallBack<T> {
             if (!RequestType.checkFlag(type, RequestType.FLAG_NULLABLE)) {//内容不能为空
                 boolean isNull = result == null;
                 if (!isNull) {
+                    Object resultData;
                     if (result instanceof IResultBean) {
-                        isNull = ((IResultBean<?>) result).getData() == null;
+                        resultData = ((IResultBean<?>) result).getData();
                     } else {
-                        isNull = responseHandler != null && responseHandler.checkDataNull(result);
+                        resultData = result;
+                    }
+                    if (resultData == null) {
+                        isNull = true;
+                    } else if (responseHandler != null) {
+                        isNull = responseHandler.checkDataNull(result);
                     }
                 }
                 if (isNull) {
@@ -180,7 +186,6 @@ public abstract class BaseCallBack<T> {
         }
         CentralManager.runOnMainTread(runnable);
     }
-
 
     protected final String getString(int id) {
         return Util.getString(id);

@@ -3,20 +3,18 @@ package com.zpf.rvexpand;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
-public class SafeLinearLayoutManager extends LinearLayoutManager {
-    public SafeLinearLayoutManager(Context context) {
-        super(context);
-    }
+public class SafeStaggeredLayoutManager extends StaggeredGridLayoutManager {
 
-    public SafeLinearLayoutManager(Context context, int orientation, boolean reverseLayout) {
-        super(context, orientation, reverseLayout);
-    }
-
-    public SafeLinearLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public SafeStaggeredLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    public SafeStaggeredLayoutManager(int spanCount, int orientation) {
+        super(spanCount, orientation);
     }
 
     @Override
