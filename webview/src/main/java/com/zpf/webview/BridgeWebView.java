@@ -13,10 +13,6 @@ import android.net.http.SslError;
 import android.os.Build;
 import android.os.Looper;
 import android.os.Message;
-
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -36,6 +32,9 @@ import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+
 import com.zpf.api.IChecker;
 import com.zpf.api.ILogger;
 import com.zpf.api.OnProgressListener;
@@ -44,10 +43,6 @@ import com.zpf.api.dataparser.StringParseResult;
 import com.zpf.api.dataparser.StringParseType;
 import com.zpf.tool.global.CentralManager;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,8 +52,7 @@ import java.util.List;
  */
 public class BridgeWebView extends WebView {
     private List<String> whiteList;//白名单关键字
-    private final String jsFileName = "bridge.js";
-    private String jsFileString;
+    private String jsBridgeString;
     private final List<WebViewStateListener> stateListenerList = new ArrayList<>();
     protected OnReceivedWebPageListener webPageListener;
     protected WebViewWindowListener windowListener;
@@ -66,7 +60,7 @@ public class BridgeWebView extends WebView {
     protected OnProgressListener progressChangedListener;
     protected IChecker<String> urlInterceptor;//url拦截
     protected JsCallNativeListener jsCallNativeListener;//js调用native的回调
-    protected OverrideLoadUrlListener overrideLoadUrlListener;//OverrideLoadUrlListener
+    protected OverrideLoadUrlHandler overrideLoadUrlHandler;//OverrideLoadUrlListener
     private boolean isTraceless;//无痕浏览
     private final WebPageInfo webPageInfo = new WebPageInfo();//当前加载页面
     private final HashMap<String, Boolean> redirectedUrlMap = new HashMap<>();//重定向原始url集合
@@ -96,7 +90,7 @@ public class BridgeWebView extends WebView {
         initSetting();
         setWebChromeClient(initWebChromeClient());
         setWebViewClient(initWebViewClient());
-        initJsString();
+        jsBridgeString = initJsBridgeString();
         setDownloadListener(new DownloadListener() {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
@@ -128,94 +122,6 @@ public class BridgeWebView extends WebView {
         setting.setDefaultTextEncodingName("UTF-8");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setting.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        }
-    }
-
-    protected void initJsString() {
-        InputStream in = null;
-        try {
-            in = getContext().getAssets().open(jsFileName);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (in != null) {
-            try {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
-                String line;
-                StringBuilder sb = new StringBuilder();
-                do {
-                    line = bufferedReader.readLine();
-                    if (line != null && !line.matches("^\\s*//.*")) {
-                        sb.append(line);
-                    }
-                } while (line != null);
-                bufferedReader.close();
-                in.close();
-                jsFileString = sb.toString();
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    //ignore
-                }
-            }
-        }
-        if (jsFileString == null) {
-            jsFileString = "function CallNative(name, body, callBack) {\n" +
-                    "    if (!name) {\n" +
-                    "        return;\n" +
-                    "    }\n" +
-                    "    var id = \"\";\n" +
-                    "    var param;\n" +
-                    "    if(!body){\n" +
-                    "        param = \"\";\n" +
-                    "    }else if(typeof body === 'string'){\n" +
-                    "        param = body;\n" +
-                    "    }else{\n" +
-                    "        param = JSON.stringify(body);\n" +
-                    "    }\n" +
-                    "    if(callBack && typeof callBack === 'function'){\n" +
-                    "        var date = new Date();\n" +
-                    "        var id = date.toISOString();\n" +
-                    "        var newAction = {\n" +
-                    "            id: id,\n" +
-                    "            callBack: callBack,\n" +
-                    "        };\n" +
-                    "        Native.actions.push(newAction);\n" +
-                    "    }\n" +
-                    "   return window.bridge.callNative(name,param,id);\n" +
-                    "};\n" +
-                    "function NativeCallBack(id, body) {\n" +
-                    "    if (!id) {\n" +
-                    "        return;\n" +
-                    "    }\n" +
-                    "    if (!Native.actions) {\n" +
-                    "        return;\n" +
-                    "    }\n" +
-                    "    for (var index in Native.actions) {\n" +
-                    "        var action = Native.actions[index];\n" +
-                    "        if (action.id === id) {\n" +
-                    "            var callBack = action.callBack;\n" +
-                    "            if (callBack && typeof callBack === 'function') {\n" +
-                    "                if (body) {\n" +
-                    "                    callBack(body)\n" +
-                    "                } else {\n" +
-                    "                    callBack()\n" +
-                    "                }\n" +
-                    "            }\n" +
-                    "            break;\n" +
-                    "        }\n" +
-                    "    }\n" +
-                    "};\n" +
-                    "if (!Native) {\n" +
-                    "    var Native = window.Native ={\n" +
-                    "        actions : [],\n" +
-                    "        jsCall : CallNative\n" +
-                    "    };\n" +
-                    "    window.bridge.connect();\n" +
-                    "}";
         }
     }
 
@@ -382,7 +288,6 @@ public class BridgeWebView extends WebView {
 
     }
 
-
     /**
      * 创建默认的 WebViewClient
      */
@@ -512,7 +417,7 @@ public class BridgeWebView extends WebView {
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
                 logInfo("========================onReceivedSslError======================");
                 if (error != null) {
-                    logInfo("error=" + error.toString());
+                    logInfo("error=" + error);
                 }
                 handler.proceed(); // 接受证书
             }
@@ -586,9 +491,15 @@ public class BridgeWebView extends WebView {
 
     private boolean checkRedirect(String url) {
         //增加一个时间校验
-        webPageInfo.isRedirect = (!webPageInfo.loadComplete || (System.currentTimeMillis() - webPageInfo.finishTime) < 50
-                || !TextUtils.equals(url, webPageInfo.webUrl));
-        return webPageInfo.isRedirect;
+        String currentUrl = webPageInfo.webUrl;
+        if (currentUrl == null) {
+            return false;
+        }
+        boolean isRedirect = !TextUtils.equals(currentUrl, url) &&
+                (!webPageInfo.loadComplete || (System.currentTimeMillis() - webPageInfo.finishTime) < 50);
+        webPageInfo.isRedirect = isRedirect;
+        redirectedUrlMap.put(currentUrl, isRedirect);
+        return isRedirect;
     }
 
     private boolean interceptRedirected(String url) {
@@ -676,12 +587,15 @@ public class BridgeWebView extends WebView {
         }
     }
 
-    private boolean handleOverrideUrlLoading(WebView webView, final String url) {
+    protected boolean handleOverrideUrlLoading(WebView webView, final String url) {
         boolean intercept = urlInterceptor != null && urlInterceptor.check(url);
         if (intercept) {
-            return interceptOverrideUrlLoading();
-        } else if (!url.startsWith("http://") && !url.startsWith("https://")
-                && !url.startsWith("file://") && !url.equals("about:blank")) {
+            logInfo("intercept url: " + url);
+            return true;
+        }
+        boolean openBySystem = !url.startsWith("http://") && !url.startsWith("https://")
+                && !url.startsWith("file://") && !url.equals("about:blank");
+        if (openBySystem) {
             try {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -689,40 +603,36 @@ public class BridgeWebView extends WebView {
             } catch (ActivityNotFoundException e) {
                 logInfo("activity not found to handle uri scheme for: " + url);
             }
-            return interceptOverrideUrlLoading();
-        } else {
+            return true;
+        }
+        final boolean isRedirect = checkRedirect(url);
+        final OverrideLoadUrlHandler handler = overrideLoadUrlHandler;
+        if (handler != null) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (overrideLoadUrlListener == null) {
-                        if (webPageInfo.webUrl != null && checkRedirect(url)) {
-                            redirectedUrlMap.put(webPageInfo.webUrl, true);
-                        }
-                        loadUrl(url);
-                    } else {
-                        overrideLoadUrlListener.overrideLoadUrl(url, checkRedirect(url));
-                    }
+                    overrideLoadUrlHandler.overrideLoadUrl(url, isRedirect);
                 }
             });
-            return interceptOverrideUrlLoading();
+            return true;
         }
+        return false;
     }
 
-    protected boolean interceptOverrideUrlLoading() {
-        return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
+    protected String initJsBridgeString() {
+        return DefaultJsReader.loadJsFromAssetsFile(getContext(), true);
     }
 
     protected boolean injectBridgeScript() {
-        if (jsFileString != null) {
-            logInfo("start load jsFile");
+        if (jsBridgeString != null) {
+            logInfo("start connect JsBridge");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                evaluateJavascript("javascript:" + jsFileString, null);
+                evaluateJavascript("javascript:" + jsBridgeString, null);
             } else {
-                loadUrl("javascript:" + jsFileString);
+                loadUrl("javascript:" + jsBridgeString);
             }
             return true;
         } else {
-            logInfo("cannot load jsFile");
             return false;
         }
     }
@@ -788,8 +698,8 @@ public class BridgeWebView extends WebView {
         this.progressChangedListener = progressChangedListener;
     }
 
-    public void setOverrideLoadUrlListener(OverrideLoadUrlListener overrideLoadUrlListener) {
-        this.overrideLoadUrlListener = overrideLoadUrlListener;
+    public void setOverrideLoadUrlListener(OverrideLoadUrlHandler overrideLoadUrlHandler) {
+        this.overrideLoadUrlHandler = overrideLoadUrlHandler;
     }
 
     public boolean isTraceless() {
