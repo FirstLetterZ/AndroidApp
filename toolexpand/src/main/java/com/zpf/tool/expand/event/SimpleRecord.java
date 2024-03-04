@@ -5,8 +5,6 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.zpf.api.ITransRecord;
-
 import java.util.HashSet;
 
 /**

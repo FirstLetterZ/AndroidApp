@@ -4,8 +4,6 @@ package com.zpf.tool.expand.event;
 import androidx.annotation.NonNull;
 
 import com.zpf.api.IChecker;
-import com.zpf.api.IReceiver;
-import com.zpf.api.ITransRecord;
 
 import java.util.HashSet;
 import java.util.LinkedList;

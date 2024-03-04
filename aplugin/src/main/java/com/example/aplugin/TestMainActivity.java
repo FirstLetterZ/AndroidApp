@@ -1,12 +1,7 @@
 package com.example.aplugin;
 
-import com.zpf.frame.IViewProcessor;
-import com.zpf.support.base.CompatContainerActivity;
+import android.app.Activity;
 
-public class TestMainActivity extends CompatContainerActivity {
+public class TestMainActivity extends Activity {
 
-    @Override
-    protected Class<? extends IViewProcessor> defViewProcessorClass() {
-        return TestMainLayout.class;
-    }
 }

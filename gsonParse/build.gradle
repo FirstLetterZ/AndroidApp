@@ -1,7 +1,8 @@
 apply plugin: 'com.android.library'
 apply from: '../publish.gradle'
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdk rootProject.ext.compileSdkVersion
+    namespace "com.zpf.tool.gson"
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion

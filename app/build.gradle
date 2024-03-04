@@ -1,8 +1,11 @@
-apply plugin: 'com.android.application'
+plugins {
+    id("com.android.application")
+}
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
+    namespace "com.zpf.app"
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
@@ -53,7 +56,7 @@ android {
 
 dependencies {
 //    api project(':support')
-    api project(':refresh')
+//    api project(':refresh')
     api project(':network')
     api project(':binding')
     api project(':toolexpand')

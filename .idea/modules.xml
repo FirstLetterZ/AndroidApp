@@ -2,16 +2,59 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/AndroidAppTest.iml" filepath="$PROJECT_DIR$/.idea/modules/AndroidAppTest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/generalUtil/generalUtil.iml" filepath="$PROJECT_DIR$/generalUtil/generalUtil.iml" />
-      <module fileurl="file://$PROJECT_DIR$/glideutil/glideutil.iml" filepath="$PROJECT_DIR$/glideutil/glideutil.iml" />
-      <module fileurl="file://$PROJECT_DIR$/interfaces/interfaces.iml" filepath="$PROJECT_DIR$/interfaces/interfaces.iml" />
-      <module fileurl="file://$PROJECT_DIR$/network/network.iml" filepath="$PROJECT_DIR$/network/network.iml" />
-      <module fileurl="file://$PROJECT_DIR$/refresh/refresh.iml" filepath="$PROJECT_DIR$/refresh/refresh.iml" />
-      <module fileurl="file://$PROJECT_DIR$/rxnetwork/rxnetwork.iml" filepath="$PROJECT_DIR$/rxnetwork/rxnetwork.iml" />
-      <module fileurl="file://$PROJECT_DIR$/support/support.iml" filepath="$PROJECT_DIR$/support/support.iml" />
-      <module fileurl="file://$PROJECT_DIR$/webview/webview.iml" filepath="$PROJECT_DIR$/webview/webview.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/AndroidApp.iml" filepath="$PROJECT_DIR$/.idea/modules/AndroidApp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/aplugin/AndroidApp.aplugin.iml" filepath="$PROJECT_DIR$/.idea/modules/aplugin/AndroidApp.aplugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/aplugin/AndroidApp.aplugin.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/aplugin/AndroidApp.aplugin.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/aplugin/AndroidApp.aplugin.main.iml" filepath="$PROJECT_DIR$/.idea/modules/aplugin/AndroidApp.aplugin.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/aplugin/AndroidApp.aplugin.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/aplugin/AndroidApp.aplugin.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/AndroidApp.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/AndroidApp.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/AndroidApp.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/AndroidApp.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/AndroidApp.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/AndroidApp.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/AndroidApp.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/AndroidApp.app.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/binding/AndroidApp.binding.iml" filepath="$PROJECT_DIR$/.idea/modules/binding/AndroidApp.binding.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/binding/AndroidApp.binding.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/binding/AndroidApp.binding.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/binding/AndroidApp.binding.main.iml" filepath="$PROJECT_DIR$/.idea/modules/binding/AndroidApp.binding.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/binding/AndroidApp.binding.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/binding/AndroidApp.binding.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/glideutil/AndroidApp.glideutil.iml" filepath="$PROJECT_DIR$/.idea/modules/glideutil/AndroidApp.glideutil.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/glideutil/AndroidApp.glideutil.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/glideutil/AndroidApp.glideutil.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/glideutil/AndroidApp.glideutil.main.iml" filepath="$PROJECT_DIR$/.idea/modules/glideutil/AndroidApp.glideutil.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/glideutil/AndroidApp.glideutil.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/glideutil/AndroidApp.glideutil.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/gsonParse/AndroidApp.gsonParse.iml" filepath="$PROJECT_DIR$/.idea/modules/gsonParse/AndroidApp.gsonParse.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/gsonParse/AndroidApp.gsonParse.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/gsonParse/AndroidApp.gsonParse.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/gsonParse/AndroidApp.gsonParse.main.iml" filepath="$PROJECT_DIR$/.idea/modules/gsonParse/AndroidApp.gsonParse.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/gsonParse/AndroidApp.gsonParse.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/gsonParse/AndroidApp.gsonParse.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/network/AndroidApp.network.iml" filepath="$PROJECT_DIR$/.idea/modules/network/AndroidApp.network.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/network/AndroidApp.network.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/network/AndroidApp.network.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/network/AndroidApp.network.main.iml" filepath="$PROJECT_DIR$/.idea/modules/network/AndroidApp.network.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/network/AndroidApp.network.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/network/AndroidApp.network.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/refresh/AndroidApp.refresh.iml" filepath="$PROJECT_DIR$/.idea/modules/refresh/AndroidApp.refresh.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/refresh/AndroidApp.refresh.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/refresh/AndroidApp.refresh.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/refresh/AndroidApp.refresh.main.iml" filepath="$PROJECT_DIR$/.idea/modules/refresh/AndroidApp.refresh.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/refresh/AndroidApp.refresh.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/refresh/AndroidApp.refresh.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/request/AndroidApp.request.iml" filepath="$PROJECT_DIR$/.idea/modules/request/AndroidApp.request.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/request/AndroidApp.request.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/request/AndroidApp.request.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/request/AndroidApp.request.main.iml" filepath="$PROJECT_DIR$/.idea/modules/request/AndroidApp.request.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/request/AndroidApp.request.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/request/AndroidApp.request.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rvexpand/AndroidApp.rvexpand.iml" filepath="$PROJECT_DIR$/.idea/modules/rvexpand/AndroidApp.rvexpand.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rvexpand/AndroidApp.rvexpand.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/rvexpand/AndroidApp.rvexpand.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rvexpand/AndroidApp.rvexpand.main.iml" filepath="$PROJECT_DIR$/.idea/modules/rvexpand/AndroidApp.rvexpand.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rvexpand/AndroidApp.rvexpand.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/rvexpand/AndroidApp.rvexpand.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/support/AndroidApp.support.iml" filepath="$PROJECT_DIR$/.idea/modules/support/AndroidApp.support.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/support/AndroidApp.support.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/support/AndroidApp.support.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/support/AndroidApp.support.main.iml" filepath="$PROJECT_DIR$/.idea/modules/support/AndroidApp.support.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/support/AndroidApp.support.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/support/AndroidApp.support.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/toolexpand/AndroidApp.toolexpand.iml" filepath="$PROJECT_DIR$/.idea/modules/toolexpand/AndroidApp.toolexpand.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/toolexpand/AndroidApp.toolexpand.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/toolexpand/AndroidApp.toolexpand.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/toolexpand/AndroidApp.toolexpand.main.iml" filepath="$PROJECT_DIR$/.idea/modules/toolexpand/AndroidApp.toolexpand.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/toolexpand/AndroidApp.toolexpand.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/toolexpand/AndroidApp.toolexpand.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/viewexpand/AndroidApp.viewexpand.iml" filepath="$PROJECT_DIR$/.idea/modules/viewexpand/AndroidApp.viewexpand.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/viewexpand/AndroidApp.viewexpand.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/viewexpand/AndroidApp.viewexpand.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/viewexpand/AndroidApp.viewexpand.main.iml" filepath="$PROJECT_DIR$/.idea/modules/viewexpand/AndroidApp.viewexpand.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/viewexpand/AndroidApp.viewexpand.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/viewexpand/AndroidApp.viewexpand.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/webview/AndroidApp.webview.iml" filepath="$PROJECT_DIR$/.idea/modules/webview/AndroidApp.webview.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/webview/AndroidApp.webview.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/webview/AndroidApp.webview.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/webview/AndroidApp.webview.main.iml" filepath="$PROJECT_DIR$/.idea/modules/webview/AndroidApp.webview.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/webview/AndroidApp.webview.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/webview/AndroidApp.webview.unitTest.iml" />
     </modules>
   </component>
 </project>

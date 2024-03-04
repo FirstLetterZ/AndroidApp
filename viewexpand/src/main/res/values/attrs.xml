@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <declare-styleable name="PhonePageLayout">
-        <attr name="isContentView" format="boolean"/>
-        <attr name="hierarchy" format="integer" />
-        <attr name="contentBelowTitle" format="boolean" />
-    </declare-styleable>
-</resources>

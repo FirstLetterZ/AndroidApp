@@ -33,7 +33,7 @@ public class ResponseHandleImpl implements IResponseHandler {
     }
 
     @Override
-    public boolean interceptFailHandle(IResultBean result) {
+    public boolean interceptFailHandle(int type, IResultBean<?> result) {
         return false;
     }
 

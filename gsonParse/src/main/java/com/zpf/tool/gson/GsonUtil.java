@@ -14,7 +14,8 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.stream.JsonReader;
 import com.zpf.api.dataparser.JsonParserInterface;
-import com.zpf.api.dataparser.SkipParse;
+import com.zpf.api.dataparser.SkipDeserialization;
+import com.zpf.api.dataparser.SkipSerialization;
 import com.zpf.api.dataparser.StringParseResult;
 import com.zpf.api.dataparser.StringParseType;
 
@@ -37,12 +38,23 @@ public class GsonUtil implements JsonParserInterface {
             .addSerializationExclusionStrategy(new ExclusionStrategy() {
                 @Override
                 public boolean shouldSkipField(FieldAttributes f) {
-                    return f == null || f.getAnnotation(SkipParse.class) != null;
+                    return f == null || f.getAnnotation(SkipSerialization.class) != null;
                 }
 
                 @Override
                 public boolean shouldSkipClass(Class<?> clazz) {
-                    return clazz == null || clazz.getAnnotation(SkipParse.class) != null;
+                    return clazz == null || clazz.getAnnotation(SkipSerialization.class) != null;
+                }
+            })
+            .addDeserializationExclusionStrategy(new ExclusionStrategy() {
+                @Override
+                public boolean shouldSkipField(FieldAttributes f) {
+                    return f == null || f.getAnnotation(SkipDeserialization.class) != null;
+                }
+
+                @Override
+                public boolean shouldSkipClass(Class<?> clazz) {
+                    return clazz == null || clazz.getAnnotation(SkipDeserialization.class) != null;
                 }
             })
             .create();

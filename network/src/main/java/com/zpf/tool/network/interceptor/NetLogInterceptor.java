@@ -1,7 +1,5 @@
 package com.zpf.tool.network.interceptor;
 
-import android.text.TextUtils;
-
 import androidx.annotation.NonNull;
 
 import com.zpf.tool.network.util.Util;
@@ -35,33 +33,18 @@ public class NetLogInterceptor implements Interceptor {
         if (netLogListener == null) {
             return chain.proceed(chain.request());
         }
-        StringBuilder builder = new StringBuilder(128);
-        builder.append("{");
         long t1 = System.currentTimeMillis();
         Request request = chain.request();
         HttpUrl httpUrl = request.url();
-        builder.append("\"url\":\"").append(httpUrl).append("\"");//请求url
-        builder.append(",\"method\":\"").append(request.method()).append("\"");//请求类型
-        builder.append(",");
-        addHeads(builder, request.headers());//请求头
-        builder.append(",\"params\":");//请求参数
+        StringBuilder builder = new StringBuilder(128);
+        builder.append("{\"method\":\"").append(request.method()).append("\"");//请求类型
+        builder.append(",\"url\":\"").append(httpUrl).append("\"");//请求url
         RequestBody requestBody = request.body();
         if (requestBody != null) {
+            builder.append(",\"params\":");//请求参数
             addRequestParams(builder, requestBody);
-        } else {
-            int querySize = httpUrl.querySize();
-            builder.append("{");
-            if (querySize > 0) {
-                for (int i = 0; i < querySize; i++) {
-                    builder.append("\"").append(httpUrl.queryParameterName(i))
-                            .append("\":\"").append(httpUrl.queryParameterValue(i)).append("\"");
-                    if (i < querySize - 1) {
-                        builder.append(",");
-                    }
-                }
-            }
-            builder.append("}");
         }
+        addHeads(builder, request.headers());//请求头
         builder.append("}");
         netLogListener.log(t1, true, builder.toString());
         builder.delete(0, builder.length());
@@ -83,7 +66,7 @@ public class NetLogInterceptor implements Interceptor {
         if (success) {
             ResponseBody body = response.body();
             bodyString = Util.smartReadBodyString(body);
-            if (TextUtils.isEmpty(bodyString)) {
+            if (bodyString == null || bodyString.length() == 0) {
                 bodyString = "{\"code\":" + response.code() + ",\"message\":\"" + response.message() +
                         "\",\"Content-Type\":\"" + response.headers().get("Content-Type") +
                         "\",\"Content-Length\":\"" + response.headers().get("Content-Length") +
@@ -93,7 +76,6 @@ public class NetLogInterceptor implements Interceptor {
         } else {
             builder.append("{\"code\":").append(response.code()).append(",\"message\":\"").append(response.message()).append("\"}");
         }
-        builder.append(",");
         addHeads(builder, response.headers());//响应头
         builder.append(",\"time-consuming\":").append((t2 - t1)).append("}");
         netLogListener.log(t1, success, builder.toString());
@@ -101,16 +83,20 @@ public class NetLogInterceptor implements Interceptor {
     }
 
     private void addHeads(StringBuilder builder, Headers headers) {
-        builder.append("\"heads\":{");//请求头
+        builder.append(",\"heads\":{");//请求头
         for (int i = 0; i < headers.size(); i++) {
             if (i > 0) {
                 builder.append(",");
             }
-            builder.append("\"").
-                    append(headers.name(i))
-                    .append("\":\"")
-                    .append(headers.value(i))
-                    .append("\"");
+            builder.append("\"").append(headers.name(i)).append("\":");
+            String value = headers.value(i);
+            if (value.length() == 0) {
+                builder.append("\"\"");
+            } else if (value.startsWith("\"")) {
+                builder.append(value);
+            } else {
+                builder.append("\"").append(value).append("\"");
+            }
         }
         builder.append("}");
     }
@@ -157,7 +143,7 @@ public class NetLogInterceptor implements Interceptor {
                         requestBody.writeTo(buffer);
                         if (buffer.size() > 0 && isPlaintext(buffer)) {
                             String par = buffer.readString(charset);
-                            if (TextUtils.isEmpty(par)) {
+                            if (par.length() == 0) {
                                 builder.append("{}");
                             } else if (par.startsWith("{") || par.startsWith("[")) {
                                 builder.append(par);
